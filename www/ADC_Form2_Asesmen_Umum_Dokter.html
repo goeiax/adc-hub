@@ -1191,6 +1191,23 @@ textarea.in#d1_umum{min-height:138px;}
 .hubchip.off{border-color:rgba(245,239,230,.25);color:rgba(245,239,230,.45);}
 .hubchip.sync{border-color:#C9A86A;color:#C9A86A;}
 @media print{.hubchip{display:none!important;}}
+
+/* Tombol penjadwalan D5b — tombol badan form (bukan .btn bilah atas yang gelap).
+   Bernomor sesuai urutan wajib SOP: Generate -> Simpan ke Rekam Medis -> Kirim. */
+.schedbtns{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0 10px;}
+.sbtn{font-family:inherit;display:inline-flex;align-items:center;gap:9px;font-size:14.5px;font-weight:600;
+  padding:11px 18px;min-height:46px;border-radius:8px;cursor:pointer;
+  background:var(--surface);color:var(--ink);border:1px solid var(--line-strong);
+  box-shadow:0 1px 0 rgba(27,26,24,.04);transition:border-color .15s,background .15s,transform .05s;}
+.sbtn:hover{border-color:var(--accent);background:#FCF6F2;}
+.sbtn:active{transform:translateY(1px);}
+.sbtn .sn{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:999px;
+  font-size:12px;font-weight:700;background:var(--surface-quiet);color:var(--accent-deep);border:1px solid var(--line-strong);}
+.sbtn.pri{background:var(--accent-act);border-color:var(--accent-act);color:#fff;}
+.sbtn.pri:hover{background:var(--accent-deep);border-color:var(--accent-deep);}
+.sbtn.pri .sn{background:rgba(255,255,255,.2);border-color:rgba(255,255,255,.35);color:#fff;}
+.sbtn.ghost{border-style:dashed;color:var(--ink-muted);font-weight:560;}
+@media print{.schedbtns{display:none!important;}}
 </style>
 </head>
 <body>
@@ -1474,11 +1491,11 @@ textarea.in#d1_umum{min-height:138px;}
       <div class="f s3"><span class="lab">Disiapkan oleh (perawat)</span><input class="in" id="d5_by" placeholder="nama perawat"></div>
       <div class="f w2 s12"><span class="lab">Webhook Make.com</span><input class="in" id="cfg_webhook" placeholder="https://hook.eu2.make.com/..."></div>
     </div>
-    <div style="margin:8px 0 4px">
-      <button type="button" class="btn" style="color:var(--ink)" onclick="generateSchedule()">Generate Jadwal</button>
-      <button type="button" class="btn" style="color:var(--ink)" onclick="copySchedule()">Salin Jadwal</button>
-      <button type="button" class="btn" style="color:var(--ink)" onclick="saveSchedToRecord()">Simpan ke Rekam Medis</button>
-      <button type="button" class="btn" style="color:var(--ink)" onclick="sendToSleekFlow()">Kirim ke SleekFlow</button>
+    <div class="schedbtns">
+      <button type="button" class="sbtn pri" onclick="generateSchedule()"><span class="sn">1</span>Generate Jadwal</button>
+      <button type="button" class="sbtn" onclick="saveSchedToRecord()"><span class="sn">2</span>Simpan ke Rekam Medis</button>
+      <button type="button" class="sbtn" onclick="sendToSleekFlow()"><span class="sn">3</span>Kirim ke SleekFlow</button>
+      <button type="button" class="sbtn ghost" onclick="copySchedule()">Salin Jadwal</button>
     </div>
     <div id="send_status" style="font-size:13px;font-weight:600;margin-bottom:6px"></div>
     <div id="rec_status" style="font-size:13px;font-weight:600;margin-bottom:6px"></div>
