@@ -1208,6 +1208,8 @@ textarea.in#d1_umum{min-height:138px;}
 .sbtn.pri .sn{background:rgba(255,255,255,.2);border-color:rgba(255,255,255,.35);color:#fff;}
 .sbtn.ghost{border-style:dashed;color:var(--ink-muted);font-weight:560;}
 @media print{.schedbtns{display:none!important;}}
+
+.idrow{margin-bottom:18px;}
 </style>
 </head>
 <body>
@@ -1257,17 +1259,6 @@ textarea.in#d1_umum{min-height:138px;}
     <h1 class="h1">Asesmen umum dokter</h1>
   </header>
 
-  <!-- Panel staf: identitas pasien, disiapkan perawat sebelum dokter masuk -->
-  <div class="staff doc-meta">
-    <div class="staff-h"><span class="eg">Khusus staf</span><span class="ss">Disiapkan perawat sebelum dokter masuk</span></div>
-    <div class="staff-grid">
-      <div class="sf k4"><label class="slab" for="p_nama">Nama pasien</label><input class="sin" id="p_nama" placeholder="Nama pasien"></div>
-      <div class="sf k3"><label class="slab" for="rm">No. RM</label><input class="sin" id="rm" placeholder="RM-______"></div>
-      <div class="sf k3"><label class="slab" for="p_wa">WhatsApp</label><input class="sin" id="p_wa" placeholder="08xx xxxx xxxx"></div>
-      <div class="sf k2"><label class="slab" for="tgl">Tanggal</label><input class="sin" type="date" id="tgl"></div>
-    </div>
-  </div>
-
   <nav class="rail" id="rail" aria-label="Langkah asesmen"></nav>
 
   <!-- D0 -->
@@ -1275,6 +1266,14 @@ textarea.in#d1_umum{min-height:138px;}
   
   
   <section class="step" data-step="0"><div class="sec"><span class="n">D0</span>Ringkasan handoff &amp; riwayat perawatan</div>
+  <!-- Identitas pasien (dulu panel gelap "Khusus staf" di atas wizard) — kini bagian D0.
+       Id tetap sama -> applyIntake / applyHandoff / buildHandoff / hub tidak berubah. -->
+  <div class="row idrow">
+    <div class="f s4"><label class="lab" for="p_nama">Nama pasien</label><input class="in" id="p_nama" placeholder="Nama pasien"></div>
+    <div class="f s3"><label class="lab" for="rm">No. RM</label><input class="in" id="rm" placeholder="RM-______"></div>
+    <div class="f s3"><label class="lab" for="p_wa">WhatsApp</label><input class="in" id="p_wa" placeholder="08xx xxxx xxxx"></div>
+    <div class="f s2"><label class="lab" for="tgl">Tanggal</label><input class="in" type="date" id="tgl"></div>
+  </div>
   
 
   <div class="flag">
