@@ -1213,6 +1213,20 @@ textarea.in#d1_umum{min-height:138px;}
 
 body.mode-kontrol #rb2{display:none;}
 .dxblk{margin-top:26px;}
+
+/* ==== Bar kontrol satu baris: jenis kunjungan + status wajib (permintaan Alex 23 Sep) ==== */
+.ctlbar{position:sticky;top:0;z-index:9;display:flex;align-items:center;gap:14px;flex-wrap:nowrap;
+  padding:7px 28px;background:var(--surface-quiet);border-bottom:1px solid var(--line);overflow-x:auto;scrollbar-width:thin;}
+.ctlbar .modebar,.ctlbar .reqbar{position:static;display:flex !important;flex-wrap:nowrap;align-items:center;
+  padding:0 !important;border:none !important;background:none !important;gap:6px;white-space:nowrap;flex:0 0 auto;}
+.ctlbar .reqbar{flex:1 1 auto;padding-left:14px !important;border-left:1px solid var(--line-strong) !important;}
+.ctlbar .modebar .lb{font-size:10px;letter-spacing:.12em;margin-right:2px;}
+.ctlbar .modebar button{padding:5px 12px !important;font-size:12px !important;}
+.ctlbar .modebar .ket{display:none !important;}
+.ctlbar .reqbar .cnt{font-size:10px !important;padding:4px 9px !important;border-radius:999px;}
+.ctlbar .reqbar .lst{flex-wrap:nowrap !important;gap:5px;}
+.ctlbar .reqbar .it{padding:4px 10px !important;font-size:12px !important;white-space:nowrap;}
+@media print{.ctlbar{display:none !important;}}
 </style>
 </head>
 <body>
@@ -1235,11 +1249,17 @@ body.mode-kontrol #rb2{display:none;}
   </div>
 </div>
 
+<div class="ctlbar">
 <div class="modebar">
   <span class="lb">Jenis kunjungan</span>
   <button type="button" id="mb_awal" class="on" onclick="setMode('awal')">Kunjungan awal</button>
-  <button type="button" id="mb_kontrol" onclick="setMode('kontrol')">Kunjungan kontrol</button>
-  <span class="ket" id="mb_ket">Semua bagian tampil.</span>
+  <button type="button" id="mb_kontrol" onclick="setMode('kontrol')" title="Pemeriksaan umum di D1 &amp; penentuan program (D2) disembunyikan — sudah ditetapkan di kunjungan awal">Kunjungan kontrol</button>
+  <span class="ket" id="mb_ket" hidden>Semua bagian tampil.</span>
+</div>
+<div class="reqbar" id="reqbar">
+  <span class="cnt" id="reqcnt">Wajib —</span>
+  <span class="lst" id="reqlst"></span>
+</div>
 </div>
 <!-- Palang kontrol: kunjungan kontrol WAJIB memuat handoff kunjungan sebelumnya.
      Tanpa itu riwayat, IGA baseline & resep berjalan hilang diam-diam. -->
@@ -1250,10 +1270,6 @@ body.mode-kontrol #rb2{display:none;}
   <label class="hb-ovr"><input type="checkbox" id="ho_absen" onchange="renderHoBar()"> Handoff tidak tersedia (berkas hilang / kunjungan lama) — lanjut tanpa riwayat</label>
 </div>
 
-<div class="reqbar" id="reqbar">
-  <span class="cnt" id="reqcnt">Wajib —</span>
-  <span class="lst" id="reqlst"></span>
-</div>
 
 <div class="page">
 
