@@ -1,0 +1,8 @@
+{
+  "_catatan": "Salin berkas ini menjadi neosoft.json (tanpa .example) lalu isi nilainya dari NeoSoft. JANGAN commit/sinkron/kirim berkas neosoft.json — ini kredensial database live. Biarkan hanya di PC klinik.",
+  "host": "ALAMAT-DB-NEOSOFT",
+  "port": 3306,
+  "user": "USER-DB",
+  "password": "PASSWORD-DB",
+  "database": ""
+}

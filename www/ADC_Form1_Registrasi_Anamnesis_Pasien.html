@@ -1,0 +1,1229 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ADC — Form 1 · Registrasi &amp; Anamnesis Pasien</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,100..900;1,62..125,100..900&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* Palet baru — hangat (mengikuti ADC Patient Forms rev. baru) */
+  --canvas:#FBF8F3; --surface:#FFFFFF; --surface-quiet:#F5EFE6;
+  --ink:#1B1A18; --ink-2:#3A3833; --ink-muted:#6B675E; --ink-faint:#847D70;
+  --line:#E6DECF; --line-strong:#D9CCB7;
+  --accent:#C97A5E; --accent-deep:#8E4A33; --gold:#C9A86A; --green:#6E7C5E;
+  --ink-fill:#1F4E9C;
+  --ff-head:'Archivo',system-ui,-apple-system,sans-serif;
+  --ff-body:'Archivo',system-ui,-apple-system,sans-serif;
+  --accent-act:#B0603F; --r-card:14px; --r-box:8px; --r-pill:999px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{background:var(--canvas);color:var(--ink);font-family:var(--ff-body);
+  font-size:16px;font-weight:380;line-height:1.55;-webkit-font-smoothing:antialiased;}
+input,select,textarea,button{font-family:inherit;}
+/* Isian = tinta biru; placeholder tetap redup (bukan data) */
+input:not([type=checkbox]):not([type=radio]),select,textarea{color:var(--ink-fill);font-weight:420;}
+input::placeholder,textarea::placeholder{color:var(--ink-faint);font-weight:380;}
+input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+input[type=checkbox],input[type=radio]{accent-color:var(--accent);width:17px;height:17px;margin:0;flex:0 0 auto;}
+
+/* ===== TOOLBAR ===== */
+.toolbar{background:var(--ink);color:var(--surface-quiet);padding:14px 36px;display:flex;
+  align-items:center;justify-content:space-between;gap:18px;position:sticky;top:0;z-index:10;}
+.toolbar .tb-title{font-size:15px;font-weight:620;letter-spacing:.01em;}
+.toolbar .tb-hint{font-size:13px;color:var(--ink-faint);margin-top:2px;}
+.tb-actions{display:flex;gap:10px;}
+.btn{font-size:13px;font-weight:560;letter-spacing:.02em;padding:10px 20px;border-radius:var(--r-pill);
+  border:1px solid rgba(245,239,230,.28);background:rgba(245,239,230,.06);color:var(--surface-quiet);cursor:pointer;transition:all .16s ease;}
+.btn:hover{background:rgba(245,239,230,.16);border-color:rgba(245,239,230,.5);}
+.btn.tan{background:var(--accent-act);border-color:var(--accent-act);color:#fff;}
+.btn.tan:hover{background:var(--accent-deep);border-color:var(--accent-deep);}
+
+/* ===== HALAMAN ===== */
+.page{width:210mm;min-height:297mm;background:var(--surface);margin:24px auto;
+  padding:34px 34px 28px;border:1px solid var(--line);border-radius:var(--r-card);}
+.doc-head{display:flex;justify-content:space-between;align-items:flex-end;
+  border-bottom:1px solid var(--line);padding-bottom:18px;margin-bottom:14px;gap:24px;}
+.brand .eyebrow{font-size:11px;font-weight:560;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:6px;}
+.brand .name{font-size:29px;font-weight:620;letter-spacing:-.01em;line-height:1.1;}
+.brand .addr{font-size:13px;color:var(--ink-muted);margin-top:6px;}
+.doc-meta{text-align:right;font-size:13px;color:var(--ink-2);min-width:230px;}
+.doc-meta .title{font-size:17px;font-weight:620;color:var(--ink);margin-bottom:8px;}
+.doc-meta .row{margin-top:6px;display:flex;gap:8px;align-items:center;justify-content:flex-end;}
+.mini{border:1px solid var(--line);border-radius:var(--r-box);background:var(--surface);
+  padding:7px 10px;font-size:14px;color:var(--ink-fill);}
+.mini:focus{outline:2px solid var(--accent);outline-offset:2px;}
+.intro{font-size:14px;line-height:1.6;color:var(--ink-2);margin:14px 0 0;
+  background:var(--surface-quiet);border:1px solid var(--line);border-radius:var(--r-box);padding:14px 18px;}
+.intro b{font-weight:620;color:var(--ink);}
+
+/* ===== SEKSI ===== */
+.sec{font-size:12px;font-weight:520;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-muted);
+  margin:30px 0 14px;padding-bottom:0;border:none;display:flex;align-items:center;gap:10px;}
+.sec::after{content:'';flex:1;height:1px;background:var(--line);}
+.sec .n{color:var(--accent);font-weight:620;letter-spacing:.1em;}
+.note{font-size:14px;line-height:1.6;color:var(--ink-2);margin:0 0 16px;font-style:normal;
+  background:var(--surface-quiet);border:1px solid var(--line);border-radius:var(--r-box);padding:14px 18px;}
+.note b{font-weight:620;color:var(--ink);}
+
+/* ===== FIELD ===== */
+.row{display:flex;gap:18px;margin-bottom:20px;flex-wrap:wrap;}
+.f{flex:1;min-width:180px;display:flex;flex-direction:column;}
+.f.w2{flex:2;} .f.w3{flex:3;}
+.lab{font-size:12px;font-weight:560;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-muted);margin-bottom:10px;}
+.in{width:100%;border:1px solid var(--line);border-radius:var(--r-box);background:var(--surface);
+  padding:11px 13px;font-size:15px;color:var(--ink-fill);transition:border-color .16s ease;}
+.in:focus{outline:2px solid var(--accent);outline-offset:2px;border-color:var(--accent);}
+.in::placeholder{color:var(--ink-faint);}
+
+/* Chip pil — perilaku tetap checkbox (pilihan ganda), hanya tampilannya pil */
+.opts{display:flex;flex-wrap:wrap;gap:9px;margin:0;}
+.opt{display:flex;align-items:center;gap:9px;padding:10px 18px;border:1px solid var(--line);
+  border-radius:var(--r-pill);background:var(--surface);font-size:15px;color:var(--ink-2);cursor:pointer;transition:border-color .16s ease;}
+.opt:hover{border-color:var(--accent);}
+.opt:has(input:checked){border-color:var(--accent);background:var(--surface-quiet);font-weight:560;}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;}
+
+/* ===== KARTU PROGRAM ===== */
+.prog-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:4px 0 8px;}
+.prog{border:1px solid var(--line);border-radius:var(--r-card);padding:18px;cursor:pointer;
+  position:relative;background:var(--surface);transition:border-color .16s ease;}
+.prog:hover{border-color:var(--accent);}
+.prog.on{border-color:var(--accent);background:var(--surface-quiet);}
+.prog input{position:absolute;top:16px;right:16px;}
+.prog .pname{font-size:16px;font-weight:620;padding-right:26px;color:var(--ink);}
+.prog .psub{font-size:13px;color:var(--ink-muted);margin-top:4px;line-height:1.45;}
+
+/* ===== BLOK DETAIL (dibuka oleh tog()) ===== */
+.detail{border:1px solid var(--line);border-radius:var(--r-card);margin-bottom:16px;display:none;overflow:hidden;}
+.detail.on{display:block;}
+.detail-h{background:var(--surface-quiet);padding:14px 18px;font-size:15px;font-weight:620;
+  border-bottom:1px solid var(--line);color:var(--ink);}
+.detail-b{padding:20px 18px;}
+
+.callout{border:1px solid var(--line);background:var(--surface-quiet);border-radius:var(--r-box);
+  padding:14px 18px;margin:16px 0;font-size:14px;line-height:1.6;color:var(--ink-2);}
+.callout .k{font-weight:620;letter-spacing:.14em;text-transform:uppercase;font-size:11px;
+  color:var(--accent-deep);display:block;margin-bottom:6px;}
+
+/* ===== ALERGI ===== */
+.flag{border:1px solid var(--accent);background:#FCF4F0;border-radius:var(--r-card);
+  padding:16px 18px;margin:18px 0;display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+.flag .badge{font-size:11px;font-weight:620;letter-spacing:.14em;text-transform:uppercase;
+  color:#fff;background:var(--accent-deep);padding:7px 12px;border-radius:var(--r-pill);white-space:nowrap;}
+.flag .fin{flex:1;min-width:220px;border:1px solid var(--line);border-radius:var(--r-box);
+  background:var(--surface);padding:11px 13px;font-size:15px;font-weight:560;color:var(--ink-fill);}
+.flag .fin:focus{outline:2px solid var(--accent);outline-offset:2px;}
+.flag .none{display:flex;align-items:center;gap:9px;font-size:14px;color:var(--ink-2);white-space:nowrap;
+  padding:10px 18px;border:1px solid var(--line);border-radius:var(--r-pill);background:var(--surface);cursor:pointer;}
+
+/* ===== PERSETUJUAN & TANDA TANGAN ===== */
+.ack{display:flex;gap:12px;align-items:flex-start;margin:10px 0;font-size:14px;line-height:1.6;color:var(--ink-2);
+  padding:14px 18px;border:1px solid var(--line);border-radius:var(--r-box);background:var(--surface);cursor:pointer;}
+.ack:has(input:checked){border-color:var(--accent);background:var(--surface-quiet);}
+.ack input{margin-top:2px;}
+.sigs{display:flex;gap:24px;margin-top:20px;flex-wrap:wrap;}
+.sig{flex:1;min-width:180px;}
+.sig .lab{margin-bottom:34px;}
+.sig .line{border-bottom:1px solid var(--line-strong);height:1px;}
+.sig .who{font-size:13px;color:var(--ink-muted);margin-top:8px;line-height:1.5;}
+
+.foot{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;
+  border-top:1px solid var(--line);padding-top:16px;margin-top:28px;flex-wrap:wrap;}
+.foot .l{font-size:13px;color:var(--ink-muted);line-height:1.55;}
+.foot .r{text-align:right;font-size:13px;color:var(--ink-muted);}
+.foot .r .nm{font-size:14px;font-weight:620;color:var(--ink);}
+.disc{max-width:210mm;margin:0 auto 28px;padding:14px 34px;font-size:13px;line-height:1.6;
+  color:var(--ink-muted);text-align:center;}
+
+@media print{
+  html,body{background:#fff;font-size:14px;}
+  .toolbar{display:none!important;}
+  .page{width:100%;min-height:auto;margin:0;padding:0;border:none;border-radius:0;}
+  .disc{margin:10px auto 0;padding:10px 0;}
+  .detail{display:none!important;} .detail.on{display:block!important;}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  input:not([type=checkbox]):not([type=radio]),select,textarea{color:var(--ink-fill)!important;}
+  .prog,.detail,.flag,.ack{break-inside:avoid;}
+  .sec{break-after:avoid;}
+}
+
+
+/* ==========================================================================
+   PENYELARASAN TATA LETAK — keterbacaan & kemudahan pengisian.
+   Masalah yang diperbaiki (terukur, bukan kira-kira):
+   1. 23 label tidak muat satu baris karena baris memuat 3-4 kolom sempit.
+      Flexbox membuat kolom menyusut sampai label pecah; grid auto-fit
+      menahan lebar minimum lalu membungkus rapi ke baris berikutnya.
+   2. Saat satu label pecah 2 baris sedangkan tetangganya tidak, kotak isian
+      jadi tidak sebaris — mata kehilangan garis pindai. Tinggi label dikunci
+      2 baris supaya semua kotak isian rata.
+   3. Chip pilihan hanya ~37px; Form 1 diisi pasien di tablet, target sentuh
+      minimal 44px.
+   Hanya tampilan. Tidak ada kelas / struktur / logika yang berubah.
+   ========================================================================== */
+
+/* --- Baris jadi grid yang menyeimbangkan diri: minimal 220px per kolom --- */
+.row{display:grid !important;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:18px 18px !important;align-items:start;margin-bottom:22px !important;}
+.f{min-width:0 !important;}
+.f.w2{grid-column:span 2;}
+.f.w3{grid-column:span 3;}
+@media (max-width:900px){ .f.w2,.f.w3{grid-column:span 1;} }
+
+/* --- Label: tinggi dikunci 2 baris → semua kotak isian sebaris --- */
+.lab{display:flex;align-items:flex-end;min-height:2.5em;line-height:1.25;
+  letter-spacing:.06em !important;margin-bottom:8px !important;hyphens:none;}
+.lab .req,.lab .opt{margin-left:6px;}
+/* baris tanpa label panjang tidak perlu cadangan tinggi */
+.row:has(.lab:only-child) .lab{min-height:0;}
+
+/* --- Target sentuh 44px (tablet pasien) --- */
+.opt,.ck label,.dod label,
+#ovl_acne .ck label,#ovl_melasma .ck label,#ovl_hair .ck label,
+#ovl_acne label.ck,#ovl_melasma label.ck{
+  padding:11px 18px !important;min-height:44px;line-height:1.3;}
+.in,.fin{padding:12px 13px !important;min-height:46px;}
+select.in{min-height:46px;}
+.opts,.ck,.ff-list{gap:9px !important;}
+
+/* --- Blok pilihan lebar penuh: jangan dipaksa masuk kolom sempit --- */
+.f:has(> .opts),.f:has(> .ck){grid-column:1 / -1;}
+.f.w2:has(> .opts),.f.w3:has(> .opts){grid-column:1 / -1;}
+
+/* --- Irama antar seksi: jeda lebih tegas supaya kelompok terbaca --- */
+.sec{margin:34px 0 16px !important;}
+.sec:first-of-type{margin-top:8px !important;}
+.note,.callout,.intro{margin-bottom:18px !important;}
+
+/* --- Kartu program & detail --- */
+.prog-grid{gap:14px !important;}
+@media (max-width:760px){ .prog-grid{grid-template-columns:repeat(2,1fr) !important;} }
+.detail-b .row:last-child{margin-bottom:0 !important;}
+
+/* --- Alergi: satu baris penuh, tidak berdesakan --- */
+.flag{gap:12px !important;}
+.flag .fin{min-width:260px;}
+
+/* --- Cetak: rapatkan kembali agar tidak menambah halaman --- */
+@media print{
+  .row{gap:10px 14px !important;margin-bottom:12px !important;}
+  .lab{min-height:0 !important;margin-bottom:4px !important;}
+  .in,.fin{min-height:0 !important;padding:6px 9px !important;}
+  .opt,.ck label{padding:5px 11px !important;min-height:0 !important;}
+  .sec{margin:16px 0 8px !important;}
+  .note,.callout,.intro{margin-bottom:9px !important;padding:8px 11px !important;}
+}
+
+/* --- Header dokumen memakai kelas .row juga, tetapi maksudnya baris inline
+       "Label [isian]" — bukan grid kolom. Tanpa pengecualian ini, aturan grid
+       di atas memecahnya jadi satu kolom dan header menumpuk vertikal. --- */
+.doc-meta .row{display:flex !important;grid-template-columns:none !important;
+  gap:8px !important;margin-bottom:0 !important;margin-top:6px !important;
+  align-items:center;justify-content:flex-end;}
+.doc-meta .row .lab{min-height:0 !important;margin-bottom:0 !important;}
+
+/* ==========================================================================
+   PERBAIKAN HEADER DOKUMEN
+   Chip sentuh 44px dibuat untuk pilihan pasien di tablet, tetapi ikut mengenai
+   kotak Baru/Lama di header — blok kanan membengkak, "Dokter pemeriksa" pecah
+   ke baris sendiri, dan logo terdorong jauh ke bawah karena .doc-head merata
+   di bawah. Header punya kebutuhan berbeda: padat, sebaris, sekali baca.
+   ========================================================================== */
+.doc-head{align-items:flex-start !important;}
+.doc-meta{min-width:340px !important;display:flex;flex-direction:column;align-items:flex-end;gap:7px;}
+.doc-meta .title{margin-bottom:4px !important;}
+.doc-meta .row{flex-wrap:nowrap !important;white-space:nowrap;margin-top:0 !important;}
+/* kotak pilihan header: padat, bukan chip sentuh */
+.doc-meta .opt{padding:5px 11px !important;min-height:0 !important;font-size:13.5px !important;
+  gap:7px !important;line-height:1.2;}
+.doc-meta .opt input[type=checkbox]{width:15px;height:15px;}
+.doc-meta .opt:has(input:checked){font-weight:560;}
+/* semua isian header setinggi sama supaya barisnya rata */
+.doc-meta .mini{min-height:34px !important;padding:6px 10px !important;font-size:14px !important;}
+
+
+/* ==========================================================================
+   REDESIGN HANDOFF: wizard bertahap, panel staf, kartu seksi.
+   Hanya tampilan & navigasi langkah. Mesin intake tidak disentuh:
+   seluruh id dan kelas yang dibaca buildIntake() dipertahankan.
+   ========================================================================== */
+body{background:var(--canvas);}
+.page{width:auto !important;max-width:1140px !important;min-height:0 !important;
+  background:transparent !important;border:none !important;border-radius:0 !important;
+  margin:0 auto !important;padding:0 32px 96px !important;}
+@media (max-width:640px){ .page{padding:0 20px 64px !important;} }
+
+/* Header */
+.fhead{padding:52px 0 34px;}
+.fhead .eyebrow{font-size:12px;letter-spacing:.18em;text-transform:uppercase;font-weight:520;
+  color:var(--ink-muted);margin-bottom:14px;}
+.fhead .h1{font-size:52px;line-height:1.02;letter-spacing:-.015em;color:var(--ink);
+  font-variation-settings:'wght' 320,'wdth' 78;font-weight:320;margin:0 0 18px;}
+.fhead .lede{font-size:17px;line-height:1.6;color:var(--ink-2);max-width:68ch;text-wrap:pretty;}
+.fhead .lede b{font-weight:600;color:var(--ink);}
+@media (max-width:640px){ .fhead .h1{font-size:34px;} .fhead{padding:32px 0 24px;} }
+
+/* Panel staf (gelap) */
+.staff{background:#14130F;border-radius:14px;padding:24px 28px;margin-bottom:26px;
+  min-width:0 !important;display:block !important;text-align:left !important;}
+.staff .staff-h{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:16px;}
+.staff .eg{font-size:11px;letter-spacing:.18em;text-transform:uppercase;font-weight:560;color:var(--gold);}
+.staff .ss{font-size:14px;color:rgba(245,239,230,.7);}
+.staff .staff-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:18px;}
+.staff .sf{display:flex;flex-direction:column;}
+.staff .sf-wide{grid-column:span 2;}
+@media (max-width:640px){.staff .sf-wide{grid-column:span 1;}}
+.staff .slab{font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:560;
+  color:var(--gold);margin-bottom:7px;min-height:0 !important;display:block;}
+.staff .sin{width:100%;box-sizing:border-box;padding:11px 13px;border:1px solid rgba(245,239,230,.24);
+  border-radius:8px;background:rgba(245,239,230,.06);font-size:15px;color:#F5EFE6 !important;min-height:46px;}
+.staff .sin::placeholder{color:rgba(245,239,230,.45) !important;}
+.staff .spills{display:flex;gap:8px;flex-wrap:wrap;}
+.staff .opt.spill{padding:10px 18px !important;min-height:44px !important;border:1px solid rgba(245,239,230,.24) !important;
+  border-radius:999px;background:transparent !important;font-size:15px !important;color:#F5EFE6 !important;}
+.staff .opt.spill:has(input:checked){border-color:var(--accent) !important;background:rgba(201,122,94,.18) !important;}
+
+/* Rel langkah */
+.rail{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;border-top:1px solid var(--line);
+  margin-bottom:32px;}
+.rail button{position:relative;border:none;background:none;text-align:left;cursor:pointer;
+  padding:15px 12px 17px 0;font-family:inherit;}
+.rail button .rn{display:block;font-size:11px;letter-spacing:.16em;color:var(--ink-faint);margin-bottom:5px;}
+.rail button .rl{display:block;font-size:13.5px;line-height:1.35;color:var(--ink-2);font-weight:500;}
+.rail button.on::before{content:'';position:absolute;top:-1px;left:0;right:8px;height:2px;background:var(--accent);}
+.rail button.on .rl{color:var(--ink);font-weight:600;}
+.rail button:hover .rl{color:var(--accent-deep);}
+@media (max-width:760px){ .rail{grid-auto-flow:row;grid-auto-columns:auto;}
+  .rail button{padding:11px 0;border-top:1px solid var(--line);}
+  .rail button.on::before{right:0;} }
+
+/* Kartu langkah */
+.step{background:var(--surface);border:1px solid var(--line);border-radius:14px;
+  padding:34px;margin-bottom:20px;display:none;}
+.step.on{display:block;}
+body.showall .step{display:block;}
+@media (max-width:640px){ .step{padding:22px 18px;} }
+.step > .sec:first-child{margin-top:0 !important;}
+.stepnav{display:flex;justify-content:space-between;align-items:center;gap:14px;
+  margin-top:26px;padding-top:20px;border-top:1px solid var(--line);flex-wrap:wrap;}
+.stepnav .nb{font-family:inherit;font-size:14px;font-weight:540;padding:11px 20px;border-radius:8px;
+  border:1px solid var(--line-strong);background:transparent;color:var(--ink-2);cursor:pointer;}
+.stepnav .nb:hover{border-color:var(--accent);color:var(--accent-deep);}
+.stepnav .nb-p{background:var(--accent-act);border-color:var(--accent-act);color:#fff;}
+.stepnav .nb-p:hover{background:var(--accent-deep);border-color:var(--accent-deep);color:#fff;}
+.stepnav .donehint{font-size:14px;color:var(--ink-muted);}
+
+@media print{
+  .rail,.stepnav,.no-print{display:none !important;}
+  .step{display:block !important;border:none;border-radius:0;padding:0;margin-bottom:14px;break-inside:avoid;}
+  .staff{background:#fff !important;border:1px solid #D9CCB7;padding:14px 16px;}
+  .staff .eg,.staff .slab{color:#8E4A33 !important;}
+  .staff .ss{color:#6B675E !important;}
+  .staff .sin{background:#fff !important;color:var(--ink-fill) !important;border-color:#D9CCB7 !important;min-height:0;padding:6px 9px;}
+  .staff .opt.spill{color:#1B1A18 !important;border-color:#D9CCB7 !important;min-height:0 !important;padding:4px 10px !important;}
+  .fhead{padding:0 0 16px;} .fhead .h1{font-size:30px;} .fhead .lede{font-size:13px;}
+  .page{padding:0 !important;}
+}
+
+
+/* ==========================================================================
+   GRID 12 KOLOM (sesuai spek handoff) — menggantikan auto-fit.
+   Sebelumnya lebar kolom bergantung JUMLAH field per baris, sehingga .w3
+   memakan seluruh baris dan sisanya terlempar: "Nama lengkap" nyaris penuh,
+   "Kota domisili" seperempat, tepi kanan bergerigi. Kini setiap field membawa
+   span sendiri (s3..s12) dan tiap baris berjumlah tepat 12 → tepi kanan rata.
+   ========================================================================== */
+.row{display:grid !important;grid-template-columns:repeat(12,1fr) !important;
+  gap:22px 20px !important;align-items:start;margin-bottom:24px !important;}
+.f{min-width:0 !important;grid-column:span 4;}
+.f.s3{grid-column:span 3;} .f.s4{grid-column:span 4;} .f.s5{grid-column:span 5;}
+.f.s6{grid-column:span 6;} .f.s7{grid-column:span 7;} .f.s8{grid-column:span 8;}
+.f.s9{grid-column:span 9;} .f.s10{grid-column:span 10;} .f.s11{grid-column:span 11;}
+.f.s12{grid-column:span 12;}
+/* w2/w3 lama tidak lagi menentukan lebar — span-lah yang menentukan */
+.f.w2,.f.w3{grid-column:auto/span var(--sp,4);}
+.f.w2.s3,.f.w3.s3{grid-column:span 3;} .f.w2.s4,.f.w3.s4{grid-column:span 4;}
+.f.w2.s5,.f.w3.s5{grid-column:span 5;} .f.w2.s6,.f.w3.s6{grid-column:span 6;}
+.f.w2.s7,.f.w3.s7{grid-column:span 7;} .f.w2.s8,.f.w3.s8{grid-column:span 8;}
+.f.w2.s9,.f.w3.s9{grid-column:span 9;} .f.w2.s10,.f.w3.s10{grid-column:span 10;}
+.f.w2.s11,.f.w3.s11{grid-column:span 11;} .f.w2.s12,.f.w3.s12{grid-column:span 12;}
+/* aturan lama yang memaksa blok pilihan selebar penuh DICABUT — span sudah
+   memperhitungkan jumlah chip, jadi "Jenis kelamin" (2 chip) tak lagi
+   membuang satu baris utuh. */
+.f:has(> .opts),.f:has(> .ck),.f.w2:has(> .opts),.f.w3:has(> .opts){grid-column:auto;}
+.f.s3:has(> .opts){grid-column:span 3;} .f.s4:has(> .opts){grid-column:span 4;}
+.f.s6:has(> .opts){grid-column:span 6;} .f.s8:has(> .opts){grid-column:span 8;}
+.f.s12:has(> .opts){grid-column:span 12;}
+/* label tak perlu lagi cadangan 2 baris sebesar dulu: kolom sudah lebih lega */
+.lab{min-height:2.1em;}
+@media (max-width:860px){
+  .row{grid-template-columns:repeat(6,1fr) !important;}
+  .f,.f.w2,.f.w3,.f.s3,.f.s4,.f.s5,.f.s6,.f.s7,.f.s8{grid-column:span 3;}
+  .f.s9,.f.s10,.f.s11,.f.s12{grid-column:span 6;}
+}
+@media (max-width:560px){
+  .row{grid-template-columns:1fr !important;}
+  .f,.f.w2,.f.w3,[class*=" s"]{grid-column:span 1 !important;}
+  .lab{min-height:0;}
+}
+@media print{ .row{gap:10px 14px !important;margin-bottom:12px !important;} .lab{min-height:0 !important;} }
+
+
+/* ===== TANDA TANGAN: bisa diisi & digambar =====
+   Mengikuti spek handoff: canvas di-skala device-pixel-ratio, garis 1,7px,
+   ujung membulat, tinta #1F4E9C — warna yang sama dengan isian ketik, supaya
+   konsisten dengan konvensi "yang diisi = biru". */
+.sigs{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:22px;margin-top:22px;}
+.sig{display:flex;flex-direction:column;min-width:0;}
+.sig > .lab{margin-bottom:9px;min-height:0;}
+.pad-wrap{position:relative;border:1px solid var(--line);border-radius:var(--r-box);
+  background:var(--surface);height:132px;overflow:hidden;}
+.pad-wrap:focus-within{border-color:var(--accent);}
+.sigpad{display:block;width:100%;height:100%;touch-action:none;cursor:crosshair;}
+.padhint{position:absolute;left:14px;bottom:10px;font-size:12.5px;color:var(--ink-faint);
+  pointer-events:none;letter-spacing:.02em;}
+.pad-wrap.inked .padhint{display:none;}
+.padclr{position:absolute;top:8px;right:8px;font-family:inherit;font-size:12px;font-weight:560;
+  padding:5px 11px;border:1px solid var(--line-strong);border-radius:var(--r-pill);
+  background:var(--surface);color:var(--ink-muted);cursor:pointer;}
+.padclr:hover{border-color:var(--accent);color:var(--accent-deep);}
+.sigrow{margin-top:12px !important;margin-bottom:0 !important;gap:12px !important;}
+.sigrow .lab{min-height:0 !important;margin-bottom:6px !important;font-size:11px;}
+.sigrow .in{padding:9px 11px !important;min-height:40px;}
+@media print{
+  .sigs{grid-template-columns:repeat(3,1fr);gap:14px;break-inside:avoid;}
+  .pad-wrap{height:96px;border:none;border-bottom:1px solid #1B1A18;border-radius:0;}
+  .padclr,.padhint{display:none !important;}
+  .sigrow .in{border:none !important;border-bottom:1px solid #D9CCB7 !important;
+    border-radius:0 !important;padding:2px 0 !important;min-height:0 !important;}
+}
+
+
+/* Penjaga: .opt di Form 1 = CHIP PIL. Bila terpakai di dalam .lab (maksudnya
+   penanda "opsional"), jangan dirender sebagai gelembung — cukup teks kecil. */
+.lab .opt{display:inline;padding:0;border:none;background:none;border-radius:0;
+  min-height:0;font-size:11.5px;font-style:italic;font-weight:400;
+  text-transform:none;letter-spacing:0;color:var(--ink-faint);margin-left:6px;}
+/* judul pad tanda tangan boleh 2 baris tanpa merusak kerataan */
+.sig > .lab{min-height:2.4em;align-items:flex-end;}
+
+
+/* ===== PANEL STAF: grid 12 kolom (disamakan dengan badan form) =====
+   Sebelumnya auto-fit minmax(190px) menghasilkan 4 kolom, lalu blok foto
+   (span 2) membungkus ke baris 2 dan menyisakan 2 kolom kosong — ruang mati
+   besar di kanan bawah. Kini baris 1 = empat field @3 kolom, baris 2 = blok
+   foto selebar penuh dengan chip & area difoto SEBARIS. */
+.staff .staff-grid{grid-template-columns:repeat(12,1fr) !important;gap:20px 20px !important;}
+.staff .sf.k3{grid-column:span 3;}
+.staff .sf.k12{grid-column:span 12;}
+.staff .slab{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;min-height:1.5em;}
+.staff .sreq{font-size:10.5px;letter-spacing:.06em;text-transform:none;font-weight:400;
+  color:rgba(245,239,230,.55);font-style:italic;}
+.staff .foto-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.staff .foto-row .spills{flex:0 0 auto;}
+.staff .foto-row .sin{flex:1 1 260px;min-width:0;}
+/* kotak centang di panel gelap: putih pekat terlalu mencolok, samakan ke aksen */
+.staff input[type=checkbox]{accent-color:var(--accent);}
+.staff .opt.spill{min-height:46px !important;padding:11px 18px !important;}
+.staff .sin{min-height:46px;}
+/* pemisah tipis antara baris identitas dan baris foto */
+.staff .sf.k12{border-top:1px solid rgba(245,239,230,.14);padding-top:18px;margin-top:2px;}
+@media (max-width:900px){
+  .staff .sf.k3{grid-column:span 6;}
+}
+@media (max-width:560px){
+  .staff .sf.k3,.staff .sf.k12{grid-column:span 12;}
+  .staff .foto-row .sin{flex:1 1 100%;}
+}
+@media print{
+  .staff .sf.k12{border-top:1px solid #D9CCB7;padding-top:10px;}
+  .staff .sreq{color:#6B675E !important;}
+  .staff .opt.spill{min-height:0 !important;padding:4px 10px !important;}
+  .staff .sin{min-height:0;}
+}
+
+
+/* ==========================================================================
+   PERBAIKAN GRID & LABEL
+   1. .f.s1/.s2 tidak pernah didefinisikan padahal dipakai — field-nya jatuh ke
+      default span 4, sehingga baris D1 menjadi 6+4+4+4=18 dan membungkus.
+   2. .opt di Form 2 punya TIGA arti (baris checkbox, penanda "opsional", chip
+      pil). Aturan chip menang, jadi "pilih satu" di dalam label ikut jadi
+      gelembung. Penjaga yang sudah dipasang di Form 1 dibawa ke sini.
+   3. Chip berlabel pendek (angka Romawi Fitzpatrick) tidak perlu padding
+      selebar chip berlabel kata — tingginya tetap 44px untuk target sentuh.
+   ========================================================================== */
+.f.s1{grid-column:span 1;} .f.s2{grid-column:span 2;}
+.f.w2.s1,.f.w3.s1{grid-column:span 1;} .f.w2.s2,.f.w3.s2{grid-column:span 2;}
+
+.lab .opt{display:inline !important;padding:0 !important;border:none !important;
+  background:none !important;border-radius:0 !important;min-height:0 !important;
+  font-size:11.5px !important;font-style:italic;font-weight:400 !important;
+  text-transform:none;letter-spacing:0;color:var(--ink-faint) !important;margin-left:6px;}
+
+.opts.tight .opt{padding:11px 12px !important;}
+.opts.tight .opt input{margin-right:1px;}
+
+@media (max-width:860px){ .f.s1,.f.s2{grid-column:span 2;} }
+@media (max-width:560px){ .f.s1,.f.s2{grid-column:span 1 !important;} }
+
+/* Baris pengukuran perawat: 3 kolom sejajar, ritme sama dengan baris atas panel.
+   (Root cause layar Alex 3 Sep: .k4 dipakai tapi tak pernah didefinisikan di
+   form ini -> field jatuh ke span 1/12 dan menciut.) */
+.ukur-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;margin-top:2px;}
+.ukur-grid .uf{display:flex;flex-direction:column;}
+.ukur-grid .slab{white-space:nowrap;}
+@media (max-width:640px){ .ukur-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;} }
+@media print{ .ukur-grid{gap:10px;} }
+
+/* ==========================================================================
+   JAWABAN DINAMIS — kolom teks pasien membesar mengikuti isi (permintaan Alex
+   3 Sep). Semua input teks bebas jadi textarea 1 baris yang tumbuh otomatis:
+   field-sizing:content (Chrome/Edge 123+) + fallback JS scrollHeight.
+   ========================================================================== */
+textarea.in.ag{
+  height:auto;min-height:52px;resize:none;overflow:hidden;
+  line-height:1.5;font:inherit;display:block;
+  field-sizing:content;
+}
+@media print{ textarea.in.ag{overflow:visible;} }
+
+/* ==========================================================================
+   RINGKASAN MINI PANEL STAF — langkah 2+ menggantikan panel gelap penuh.
+   Visibilitas diatur kelas body.past0 dengan !important (anti tabrakan gaya).
+   ========================================================================== */
+#staff_mini{display:none;}
+body.past0 .staff.doc-meta{display:none !important;}
+body.past0 #staff_mini{display:flex !important;}
+
+.staff-mini{align-items:baseline;gap:6px 0;flex-wrap:wrap;
+  background:#14130F;border-radius:14px;padding:16px 22px;margin:0 0 16px;}
+.staff-mini .smk{font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+  font-weight:560;color:var(--gold);flex:0 0 auto;margin-right:22px;}
+.staff-mini .smv{flex:1 1 320px;min-width:0;display:flex;flex-wrap:wrap;
+  gap:8px 28px;align-items:baseline;}
+.staff-mini .smi{display:inline-flex;align-items:baseline;gap:8px;white-space:nowrap;}
+.staff-mini .smi em{font-style:normal;font-size:10px;letter-spacing:.12em;
+  text-transform:uppercase;font-weight:560;color:rgba(201,168,106,.85);}
+.staff-mini .smi > span{font-size:14px;font-weight:480;color:#F5EFE6;}
+.staff-mini .smi.kosong > span{color:rgba(245,239,230,.4);}
+.staff-mini .smedit{font-family:inherit;font-size:12px;font-weight:560;color:var(--gold);
+  background:none;border:1px solid rgba(201,168,106,.45);border-radius:999px;
+  padding:6px 14px;cursor:pointer;flex:0 0 auto;margin-left:18px;align-self:center;}
+.staff-mini .smedit:hover{border-color:var(--gold);}
+@media print{ #staff_mini{display:none !important;} }
+.showall #staff_mini{display:none !important;}
+.showall .staff.doc-meta{display:block !important;}
+
+/* chip status hub di bilah atas */
+.hubchip{display:inline-flex;align-items:center;font-size:10.5px;font-weight:600;
+  letter-spacing:.1em;text-transform:uppercase;padding:7px 13px;border-radius:999px;
+  cursor:pointer;border:1px solid rgba(245,239,230,.3);color:rgba(245,239,230,.55);
+  margin-right:10px;user-select:none;}
+.hubchip.on{border-color:#7FA37F;color:#A8C8A8;}
+.hubchip.off{border-color:rgba(245,239,230,.25);color:rgba(245,239,230,.45);}
+.hubchip.sync{border-color:#C9A86A;color:#C9A86A;}
+@media print{.hubchip{display:none!important;}}
+</style>
+</head>
+<body>
+
+<div class="toolbar">
+  <div>
+    <div class="tb-title">ADC · Form 1 — Registrasi &amp; Anamnesis Pasien</div>
+    <div class="tb-hint">Diisi pasien · boleh dibantu perawat · sebelum masuk ruang konsultasi</div>
+  </div>
+  <div class="tb-actions">
+    <span class="hubchip off" id="hubchip" onclick="hubSetup()" title="Klik untuk mengatur alamat & kunci hub">HUB &middot; …</span><button class="btn" onclick="resetForm()">Reset</button>
+    <button class="btn" onclick="cetakSemua()">Cetak / Simpan PDF</button>
+    <button class="btn tan" onclick="simpanIntake()">Simpan Data Pasien</button>
+  </div>
+</div>
+
+<div class="page">
+
+  <header class="fhead">
+    <div class="eyebrow">Skin Quality Program &middot; Form 1 dari 2</div>
+    <h1 class="h1">Registrasi &amp; anamnesis pasien</h1>
+    <p class="lede"><b>Untuk pasien.</b> Mohon isi selengkap yang Anda tahu &mdash; boleh dibantu perawat kami. Informasi ini dipakai dokter untuk menyusun rencana perawatan yang tepat, dan <b>hanya ditanyakan sekali</b>; di form berikutnya dokter tidak akan menanyakan hal yang sama lagi.</p>
+  </header>
+
+  <!-- Panel staf: menggantikan blok meta lama yang berdesakan di pojok kanan.
+       Kelas .doc-meta DIPERTAHANKAN karena buildIntake() membaca status Baru/Lama
+       lewat selektor '.doc-meta label.opt input[type=checkbox]'. -->
+  <div class="staff doc-meta">
+    <div class="staff-h"><span class="eg">Khusus staf</span><span class="ss">Diisi pendaftaran sebelum pasien mulai</span></div>
+    <div class="staff-grid">
+      <div class="sf k3"><label class="slab" for="rm">No. RM</label><input class="sin" id="rm" placeholder="RM-______"></div>
+      <div class="sf k3"><label class="slab" for="tgl">Tanggal</label><input class="sin" type="date" id="tgl"></div>
+      <div class="sf k3"><span class="slab">Status pasien</span>
+        <div class="spills" id="p_status"><label class="opt spill"><input type="checkbox"> Baru</label><label class="opt spill"><input type="checkbox"> Lama</label></div>
+      </div>
+      <div class="sf k3"><label class="slab" for="p_dokter">Dokter pemeriksa</label><input class="sin" id="p_dokter" placeholder="dr. …, Sp.DVE"></div>
+      <div class="sf k12"><span class="slab">Foto klinis baseline <span class="sreq">wajib sebelum pasien masuk</span></span>
+        <div class="foto-row">
+          <div class="spills" id="p_foto">
+            <label class="opt spill"><input type="checkbox" id="p_foto_ok"> Sudah diambil</label>
+          </div>
+          <input class="sin" id="p_foto_area" placeholder="Area difoto — mis. wajah frontal, malar kanan-kiri">
+        </div>
+      </div>
+      <!-- Pengukuran oleh perawat — dipindah dari Form 2 (D1).
+           Dibungkus k12 agar dapat garis pemisah panel (sama seperti baris foto)
+           dan tiga kolomnya sejajar rapi; .k4 tidak pernah ada di form ini. -->
+      <div class="sf k12">
+        <span class="slab">Pengukuran <span class="sreq">diisi perawat</span></span>
+        <div class="ukur-grid">
+          <div class="uf"><label class="slab" for="p_bb">Berat badan</label>
+            <input class="sin" id="p_bb" type="number" inputmode="decimal" step="0.1" min="0" placeholder="kg" oninput="hitungIMT1()"></div>
+          <div class="uf"><label class="slab" for="p_tb">Tinggi badan</label>
+            <input class="sin" id="p_tb" type="number" inputmode="decimal" step="0.1" min="0" placeholder="cm" oninput="hitungIMT1()"></div>
+          <div class="uf"><label class="slab" for="p_imt">Indeks massa tubuh</label>
+            <input class="sin" id="p_imt" readonly placeholder="otomatis" title="Dihitung dari berat &amp; tinggi badan"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ringkasan mini panel staf — tampil di langkah 2+ menggantikan panel penuh,
+       supaya area kerja pasien lega. Statis; "Ubah" kembali ke langkah 1. -->
+  <div class="staff-mini" id="staff_mini" style="display:none" aria-label="Ringkasan data staf">
+    <span class="smk">Staf</span>
+    <span class="smv" id="sm_body">—</span>
+    <button type="button" class="smedit" onclick="goStep(0)">Ubah &rsaquo;</button>
+  </div>
+
+  <nav class="rail" id="rail" aria-label="Langkah pengisian"></nav>
+  <section class="step" data-step="0"><div class="sec"><span class="n">P1</span>Data diri</div>
+  <div class="row">
+    <div class="f w3 s5"><span class="lab">Nama lengkap</span><textarea class="in ag" id="p_nama" placeholder="Nama Anda" rows="1"></textarea></div>
+    <div class="f s3"><span class="lab">Tanggal lahir / usia</span><textarea class="in ag" placeholder="DD/MM/YYYY" rows="1"></textarea></div>
+    <div class="f s4"><span class="lab">Jenis kelamin</span>
+      <div class="opts" style="padding-top:4px"><label class="opt"><input type="checkbox"> Perempuan</label><label class="opt"><input type="checkbox"> Laki-laki</label></div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="f w2 s4"><span class="lab">Nomor WhatsApp aktif</span><textarea class="in ag" id="p_wa" placeholder="08xx xxxx xxxx" rows="1"></textarea></div>
+    <div class="f w2 s5"><span class="lab">Pekerjaan</span><textarea class="in ag" placeholder="mis. karyawan, mahasiswa, ibu rumah tangga" rows="1"></textarea></div>
+    <div class="f s3"><span class="lab">Kota domisili</span><textarea class="in ag" placeholder="mis. Bandung" rows="1"></textarea></div>
+  </div>
+
+  <!-- P2 -->
+  <div class="stepnav no-print"><span></span><button type="button" class="nb nb-p" onclick="goStep(1)">Lanjut &rsaquo;</button></div>
+  <div class="sec"><span class="n">P2</span>Riwayat kesehatan</div>
+  <div class="flag">
+    <span class="badge">Alergi / pantangan</span>
+    <input class="fin" id="alergi" placeholder="Tulis alergi obat, makanan, atau bahan yang pernah membuat Anda bereaksi">
+    <label class="none"><input type="checkbox"> Tidak ada</label>
+  </div>
+  <div class="row">
+    <div class="f w2 s6"><span class="lab">Produk / obat yang sedang dipakai untuk keluhan ini</span><textarea class="in ag" placeholder="krim, obat minum, skincare, suplemen" rows="1"></textarea></div>
+    <div class="f w2 s6"><span class="lab">Kondisi medis / obat rutin</span><textarea class="in ag" placeholder="mis. hipertensi, diabetes, tiroid, isotretinoin" rows="1"></textarea></div>
+  </div>
+  <div class="row">
+    <div class="f w3 s6"><span class="lab">Riwayat hormonal (bila relevan)</span>
+      <div class="opts" style="padding-top:4px">
+        <label class="opt"><input type="checkbox"> PCOS</label>
+        <label class="opt"><input type="checkbox"> Gangguan tiroid</label>
+        <label class="opt"><input type="checkbox"> KB hormonal</label>
+        <label class="opt"><input type="checkbox"> Sedang hamil</label>
+        <label class="opt"><input type="checkbox"> Menyusui</label>
+        <label class="opt"><input type="checkbox"> Menopause</label>
+      </div>
+    </div>
+    <div class="f s6"><span class="lab">Haid teratur? (perempuan)</span><textarea class="in ag" placeholder="Ya / Tidak" rows="1"></textarea></div>
+  </div>
+
+  <!-- P4 -->
+  <div class="stepnav no-print"><button type="button" class="nb" onclick="goStep(1)">&lsaquo; Kembali</button><button type="button" class="nb nb-p" onclick="goStep(3)">Lanjut &rsaquo;</button></div>
+  </section>
+  <section class="step" data-step="1"><div class="sec"><span class="n">P3</span>Keluhan utama &amp; program yang diminati</div>
+  <p class="note">Pilih satu atau lebih. Bila belum yakin, pilih konsultasi dahulu — dokter akan membantu menentukan.</p>
+  <div class="prog-grid">
+    <label class="prog" data-p="acne"><input type="checkbox" onchange="tog('acne')"><div class="pname">Acne</div><div class="psub">Jerawat aktif &amp; bekas</div></label>
+    <label class="prog" data-p="melasma"><input type="checkbox" onchange="tog('melasma')"><div class="pname">Hiperpigmentasi</div><div class="psub">Flek &amp; melasma</div></label>
+    <label class="prog" data-p="hair"><input type="checkbox" onchange="tog('hair')"><div class="pname">Hair-loss</div><div class="psub">Kerontokan rambut</div></label>
+    <label class="prog" data-p="slimming"><input type="checkbox" onchange="tog('slimming')"><div class="pname">Slimming</div><div class="psub">Berat badan &amp; metabolik</div></label>
+  </div>
+  <label class="opt" style="margin:2px 0 8px"><input type="checkbox"> Belum yakin, saya ingin berkonsultasi lebih dahulu</label>
+  <div class="row">
+    <div class="f w3 s9"><span class="lab">Apa yang paling ingin Anda perbaiki?</span><textarea class="in ag" placeholder="Ceritakan singkat keluhan utama Anda" rows="1"></textarea></div>
+    <div class="f s3"><span class="lab">Sejak kapan?</span><textarea class="in ag" placeholder="mis. 6 bulan terakhir" rows="1"></textarea></div>
+  </div>
+  <div class="row">
+    <div class="f w3 s9"><span class="lab">Harapan / hasil yang diinginkan</span><textarea class="in ag" placeholder="mis. jerawat terkontrol, berat badan turun bertahap" rows="1"></textarea></div>
+    <div class="f s3"><span class="lab">Pernah dirawat di tempat lain?</span><textarea class="in ag" placeholder="Ya / Tidak, sebutkan" rows="1"></textarea></div>
+  </div>
+
+  <!-- P3 -->
+  <div class="stepnav no-print"><button type="button" class="nb" onclick="goStep(0)">&lsaquo; Kembali</button><button type="button" class="nb nb-p" onclick="goStep(2)">Lanjut &rsaquo;</button></div></section>
+  
+  <section class="step" data-step="2"><div class="sec"><span class="n">P4</span>Detail sesuai keluhan Anda</div>
+  <p class="note">Bagian di bawah muncul sesuai program yang Anda pilih di P2. Centang yang sesuai dengan kondisi Anda.</p>
+
+  <div class="detail" id="d-acne">
+    <div class="detail-h">Acne · jerawat</div>
+    <div class="detail-b">
+      <div class="row" style="margin-bottom:6px"><div class="f s12"><span class="lab">Jenis jerawat yang Anda rasakan</span>
+        <div class="opts"><label class="opt"><input type="checkbox"> Komedo</label><label class="opt"><input type="checkbox"> Merah meradang</label><label class="opt"><input type="checkbox"> Bernanah</label><label class="opt"><input type="checkbox"> Benjolan besar/kista</label></div>
+      </div></div>
+      <div class="row" style="margin-bottom:6px"><div class="f s12"><span class="lab">Sudah ada bekas?</span>
+        <div class="opts"><label class="opt"><input type="checkbox"> Bekas hitam</label><label class="opt"><input type="checkbox"> Bekas merah</label><label class="opt"><input type="checkbox"> Bopeng</label><label class="opt"><input type="checkbox"> Belum ada</label></div>
+      </div></div>
+      <div class="row">
+        <div class="f s6"><span class="lab">Faktor yang memperberat</span>
+          <div class="opts"><label class="opt"><input type="checkbox"> Menjelang haid</label><label class="opt"><input type="checkbox"> Stres</label><label class="opt"><input type="checkbox"> Makanan tertentu</label></div>
+        </div>
+        <div class="f s6"><span class="lab">Lokasi utama</span><textarea class="in ag" placeholder="mis. pipi, dahi, dagu, punggung" rows="1"></textarea></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="detail" id="d-melasma">
+    <div class="detail-h">Hiperpigmentasi · melasma · flek</div>
+    <div class="detail-b">
+      <div class="callout" style="margin-top:0"><span class="k">Penting dipahami</span>Flek/melasma adalah kondisi kronis. Tujuan perawatan adalah <b>terkontrol dengan baik</b>, bukan hilang sekali pakai. Hasil dihitung dalam bulan, dan perlindungan matahari adalah kuncinya.</div>
+      <div class="row" style="margin-bottom:6px">
+        <div class="f s8"><span class="lab">Pemicu yang Anda sadari</span>
+          <div class="opts"><label class="opt"><input type="checkbox"> Paparan matahari</label><label class="opt"><input type="checkbox"> Kehamilan</label><label class="opt"><input type="checkbox"> KB hormonal</label><label class="opt"><input type="checkbox"> Tidak tahu</label></div>
+        </div>
+        <div class="f s4"><span class="lab">Area flek</span><textarea class="in ag" placeholder="mis. pipi, dahi, atas bibir" rows="1"></textarea></div>
+      </div>
+      <div class="row">
+        <div class="f s6"><span class="lab">Pemakaian sunscreen saat ini</span>
+          <div class="opts"><label class="opt"><input type="checkbox"> Tiap hari</label><label class="opt"><input type="checkbox"> Kadang</label><label class="opt"><input type="checkbox"> Tidak pernah</label></div>
+        </div>
+        <div class="f s6"><span class="lab">Sudah berapa lama?</span><textarea class="in ag" placeholder="mis. sejak melahirkan 2 tahun lalu" rows="1"></textarea></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="detail" id="d-hair">
+    <div class="detail-h">Hair-loss · kerontokan rambut</div>
+    <div class="detail-b">
+      <div class="row" style="margin-bottom:6px">
+        <div class="f s12"><span class="lab">Keluhan yang Anda rasakan</span>
+          <div class="opts"><label class="opt"><input type="checkbox"> Rontok berlebihan</label><label class="opt"><input type="checkbox"> Menipis merata</label><label class="opt"><input type="checkbox"> Ubun-ubun / crown menipis</label><label class="opt"><input type="checkbox"> Garis rambut mundur</label><label class="opt"><input type="checkbox"> Botak setempat</label><label class="opt"><input type="checkbox"> Rambut mudah patah</label><label class="opt"><input type="checkbox"> Setelah melahirkan</label></div>
+        </div>
+      </div>
+      <div class="row" style="margin-bottom:6px">
+        <div class="f s4"><span class="lab">Sejak kapan?</span><textarea class="in ag" placeholder="mis. 1 tahun terakhir" rows="1"></textarea></div>
+        <div class="f s8"><span class="lab">Perkembangannya</span>
+          <div class="opts"><label class="opt"><input type="checkbox"> Cepat memburuk</label><label class="opt"><input type="checkbox"> Perlahan terus meningkat</label><label class="opt"><input type="checkbox"> Stabil</label><label class="opt"><input type="checkbox"> Hilang-timbul</label></div>
+        </div>
+      </div>
+      <div class="row" style="margin-bottom:6px">
+        <div class="f s12"><span class="lab">Perkiraan rontok per hari</span>
+          <div class="opts"><label class="opt"><input type="checkbox"> 50–100 (normal)</label><label class="opt"><input type="checkbox"> 101–150</label><label class="opt"><input type="checkbox"> 151–200</label><label class="opt"><input type="checkbox"> &gt; 200</label><label class="opt"><input type="checkbox"> Tidak menghitung</label></div>
+        </div>
+      </div>
+
+      <div class="callout" style="margin-top:0"><span class="k">Perkiraan Anda sendiri</span>Pilih gambaran yang paling mendekati. Ini <b>bukan diagnosis</b> — dokter akan menilai ulang saat pemeriksaan. Boleh dilewati bila ragu.</div>
+      <div class="row" style="margin-bottom:6px">
+        <div class="f s12"><span class="lab">Pola — pria (Norwood)</span>
+          <div class="opts"><label class="opt"><input type="checkbox"> I · normal</label><label class="opt"><input type="checkbox"> II · pelipis sedikit mundur</label><label class="opt"><input type="checkbox"> III · pelipis mundur, crown mulai tipis</label><label class="opt"><input type="checkbox"> IV · crown menipis jelas</label><label class="opt"><input type="checkbox"> V–VI · area tipis meluas</label><label class="opt"><input type="checkbox"> VII · botak hampir total</label><label class="opt"><input type="checkbox"> Tidak tahu</label></div>
+        </div>
+      </div>
+      <div class="row" style="margin-bottom:6px">
+        <div class="f s12"><span class="lab">Pola — wanita (Ludwig)</span>
+          <div class="opts"><label class="opt"><input type="checkbox"> I · parting sedikit melebar</label><label class="opt"><input type="checkbox"> II · parting melebar, crown terlihat</label><label class="opt"><input type="checkbox"> III · kulit kepala terlihat jelas</label><label class="opt"><input type="checkbox"> Difus / merata</label><label class="opt"><input type="checkbox"> Frontal tipis</label><label class="opt"><input type="checkbox"> Botak setempat</label><label class="opt"><input type="checkbox"> Tidak tahu</label></div>
+        </div>
+      </div>
+
+      <div class="row" style="margin-bottom:6px">
+        <div class="f s6"><span class="lab">Riwayat keluarga botak?</span><textarea class="in ag" placeholder="mis. ayah / kakek / tidak ada" rows="1"></textarea></div>
+        <div class="f s6"><span class="lab">Keluhan kulit kepala</span><textarea class="in ag" placeholder="mis. berminyak, ketombe, gatal" rows="1"></textarea></div>
+      </div>
+      <div class="row" style="margin-bottom:6px">
+        <div class="f s6"><span class="lab">Pasca melahirkan — berapa bulan lalu</span><textarea class="in ag" placeholder="kosongkan bila tidak relevan" rows="1"></textarea></div>
+        <div class="f s6"><span class="lab">Masih menyusui?</span><textarea class="in ag" placeholder="Ya / Tidak" rows="1"></textarea></div>
+      </div>
+
+      <div class="row" style="margin-bottom:6px">
+        <div class="f s12"><span class="lab">Treatment rambut yang pernah dicoba</span>
+          <div class="opts"><label class="opt"><input type="checkbox"> Shampoo anti-rontok</label><label class="opt"><input type="checkbox"> Vitamin/suplemen rambut</label><label class="opt"><input type="checkbox"> Minoxidil topikal</label><label class="opt"><input type="checkbox"> Minoxidil oral</label><label class="opt"><input type="checkbox"> Finasteride / Dutasteride</label><label class="opt"><input type="checkbox"> Spironolactone</label><label class="opt"><input type="checkbox"> Serum / hair tonic</label><label class="opt"><input type="checkbox"> Laser (klinik lain)</label><label class="opt"><input type="checkbox"> PRP / stem cell</label><label class="opt"><input type="checkbox"> Mesotherapy scalp</label><label class="opt"><input type="checkbox"> Herbal / jamu</label><label class="opt"><input type="checkbox"> Belum pernah</label></div>
+        </div>
+      </div>
+      <div class="row" style="margin-bottom:6px">
+        <div class="f s12"><span class="lab">Yang terasa ada efeknya</span><textarea class="in ag" placeholder="mis. minoxidil sempat membantu 3 bulan" rows="1"></textarea></div>
+      </div>
+
+      <div class="row" style="margin-bottom:6px">
+        <div class="f s12"><span class="lab">Kebiasaan perawatan rambut</span>
+          <div class="opts"><label class="opt"><input type="checkbox"> Bleaching / pewarnaan rutin</label><label class="opt"><input type="checkbox"> Smoothing / rebonding</label><label class="opt"><input type="checkbox"> Hijab seharian</label><label class="opt"><input type="checkbox"> Ikat rambut ketat</label><label class="opt"><input type="checkbox"> Ekstensi / wig</label><label class="opt"><input type="checkbox"> Heat styling rutin</label></div>
+        </div>
+      </div>
+      <div class="row" style="margin-bottom:6px">
+        <div class="f s12"><span class="lab">Yang paling ingin dicapai</span>
+          <div class="opts"><label class="opt"><input type="checkbox"> Hentikan kerontokan</label><label class="opt"><input type="checkbox"> Tumbuhkan rambut baru</label><label class="opt"><input type="checkbox"> Pertebal rambut yang ada</label><label class="opt"><input type="checkbox"> Perbaiki kondisi scalp</label><label class="opt"><input type="checkbox"> Perbaiki hairline</label><label class="opt"><input type="checkbox"> Maintenance jangka panjang</label></div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="f s12"><span class="lab">Frekuensi kunjungan yang sanggup dijalani</span><textarea class="in ag" placeholder="mis. tiap 3–4 minggu / hanya sesekali (luar kota)" rows="1"></textarea></div>
+      </div>
+      <div class="callout"><span class="k">Perlu diketahui</span>Perawatan rambut butuh komitmen minimal <b>3–6 bulan</b>. Kerontokan biasanya baru berkurang dalam 6–8 minggu, dan rambut baru terlihat setelah 3–4 bulan. Kejujuran soal frekuensi kunjungan membantu dokter menyusun program yang realistis.</div>
+    </div>
+  </div>
+
+  <div class="detail" id="d-slimming">
+    <div class="detail-h">Slimming · berat badan &amp; metabolik <span style="font-weight:400;font-size:11px;color:var(--ink-muted)">— dinilai Sp.GK di berkas terpisah</span></div>
+    <div class="detail-b">
+      <div class="row" style="margin-bottom:6px">
+        <div class="f s3"><span class="lab">Berat badan sekarang</span><textarea class="in ag" placeholder="mis. 78 kg" rows="1"></textarea></div>
+        <div class="f s3"><span class="lab">Tinggi badan</span><textarea class="in ag" placeholder="mis. 160 cm" rows="1"></textarea></div>
+        <div class="f s3"><span class="lab">Berat badan tertinggi pernah</span><textarea class="in ag" placeholder="mis. 85 kg" rows="1"></textarea></div>
+        <div class="f s3"><span class="lab">Target berat badan</span><textarea class="in ag" placeholder="mis. 65 kg" rows="1"></textarea></div>
+      </div>
+      <div class="row" style="margin-bottom:6px">
+        <div class="f s12"><span class="lab">Pernah mencoba program penurunan berat badan?</span><textarea class="in ag" placeholder="mis. diet ketat, obat pelangsing, olahraga — hasilnya bagaimana" rows="1"></textarea></div>
+      </div>
+      <div class="row" style="margin-bottom:6px">
+        <div class="f s12"><span class="lab">Keluhan yang dirasakan</span>
+          <div class="grid3">
+            <label class="opt"><input type="checkbox"> Mudah lelah</label>
+            <label class="opt"><input type="checkbox"> Ngemil malam</label>
+            <label class="opt"><input type="checkbox"> Sulit kenyang</label>
+            <label class="opt"><input type="checkbox"> Nyeri sendi/lutut</label>
+            <label class="opt"><input type="checkbox"> Mendengkur / sesak</label>
+            <label class="opt"><input type="checkbox"> Haid tidak teratur</label>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="f s12"><span class="lab">Riwayat penyakit metabolik (diri / keluarga)</span><textarea class="in ag" placeholder="mis. diabetes, kolesterol, hipertensi, asam urat" rows="1"></textarea></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- P5 -->
+  <div class="stepnav no-print"><button type="button" class="nb" onclick="goStep(2)">&lsaquo; Kembali</button><button type="button" class="nb nb-p" onclick="goStep(4)">Lanjut &rsaquo;</button></div></section>
+  <section class="step" data-step="3"><div class="sec"><span class="n">P5</span>Gaya hidup singkat</div>
+  <div class="row">
+    <div class="f s3"><span class="lab">Paparan matahari harian</span><textarea class="in ag" placeholder="Rendah / sedang / tinggi" rows="1"></textarea></div>
+    <div class="f s3"><span class="lab">Merokok</span><textarea class="in ag" placeholder="Ya / tidak" rows="1"></textarea></div>
+    <div class="f s3"><span class="lab">Tidur rata-rata</span><textarea class="in ag" placeholder="mis. 6 jam" rows="1"></textarea></div>
+    <div class="f s3"><span class="lab">Tingkat stres</span><textarea class="in ag" placeholder="Rendah / sedang / tinggi" rows="1"></textarea></div>
+  </div>
+  <div class="row">
+    <div class="f w2 s6"><span class="lab">Pola makan</span><textarea class="in ag" placeholder="mis. sering gorengan/manis, jarang sayur, makan malam larut" rows="1"></textarea></div>
+    <div class="f w2 s6"><span class="lab">Aktivitas fisik / olahraga</span><textarea class="in ag" placeholder="mis. jalan kaki 2x seminggu" rows="1"></textarea></div>
+  </div>
+
+  <!-- P6 -->
+  <div class="stepnav no-print"><button type="button" class="nb" onclick="goStep(3)">&lsaquo; Kembali</button><button type="button" class="nb nb-p" onclick="goStep(5)">Lanjut &rsaquo;</button></div></section>
+  <section class="step" data-step="4"><div class="sec"><span class="n">P6</span>Pemahaman &amp; persetujuan</div>
+  <label class="ack"><input type="checkbox"> Saya memahami bahwa hasil perawatan bertahap (dihitung dalam bulan, bukan instan) dan membutuhkan kepatuhan terhadap obat dan jadwal kontrol.</label>
+  <label class="ack"><input type="checkbox"> Saya bersedia dihubungi tim ADC via WhatsApp untuk pengingat kontrol dan follow-up perawatan.</label>
+  <label class="ack"><input type="checkbox"> Saya menyetujui pengambilan foto klinis untuk evaluasi medis (foto disimpan rahasia; penggunaan untuk keperluan lain meminta izin terpisah).</label>
+  <label class="ack"><input type="checkbox"> Informasi yang saya isi di atas benar sepanjang yang saya ketahui.</label>
+  <div class="sigs">
+    <div class="sig">
+      <span class="lab">Tanda tangan pasien</span>
+      <div class="pad-wrap">
+        <canvas class="sigpad" id="ttd_pasien" aria-label="Area tanda tangan pasien"></canvas>
+        <button type="button" class="padclr no-print" onclick="clearPad('ttd_pasien')">Hapus</button>
+        <span class="padhint no-print">Tanda tangan di sini</span>
+      </div>
+      <div class="row sigrow">
+        <div class="f s8"><span class="lab">Nama jelas</span><textarea class="in ag" id="ttd_pasien_nama" placeholder="Nama sesuai identitas" rows="1"></textarea></div>
+        <div class="f s4"><span class="lab">Tanggal</span><input class="in" type="date" id="ttd_pasien_tgl"></div>
+      </div>
+    </div>
+    <div class="sig">
+      <span class="lab">Tanda tangan wali (bila di bawah 17 tahun)</span>
+      <div class="pad-wrap">
+        <canvas class="sigpad" id="ttd_wali" aria-label="Area tanda tangan wali"></canvas>
+        <button type="button" class="padclr no-print" onclick="clearPad('ttd_wali')">Hapus</button>
+        <span class="padhint no-print">Tanda tangan di sini</span>
+      </div>
+      <div class="row sigrow">
+        <div class="f s7"><span class="lab">Nama wali</span><textarea class="in ag" id="ttd_wali_nama" placeholder="Nama wali" rows="1"></textarea></div>
+        <div class="f s5"><span class="lab">Hubungan</span><textarea class="in ag" id="ttd_wali_hub" placeholder="mis. ibu, ayah" rows="1"></textarea></div>
+      </div>
+    </div>
+    <div class="sig">
+      <span class="lab">Tanda tangan perawat yang membantu</span>
+      <div class="pad-wrap">
+        <canvas class="sigpad" id="ttd_perawat" aria-label="Area tanda tangan perawat"></canvas>
+        <button type="button" class="padclr no-print" onclick="clearPad('ttd_perawat')">Hapus</button>
+        <span class="padhint no-print">Tanda tangan di sini</span>
+      </div>
+      <div class="row sigrow">
+        <div class="f s12"><span class="lab">Nama perawat</span><textarea class="in ag" id="ttd_perawat_nama" placeholder="Nama perawat" rows="1"></textarea></div>
+      </div>
+    </div>
+  </div>
+  </div>
+
+  
+
+  <div class="stepnav no-print"><button type="button" class="nb" onclick="goStep(4)">&lsaquo; Kembali</button><span class="donehint">Selesai &mdash; klik <b>Simpan Data Pasien</b> di atas.</span></div></section>
+  <div class="foot">
+    <div class="l">Pertanyaan sebelum kunjungan? WhatsApp <b>+62 821 30144778</b><br>Tips perawatan: <b>@adc.skinexpert</b><br>Simpan salinan ini dan bawa saat kunjungan.</div>
+    <div class="r"><div class="nm">AESTHETIC DERMA CENTRE</div>Jl. Ir. H. Djuanda 88, Bandung<br>Form 1 dari 2 · Registrasi &amp; anamnesis</div>
+  </div>
+
+</div>
+
+<div class="disc">Informasi pada form ini bersifat rahasia dan digunakan hanya untuk keperluan medis di Aesthetic Derma Centre. Semua keputusan klinis berada di bawah tanggung jawab dokter yang menangani.</div>
+
+<script>
+function tog(p){
+  var el=document.querySelector('.prog[data-p="'+p+'"]');
+  var on=el.querySelector('input').checked;
+  el.classList.toggle('on',on);
+  var d=document.getElementById('d-'+p); if(d) d.classList.toggle('on',on);
+}
+function hitungIMT1(){
+  var bb=parseFloat((document.getElementById('p_bb')||{}).value),
+      tb=parseFloat((document.getElementById('p_tb')||{}).value),
+      o=document.getElementById('p_imt');
+  if(!o) return;
+  o.value=(bb>0&&tb>0)?String((bb/((tb/100)*(tb/100))).toFixed(1)).replace('.',','):'';
+}
+
+/* Auto-grow jawaban: fallback utk browser tanpa field-sizing:content */
+document.addEventListener('input',function(e){
+  var t=e.target;
+  if(t && t.tagName==='TEXTAREA' && t.classList.contains('ag')){
+    t.style.height='auto'; t.style.height=t.scrollHeight+'px';
+  }
+});
+function agReset(){document.querySelectorAll('textarea.ag').forEach(function(t){t.style.height='';});}
+
+function resetForm(){ setTimeout(agReset,0);
+  if(!confirm('Reset semua isian formulir?')) return;
+  document.querySelectorAll('input').forEach(function(i){ if(i.type==='checkbox'){i.checked=false;} else {i.value='';} });
+  document.querySelectorAll('.prog').forEach(function(e){e.classList.remove('on');});
+  document.querySelectorAll('.detail').forEach(function(e){e.classList.remove('on');});
+  PADS.forEach(clearPad);
+}
+window.addEventListener('load',function(){
+  var d=new Date(); var t=document.getElementById('tgl'); if(t) t.value=d.toISOString().split('T')[0];
+});
+
+/* ===== EKSPOR ADC-INTAKE v1 =====
+   Form 1 punya 135 field dan hanya 9 ber-id, jadi isian ditangkap lewat LABEL
+   (pola yang sama dipakai _progDetail di Form 2) — bukan lewat id satu per satu.
+   Tujuannya: dokter tidak mengetik ulang apa pun, dan dapat ringkasan siap-scan. */
+function _t(e){ return ((e&&e.textContent)||'').replace(/\s+/g,' ').trim(); }
+function _v(id){ var e=document.getElementById(id); return e?(e.value||'').trim():''; }
+/* nilai satu blok .f = isi teks + semua checkbox yang dicentang di dalamnya */
+function _fval(f){
+  var out=[];
+  f.querySelectorAll('input,select,textarea').forEach(function(e){
+    if(e.type==='checkbox'){ if(e.checked) out.push(_t(e.closest('label'))); return; }
+    var v=(e.value||'').trim(); if(v) out.push(v);
+  });
+  return out.join(' · ');
+}
+function _labeled(cari){
+  var hit='';
+  document.querySelectorAll('.f').forEach(function(f){
+    if(hit) return;
+    var k=_t(f.querySelector('.lab'));
+    if(k && k.toLowerCase().indexOf(cari.toLowerCase())===0) hit=_fval(f);
+  });
+  return hit;
+}
+function _ceklis(cari){
+  var out=[];
+  document.querySelectorAll('.f').forEach(function(f){
+    var k=_t(f.querySelector('.lab'));
+    if(!k || k.toLowerCase().indexOf(cari.toLowerCase())!==0) return;
+    f.querySelectorAll('label.opt input[type=checkbox]').forEach(function(c){
+      if(c.checked) out.push(_t(c.closest('label')));
+    });
+  });
+  return out;
+}
+function _seksi(){
+  var out=[];
+  document.querySelectorAll('.page .sec').forEach(function(sec){
+    var kode=_t(sec.querySelector('.n'));
+    var judul=_t(sec); if(kode) judul=judul.replace(kode,'').trim();
+    var isian=[], n=sec.nextElementSibling;
+    while(n && !(n.classList&&n.classList.contains('sec'))){
+      /* blok detail P4 hanya terisi bila programnya dipilih — kalau tertutup, lewati */
+      var lewati = n.classList && n.classList.contains('detail') && !n.classList.contains('on');
+      if(!lewati){
+        (n.classList&&n.classList.contains('f')?[n]:[]).concat(
+          Array.prototype.slice.call(n.querySelectorAll('.f'))).forEach(function(f){
+          var k=_t(f.querySelector('.lab')), v=_fval(f);
+          if(k&&v) isian.push({k:k,v:v});
+        });
+      }
+      n=n.nextElementSibling;
+    }
+    if(isian.length) out.push({kode:kode,judul:judul,isian:isian});
+  });
+  return out;
+}
+function _program(){
+  var out=[];
+  document.querySelectorAll('.prog[data-p]').forEach(function(e){
+    var c=e.querySelector('input'); if(c&&c.checked) out.push(_t(e.querySelector('.pname')));
+  });
+  return out;
+}
+/* Red flag: hal yang mengubah keputusan terapi — dinaikkan ke permukaan supaya
+   dokter tidak perlu membaca seluruh anamnesis untuk menemukannya. */
+function _flags(k){
+  var f=[], teks=((k.kondisi_medis||'')+' '+(k.obat_kini||'')+' '+(k.dirawat_lain||'')).toLowerCase();
+  (k.hormonal||[]).forEach(function(h){
+    if(/hamil|menyusui/i.test(h)) f.push(h.toUpperCase());
+    else if(/pcos|tiroid/i.test(h)) f.push(h);
+  });
+  if(/isotretinoin|roaccutane|accutane/.test(teks)) f.push('Riwayat/sedang isotretinoin');
+  if(/keloid/.test(teks)) f.push('Riwayat keloid');
+  if(/autoimun|lupus|psoriasis/.test(teks)) f.push('Penyakit autoimun');
+  if(/warfarin|antikoagulan|pengencer darah/.test(teks)) f.push('Antikoagulan');
+  if(k.kondisi_medis) f.push('Obat rutin: '+k.kondisi_medis);
+  if(k.dirawat_lain && !/^tidak|^belum|^-$/i.test(k.dirawat_lain)) f.push('Pernah dirawat di tempat lain: '+k.dirawat_lain);
+  return f;
+}
+function buildIntake(){
+  var alergiNone=document.querySelector('.flag label.none input[type=checkbox]');
+  var belumYakin=null;
+  document.querySelectorAll('label.opt').forEach(function(l){
+    if(!belumYakin && /belum yakin/i.test(_t(l))) belumYakin=l.querySelector('input');
+  });
+  /* DI-SCOPE ke #p_status: panel staf kini memuat chip lain (foto baseline),
+     dan selektor lama '.doc-meta label.opt' akan ikut menangkapnya sebagai status. */
+  var status=[]; document.querySelectorAll('#p_status label input[type=checkbox]').forEach(function(c){
+    if(c.checked) status.push(_t(c.closest('label')));
+  });
+  var k={
+    alergi:_v('alergi'), alergi_nihil:!!(alergiNone&&alergiNone.checked),
+    keluhan:_labeled('Apa yang paling ingin'), sejak:_labeled('Sejak kapan'),
+    harapan:_labeled('Harapan'), dirawat_lain:_labeled('Pernah dirawat'),
+    obat_kini:_labeled('Produk / obat yang sedang dipakai'),
+    kondisi_medis:_labeled('Kondisi medis'),
+    hormonal:_ceklis('Riwayat hormonal'), haid:_labeled('Haid teratur'),
+    program:_program(), belum_yakin:!!(belumYakin&&belumYakin.checked)
+  };
+  k.flags=_flags(k);
+  var ack=document.querySelectorAll('label.ack'), setuju=0, belum=[];
+  ack.forEach(function(l){ var c=l.querySelector('input');
+    if(c&&c.checked) setuju++; else belum.push(_t(l).slice(0,60)+'…'); });
+  return {
+    doc:'ADC-INTAKE', versi:1, sumber:'ADC-FORM1', diterbitkan:new Date().toISOString(),
+    /* Dokter ditetapkan sejak registrasi → jadi acuan awal di Form 2 (d1_dokter).
+       Form 1 hanya untuk PASIEN BARU; kunjungan kontrol langsung ke Form 2. */
+    penugasan:{ dokter:_v('p_dokter'),
+                foto_baseline:!!(document.getElementById('p_foto_ok')||{}).checked,
+                foto_area:_v('p_foto_area') },
+    pengukuran:{ bb:_v('p_bb'), tb:_v('p_tb'), imt:_v('p_imt') },
+    pasien:{ nama:_v('p_nama'), rm:_v('rm'), wa:_v('p_wa'), tanggal:_v('tgl'),
+             usia:_labeled('Tanggal lahir'), kelamin:_labeled('Jenis kelamin'),
+             kota:_labeled('Kota domisili'), status:status.join('/') },
+    kritis:k,
+    gaya_hidup:{ matahari:_labeled('Paparan matahari'), merokok:_labeled('Merokok'),
+                 tidur:_labeled('Tidur'), stres:_labeled('Tingkat stres'),
+                 pola_makan:_labeled('Pola makan'), aktivitas:_labeled('Aktivitas fisik') },
+    seksi:_seksi(),
+    persetujuan:{ total:ack.length, disetujui:setuju, belum:belum,
+      tanda_tangan:{
+        pasien :{ nama:_v('ttd_pasien_nama'), tanggal:_v('ttd_pasien_tgl'), gambar:padData('ttd_pasien') },
+        wali   :{ nama:_v('ttd_wali_nama'), hubungan:_v('ttd_wali_hub'), gambar:padData('ttd_wali') },
+        perawat:{ nama:_v('ttd_perawat_nama'), gambar:padData('ttd_perawat') }
+      } }
+  };
+}
+
+/* ===== ADC HUB (companion server, Tahap 1) =====
+   Semua panggilan dibungkus try/catch dan bersifat opsional:
+   hub mati / belum dipasang -> form berperilaku persis seperti sebelumnya
+   (berkas unduhan tetap dibuat sebagai cadangan di semua jalur). */
+function hubDefault(){ /* disajikan hub sendiri (http) -> pakai origin; dibuka sbg file -> localhost */
+  return (location.protocol==='http:'||location.protocol==='https:')?location.origin:'http://localhost:3777'; }
+function hubURL(){ try{return (localStorage.getItem('adc_hub_url')||hubDefault()).replace(/\/+$/,'');}catch(e){return hubDefault();} }
+function hubKey(){ try{return localStorage.getItem('adc_hub_key')||'';}catch(e){return '';} }
+var _hubOn=false;
+function hubChip(st,txt){ var c=document.getElementById('hubchip'); if(!c) return;
+  c.className='hubchip '+st; c.textContent='HUB · '+txt; }
+function hubPing(){
+  try{
+    fetch(hubURL()+'/api/ping',{cache:'no-store'}).then(function(r){return r.json();})
+    .then(function(j){ _hubOn=!!(j&&j.ok); hubChip(_hubOn?'on':'off',_hubOn?'tersambung':'mati'); })
+    .catch(function(){ _hubOn=false; hubChip('off','mati'); });
+  }catch(e){ _hubOn=false; }
+}
+function hubSetup(){
+  var u=prompt('Alamat hub (PC yang menjalankan adc-hub):',hubURL()); if(u===null) return;
+  try{ localStorage.setItem('adc_hub_url',(u||'http://localhost:3777')); }catch(e){}
+  var k=prompt('Kunci hub (lihat jendela server / config.json):',hubKey());
+  if(k!==null){ try{ localStorage.setItem('adc_hub_key',k); }catch(e){} }
+  hubPing();
+}
+function hubPost(jenis,obj,cb){
+  if(!_hubOn){ if(cb) cb(false,'hub tidak tersambung'); return; }
+  try{
+    hubChip('sync','mengirim…');
+    fetch(hubURL()+'/api/'+jenis,{method:'POST',
+      headers:{'Content-Type':'application/json','X-ADC-Key':hubKey()},
+      body:JSON.stringify(obj)})
+    .then(function(r){return r.json();})
+    .then(function(j){ hubChip(j.ok?'on':'off', j.ok?(jenis+' tersimpan'):('gagal: '+(j.error||''))); if(cb) cb(!!j.ok,j.error||''); })
+    .catch(function(e){ hubChip('off','gagal kirim'); if(cb) cb(false,String(e)); });
+  }catch(e){ if(cb) cb(false,String(e)); }
+}
+function hubGetPasien(rm,cb){
+  try{
+    fetch(hubURL()+'/api/pasien/'+encodeURIComponent(rm),{headers:{'X-ADC-Key':hubKey()},cache:'no-store'})
+    .then(function(r){return r.json();})
+    .then(function(j){ cb(j&&!j.error?j:null, j&&j.error); })
+    .catch(function(e){ cb(null,String(e)); });
+  }catch(e){ cb(null,String(e)); }
+}
+window.addEventListener('load',function(){ hubPing(); setInterval(hubPing,30000); });
+
+function simpanIntake(){
+  var d=buildIntake();
+  /* Semua pemeriksaan dikumpulkan jadi SATU dialog. Empat konfirmasi beruntun
+     membuat orang menekan OK tanpa membaca — pelajaran yang sama sudah dipakai
+     di issueHandoff() Form 2. */
+  var w=[];
+  if(!d.pasien.nama && !d.pasien.rm) w.push('Nama dan No. RM masih kosong.');
+  if(!d.penugasan.dokter) w.push('Dokter pemeriksa belum ditentukan — nama ini jadi acuan awal di Form 2.');
+  if(!d.penugasan.foto_baseline) w.push('Foto klinis baseline belum ditandai. Foto ini TITIK PEMBANDING seluruh evaluasi hasil; tanpa itu perbandingan di kunjungan berikutnya tidak punya titik awal.');
+  if(!d.kritis.alergi && !d.kritis.alergi_nihil) w.push('Alergi belum diisi dan "Tidak ada" belum dicentang — ini data keselamatan.');
+  var tt=d.persetujuan.tanda_tangan||{};
+  if(!(tt.pasien&&tt.pasien.gambar)) w.push('Tanda tangan pasien belum dibubuhkan pada lembar persetujuan.');
+  if(d.persetujuan.disetujui<d.persetujuan.total) w.push('Persetujuan baru '+d.persetujuan.disetujui+' dari '+d.persetujuan.total+' butir dicentang.');
+  if(w.length){
+    if(!confirm('Belum lengkap ('+w.length+'):\n\n· '+w.join('\n· ')+'\n\nTetap simpan sekarang?')) return;
+  }
+  var nm=(d.pasien.nama||'Pasien').replace(/[^\w\s-]/g,'').trim().replace(/\s+/g,'_');
+  var tg=(d.pasien.tanggal||new Date().toISOString().split('T')[0]);
+  var blob=new Blob([JSON.stringify(d,null,2)],{type:'application/json'});
+  var u=URL.createObjectURL(blob), a=document.createElement('a');
+  a.href=u; a.download='Intake_'+nm+'_'+tg+'.json';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(function(){URL.revokeObjectURL(u);},1500);
+  /* kirim juga ke hub bila tersambung — berkas unduhan tetap jadi cadangan */
+  hubPost('intake',d);
+  alert('Data pasien tersimpan sebagai berkas.\n\nBerikan berkas ini ke perawat/dokter — di Form 2 klik "Muat Form 1" agar identitas, alergi, dan ringkasan anamnesis terisi otomatis (tidak perlu ketik ulang).');
+}
+
+/* ===== WIZARD BERTAHAP =====
+   Hanya navigasi tampilan: langkah aktif ditandai kelas .on. Tidak ada field
+   yang dilepas dari DOM, sehingga buildIntake() tetap membaca SELURUH isian
+   walau langkahnya sedang tidak tampil. */
+var RAIL=['Data diri & kesehatan','Keluhan & program','Detail keluhan','Gaya hidup','Persetujuan'];
+var _step=0;
+function buildRail(){
+  var r=document.getElementById('rail'); if(!r) return;
+  r.innerHTML=RAIL.map(function(l,i){
+    return '<button type="button" onclick="goStep('+i+')" id="rb'+i+'">'+
+      '<span class="rn">LANGKAH '+(i+1)+'</span><span class="rl">'+l+'</span></button>';
+  }).join('');
+}
+
+/* Ringkasan mini staf (langkah 2+) */
+function _smv(id){var e=document.getElementById(id);return e?String(e.value||'').trim():'';}
+function renderStaffMini(){
+  var el=document.getElementById('sm_body'); if(!el) return;
+  var st=[]; document.querySelectorAll('#p_status label').forEach(function(l){
+    if(l.querySelector('input').checked) st.push(l.textContent.trim()); });
+  var foto=(document.getElementById('p_foto_ok')||{}).checked;
+  var area=_smv('p_foto_area');
+  var ukur=[_smv('p_bb')&&_smv('p_bb')+' kg',_smv('p_tb')&&_smv('p_tb')+' cm',
+            _smv('p_imt')&&'IMT '+_smv('p_imt')].filter(Boolean).join(' / ');
+  function seg(k,v){return '<span class="smi'+(v?'':' kosong')+'"><em>'+k+'</em><span>'+(v||'&mdash;')+'</span></span>';}
+  el.innerHTML=[
+    seg('No. RM',_smv('rm')), seg('Tanggal',_smv('tgl')), seg('Status',st.join(' / ')),
+    seg('Dokter',_smv('p_dokter')),
+    seg('Foto', foto?('OK'+(area?(' &middot; '+area):'')):''),
+    seg('Ukur',ukur)
+  ].join('');
+}
+function toggleStaffPanel(n){
+  /* Berbasis kelas di <body> + !important di CSS — menang atas gaya/inline apa pun,
+     supaya panel hitam PASTI hilang di langkah 2+. */
+  if(n>0) renderStaffMini();
+  document.body.classList.toggle('past0', n>0);
+}
+
+function goStep(i){
+  var st=document.querySelectorAll('.step'); if(!st.length) return;
+  _step=Math.max(0,Math.min(st.length-1,i));
+  st.forEach(function(e,k){ e.classList.toggle('on',k===_step); });
+  document.querySelectorAll('#rail button').forEach(function(b,k){ b.classList.toggle('on',k===_step); });
+  toggleStaffPanel(_step);
+  /* kanvas baru punya ukuran setelah langkahnya tampil */
+  if(typeof sizePads==='function') setTimeout(sizePads,0);
+  var pg=document.querySelector('.page');
+  if(pg&&pg.scrollIntoView) window.scrollTo({top:0,behavior:'smooth'});
+}
+/* Cetak: tampilkan SEMUA langkah, cetak, lalu kembalikan. */
+function cetakSemua(){
+  document.body.classList.add('showall');
+  if(typeof sizePads==='function') setTimeout(sizePads,0);
+  setTimeout(function(){ window.print();
+    setTimeout(function(){ document.body.classList.remove('showall'); },400);
+  },30);
+}
+window.addEventListener('load',function(){
+  buildRail(); goStep(0);
+  PADS.forEach(function(id){ var cv=document.getElementById(id); if(cv){ initPad(cv); } });
+  var t=document.getElementById('ttd_pasien_tgl');
+  if(t&&!t.value) t.value=new Date().toISOString().split('T')[0];
+});
+
+/* ===== PAD TANDA TANGAN =====
+   Spek handoff: canvas di-skala devicePixelRatio, lineWidth 1.7, cap/join round,
+   strokeStyle #1F4E9C. Pointer events supaya jalan di tablet maupun mouse. */
+var PADS=['ttd_pasien','ttd_wali','ttd_perawat'];
+function _ctx(cv){ var c=cv.getContext('2d');
+  c.lineWidth=1.7; c.lineCap='round'; c.lineJoin='round'; c.strokeStyle='#1F4E9C'; return c; }
+function sizePad(cv){
+  var r=cv.getBoundingClientRect();
+  /* Langkah 6 tersembunyi saat form dimuat → lebar 0. Menggambar di kanvas
+     berukuran 0 menghasilkan goresan hilang, jadi tunda sampai terlihat. */
+  if(!r.width||!r.height) return false;
+  var dpr=window.devicePixelRatio||1;
+  var prev=cv.__inked?cv.toDataURL():null;
+  cv.width=Math.round(r.width*dpr); cv.height=Math.round(r.height*dpr);
+  var c=cv.getContext('2d'); c.setTransform(1,0,0,1,0,0); c.scale(dpr,dpr);
+  _ctx(cv);
+  if(prev){ var im=new Image(); im.onload=function(){ var cc=cv.getContext('2d');
+      cc.setTransform(1,0,0,1,0,0); cc.drawImage(im,0,0,cv.width,cv.height);
+      cc.setTransform(1,0,0,1,0,0); cc.scale(dpr,dpr); _ctx(cv); }; im.src=prev; }
+  return true;
+}
+function sizePads(){ PADS.forEach(function(id){ var cv=document.getElementById(id); if(cv) sizePad(cv); }); }
+function initPad(cv){
+  if(cv.__init) return; cv.__init=true;
+  var drawing=false;
+  function pos(e){ var r=cv.getBoundingClientRect(); return {x:e.clientX-r.left,y:e.clientY-r.top}; }
+  cv.addEventListener('pointerdown',function(e){
+    if(!cv.width) if(!sizePad(cv)) return;
+    drawing=true; cv.setPointerCapture&&cv.setPointerCapture(e.pointerId);
+    var c=_ctx(cv), p=pos(e); c.beginPath(); c.moveTo(p.x,p.y);
+    cv.__inked=true; cv.parentNode.classList.add('inked'); e.preventDefault();
+  });
+  cv.addEventListener('pointermove',function(e){
+    if(!drawing) return; var c=cv.getContext('2d'), p=pos(e);
+    c.lineTo(p.x,p.y); c.stroke(); e.preventDefault();
+  });
+  ['pointerup','pointerleave','pointercancel'].forEach(function(ev){
+    cv.addEventListener(ev,function(){ drawing=false; });
+  });
+}
+function clearPad(id){
+  var cv=document.getElementById(id); if(!cv) return;
+  var c=cv.getContext('2d'); c.setTransform(1,0,0,1,0,0);
+  c.clearRect(0,0,cv.width,cv.height);
+  var dpr=window.devicePixelRatio||1; c.scale(dpr,dpr); _ctx(cv);
+  cv.__inked=false; cv.parentNode.classList.remove('inked');
+}
+function padData(id){ var cv=document.getElementById(id);
+  return (cv&&cv.__inked)?cv.toDataURL('image/png'):''; }
+window.addEventListener('resize',function(){ sizePads(); });
+</script>
+</body>
+</html>

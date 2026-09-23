@@ -1,0 +1,17 @@
+# ===== JANGAN PERNAH DI-COMMIT =====
+# rekam medis pasien (folder per RM)
+data/
+# kunci hub (dibuat otomatis saat server pertama jalan)
+config.json
+# kredensial database NeoSoft + hasil pemetaan skema
+neosoft.json
+neosoft-skema.txt
+
+# dependensi opsional (mysql2) dan log
+node_modules/
+*.log
+
+# sampah OS
+desktop.ini
+Thumbs.db
+.DS_Store
