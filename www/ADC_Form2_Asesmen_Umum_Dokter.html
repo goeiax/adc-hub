@@ -538,7 +538,7 @@ table.tbl td{padding:4px 8px;border:1px solid var(--line);vertical-align:middle;
 
 
 /* ===== MODE KUNJUNGAN: AWAL vs KONTROL =====
-   Di kunjungan kontrol, D1 (Fitzpatrick / berat & tinggi badan) & D3 (routing program) jarang berubah.
+   Di kunjungan kontrol, D1 (Fitzpatrick / berat & tinggi badan) & D2 (routing program) jarang berubah.
    Menyembunyikannya memangkas apa yang harus dipindai dokter. */
 .modebar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:8px 36px;
   border-bottom:1px solid var(--line);background:var(--surface-quiet);font-size:13px;}
@@ -1051,12 +1051,12 @@ body.showall .step{display:block;}
 
 
 /* ==========================================================================
-   PANEL METRIK D2 — menggantikan paragraf "Aturan metrik".
+   PANEL METRIK D1 — menggantikan paragraf "Aturan metrik".
    Sebelumnya aturannya dijelaskan sebagai prosa panjang, sementara skor IGA
    justru diketik lewat dropdown DI DALAM modal program — dokter harus membuka
    pop-up hanya untuk memberi satu angka, dan skalanya tak terlihat saat menilai.
-   Kini skala tampil sebagai tombol 0-4 berlabel di D2, tepat di sebelah
-   diagnosis. Modal hanya menampilkan cerminnya (satu sumber, seperti resep D4).
+   Kini skala tampil sebagai tombol 0-4 berlabel di D1, tepat di sebelah
+   diagnosis. Modal hanya menampilkan cerminnya (satu sumber, seperti resep D3).
    ========================================================================== */
 .metrik{border:1px solid var(--line);border-radius:var(--r-card);background:var(--surface);
   padding:18px 20px;margin:18px 0;}
@@ -1192,7 +1192,7 @@ textarea.in#d1_umum{min-height:138px;}
 .hubchip.sync{border-color:#C9A86A;color:#C9A86A;}
 @media print{.hubchip{display:none!important;}}
 
-/* Tombol penjadwalan D5b — tombol badan form (bukan .btn bilah atas yang gelap).
+/* Tombol penjadwalan D4b — tombol badan form (bukan .btn bilah atas yang gelap).
    Bernomor sesuai urutan wajib SOP: Generate -> Simpan ke Rekam Medis -> Kirim. */
 .schedbtns{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0 10px;}
 .sbtn{font-family:inherit;display:inline-flex;align-items:center;gap:9px;font-size:14.5px;font-weight:600;
@@ -1210,6 +1210,9 @@ textarea.in#d1_umum{min-height:138px;}
 @media print{.schedbtns{display:none!important;}}
 
 .idrow{margin-bottom:18px;}
+
+body.mode-kontrol #rb2{display:none;}
+.dxblk{margin-top:26px;}
 </style>
 </head>
 <body>
@@ -1311,9 +1314,10 @@ textarea.in#d1_umum{min-height:138px;}
 
   <!-- D1 -->
   <div class="stepnav no-print"><span></span><button type="button" class="nb nb-p" onclick="goStep(1)">Lanjut &rsaquo;</button></div></section>
-  <section class="step" data-step="1"><div class="vis-awal">
+  <section class="step" data-step="1"><div class="sec"><span class="n">D1</span>Pemeriksaan &amp; diagnosis</div>
+  <div class="vis-awal">
   
-  <div class="sec"><span class="n">D1</span>Pemeriksaan umum</div>
+  
   <div class="row">
     <div class="f s12"><span class="lab">Keadaan umum / kesan klinis</span><textarea class="in" id="d1_umum" rows="5" placeholder="mis. tampak sehat, kulit sensitif, obesitas sentral — tulis selengkap yang diperlukan"></textarea></div>
   </div>
@@ -1335,6 +1339,50 @@ textarea.in#d1_umum{min-height:138px;}
   <!-- BB/TB/IMT diukur PERAWAT di Form 1; nilainya masuk lewat Muat Form 1 dan
        tetap tersimpan ke handoff lewat id yang sama (hidden). -->
   <input type="hidden" id="d1_bb"><input type="hidden" id="d1_tb"><input type="hidden" id="d1_imt">
+
+  </div>
+  <!-- D1 lama (diagnosis, IGA) — kini bagian D1; tampil di awal & kontrol -->
+  <div class="dxblk">
+  <div class="row">
+    <div class="f w3 s9"><span class="lab">Diagnosis<span class="req">wajib</span></span><input class="in" id="d2_dx" placeholder="mis. Acne vulgaris + PIH; Melasma sentrofasial; AGA; Obesitas grade I"></div>
+    <div class="f s3"><span class="lab">Derajat / tipe</span><input class="in" id="d2_derajat" placeholder="Ringan / sedang / berat"></div>
+  </div>
+  <div class="row">
+    <div class="f w3 s9"><span class="lab">Hasil asesmen</span><input class="in" id="d2_hasil" placeholder="mis. acne grade sedang dominan rahang, PIH ringan, kulit sensitif"></div>
+    <div class="f s3"><span class="lab">Perlu pemeriksaan penunjang?<span class="opt">opsional</span></span><input class="in" placeholder="mis. panel hormon, InBody, Hair Analyser"></div>
+  </div>
+  <div class="metrik">
+  <div class="mh"><span class="mk">Metrik terukur</span></div>
+  <div class="mcard" id="igacard_acne" style="display:none">
+    <div class="mrow"><span class="mp">Acne</span><span class="mstat" id="igastat_acne">Pilih skor IGA hari ini</span></div>
+    <div class="igaseg" role="group" aria-label="Skor IGA Acne">
+        <button type="button" data-v="0" onclick="setIGA('ac_iga','0')"><b>0</b><em>Clear</em></button>
+        <button type="button" data-v="1" onclick="setIGA('ac_iga','1')"><b>1</b><em>Almost clear</em></button>
+        <button type="button" data-v="2" onclick="setIGA('ac_iga','2')"><b>2</b><em>Mild</em></button>
+        <button type="button" data-v="3" onclick="setIGA('ac_iga','3')"><b>3</b><em>Moderate</em></button>
+        <button type="button" data-v="4" onclick="setIGA('ac_iga','4')"><b>4</b><em>Severe</em></button>
+      </div>
+      <input type="hidden" id="ac_iga">
+    
+  </div>
+  <div class="mcard" id="igacard_melasma" style="display:none">
+    <div class="mrow"><span class="mp">Hiperpigmentasi / Melasma</span><span class="mstat" id="igastat_melasma">Pilih skor IGA hari ini</span></div>
+    <div class="igaseg" role="group" aria-label="Skor IGA Melasma">
+        <button type="button" data-v="0" onclick="setIGA('me_iga','0')"><b>0</b><em>Clear</em></button>
+        <button type="button" data-v="1" onclick="setIGA('me_iga','1')"><b>1</b><em>Almost clear</em></button>
+        <button type="button" data-v="2" onclick="setIGA('me_iga','2')"><b>2</b><em>Mild</em></button>
+        <button type="button" data-v="3" onclick="setIGA('me_iga','3')"><b>3</b><em>Moderate</em></button>
+        <button type="button" data-v="4" onclick="setIGA('me_iga','4')"><b>4</b><em>Severe</em></button>
+      </div>
+      <input type="hidden" id="me_iga">
+    
+  </div>
+  <div class="mcard alt" id="igacard_hair" style="display:none">
+    <div class="mrow"><span class="mp">Hair-Loss</span><span class="mstat">Tanpa IGA</span></div>
+    
+  </div>
+  
+</div>
 
   </div>
   <div class="vis-kontrol">
@@ -1377,55 +1425,14 @@ textarea.in#d1_umum{min-height:138px;}
   </div>
   
   </div>
-  <!-- D2 -->
+  <!-- D1 -->
   
   <div class="stepnav no-print"><button type="button" class="nb" onclick="goStep(0)">&lsaquo; Kembali</button><button type="button" class="nb nb-p" onclick="goStep(2)">Lanjut &rsaquo;</button></div></section>
-  <section class="step" data-step="2"><div class="sec"><span class="n">D2</span>Diagnosis &amp; hasil asesmen</div>
-  <div class="row">
-    <div class="f w3 s9"><span class="lab">Diagnosis<span class="req">wajib</span></span><input class="in" id="d2_dx" placeholder="mis. Acne vulgaris + PIH; Melasma sentrofasial; AGA; Obesitas grade I"></div>
-    <div class="f s3"><span class="lab">Derajat / tipe</span><input class="in" id="d2_derajat" placeholder="Ringan / sedang / berat"></div>
-  </div>
-  <div class="row">
-    <div class="f w3 s9"><span class="lab">Hasil asesmen</span><input class="in" id="d2_hasil" placeholder="mis. acne grade sedang dominan rahang, PIH ringan, kulit sensitif"></div>
-    <div class="f s3"><span class="lab">Perlu pemeriksaan penunjang?<span class="opt">opsional</span></span><input class="in" placeholder="mis. panel hormon, InBody, Hair Analyser"></div>
-  </div>
-  <div class="metrik">
-  <div class="mh"><span class="mk">Metrik terukur</span></div>
-  <div class="mcard" id="igacard_acne" style="display:none">
-    <div class="mrow"><span class="mp">Acne</span><span class="mstat" id="igastat_acne">Pilih skor IGA hari ini</span></div>
-    <div class="igaseg" role="group" aria-label="Skor IGA Acne">
-        <button type="button" data-v="0" onclick="setIGA('ac_iga','0')"><b>0</b><em>Clear</em></button>
-        <button type="button" data-v="1" onclick="setIGA('ac_iga','1')"><b>1</b><em>Almost clear</em></button>
-        <button type="button" data-v="2" onclick="setIGA('ac_iga','2')"><b>2</b><em>Mild</em></button>
-        <button type="button" data-v="3" onclick="setIGA('ac_iga','3')"><b>3</b><em>Moderate</em></button>
-        <button type="button" data-v="4" onclick="setIGA('ac_iga','4')"><b>4</b><em>Severe</em></button>
-      </div>
-      <input type="hidden" id="ac_iga">
-    
-  </div>
-  <div class="mcard" id="igacard_melasma" style="display:none">
-    <div class="mrow"><span class="mp">Hiperpigmentasi / Melasma</span><span class="mstat" id="igastat_melasma">Pilih skor IGA hari ini</span></div>
-    <div class="igaseg" role="group" aria-label="Skor IGA Melasma">
-        <button type="button" data-v="0" onclick="setIGA('me_iga','0')"><b>0</b><em>Clear</em></button>
-        <button type="button" data-v="1" onclick="setIGA('me_iga','1')"><b>1</b><em>Almost clear</em></button>
-        <button type="button" data-v="2" onclick="setIGA('me_iga','2')"><b>2</b><em>Mild</em></button>
-        <button type="button" data-v="3" onclick="setIGA('me_iga','3')"><b>3</b><em>Moderate</em></button>
-        <button type="button" data-v="4" onclick="setIGA('me_iga','4')"><b>4</b><em>Severe</em></button>
-      </div>
-      <input type="hidden" id="me_iga">
-    
-  </div>
-  <div class="mcard alt" id="igacard_hair" style="display:none">
-    <div class="mrow"><span class="mp">Hair-Loss</span><span class="mstat">Tanpa IGA</span></div>
-    
-  </div>
-  
-</div>
-
-  <!-- D3 -->
+  <section class="step" data-step="2">
+  <!-- D2 -->
   <div class="vis-awal">
   
-  <div class="sec"><span class="n">D3</span>Penentuan program &amp; rujukan form khusus</div>
+  <div class="sec"><span class="n">D2</span>Penentuan program &amp; rujukan form khusus</div>
   
   <div class="prog-grid">
     <button type="button" class="progbtn" id="pb_acne" onclick="openProg('acne')"><div class="pname">Acne</div><div class="psub">Asesmen 4 Faktor</div><div class="pstat" id="ps_acne">Belum diisi</div></button>
@@ -1441,22 +1448,22 @@ textarea.in#d1_umum{min-height:138px;}
   <!-- K1 — evaluasi kunjungan kontrol -->
   
 
-  <!-- D4 -->
+  <!-- D3 -->
   
   <div class="stepnav no-print"><button type="button" class="nb" onclick="goStep(1)">&lsaquo; Kembali</button><button type="button" class="nb nb-p" onclick="goStep(3)">Lanjut &rsaquo;</button></div></section>
-  <section class="step" data-step="3"><div class="sec"><span class="n">D4</span>Resep berjalan <span class="opt">cermin dari form program — hanya baca</span></div>
+  <section class="step" data-step="3"><div class="sec"><span class="n">D3</span>Resep berjalan <span class="opt">cermin dari form program — hanya baca</span></div>
   
   <table class="tbl">
     <thead><tr><th style="width:8%">Program</th><th style="width:28%">Obat / produk</th><th style="width:16%">Jadwal</th><th style="width:28%">Cara pakai</th><th style="width:20%">Durasi</th></tr></thead>
     <tbody id="d4_rx">
-      <tr><td colspan="5" style="color:var(--ink-muted)">Belum ada resep — tulis di form program (D3).</td></tr>
+      <tr><td colspan="5" style="color:var(--ink-muted)">Belum ada resep — tulis di form program (D2).</td></tr>
     </tbody>
   </table>
   <div class="callout"><span class="k">Rujukan bila perlu</span>Obat hormonal oral (Finasteride / Spironolactone / Minoxidil oral) belum tersedia di ADC — resep diperoleh di Melinda Hospital. Treatment in-clinic tetap di ADC.</div>
 
-  <!-- D5 -->
+  <!-- D4 -->
   
-  <div class="sec"><span class="n">D5</span>Rencana program &amp; ritme kontrol</div>
+  <div class="sec"><span class="n">D4</span>Rencana program &amp; ritme kontrol</div>
   <div class="zone dr">
     <div class="row">
       <div class="f w3 s12"><span class="lab">Rencana &amp; timeline</span><textarea class="in ta" id="d5_plan" placeholder="Tulis bebas — mis. fase awal 1–3 bln kendalikan radang; evaluasi bulan ke-3; lanjut sesuai respons."></textarea></div>
@@ -1480,8 +1487,8 @@ textarea.in#d1_umum{min-height:138px;}
   </div>
 
   
-  <div class="sec"><span class="n">D5b</span>Penjadwalan &amp; reminder SleekFlow</div>
-  <div id="sched_lock" class="lockmsg">Terkunci — menunggu dokter mengisi <b>kontrol tiap</b> dan <b>tanggal mulai</b> di D5.</div>
+  <div class="sec"><span class="n">D4b</span>Penjadwalan &amp; reminder SleekFlow</div>
+  <div id="sched_lock" class="lockmsg">Terkunci — menunggu dokter mengisi <b>kontrol tiap</b> dan <b>tanggal mulai</b> di D4.</div>
   <div class="zone nr lock" id="sched_zone">
     <div class="row">
       <div class="f s3"><span class="lab">Kunjungan berikutnya</span><input class="in" type="date" id="d5_next"></div>
@@ -1505,10 +1512,10 @@ textarea.in#d1_umum{min-height:138px;}
     
   </div>
 
-  <!-- D6 -->
+  <!-- D5 -->
   
   <div class="stepnav no-print"><button type="button" class="nb" onclick="goStep(2)">&lsaquo; Kembali</button><button type="button" class="nb nb-p" onclick="goStep(4)">Lanjut &rsaquo;</button></div></section>
-  <section class="step" data-step="4"><div class="sec"><span class="n">D6</span>Rekomendasi bertahap<span class="opt">opsional — isi bila pasien menanyakan langkah lanjutan</span> &nbsp;<span style="font-weight:600;color:var(--ink-muted);letter-spacing:.04em;text-transform:none">— catatan pegangan pasien (case-by-case)</span></div>
+  <section class="step" data-step="4"><div class="sec"><span class="n">D5</span>Rekomendasi bertahap<span class="opt">opsional — isi bila pasien menanyakan langkah lanjutan</span> &nbsp;<span style="font-weight:600;color:var(--ink-muted);letter-spacing:.04em;text-transform:none">— catatan pegangan pasien (case-by-case)</span></div>
   <p class="note">Bersifat bertahap sesuai kondisi pasien — <b>bukan janji hasil</b>. Pasien membawa pulang catatan ini agar tahu langkah berikutnya; harga ditanyakan ke bagian depan.</p>
   <table class="tbl">
     <thead><tr><th style="width:12%">Tahap</th><th style="width:36%">Yang direkomendasikan</th><th style="width:28%">Tujuan / kondisi sasaran</th><th style="width:24%">Perkiraan waktu</th></tr></thead>
@@ -1519,15 +1526,15 @@ textarea.in#d1_umum{min-height:138px;}
     </tbody>
   </table>
 
-  <!-- D7 -->
+  <!-- D6 -->
   
-  <div class="sec"><span class="n">D7</span>Catatan dokter &amp; pantangan</div>
+  <div class="sec"><span class="n">D6</span>Catatan dokter &amp; pantangan</div>
   <div class="row">
     <div class="f w3 s7"><span class="lab">Instruksi khusus / catatan klinis (remarks)</span><input class="in" id="d7_remarks" placeholder="Hal yang perlu diperhatikan pasien &amp; dokter berikutnya"></div>
     <div class="f w2 s5"><span class="lab">Yang harus dihindari</span><input class="in" placeholder="mis. jangan hentikan obat sendiri, hindari matahari langsung"></div>
   </div>
   
-  <div class="sec"><span class="n">D8</span>Sign-off &amp; penerbitan handoff</div>
+  <div class="sec"><span class="n">D7</span>Sign-off &amp; penerbitan handoff</div>
   <div class="zone dr">
     <div class="flag" style="border-color:var(--accent-deep);flex-wrap:wrap;gap:8px 12px">
       <span class="badge" style="background:var(--accent-deep)">Sign-off dokter</span><span class="req">wajib</span>
@@ -2067,7 +2074,7 @@ function openProg(p){
     var al=_v('alergi_flag')||(_ck('alergi_none')?'Nihil (dikonfirmasi)':'BELUM DIKONFIRMASI');
     ctx.innerHTML='<b>'+(_v('p_nama')||'(nama belum diisi)')+'</b>'+
       ' · RM '+(_v('rm')||'—')+' · '+(_v('tgl')||'—')+' · Dokter: '+(_dokterKini()||'—')+
-      '<br>Diagnosis (D2): '+(_v('d2_dx')||'—')+
+      '<br>Diagnosis (D1): '+(_v('d2_dx')||'—')+
       '<br><b>Alergi / kontraindikasi: '+al+'</b>'+
       '<br><span style="color:var(--ink-muted)">Diambil otomatis dari Form 2 — jangan ketik ulang. Tutup pop-up untuk kembali; isian tersimpan.</span>';
   }
@@ -2081,7 +2088,7 @@ function closeProg(p){
 function progFilled(p){
   var o=document.getElementById('ovl_'+p); if(!o) return false;
   if(window._stage&&window._stage[p]) return true;
-  /* Skor IGA kini diisi di D2 (di LUAR modal). Tanpa pemeriksaan ini, memberi
+  /* Skor IGA kini diisi di D1 (di LUAR modal). Tanpa pemeriksaan ini, memberi
      skor tidak menandai programnya aktif — sehingga program_detail, bar wajib,
      dan peringatan metrik semuanya melewatkannya. */
   if(typeof IGA_ID!=='undefined' && IGA_ID[p]){
@@ -2312,7 +2319,7 @@ function buildSchedule(){
 }
 function generateSchedule(){
   var rows=buildSchedule(), tb=document.getElementById('schedBody');
-  if(!rows){ tb.innerHTML='<tr><td colspan="4" style="color:var(--ink)">Dokter belum mengisi ritme kontrol / tanggal mulai di D5.</td></tr>'; return; }
+  if(!rows){ tb.innerHTML='<tr><td colspan="4" style="color:var(--ink)">Dokter belum mengisi ritme kontrol / tanggal mulai di D4.</td></tr>'; return; }
   window._schedRows=rows;
   tb.innerHTML=rows.map(function(r){
     return '<tr><td>H+'+r.off+'</td><td>'+_fmtD(r.date)+'</td><td>'+r.jenis+'</td><td>'+r.msg+'</td></tr>';
@@ -2410,8 +2417,8 @@ window.addEventListener('load',function(){
 /* ===== HANDOFF ===== */
 function _hv(id){var e=document.getElementById(id);return e?(e.value||'').trim():'';}
 /* ===== RESEP: SATU SUMBER =====
-   Tabel resep hidup di dalam tiap form program. D4 hanya menampilkan ulang.
-   Sebelumnya D4 bisa diketik sendiri -> handoff berpotensi kontradiktif. */
+   Tabel resep hidup di dalam tiap form program. D3 hanya menampilkan ulang.
+   Sebelumnya D3 bisa diketik sendiri -> handoff berpotensi kontradiktif. */
 var RXSEL={acne:'#ovl_acne .rx-table tbody tr', melasma:'#ovl_melasma .rx-table tbody tr',
            hair:'#ovl_hair #hr_rxTable tbody tr'};
 /* Buka kolom treatment hanya untuk faktor yang pemicunya dicentang. */
@@ -2449,9 +2456,9 @@ function renderRxMirror(){
   tb.innerHTML = rx.length ? rx.map(function(r){
     return '<tr><td>'+_hesc(r.program)+'</td><td>'+_hesc(r.obat)+'</td><td>'+_hesc(r.jadwal)+
            '</td><td>'+_hesc(r.cara)+'</td><td>'+_hesc(r.durasi)+'</td></tr>';
-  }).join('') : '<tr><td colspan="5" style="color:var(--ink-muted)">Belum ada resep — tulis di form program (D3).</td></tr>';
+  }).join('') : '<tr><td colspan="5" style="color:var(--ink-muted)">Belum ada resep — tulis di form program (D2).</td></tr>';
 }
-/* fungsi _hRx lama dihapus — D4 kini cermin read-only, sumber resep tunggal = collectRx(). */
+/* fungsi _hRx lama dihapus — D3 kini cermin read-only, sumber resep tunggal = collectRx(). */
 function _hProg(){
   return activeProgs().map(function(p){return PLABEL[p];}).join(', ');
 }
@@ -2486,7 +2493,7 @@ function buildHandoff(){
     asesmen:{
       tanggal:_hv('tgl'), dokter:_dokterKini(), program:_hProg(),
       diagnosis:_hv('d2_dx'), derajat:_hv('d2_derajat'), hasil:_hv('d2_hasil'),
-      /* Pemeriksaan D1 & konteks D3 — sebelumnya diisi dokter tapi TIDAK pernah terekam. */
+      /* Pemeriksaan D1 & konteks D2 — sebelumnya diisi dokter tapi TIDAK pernah terekam. */
       pemeriksaan:{ umum:_hv('d1_umum'), tipe_kulit:_hv('d1_tipekulit'),
         fitzpatrick:(function(){var r=document.querySelector('input[name="d1_fitz"]:checked');return r?r.value:'';})(),
         bb:_hv('d1_bb'), tb:_hv('d1_tb'), imt:_hv('d1_imt') },
@@ -2908,7 +2915,7 @@ function setMode(m){
   if(a) a.classList.toggle('on', m==='awal');
   if(k) k.classList.toggle('on', m==='kontrol');
   if(ket) ket.textContent = (m==='kontrol')
-    ? 'D1 (pemeriksaan umum) & D3 (penentuan program) disembunyikan — sudah ditetapkan di kunjungan awal. Ubah ke "Kunjungan awal" bila perlu direvisi.'
+    ? 'Bagian pemeriksaan di D1 & D2 (penentuan program) disembunyikan — sudah ditetapkan di kunjungan awal. Ubah ke "Kunjungan awal" bila perlu direvisi.'
     : 'Semua bagian tampil.';
   renderK1ctx();
   if(typeof updateGisDim==='function') updateGisDim();
@@ -2944,7 +2951,7 @@ function renderK1ctx(){
   }).join('');
 }
 function goTo(id){
-  /* di mode kontrol, tombol program di D3 tersembunyi — arahkan ke kembarannya di K1 */
+  /* di mode kontrol, tombol program di D2 tersembunyi — arahkan ke kembarannya di K1 */
   if(_mode==='kontrol' && id.indexOf('pb_')===0){ var alt='pb2_'+id.slice(3);
     if(document.getElementById(alt)) id=alt; }
   var e=document.getElementById(id); if(!e) return;
@@ -3004,10 +3011,10 @@ function issueHandoff(){
   /* Semua pemeriksaan dikumpulkan jadi SATU dialog. Peringatan bertubi-tubi
      membuat orang menekan OK tanpa membaca — justru menggagalkan tujuannya. */
   var w=[];
-  if(!_ck('d8_signoff')) w.push('Dokter belum menandai "Asesmen selesai" (D8) — handoff berisi diagnosis, resep & rencana.');
+  if(!_ck('d8_signoff')) w.push('Dokter belum menandai "Asesmen selesai" (D7) — handoff berisi diagnosis, resep & rencana.');
   metricWarnings().forEach(function(m){ w.push('Metrik wajib: '+m); });
   if(_v('d5_iv') && _v('d5_start') && !(window._schedRows&&window._schedRows.length))
-    w.push('Jadwal belum di-generate (D5b) — handoff ini tidak akan memuat jadwal kontrol.');
+    w.push('Jadwal belum di-generate (D4b) — handoff ini tidak akan memuat jadwal kontrol.');
   if(!a.diagnosis && !a.hasil) w.push('Diagnosis / hasil asesmen masih kosong.');
   if(!a.alergi && !a.alergi_nihil) w.push('Alergi / kontraindikasi belum dikonfirmasi.');
   if(w.length){
@@ -3091,7 +3098,7 @@ function muatHandoffHub(){
    Navigasi tampilan saja. Field tidak dilepas dari DOM, jadi buildHandoff(),
    reqStatus(), metricWarnings(), dan palang handoff tetap membaca semuanya
    walau langkahnya sedang tidak tampil. */
-var RAIL=['Handoff & riwayat','Pemeriksaan','Diagnosis & program','Resep & jadwal','Rekomendasi & sign-off'];
+var RAIL=['Handoff & riwayat','Pemeriksaan & diagnosis','Program','Resep & jadwal','Rekomendasi & sign-off'];
 var _step=0;
 function buildRail(){
   var r=document.getElementById('rail'); if(!r) return;
@@ -3102,6 +3109,8 @@ function buildRail(){
 }
 function goStep(i){
   var st=document.querySelectorAll('.step'); if(!st.length) return;
+  /* mode kontrol: langkah 'Program' (D2 penentuan program) kosong -> dilewati */
+  if(document.body.classList.contains('mode-kontrol') && i===2){ i=(_step<2)?3:1; }
   _step=Math.max(0,Math.min(st.length-1,i));
   st.forEach(function(e,k){ e.classList.toggle('on',k===_step); });
   document.querySelectorAll('#rail button').forEach(function(b,k){ b.classList.toggle('on',k===_step); });
@@ -3137,8 +3146,8 @@ function hitungIMT(){
   out.value=(isFinite(v)&&v>0&&v<200)?v.toFixed(1).replace('.',','):'';
 }
 
-/* ===== PANEL METRIK D2 =====
-   Skor IGA kini diberikan lewat tombol 0-4 di D2. Nilainya tetap disimpan di
+/* ===== PANEL METRIK D1 =====
+   Skor IGA kini diberikan lewat tombol 0-4 di D1. Nilainya tetap disimpan di
    input ber-id ac_iga / me_iga yang SAMA seperti sebelumnya, sehingga seluruh
    mesin (igaData, metricStatus, metricWarnings, reqStatus, _progDetail,
    buildHandoff) tidak berubah sama sekali. */

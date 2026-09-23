@@ -94,8 +94,8 @@ td.v{font-weight:620;color:var(--accent-deep);white-space:nowrap;}
     <span class="who nr">Perawat</span><div>Isi <b>panel gelap "Khusus staf"</b> di Form 1: No. RM, tanggal, status, <b>dokter pemeriksa</b>, dan tandai <b>foto klinis baseline sudah diambil</b> (wajib sebelum pasien bertemu dokter — foto ini titik pembanding seluruh evaluasi hasil).</div>
     <span class="who nr">Pasien</span><div>Mengisi langkah 1–6 (boleh dibantu perawat), menandatangani lembar persetujuan di layar.</div>
     <span class="who nr">Perawat</span><div>Klik <b>Simpan Data Pasien</b> → berkas <span class="file">Intake_Nama_tanggal.json</span> terunduh. Serahkan/pindahkan ke PC dokter.</div>
-    <span class="who">Dokter</span><div>Buka Form 2 → klik <b>Muat Form 1</b>. Identitas &amp; alergi terisi otomatis; seluruh anamnesis tampil sebagai <b>Ringkasan Anamnesis</b> — baca ringkasan &amp; konfirmasi alergi <b>sebelum</b> memeriksa. Lanjutkan D1 → D8 (rincian di bagian 3).</div>
-    <span class="who nr">Perawat</span><div>Setelah dokter menetapkan ritme kontrol: generate jadwal (D5b), reserve slot NeoSoft, lalu — setelah dokter sign-off — klik <b>Terbitkan Handoff</b> dan lampirkan berkasnya ke rekam medis.</div>
+    <span class="who">Dokter</span><div>Buka Form 2 → klik <b>Muat Form 1</b>. Identitas &amp; alergi terisi otomatis; seluruh anamnesis tampil sebagai <b>Ringkasan Anamnesis</b> — baca ringkasan &amp; konfirmasi alergi <b>sebelum</b> memeriksa. Lanjutkan D1 → D7 (rincian di bagian 3).</div>
+    <span class="who nr">Perawat</span><div>Setelah dokter menetapkan ritme kontrol: generate jadwal (D4b), reserve slot NeoSoft, lalu — setelah dokter sign-off — klik <b>Terbitkan Handoff</b> dan lampirkan berkasnya ke rekam medis.</div>
   </div>
   <h3>Pasien kontrol</h3>
   <div class="step-flow">
@@ -118,30 +118,30 @@ td.v{font-weight:620;color:var(--accent-deep);white-space:nowrap;}
   <li>Setelah lengkap, serahkan ke dokter bersama Form 2. Pertanyaan di form ini <b>tidak diulang</b> di form dokter maupun form program.</li>
 </ul>
 
-<div class="sec" id="f2"><span class="n">3</span><h2>Form 2 — Kunjungan awal (D0–D8)</h2></div>
+<div class="sec" id="f2"><span class="n">3</span><h2>Form 2 — Kunjungan awal (D0–D7)</h2></div>
 
 <h3>D0 · Ringkasan handoff &amp; riwayat</h3>
 <p>Klik <b>Muat Form 1</b> (pasien baru) atau <b>Muat Handoff</b> (pasien kontrol). Ringkasan tersusun menurut prioritas:
 baris berbingkai = kritis (alergi, foto baseline belum ada, tanda tangan belum ada). <b>Harapan pasien</b> ditampilkan menonjol — luruskan ekspektasi di awal bila perlu.</p>
 
-<h3>D1 · Pemeriksaan umum</h3>
+<h3>D1 · Pemeriksaan &amp; diagnosis</h3>
 <p>Foto klinis baseline serta berat/tinggi/IMT sudah diisi perawat di Form 1 — semuanya tampil di ringkasan, dokter tinggal membaca. <b>Keadaan umum</b> berupa area teks ±5 baris: tulis kesan klinis selengkap yang diperlukan. Seluruh isian D1 ikut tersimpan ke handoff.</p>
 
-<h3>D2 · Diagnosis &amp; metrik terukur</h3>
+<h3>D1 (lanjutan) · Diagnosis &amp; metrik terukur</h3>
 <p>Skor <b>IGA diberikan sekali di sini</b> lewat tombol 0–4 (kartu muncul per program aktif) — form program hanya menampilkan cerminnya. Skor wajib disertai foto klinis standar; foto itulah pembandingnya. Perbaikan <b>dihitung otomatis</b> dari selisih terhadap baseline — dokter tidak menilai "membaik/memburuk" manual. Batas tiap angka: lihat bagian 6. Hitung lesi opsional.</p>
 
-<h3>D3 · Penentuan program</h3>
+<h3>D2 · Penentuan program</h3>
 <ul>
-  <li>Klik kartu program untuk membuka form asesmennya (pop-up) — data pasien, alergi &amp; diagnosis D0–D2 terbawa otomatis.</li>
+  <li>Klik kartu program untuk membuka form asesmennya (pop-up) — data pasien, alergi &amp; diagnosis D0–D1 terbawa otomatis.</li>
   <li><b>Slimming dinilai terpisah</b> oleh Sp.GK di berkas <i>Asesmen Slimming (Sp.GK)</i> — buka file itu, bukan di sini.</li>
   <li>Di dalam modal: data diri, alergi, hormonal, gaya hidup <b>sudah ditanyakan di Form 1/2 — jangan diulang</b>; isi hanya yang spesifik program.</li>
   <li>Kolom <b>Treatment ADC terbuka setelah minimal satu pemicu dicentang</b>. Memilih <b>tahap</b> mengisi otomatis prosedur, resep cream &amp; obat minum default — semuanya tetap dapat diubah dokter. Tahap juga menetapkan tag &amp; jadwal reminder pasien.</li>
 </ul>
 
-<h3>D4 · Resep berjalan</h3>
+<h3>D3 · Resep berjalan</h3>
 <p>Hanya cermin — resep ditulis <b>di dalam form program</b>, tempat tabelnya punya default per tahap. Satu sumber supaya tidak ada dua versi resep yang bertentangan di handoff. Obat hormonal oral (Finasteride/Spironolactone/Minoxidil oral, dsb.) dirujuk keluar; treatment in-clinic ADC berjalan paralel — catat di handoff agar dokter berikutnya tahu.</p>
 
-<h3>D5 → D5b · Ritme kontrol &amp; jadwal reminder</h3>
+<h3>D4 → D4b · Ritme kontrol &amp; jadwal reminder</h3>
 <ul>
   <li><b>Dokter</b> menetapkan ritme kontrol + tanggal mulai. Blok penjadwalan perawat terbuka setelah keduanya terisi.</li>
   <li><b>Perawat</b>: reserve slot di NeoSoft → <b>Generate</b> jadwal → <b>Simpan</b> (berkas <span class="file">Jadwal_Nama.json</span>, lampirkan ke rekam medis) → <b>Kirim</b> ke SleekFlow via webhook Make.com, atau <b>Salin</b> untuk tempel manual.</li>
@@ -150,18 +150,18 @@ baris berbingkai = kritis (alergi, foto baseline belum ada, tanda tangan belum a
 Reminder bertanda <b>[KONDISIONAL]</b> (H+2 "tidak hadir") hanya boleh menyala bila pasien <b>benar-benar tidak datang</b>.
 Gerbang kehadirannya dipasang di skenario Make.com — jangan dikirim tanpa syarat, karena pasien yang hadir akan menerima pesan "kami belum bertemu Anda".</div>
 
-<h3>D6 · Rekomendasi bertahap</h3>
+<h3>D5 · Rekomendasi bertahap</h3>
 <p>Bersifat bertahap sesuai kondisi pasien — <b>bukan janji hasil</b>. Pasien membawa pulang salinannya.</p>
 
-<h3>D7 · Catatan &amp; remarks</h3>
+<h3>D6 · Catatan &amp; remarks</h3>
 <p>Remarks menjadi dasar penyusunan reminder oleh CS dan menjadi "rencana kunjungan ini" yang dilihat dokter pada kontrol berikutnya — tulis konkret.</p>
 
-<h3>D8 · Sign-off &amp; penerbitan</h3>
+<h3>D7 · Sign-off &amp; penerbitan</h3>
 <div class="step-flow">
   <span class="who">Dokter</span><div>Centang <b>Asesmen selesai</b> — tanda sign-off klinis Anda.</div>
   <span class="who nr">Perawat</span><div>Setelah sign-off dan jadwal ter-generate: klik <b>Terbitkan Handoff</b> → simpan berkas <span class="file">Handoff_Nama_tanggal.json</span> &amp; lampirkan ke rekam medis. Sampaikan edukasi sebelum pasien pulang (checklist di form program).</div>
 </div>
-<p>Urutan lengkap satu kunjungan: dokter D0–D2 → form program di D3 → ritme D5 → perawat jadwal D5b → dokter sign-off D8 → perawat terbitkan.</p>
+<p>Urutan lengkap satu kunjungan: dokter D0–D1 → form program di D2 → ritme D4 → perawat jadwal D4b → dokter sign-off D7 → perawat terbitkan.</p>
 
 <div class="sec" id="kontrol"><span class="n">4</span><h2>Kunjungan kontrol (mode Kontrol)</h2></div>
 <ul>
