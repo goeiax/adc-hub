@@ -2496,9 +2496,35 @@ function _ringkasProgram(pd){
     return (d.program||k)+(d.tahap?(' [tahap '+d.tahap+']'):'')+': '+((d.isian||[]).slice(0,24).join(' · '));
   }).join('  ||  ');
 }
+/* Mode kontrol menyembunyikan D1/D2 dan tidak membuka tabel resep program, jadi
+   diagnosis, derajat, pemeriksaan, & resep berjalan terbit KOSONG — handoff
+   berikutnya kehilangan konteks. Bawa dari handoff yang dimuat bila kosong hari
+   ini; nilai yang diisi hari ini selalu menang. Daftar yang dibawa dicatat di
+   asesmen.dibawa agar jejak audit jelas. */
+function _bawaKontrol(h){
+  var prev=window._prevHandoff, dibawa=[];
+  if(_mode!=='kontrol'||!prev||!prev.asesmen) return h;
+  var pa=prev.asesmen, a=h.asesmen;
+  ['diagnosis','derajat','alasan_program','rujukan'].forEach(function(k){
+    if(!a[k]&&pa[k]){ a[k]=pa[k]; dibawa.push(k); } });
+  var pe=a.pemeriksaan||{}, pp=pa.pemeriksaan||{}, adaPe=false;
+  Object.keys(pe).forEach(function(k){ if(pe[k]) adaPe=true; });
+  if(!adaPe&&Object.keys(pp).length){ a.pemeriksaan=pp; dibawa.push('pemeriksaan'); }
+  if(!(a.resep||[]).length&&(pa.resep||[]).length){ a.resep=pa.resep; dibawa.push('resep'); }
+  var pd=prev.program_detail||{};
+  Object.keys(pd).forEach(function(p){
+    var cur=h.program_detail[p], old=pd[p]||{};
+    if(!cur){ return; }   /* program tak lagi aktif hari ini — jangan dihidupkan lagi */
+    if(!cur.tahap&&old.tahap){ cur.tahap=old.tahap; dibawa.push('tahap.'+p); }
+    if(!(cur.isian||[]).length&&(old.isian||[]).length){
+      cur.isian=old.isian; dibawa.push('program_detail.'+p); }
+  });
+  if(dibawa.length) a.dibawa=dibawa;
+  return h;
+}
 function buildHandoff(){
   var riw=_riwayatDari(window._prevHandoff);
-  return {
+  return _bawaKontrol({
     doc:'ADC-HANDOFF', versi:1, sumber:'ADC-FORM2-UMUM', diterbitkan:new Date().toISOString(),
     kunjungan_ke:riw.length+1, riwayat:riw,
     pasien:{nama:_hv('p_nama'), rm:_hv('rm'), wa:_hv('p_wa')},
@@ -2527,7 +2553,7 @@ function buildHandoff(){
     program_detail:_progDetail(),
     jadwal:(window._schedRows||[]).slice(0,60).map(function(r){
       return {tanggal:_isoD(r.date), jenis:r.jenis, pesan:r.msg};})
-  };
+  });
 }
 /* Ringkas isi tiap form program yang dibuka — ikut ke handoff & rekam NeoSoft. */
 /* Treatment tambahan bebas-tulis per faktor (Acne & Slimming). Diprefiks nama faktor
@@ -2548,6 +2574,10 @@ function _progDetail(){
     var root=document.getElementById('ovl_'+p); if(!root) return;
     var isian=[];
     root.querySelectorAll('input,select,textarea').forEach(function(e){
+      /* Blok tahap yang TIDAK dipilih (tersembunyi) berisi baris contoh/default untuk
+         tahap lain — jangan ikut terekam, kalau tidak obat yang tak diresepkan
+         (mis. Isotretinoin) tampil sebagai "temuan". Sama dengan aturan collectRx(). */
+      if(e.closest && e.closest('.stage-block:not(.show), .blk:not(.show)')) return;
       if(e.type==='checkbox'){
         if(!e.checked) return;
         var lab=e.closest('label'); if(lab) isian.push(lab.textContent.trim());

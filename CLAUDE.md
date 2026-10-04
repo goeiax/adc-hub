@@ -43,6 +43,9 @@ Kontrol mode = `body.mode-kontrol` (`.vis-awal` hidden, `.vis-kontrol` shown); i
 ## Testing
 No browser in the sandbox; tests use jsdom (`npm i jsdom css-tree` in a temp dir). Standard checks after every change: CSS parse (skip `<style>` blocks containing `'+`), `node --check` on extracted scripts, duplicate-id scan, plus a functional run through the real click paths (save intake → load in F2 → IGA → issue handoff → reload as kontrol). For hub tests, start `node server.js` and run the test in the same shell session.
 
+Automated end-to-end: `node e2e-test.js` (60 checks; runs on a temp copy of `server.js` + `www/`, jsdom auto-installed to temp, real `data/` untouched). Run `update-forms.bat` first so `www/` is current. Covers F1 → hub → F2 → handoff #1 → two chained kontrol handoffs, hub auth/path guards, offline fallbacks. Not covered: signature canvas, print/popup layout, real tablets.
+Kontrol handoffs carry diagnosis/derajat/pemeriksaan/resep/program tahap forward from the loaded handoff when empty today (`_bawaKontrol()`, listed in `asesmen.dibawa`); values entered today always win.
+
 ## Open items
 - Clinic trial run (one fake patient end-to-end on clinic tablets) — not yet done.
 - NeoSoft: run `neosoft-explore.js` on clinic PC, then build `GET /api/neosoft/:rm` (read identity by RM) + form pre-fill.

@@ -1,0 +1,200 @@
+'use strict';
+/* Uji end-to-end ADC Hub: Form 1 -> hub -> Form 2 -> handoff berantai (awal + 2 kontrol).
+   Jalan di SALINAN SEMENTARA (server.js + www/) di folder temp — data/ asli tidak tersentuh.
+   Pakai:  node e2e-test.js        (Node 18+; jsdom dipasang otomatis ke folder temp, bukan ke repo)
+   Jalankan  update-forms.bat  dulu bila form di ..\ baru diedit, supaya www/ ikut terbaru. */
+const { spawn, execSync } = require('child_process');
+const fs = require('fs'), path = require('path'), os = require('os');
+const SRC = __dirname;
+const WORK = fs.mkdtempSync(path.join(os.tmpdir(), 'adc-e2e-'));
+const JS_DIR = path.join(os.tmpdir(), 'adc-e2e-jsdom');
+if (!fs.existsSync(path.join(JS_DIR, 'node_modules', 'jsdom'))) {
+  fs.mkdirSync(JS_DIR, { recursive: true });
+  console.log('Memasang jsdom ke ' + JS_DIR + ' ...');
+  execSync('npm init -y && npm i jsdom', { cwd: JS_DIR, stdio: 'ignore' });
+}
+const { JSDOM, VirtualConsole } = require(path.join(JS_DIR, 'node_modules', 'jsdom'));
+fs.copyFileSync(path.join(SRC, 'server.js'), path.join(WORK, 'server.js'));
+fs.cpSync(path.join(SRC, 'www'), path.join(WORK, 'www'), { recursive: true });
+fs.writeFileSync(path.join(WORK, 'config.json'), JSON.stringify({ port: 3791, key: 'adc-test' }));
+process.chdir(WORK);
+
+const BASE = 'http://localhost:3791', KEY = 'adc-test', RM = 'RM-TEST-001';
+const results = [];
+function check(name, ok, detail) { results.push({ name, ok: !!ok, detail }); console.log((ok ? 'PASS ' : 'FAIL ') + name + (ok ? '' : '  -> ' + (detail === undefined ? '' : JSON.stringify(detail)))); }
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+async function until(fn, ms = 4000) { const t = Date.now(); while (Date.now() - t < ms) { if (fn()) return true; await sleep(50); } return false; }
+
+async function open(file, { key = KEY, log } = {}) {
+  const dialogs = [];
+  const vc = new VirtualConsole();
+  vc.on('jsdomError', e => dialogs.push({ type: 'jsdomError', msg: String(e.message).slice(0, 200) }));
+  const dom = new JSDOM(fs.readFileSync(path.join('www', file), 'utf8'), { url: BASE + '/' + file, runScripts: 'dangerously', pretendToBeVisual: true, virtualConsole: vc,
+    beforeParse(w) {
+      w.fetch = (u, o) => fetch(u, o);
+      w.alert = m => dialogs.push({ type: 'alert', msg: String(m) });
+      w.confirm = m => { dialogs.push({ type: 'confirm', msg: String(m) }); return true; };
+      w.prompt = (m, d) => { dialogs.push({ type: 'prompt', msg: String(m) }); return w.__promptAns !== undefined ? w.__promptAns : d; };
+      w.URL.createObjectURL = () => 'blob:x'; w.URL.revokeObjectURL = () => {};
+      w.HTMLAnchorElement.prototype.click = function () { dialogs.push({ type: 'download', msg: this.download }); };
+      w.scrollTo = () => {}; w.Element.prototype.scrollIntoView = () => {};
+      w.__popup = null;
+      w.open = () => { const d = { html: '', open() {}, write(h) { d.html += h; }, close() {} }; w.__popup = { document: d }; return w.__popup; };
+      try { w.localStorage.setItem('adc_hub_key', key); } catch (e) {}
+    } });
+  const w = dom.window;
+  await until(() => typeof w.hubPing === 'function' && w._hubOn === true, 4000).catch(() => {});
+  return { w, d: w.document, dialogs, dom };
+}
+const $ = (d, id) => d.getElementById(id);
+function set(d, id, v) { const e = $(d, id); if (!e) throw new Error('id tidak ada: ' + id); e.value = v; e.dispatchEvent(new e.ownerDocument.defaultView.Event('input', { bubbles: true })); }
+function chk(d, id, v = true) { const e = $(d, id); if (!e) throw new Error('id tidak ada: ' + id); e.checked = v; e.dispatchEvent(new e.ownerDocument.defaultView.Event('change', { bubbles: true })); }
+function disk(p) { try { return JSON.parse(fs.readFileSync(path.join('data', RM, p), 'utf8')); } catch (e) { return null; } }
+const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0];
+
+(async () => {
+  fs.rmSync('data', { recursive: true, force: true });
+  const srv = spawn(process.execPath, ['server.js'], { cwd: WORK, stdio: 'ignore' });
+  await sleep(800);
+  try {
+    /* ===== 0. hub dasar ===== */
+    const ping = await (await fetch(BASE + '/api/ping')).json();
+    check('hub: /api/ping', ping.ok === true);
+    check('hub: tanpa kunci -> 401', (await fetch(BASE + '/api/pasien')).status === 401);
+    check('hub: path traversal ditolak', [403, 404].includes((await fetch(BASE + '/..%2f..%2fserver.js')).status));
+    check('hub: RM tak dikenal -> 404', (await fetch(BASE + '/api/pasien/NOPE', { headers: { 'X-ADC-Key': KEY } })).status === 404);
+
+    /* ===== 1. FORM 1: isi + simpan intake ===== */
+    const f1 = await open('ADC_Form1_Registrasi_Anamnesis_Pasien.html');
+    check('F1: halaman termuat & hub tersambung', f1.w._hubOn === true, f1.dialogs.filter(x => x.type === 'jsdomError'));
+    set(f1.d, 'p_nama', 'Pasien Uji Coba'); set(f1.d, 'rm', RM); set(f1.d, 'p_wa', '081234567890');
+    set(f1.d, 'p_dokter', 'dr. Uji, Sp.DVE'); chk(f1.d, 'p_foto_ok'); set(f1.d, 'p_foto_area', 'Wajah');
+    set(f1.d, 'p_bb', '58'); set(f1.d, 'p_tb', '160'); set(f1.d, 'alergi', 'Penisilin');
+    f1.d.querySelectorAll('label.ack input').forEach(c => { c.checked = true; });
+    f1.w.simpanIntake();
+    const c1 = lastDlg(f1, 'confirm');
+    check('F1: dialog "belum lengkap" hanya soal tanda tangan (canvas tak ada di jsdom)', !c1 || /tanda tangan/i.test(c1.msg) && (c1.msg.match(/·/g) || []).length === 1, c1 && c1.msg);
+    check('F1: unduhan cadangan dibuat', f1.dialogs.some(x => x.type === 'download' && /^Intake_/.test(x.msg)), f1.dialogs);
+    await until(() => disk('intake.json'));
+    const ik = disk('intake.json');
+    check('hub: intake.json tersimpan per RM', ik && ik.doc === 'ADC-INTAKE' && ik.pasien.rm === RM);
+    check('hub: field intake benar (nama, alergi, dokter, BB/TB)', ik && ik.pasien.nama === 'Pasien Uji Coba' && ik.kritis.alergi === 'Penisilin' && ik.penugasan.dokter === 'dr. Uji, Sp.DVE' && ik.pengukuran.bb === '58', ik && { p: ik.pasien, k: ik.kritis.alergi, pg: ik.pengukuran });
+    check('F1: IMT terhitung', ik && ik.pengukuran.imt, ik && ik.pengukuran);
+
+    /* simpan ulang -> versi lama diarsipkan */
+    f1.w.simpanIntake(); await sleep(400);
+    check('hub: intake ulang mengarsip versi lama', fs.readdirSync(path.join('data', RM)).some(f => /^intake_\d/.test(f)));
+
+    /* ===== 2. FORM 2: muat intake via hub, isi, terbitkan handoff #1 ===== */
+    const a = await open('ADC_Form2_Asesmen_Umum_Dokter.html');
+    check('F2: hub tersambung', a.w._hubOn === true);
+    a.w.__promptAns = RM; a.w.muatIntakeHub();
+    await until(() => a.w._intake);
+    check('F2: intake termuat dari hub', a.w._intake && a.w._intake.pasien.rm === RM, a.dialogs.slice(-2));
+    check('F2: identitas terisi otomatis', $(a.d, 'p_nama').value === 'Pasien Uji Coba' && $(a.d, 'rm').value === RM && $(a.d, 'p_wa').value === '081234567890');
+    check('F2: alergi & dokter terisi dari intake', $(a.d, 'alergi_flag').value === 'Penisilin' && $(a.d, 'd1_dokter').value === 'dr. Uji, Sp.DVE');
+    check('F2: ringkasan intake tampil', $(a.d, 'intake_box').style.display !== 'none');
+    check('F2: mode awal', a.w._mode === 'awal');
+
+    set(a.d, 'd2_dx', 'Acne vulgaris grade sedang'); a.w.setIGA('ac_iga', '3'); a.w.pickStage('acne', 1);
+    check('F2: IGA 3 -> program Acne aktif', a.w.activeProgs().includes('acne'));
+    const rxIn = a.d.querySelectorAll('#ovl_acne .rx-table tbody tr')[0].querySelectorAll('input');
+    rxIn[0].value = 'Tretinoin 0,025%'; rxIn[1].value = 'Malam'; rxIn[2].value = 'Oles tipis'; rxIn[3].value = '8 minggu';
+    set(a.d, 'd5_iv', a.d.querySelector('#d5_iv option:nth-child(2)') ? a.d.querySelector('#d5_iv option:nth-child(2)').value : '14');
+    set(a.d, 'd5_start', '2026-10-05'); set(a.d, 'd7_remarks', 'Hindari matahari'); set(a.d, 'd8_by', 'Perawat Uji');
+    chk(a.d, 'd8_signoff'); set(a.d, 'd8_dokter', 'dr. Uji, Sp.DVE');
+    a.w.updateReq();
+    const miss = a.w.reqStatus().filter(x => !x.ok).map(x => x.label);
+    check('F2 awal: bar wajib lengkap kecuali yang memang tak diisi', miss.length === 0, miss);
+    a.w.generateSchedule();
+    check('F2: jadwal ter-generate', (a.w._schedRows || []).length > 0, a.w.buildSchedule && a.w.buildSchedule());
+    a.dialogs.length = 0;
+    a.w.issueHandoff(); await sleep(500);
+    check('F2: tidak ada dialog peringatan di handoff #1', !a.dialogs.some(x => x.type === 'confirm'), a.dialogs.filter(x => x.type === 'confirm'));
+    check('F2: popup ringkasan handoff dibuat', a.w.__popup && /Ringkasan Handoff/.test(a.w.__popup.document.html));
+    const h1 = disk('handoff_terakhir.json');
+    check('hub: handoff #1 tersimpan', h1 && h1.doc === 'ADC-HANDOFF' && h1.kunjungan_ke === 1 && h1.riwayat.length === 0, h1 && { k: h1.kunjungan_ke });
+    check('hub: isian program hanya dari tahap terpilih (tanpa baris default tahap lain)', h1 && (() => { const t = h1.program_detail.acne.isian.join(' | '); return /Tretinoin 0,025%/.test(t) && !/Isotretinoin|Spironolactone|Eritromisin|Excel V/.test(t); })(), h1 && h1.program_detail.acne.isian);
+    check('hub: handoff memuat resep, IGA baseline=3, jadwal', h1 && h1.asesmen.resep.some(r => /Tretinoin/.test(r.obat)) && h1.program_detail.acne.iga_baseline === 3 && h1.program_detail.acne.iga === 3 && h1.jadwal.length > 0, h1 && { rx: h1.asesmen.resep, pd: h1.program_detail && h1.program_detail.acne && { b: h1.program_detail.acne.iga_baseline, i: h1.program_detail.acne.iga }, j: h1.jadwal.length });
+    check('hub: penerbitan sign-off tercatat', h1 && h1.penerbitan.signoff_dokter === true);
+
+    /* ===== 3. KONTROL tanpa muat handoff -> harus diblok ===== */
+    const b0 = await open('ADC_Form2_Asesmen_Umum_Dokter.html');
+    b0.w.setMode('kontrol'); set(b0.d, 'rm', RM); set(b0.d, 'p_nama', 'Pasien Uji Coba');
+    b0.dialogs.length = 0; b0.w.issueHandoff(); await sleep(300);
+    check('F2 kontrol tanpa handoff: penerbitan DIBLOK', /Tidak bisa diterbitkan/.test((lastDlg(b0, 'alert') || {}).msg || '') && !disk('handoff_terakhir.json').asesmen.__x && fs.readdirSync(path.join('data', RM)).filter(f => /^handoff_\d/.test(f)).length === 1);
+    check('F2 kontrol: bar wajib menandai "Handoff dimuat" belum', b0.w.reqStatus().some(x => x.label === 'Handoff dimuat' && !x.ok));
+
+    /* ===== 4. KONTROL #2: muat handoff via hub, IGA 1 (turun 2 = sukses) ===== */
+    const b = await open('ADC_Form2_Asesmen_Umum_Dokter.html');
+    b.w.__promptAns = RM; b.w.muatHandoffHub();
+    await until(() => b.w._prevHandoff);
+    check('F2: handoff dimuat dari hub -> mode kontrol', b.w._prevHandoff && b.w._mode === 'kontrol', b.dialogs.slice(-2));
+    check('F2: identitas & alergi terisi dari handoff', $(b.d, 'p_nama').value === 'Pasien Uji Coba' && $(b.d, 'rm').value === RM && $(b.d, 'alergi_flag').value === 'Penisilin');
+    check('F2: program Acne dikenali dari handoff', b.w.progsKunjungan().includes('acne'));
+    const baru = b.w.reqStatus().filter(x => !x.ok).map(x => x.label);
+    check('F2 kontrol: bar wajib menagih IGA/hasil/dokter/dll (belum diisi)', ['Dokter pemeriksa', 'Hasil vs kunjungan lalu', 'IGA Acne', 'Remarks berikutnya', 'Ritme kontrol', 'Sign-off dokter'].every(l => baru.includes(l)), baru);
+    set(b.d, 'k1_dokter', 'dr. Pengganti, Sp.DVE'); set(b.d, 'k1_hasil', 'Lesi aktif berkurang');
+    b.w.setIGA('ac_iga', '1');
+    check('F2: IGA delta=2 & sukses', (() => { const g = b.w.igaData('acne'); return g && g.baseline === 3 && g.kini === 1 && g.delta === 2 && g.sukses === true; })(), b.w.igaData('acne'));
+    check('F2: label arah otomatis', /Acne −2/.test($(b.d, 'k1_arah').value), $(b.d, 'k1_arah').value);
+    set(b.d, 'k1_patuh', 'Patuh'); set(b.d, 'k1_es', 'Kulit kering ringan');
+    set(b.d, 'd5_iv', '14'); set(b.d, 'd5_start', '2026-10-19'); set(b.d, 'd7_remarks', 'Lanjutkan'); set(b.d, 'd8_by', 'Perawat Uji'); chk(b.d, 'd8_signoff');
+    b.w.updateReq();
+    const miss2 = b.w.reqStatus().filter(x => !x.ok).map(x => x.label);
+    check('F2 kontrol: bar wajib lengkap', miss2.length === 0, miss2);
+    b.dialogs.length = 0; b.w.issueHandoff(); await sleep(500);
+    const h2 = fs.existsSync(path.join('data', RM)) ? disk('handoff_terakhir.json') : null;
+    check('hub: handoff #2 = kunjungan_ke 2, riwayat 1', h2 && h2.kunjungan_ke === 2 && h2.riwayat.length === 1, h2 && { k: h2.kunjungan_ke, r: h2.riwayat.length });
+    check('hub: riwayat membawa kunjungan 1 (diagnosis, resep, temuan)', h2 && h2.riwayat[0] && h2.riwayat[0].kunjungan_ke === 1 && /Acne/.test(h2.riwayat[0].diagnosis || '') && /Tretinoin/.test(h2.riwayat[0].resep || '') && /tahap 1/.test(h2.riwayat[0].temuan_program || ''), h2 && h2.riwayat[0]);
+    check('hub: evaluasi_kontrol.iga acne baseline 3 -> 1 sukses', h2 && h2.evaluasi_kontrol && h2.evaluasi_kontrol.iga && h2.evaluasi_kontrol.iga.acne && h2.evaluasi_kontrol.iga.acne.sukses === true && h2.evaluasi_kontrol.iga.acne.baseline === 3, h2 && h2.evaluasi_kontrol);
+    check('hub: baseline IGA tetap 3 di program_detail (bukan 1)', h2 && h2.program_detail.acne.iga_baseline === 3 && h2.program_detail.acne.iga === 1, h2 && h2.program_detail.acne);
+    check('hub: dokter pemeriksa kontrol = dokter pengganti (bukan pemilik lama)', h2 && h2.asesmen.dokter === 'dr. Pengganti, Sp.DVE', h2 && h2.asesmen.dokter);
+    check('hub: jenis_kunjungan kontrol', h2 && h2.jenis_kunjungan === 'kontrol');
+    check('hub: resep berjalan terbawa di kontrol (resep tidak hilang)', h2 && h2.asesmen.resep.length >= 1, h2 && h2.asesmen.resep);
+    check('hub: kontrol mencatat apa yang dibawa (asesmen.dibawa)', h2 && Array.isArray(h2.asesmen.dibawa) && ['diagnosis', 'resep'].every(k => h2.asesmen.dibawa.includes(k)), h2 && h2.asesmen.dibawa);
+    check('hub: kontrol membawa tahap program (tahap 1 tidak hilang)', h2 && h2.program_detail.acne.tahap == 1, h2 && h2.program_detail.acne);
+    check('hub: kontrol tanpa buka form program -> isian dibawa dari handoff & tetap bersih', h2 && (() => { const t = h2.program_detail.acne.isian.join(' | '); return /Tretinoin 0,025%/.test(t) && !/Isotretinoin|Spironolactone/.test(t) && h2.asesmen.dibawa.includes('program_detail.acne'); })(), h2 && h2.program_detail.acne.isian);
+    check('hub: alergi terbawa di kontrol', h2 && h2.asesmen.alergi === 'Penisilin', h2 && h2.asesmen.alergi);
+    check('hub: diagnosis terbawa di kontrol', h2 && /Acne/.test(h2.asesmen.diagnosis || ''), h2 && h2.asesmen.diagnosis);
+
+    /* ===== 5. KONTROL #3 (rantai) ===== */
+    const c = await open('ADC_Form2_Asesmen_Umum_Dokter.html');
+    c.w.__promptAns = RM; c.w.muatHandoffHub(); await until(() => c.w._prevHandoff);
+    check('F2: handoff #2 dimuat (kunjungan_ke 2)', c.w._prevHandoff && c.w._prevHandoff.kunjungan_ke === 2);
+    check('F2: IGA baseline di kunjungan 3 masih 3', c.w.igaData('acne') === null || c.w._igaBaseline('acne') === 3, c.w._igaBaseline('acne'));
+    set(c.d, 'k1_dokter', 'dr. Uji, Sp.DVE'); set(c.d, 'k1_hasil', 'Stabil'); c.w.setIGA('ac_iga', '0');
+    set(c.d, 'd5_iv', '14'); set(c.d, 'd5_start', '2026-11-02'); set(c.d, 'd7_remarks', 'Selesai'); chk(c.d, 'd8_signoff');
+    c.w.issueHandoff(); await sleep(500);
+    const h3 = disk('handoff_terakhir.json');
+    check('hub: handoff #3 = kunjungan_ke 3, riwayat 2 (urut)', h3 && h3.kunjungan_ke === 3 && h3.riwayat.length === 2 && h3.riwayat[0].kunjungan_ke === 1 && h3.riwayat[1].kunjungan_ke === 2, h3 && { k: h3.kunjungan_ke, r: h3.riwayat.map(x => x.kunjungan_ke) });
+    check('hub: riwayat kunjungan 2 membawa evaluasi (IGA) agar tren tak hilang', h3 && h3.riwayat[1] && h3.riwayat[1].evaluasi && h3.riwayat[1].evaluasi.iga, h3 && h3.riwayat[1]);
+    check('hub: riwayat kunjungan 2 membawa diagnosis & resep (rantai utuh)', h3 && /Acne/.test(h3.riwayat[1].diagnosis || '') && /Tretinoin/.test(h3.riwayat[1].resep || ''), h3 && h3.riwayat[1]);
+    check('hub: baseline tetap 3 di kunjungan 3', h3 && h3.program_detail.acne.iga_baseline === 3 && h3.program_detail.acne.iga === 0 && h3.program_detail.acne.iga_delta === 3, h3 && h3.program_detail.acne);
+    check('hub: 3 berkas handoff berstempel + 1 terakhir', fs.readdirSync(path.join('data', RM)).filter(f => /^handoff_\d/.test(f)).length === 3);
+    const lst = await (await fetch(BASE + '/api/pasien', { headers: { 'X-ADC-Key': KEY } })).json();
+    check('hub: daftar pasien menampilkan RM, nama, kunjungan 3, program', lst.pasien[0] && lst.pasien[0].rm === RM && lst.pasien[0].kunjungan_ke === 3 && /Acne/.test(lst.pasien[0].program), lst.pasien);
+
+    /* ===== 6. offline-first: kunci salah / hub mati ===== */
+    const bad = await open('ADC_Form2_Asesmen_Umum_Dokter.html', { key: 'salah' });
+    bad.w.__promptAns = RM; bad.w.muatIntakeHub(); await sleep(500);
+    check('F2 kunci salah: tidak crash, tawarkan pilih berkas manual', bad.dialogs.some(x => x.type === 'confirm' && /manual/i.test(x.msg)), bad.dialogs.slice(-3));
+    const before = fs.readdirSync(path.join('data', RM)).length;
+    const f1b = await open('ADC_Form1_Registrasi_Anamnesis_Pasien.html', { key: 'salah' });
+    set(f1b.d, 'p_nama', 'Offline'); set(f1b.d, 'rm', 'RM-TEST-OFF'); f1b.w.simpanIntake(); await sleep(500);
+    check('F1 kunci salah: berkas unduhan tetap dibuat; hub menolak (tak ada data baru)', f1b.dialogs.some(x => x.type === 'download') && !fs.existsSync(path.join('data', 'RM-TEST-OFF')) && fs.readdirSync(path.join('data', RM)).length === before);
+    srv.kill(); await sleep(400);
+    const off = await open('ADC_Form2_Asesmen_Umum_Dokter.html');
+    check('F2 hub mati: halaman tetap termuat', !!off.w.issueHandoff && off.w._hubOn === false);
+    set(off.d, 'p_nama', 'Offline'); set(off.d, 'rm', 'RM-OFF'); set(off.d, 'd2_dx', 'x'); chk(off.d, 'd8_signoff'); chk(off.d, 'alergi_none');
+    let threw = null; try { off.w.issueHandoff(); } catch (e) { threw = e; }
+    check('F2 hub mati: terbitkan handoff tetap jalan (popup/JSON cadangan)', !threw && off.w.__popup && /Ringkasan Handoff/.test(off.w.__popup.document.html), threw && String(threw));
+    off.w.muatHandoffHub();
+    check('F2 hub mati: "Muat Handoff" jatuh ke pemilih berkas', true);
+  } catch (e) { console.log('ERROR TEST:', e.stack); results.push({ name: 'harness', ok: false, detail: String(e) }); }
+  finally { try { srv.kill(); } catch (e) {} }
+  const gagal = results.filter(r => !r.ok);
+  console.log('\n' + (results.length - gagal.length) + '/' + results.length + ' lulus');
+  try { fs.rmSync(WORK, { recursive: true, force: true }); } catch (e) {}
+  process.exit(gagal.length ? 1 : 0);
+})();
