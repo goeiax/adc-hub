@@ -49,6 +49,6 @@ Kontrol handoffs carry diagnosis/derajat/pemeriksaan/resep/program tahap forward
 ## Open items
 - Clinic trial run (one fake patient end-to-end on clinic tablets) — not yet done.
 - NeoSoft: run `neosoft-explore.js` on clinic PC, then build `GET /api/neosoft/:rm` (read identity by RM) + form pre-fill.
-- GitHub: target repo `goeiax/adc-hub` (private) — not created yet; remote already set.
+- GitHub: `goeiax/adc-hub` (private) exists; `main` pushed and tracking `origin/main`.
 - IGA memo awaiting doctor ratification; Dr. Kamelia hair-loss answers pending.
 - Full session history: Obsidian vault `Sessions/2026-07-08 ADC Skin Quality Program Session.md`.
