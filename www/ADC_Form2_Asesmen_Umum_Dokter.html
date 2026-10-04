@@ -2507,9 +2507,12 @@ function _bawaKontrol(h){
   var pa=prev.asesmen, a=h.asesmen;
   ['diagnosis','derajat','alasan_program','rujukan'].forEach(function(k){
     if(!a[k]&&pa[k]){ a[k]=pa[k]; dibawa.push(k); } });
-  var pe=a.pemeriksaan||{}, pp=pa.pemeriksaan||{}, adaPe=false;
-  Object.keys(pe).forEach(function(k){ if(pe[k]) adaPe=true; });
-  if(!adaPe&&Object.keys(pp).length){ a.pemeriksaan=pp; dibawa.push('pemeriksaan'); }
+  /* Hanya ciri yang menetap (tipe kulit, Fitzpatrick). BB/TB/IMT & keadaan umum
+     berubah tiap kunjungan — menyalinnya akan menampilkan angka lama seolah
+     diukur hari ini. */
+  a.pemeriksaan=a.pemeriksaan||{}; var pp=pa.pemeriksaan||{};
+  ['tipe_kulit','fitzpatrick'].forEach(function(k){
+    if(!a.pemeriksaan[k]&&pp[k]){ a.pemeriksaan[k]=pp[k]; dibawa.push('pemeriksaan.'+k); } });
   if(!(a.resep||[]).length&&(pa.resep||[]).length){ a.resep=pa.resep; dibawa.push('resep'); }
   var pd=prev.program_detail||{};
   Object.keys(pd).forEach(function(p){

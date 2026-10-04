@@ -96,7 +96,7 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
     check('F2: ringkasan intake tampil', $(a.d, 'intake_box').style.display !== 'none');
     check('F2: mode awal', a.w._mode === 'awal');
 
-    set(a.d, 'd2_dx', 'Acne vulgaris grade sedang'); a.w.setIGA('ac_iga', '3'); a.w.pickStage('acne', 1);
+    set(a.d, 'd2_dx', 'Acne vulgaris grade sedang'); set(a.d, 'd1_tipekulit', 'Berminyak'); a.w.setIGA('ac_iga', '3'); a.w.pickStage('acne', 1);
     check('F2: IGA 3 -> program Acne aktif', a.w.activeProgs().includes('acne'));
     const rxIn = a.d.querySelectorAll('#ovl_acne .rx-table tbody tr')[0].querySelectorAll('input');
     rxIn[0].value = 'Tretinoin 0,025%'; rxIn[1].value = 'Malam'; rxIn[2].value = 'Oles tipis'; rxIn[3].value = '8 minggu';
@@ -155,6 +155,7 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
     check('hub: kontrol mencatat apa yang dibawa (asesmen.dibawa)', h2 && Array.isArray(h2.asesmen.dibawa) && ['diagnosis', 'resep'].every(k => h2.asesmen.dibawa.includes(k)), h2 && h2.asesmen.dibawa);
     check('hub: kontrol membawa tahap program (tahap 1 tidak hilang)', h2 && h2.program_detail.acne.tahap == 1, h2 && h2.program_detail.acne);
     check('hub: kontrol tanpa buka form program -> isian dibawa dari handoff & tetap bersih', h2 && (() => { const t = h2.program_detail.acne.isian.join(' | '); return /Tretinoin 0,025%/.test(t) && !/Isotretinoin|Spironolactone/.test(t) && h2.asesmen.dibawa.includes('program_detail.acne'); })(), h2 && h2.program_detail.acne.isian);
+    check('hub: kontrol membawa ciri menetap (tipe kulit) tapi BUKAN BB/TB/IMT lama', h1 && h2 && h1.asesmen.pemeriksaan.bb === '58' && h2.asesmen.pemeriksaan.tipe_kulit === 'Berminyak' && !h2.asesmen.pemeriksaan.bb && !h2.asesmen.pemeriksaan.imt, h2 && h2.asesmen.pemeriksaan);
     check('hub: alergi terbawa di kontrol', h2 && h2.asesmen.alergi === 'Penisilin', h2 && h2.asesmen.alergi);
     check('hub: diagnosis terbawa di kontrol', h2 && /Acne/.test(h2.asesmen.diagnosis || ''), h2 && h2.asesmen.diagnosis);
 
@@ -175,6 +176,25 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
     const lst = await (await fetch(BASE + '/api/pasien', { headers: { 'X-ADC-Key': KEY } })).json();
     check('hub: daftar pasien menampilkan RM, nama, kunjungan 3, program', lst.pasien[0] && lst.pasien[0].rm === RM && lst.pasien[0].kunjungan_ke === 3 && /Acne/.test(lst.pasien[0].program), lst.pasien);
 
+    /* ===== 5b. melasma & hair: isian hanya dari tahap terpilih, penilaian di luar blok tetap terekam ===== */
+    const m = await open('ADC_Form2_Asesmen_Umum_Dokter.html');
+    set(m.d, 'p_nama', 'Uji Program Lain'); set(m.d, 'rm', 'RM-TEST-002');
+    m.w.setIGA('me_iga', '2'); chk(m.d, 'me_foto_ok'); m.w.pickStage('melasma', 'P');
+    chk(m.d, 'hr_foto_ok'); m.w.pickStage('hair', 1);
+    const pdm = m.w.buildHandoff().program_detail;
+    check('F2: melasma & hair aktif', !!pdm.melasma && !!pdm.hair, Object.keys(pdm));
+    check('F2 melasma: isian hanya blok P (tidak ada isi blok A/M)', (() => {
+      const own = [...m.d.querySelectorAll('#ovl_melasma .stage-block:not(#me_block-P) input')].map(e => (e.value || '').trim()).filter(Boolean);
+      const t = pdm.melasma.isian.join('|'); return pdm.melasma.isian.length > 0 && own.every(v => !t.includes(v) || [...m.d.querySelectorAll('#me_block-P input')].some(e => (e.value || '').trim() === v));
+    })(), pdm.melasma && pdm.melasma.isian);
+    check('F2 melasma: foto klinis (di luar blok) tetap terekam', pdm.melasma.isian.some(x => /pencahayaan/i.test(x)), pdm.melasma.isian);
+    check('F2 hair: foto klinis (di luar blok) tetap terekam', pdm.hair.isian.some(x => /pencahayaan/i.test(x)), pdm.hair.isian);
+    check('F2 hair: isian dari blok tahap 1, tidak ada label blok tahap 2/3', (() => {
+      const lab = sel => [...m.d.querySelectorAll(sel + ' label')].map(l => l.textContent.trim()).filter(Boolean);
+      const own = lab('#hr_blk-1'), other = lab('#hr_blk-2').concat(lab('#hr_blk-3')).filter(x => !own.includes(x));
+      return own.some(x => pdm.hair.isian.includes(x)) && other.every(x => !pdm.hair.isian.includes(x)) && other.length > 0;
+    })(), pdm.hair.isian);
+
     /* ===== 6. offline-first: kunci salah / hub mati ===== */
     const bad = await open('ADC_Form2_Asesmen_Umum_Dokter.html', { key: 'salah' });
     bad.w.__promptAns = RM; bad.w.muatIntakeHub(); await sleep(500);
@@ -189,8 +209,9 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
     set(off.d, 'p_nama', 'Offline'); set(off.d, 'rm', 'RM-OFF'); set(off.d, 'd2_dx', 'x'); chk(off.d, 'd8_signoff'); chk(off.d, 'alergi_none');
     let threw = null; try { off.w.issueHandoff(); } catch (e) { threw = e; }
     check('F2 hub mati: terbitkan handoff tetap jalan (popup/JSON cadangan)', !threw && off.w.__popup && /Ringkasan Handoff/.test(off.w.__popup.document.html), threw && String(threw));
+    let klik = 0; off.w.HTMLInputElement.prototype.click = function () { if (this.id === '_handofffile') klik++; };
     off.w.muatHandoffHub();
-    check('F2 hub mati: "Muat Handoff" jatuh ke pemilih berkas', true);
+    check('F2 hub mati: "Muat Handoff" jatuh ke pemilih berkas', klik === 1, klik);
   } catch (e) { console.log('ERROR TEST:', e.stack); results.push({ name: 'harness', ok: false, detail: String(e) }); }
   finally { try { srv.kill(); } catch (e) {} }
   const gagal = results.filter(r => !r.ok);
