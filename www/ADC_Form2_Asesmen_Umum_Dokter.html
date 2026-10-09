@@ -1603,7 +1603,7 @@ body.mode-kontrol #rb2{display:none;}
   <div class="sec"><span class="n">D6</span>Catatan dokter &amp; pantangan</div>
   <div class="row">
     <div class="f w3 s7"><span class="lab">Instruksi khusus / catatan klinis (remarks)</span><input class="in" id="d7_remarks" placeholder="Hal yang perlu diperhatikan pasien &amp; dokter berikutnya"></div>
-    <div class="f w2 s5"><span class="lab">Yang harus dihindari</span><input class="in" placeholder="mis. jangan hentikan obat sendiri, hindari matahari langsung"></div>
+    <div class="f w2 s5"><span class="lab">Yang harus dihindari</span><input class="in" id="d6_hindari" placeholder="mis. jangan hentikan obat sendiri, hindari matahari langsung"></div>
   </div>
   
   <div class="sec"><span class="n">D7</span>Sign-off &amp; penerbitan handoff</div>
@@ -1832,7 +1832,7 @@ body.mode-kontrol #rb2{display:none;}
   
   
   <div class="qline"><span class="q">Foto klinis baseline diambil</span><span class="sub">(wajib — sumber kebenaran hasil)</span>
-    <label class="ck"><input type="checkbox" id="me_foto_ok"> Sudah, pencahayaan &amp; sudut standar</label>
+    <label class="ck"><input type="checkbox" id="me_foto_ok"> Sudah, pencahayaan &amp; sudut standar</label><span class="sub" id="me_foto_f1"></span>
     <span class="q" style="margin-left:10px;">Area difoto:</span><input class="ln" placeholder="mis. malar kanan-kiri, dahi"></div>
   <div class="qline"><span class="q">Distribusi:</span><label class="ck"><input type="checkbox"> Sentrofasial</label><label class="ck"><input type="checkbox"> Malar (pipi)</label><label class="ck"><input type="checkbox"> Mandibular (rahang)</label></div>
   <div class="qline"><span class="q">Kondisi barrier:</span><label class="ck"><input type="checkbox"> Baik</label><label class="ck"><input type="checkbox"> Kering/lemah</label><label class="ck"><input type="checkbox"> Sensitif</label></div>
@@ -2020,7 +2020,7 @@ body.mode-kontrol #rb2{display:none;}
       </div>
 
       <div class="g g2" style="margin-top:9px">
-        <div class="f"><label>Diagnosis</label><input class="in" id="hr_b_dx" placeholder="mis. FPHL Ludwig II + TE pasca melahirkan"></div>
+        <div class="f"><label>Detail diagnosis rambut (diagnosis utama di D1)</label><input class="in" id="hr_b_dx" placeholder="mis. sub-tipe: FPHL Ludwig II + TE pasca melahirkan"></div>
         <div class="f"><label>Estimasi waktu — rentang</label><input class="in" id="hr_b_estimasi" placeholder="mis. rontok berkurang 6–8 mgg, rambut baru 3–4 bln"></div>
       </div>
       
@@ -2570,7 +2570,7 @@ function _bawaKontrol(h){
   if(_mode!=='kontrol'||!prev||!prev.asesmen) return h;
   var pa=prev.asesmen, a=h.asesmen;
   /* derajat TIDAK dibawa: kini = skor IGA hari ini, dinilai ulang tiap kunjungan */
-  ['diagnosis','alasan_program','rujukan'].forEach(function(k){
+  ['diagnosis','alasan_program','rujukan','hindari'].forEach(function(k){
     if(!a[k]&&pa[k]){ a[k]=pa[k]; dibawa.push(k); } });
   /* Hanya ciri yang menetap (tipe kulit, Fitzpatrick). BB/TB/IMT & keadaan umum
      berubah tiap kunjungan — menyalinnya akan menampilkan angka lama seolah
@@ -2606,7 +2606,7 @@ function buildHandoff(){
       alasan_program:_hv('d3_alasan'), rujukan:_hv('d3_rujukan'),
       alergi:_hv('alergi_flag'), alergi_nihil:!!(document.getElementById('alergi_none')||{}).checked,
       resep:collectRx(), rencana:_hv('d5_plan'), instruksi_kontrol:_hv('d5_ctrl'),
-      remarks:_hv('d7_remarks'), kunjungan_berikutnya:_hv('d5_next')
+      remarks:_hv('d7_remarks'), hindari:_hv('d6_hindari'), kunjungan_berikutnya:_hv('d5_next')
     },
     jenis_kunjungan:_mode,
     evaluasi_kontrol:(_mode==='kontrol')?{
@@ -2684,6 +2684,7 @@ function handoffText(h){
   if(a.instruksi_kontrol) L.push('Instruksi kontrol: '+a.instruksi_kontrol);
   if(a.kunjungan_berikutnya) L.push('Kunjungan berikutnya: '+a.kunjungan_berikutnya);
   if(a.remarks) L.push('Remarks dokter: '+a.remarks);
+  if(a.hindari) L.push('Yang harus dihindari: '+a.hindari);
   L.push('');
   L.push('Sifat handoff: panduan berdasarkan penilaian awal — penatalaksanaan hari ini ditentukan dokter yang memeriksa.');
   return L.join('\n');
@@ -2744,7 +2745,7 @@ function handoffDocHTML(h){
   r('Alasan / prioritas program',a.alasan_program)+r('Rujukan lintas-dokter',a.rujukan)+
   '</table>'+
   '<h2>Rencana &amp; perawatan berjalan</h2><table>'+
-  r('Rencana & timeline',a.rencana)+r('Instruksi kontrol',a.instruksi_kontrol)+r('Kunjungan berikutnya',a.kunjungan_berikutnya)+
+  r('Rencana & timeline',a.rencana)+r('Instruksi kontrol',a.instruksi_kontrol)+r('Kunjungan berikutnya',a.kunjungan_berikutnya)+r('Yang harus dihindari',a.hindari)+
   '</table>'+
   (h.evaluasi_kontrol?(function(ev){
     var DL={acne_bekas:'Acne · bekas (PIH/PIE)',hair_growth:'Hair · pertumbuhan vs baseline'};
@@ -2945,6 +2946,8 @@ function renderIntake(){
       p4[0].isian.map(function(x){ return _kv(x.k,x.v); }).join('')+'</div></div></div>' : '';
 
   document.getElementById('intake_body').innerHTML=t1+tF+t2+tD+t3+t4;
+  var mf=document.getElementById('me_foto_f1');
+  if(mf) mf.textContent = pn.foto_baseline ? ('— sudah diambil perawat di Form 1'+(pn.foto_area?(' ('+pn.foto_area+')'):'')+'; centang hanya bila difoto ulang') : '';
   box.style.display='';
 }
 function renderPrev(h,baru){
@@ -2956,7 +2959,7 @@ function renderPrev(h,baru){
     ['Alergi / kontraindikasi', a.alergi || (a.alergi_nihil?'Nihil (dikonfirmasi)':'')],
     ['Resep saat itu',(a.resep||[]).map(function(r){return [r.obat,r.jadwal,r.cara,r.durasi].filter(Boolean).join(' · ');}).join('  |  ')],
     ['Rencana & timeline',a.rencana],['Instruksi kontrol',a.instruksi_kontrol],
-    ['Remarks',a.remarks],['Kunjungan berikutnya',a.kunjungan_berikutnya],
+    ['Remarks',a.remarks],['Yang harus dihindari',a.hindari],['Kunjungan berikutnya',a.kunjungan_berikutnya],
     ['Temuan form program',_ringkasProgram(h.program_detail)]
   ].filter(function(r){return r[1];});
   (h.riwayat||[]).slice().reverse().forEach(function(v){
@@ -2985,6 +2988,8 @@ function _ckAnyIn(rootId, qPrefix){
   return found;
 }
 function _ckId(id){var e=document.getElementById(id);return !!(e&&e.checked);}
+/* Foto baseline wajah sudah diambil perawat di Form 1 -> tidak perlu dicentang ulang di form Melasma */
+function _fotoF1(){ var pn=(window._intake&&window._intake.penugasan)||{}; return !!pn.foto_baseline; }
 function _anyVal(ids){return ids.some(function(i){return _v(i)!=='';});}
 /* Status metrik per program aktif — dipakai bar wajib & guard penerbitan. */
 function metricStatus(){
@@ -2993,7 +2998,7 @@ function metricStatus(){
     if(p==='acne')    out.push({label:'IGA Acne', ok:!!_v('ac_iga'), go:'pb_acne'});
     if(p==='melasma'){
       out.push({label:'IGA Melasma', ok:!!_v('me_iga'), go:'pb_melasma'});
-      out.push({label:'Foto klinis Melasma', ok:_ckId('me_foto_ok'), go:'pb_melasma'});
+      out.push({label:'Foto klinis Melasma', ok:_ckId('me_foto_ok')||_fotoF1(), go:'pb_melasma'});
     }
     if(p==='hair'){
       out.push({label:'Foto klinis Hair-Loss', ok:_ckId('hr_foto_ok'), go:'pb_hair'});
@@ -3119,7 +3124,7 @@ function metricWarnings(){
   });
   if(_mode==='kontrol') return w;   /* sisanya = metrik baseline, ditetapkan di kunjungan awal */
   activeProgs().forEach(function(p){
-    if(p==='melasma'&& !_ckId('me_foto_ok'))               w.push('Melasma: foto klinis baseline belum dicentang');
+    if(p==='melasma'&& !_ckId('me_foto_ok') && !_fotoF1())               w.push('Melasma: foto klinis baseline belum dicentang');
     if(p==='hair'){
       if(!_ckId('hr_foto_ok')) w.push('Hair-Loss: foto klinis baseline belum dicentang');
       var st=document.getElementById('hr_b_norwood'), lu=document.getElementById('hr_b_ludwig'), any=false;
@@ -3161,7 +3166,7 @@ function issueHandoff(){
   set('h_last', [(a.diagnosis||a.hasil), a.tanggal].filter(Boolean).join(' · '));
   set('h_next', a.instruksi_kontrol || a.remarks);
   set('h_meds', a.resep.map(function(r){return [r.obat,r.jadwal].filter(Boolean).join(' ');}).filter(Boolean).join('; '));
-  set('h_avoid', a.remarks);
+  set('h_avoid', a.hindari||a.remarks);
   renderPrev(h,true);
   window._handoff=h;
   /* kirim ke hub bila tersambung — berkas & pop-up tetap dibuat seperti biasa */
@@ -3181,7 +3186,7 @@ function applyHandoff(h){
       put('h_last',[(a.diagnosis||a.hasil),a.tanggal].filter(Boolean).join(' · '));
       put('h_next',a.instruksi_kontrol||a.remarks);
       put('h_meds',(a.resep||[]).map(function(x){return [x.obat,x.jadwal].filter(Boolean).join(' ');}).filter(Boolean).join('; '));
-      put('h_avoid',a.remarks);
+      put('h_avoid',a.hindari||a.remarks);
       /* alergi: set kedua field bersamaan (bukan hanya mengisi yang kosong) supaya
          "Penisilin" + "nihil" tidak pernah tercatat bersamaan */
       if(a.alergi||a.alergi_nihil){

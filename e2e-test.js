@@ -74,6 +74,10 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
     f1.d.querySelectorAll('label.ack input').forEach(c => { c.checked = true; });
     { const pc = f1.d.querySelector('.prog[data-p=acne] input'); pc.checked = true; f1.w.tog('acne');
       const lok = [...f1.d.querySelectorAll('#d-acne label.opt')].find(l => l.textContent.trim() === 'Pipi'); lok.querySelector('input').checked = true; }
+    { const labs = [...f1.d.querySelectorAll('.lab')].map(l => l.textContent.trim());
+      check('F1: pertanyaan ganda dihapus (BB/TB di Slimming, Masih menyusui, Haid tidak teratur) & label onset rambut unik',
+        !labs.includes('Berat badan sekarang') && !labs.includes('Tinggi badan') && !labs.includes('Masih menyusui?') &&
+        !/Haid tidak teratur/.test(f1.d.getElementById('d-slimming').textContent) && labs.filter(l => l === 'Sejak kapan?').length === 1 && labs.includes('Rontok sejak kapan?'), labs.filter(l => /Sejak|Berat|menyusui/i.test(l))); }
     f1.w.simpanIntake();
     const c1 = lastDlg(f1, 'confirm');
     check('F1: dialog "belum lengkap" hanya soal tanda tangan (canvas tak ada di jsdom)', !c1 || /tanda tangan/i.test(c1.msg) && (c1.msg.match(/·/g) || []).length === 1, c1 && c1.msg);
@@ -118,6 +122,7 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
     rxIn[0].value = 'Tretinoin 0,025%'; rxIn[1].value = 'Malam'; rxIn[2].value = 'Oles tipis'; rxIn[3].value = '8 minggu';
     set(a.d, 'd5_iv', a.d.querySelector('#d5_iv option:nth-child(2)') ? a.d.querySelector('#d5_iv option:nth-child(2)').value : '14');
     set(a.d, 'd5_start', '2026-10-05'); set(a.d, 'd7_remarks', 'Hindari matahari'); set(a.d, 'd8_by', 'Perawat Uji');
+    set(a.d, 'd6_hindari', 'Hindari scrub');
     chk(a.d, 'd8_signoff'); set(a.d, 'd8_dokter', 'dr. Uji, Sp.DVE');
     a.w.updateReq();
     const miss = a.w.reqStatus().filter(x => !x.ok).map(x => x.label);
@@ -135,6 +140,7 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
     check('hub: handoff #1 derajat = rangkuman IGA', h1 && h1.asesmen.derajat === 'Acne IGA 3 · Sedang (Moderate)', h1 && h1.asesmen.derajat);
     check('hub: catatan klinis (temuan + penunjang) tersimpan di handoff', h1 && h1.asesmen.hasil === 'Temuan: papul rahang\nPenunjang: panel hormon', h1 && h1.asesmen.hasil);
     check('hub: resep hanya obat yang diisi dokter (baris contoh tidak ikut)', h1 && h1.asesmen.resep.length === 1 && !/Clindamycin|Sunscreen|Isotretinoin/.test(JSON.stringify(h1.asesmen.resep)), h1 && h1.asesmen.resep.map(r => r.obat));
+    check('hub: D6 "Yang harus dihindari" tersimpan di handoff', h1 && h1.asesmen.hindari === 'Hindari scrub', h1 && h1.asesmen.hindari);
     check('hub: penerbitan sign-off tercatat', h1 && h1.penerbitan.signoff_dokter === true);
 
     /* ===== 3. KONTROL tanpa muat handoff -> harus diblok ===== */
@@ -178,6 +184,7 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
     check('hub: kontrol membawa ciri menetap (tipe kulit) tapi BUKAN BB/TB/IMT lama', h1 && h2 && h1.asesmen.pemeriksaan.bb === '58' && h2.asesmen.pemeriksaan.tipe_kulit === 'Kombinasi, Sensitif' && !h2.asesmen.pemeriksaan.bb && !h2.asesmen.pemeriksaan.imt, h2 && h2.asesmen.pemeriksaan);
     check('hub: kontrol: derajat = IGA hari ini (tidak dibawa dari kunjungan lalu)', h2 && h2.asesmen.derajat === 'Acne IGA 1 · Hampir bersih (Almost clear)' && !h2.asesmen.dibawa.includes('derajat'), h2 && h2.asesmen.derajat);
     check('F2 kontrol: kotak alergi tampil (terisi dari handoff) & bisa diubah', $(b.d, 'alergi_box').style.display !== 'none' && $(b.d, 'alergi_flag').value === 'Penisilin');
+    check('hub: pantangan dibawa ke kontrol & tampil di panel journey', h2 && h2.asesmen.hindari === 'Hindari scrub' && $(b.d, 'h_avoid').value === 'Hindari scrub', { h: h2 && h2.asesmen.hindari, panel: $(b.d, 'h_avoid').value });
     check('hub: alergi terbawa di kontrol', h2 && h2.asesmen.alergi === 'Penisilin', h2 && h2.asesmen.alergi);
     check('hub: diagnosis terbawa di kontrol', h2 && /Acne/.test(h2.asesmen.diagnosis || ''), h2 && h2.asesmen.diagnosis);
 
@@ -257,6 +264,12 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
       let escOk = !dl.d.getElementById('mdlg').classList.contains('on');
       dl.w.openProg('acne'); dl.d.dispatchEvent(new dl.w.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
       check('F2 dialog: Esc menutup dialog, lalu tetap menutup form program (listener tidak bocor)', escOk && !dl.d.getElementById('ovl_acne').classList.contains('open')); }
+
+    { const fm = await open('ADC_Form2_Asesmen_Umum_Dokter.html');
+      fm.w.applyIntake({ doc: 'ADC-INTAKE', pasien: {}, kritis: { alergi_nihil: true }, penugasan: { foto_baseline: true, foto_area: 'Wajah' }, pengukuran: {}, persetujuan: {} });
+      fm.w.pickStage('melasma', 'P');
+      const fo = fm.w.metricStatus().find(m => m.label === 'Foto klinis Melasma');
+      check('F2 Melasma: foto baseline dari Form 1 memenuhi syarat foto (tidak perlu dicentang ulang)', fo && fo.ok && !$(fm.d, 'me_foto_ok').checked && /Form 1/.test($(fm.d, 'me_foto_f1').textContent), fo); }
 
     /* ===== 6. offline-first: kunci salah / hub mati ===== */
     const bad = await open('ADC_Form2_Asesmen_Umum_Dokter.html', { key: 'salah' });
