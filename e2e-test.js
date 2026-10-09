@@ -210,6 +210,8 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
     set(m.d, 'p_nama', 'Uji Program Lain'); set(m.d, 'rm', 'RM-TEST-002');
     m.w.setIGA('me_iga', '2'); chk(m.d, 'me_foto_ok'); m.w.pickStage('melasma', 'P');
     chk(m.d, 'hr_foto_ok'); m.w.pickStage('hair', 1);
+    check('F2: memilih tahap tidak mencentang apa pun otomatis (tanpa centang bawaan)', [...m.d.querySelectorAll('#ovl_acne input[type=checkbox], #ovl_melasma input[type=checkbox], #ovl_hair input[type=checkbox]')].every(c => !c.defaultChecked) && !m.d.querySelector('#hr_blk-1 input:checked') && !m.d.querySelector('#me_block-P input:checked'));
+    m.d.querySelector('#hr_blk-1 input[type=checkbox]').checked = true;
     const pdm = m.w.buildHandoff().program_detail;
     check('F2: melasma & hair aktif', !!pdm.melasma && !!pdm.hair, Object.keys(pdm));
     check('F2 melasma: isian hanya blok P (tidak ada isi blok A/M)', (() => {
