@@ -78,6 +78,9 @@ table.tbl td{padding:4px 8px;border:1px solid var(--line);vertical-align:middle;
 .flag .fin:focus{outline:none;}
 .flag .none{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink-2);white-space:nowrap;}
 .flag .none input{width:14px;height:14px;accent-color:var(--ink);}
+.flag .alg-v{flex:1;font-size:15px;font-weight:600;color:var(--ink-fill);}
+.flag .alg-v.kosong{color:var(--accent-deep,#8E4A33);font-weight:600;}
+.flag .alg-src{font-size:11.5px;color:var(--ink-2);white-space:nowrap;}
 .handoff{border:1px solid var(--accent-deep);border-top:3px solid var(--accent-deep);margin:6px 0;}
 .handoff .hh{background:var(--surface-quiet);border-bottom:1px solid var(--line);padding:5px 12px;display:flex;justify-content:space-between;align-items:baseline;}
 .handoff .hh .t{font-family:var(--ff-head);font-size:12.5px;font-weight:600;}
@@ -952,6 +955,7 @@ body.showall .step{display:block;}
    membuang satu baris utuh. */
 .f:has(> .opts),.f:has(> .ck),.f.w2:has(> .opts),.f.w3:has(> .opts){grid-column:auto;}
 .f.s3:has(> .opts){grid-column:span 3;} .f.s4:has(> .opts){grid-column:span 4;}
+.f.s5:has(> .opts){grid-column:span 5;} .f.s7:has(> .opts){grid-column:span 7;}
 .f.s6:has(> .opts){grid-column:span 6;} .f.s8:has(> .opts){grid-column:span 8;}
 .f.s12:has(> .opts){grid-column:span 12;}
 /* label tak perlu lagi cadangan 2 baris sebesar dulu: kolom sudah lebih lega */
@@ -1007,6 +1011,31 @@ body.showall .step{display:block;}
 
 .opts.tight .opt{padding:11px 12px !important;}
 .opts.tight .opt input{margin-right:1px;}
+/* D1: pemisah kelompok (Profil kulit / Diagnosis) + chip ringkas agar satu baris */
+.d1h{font-size:11px;font-weight:620;letter-spacing:.14em;text-transform:uppercase;color:var(--accent-deep);
+  margin:4px 0 14px;padding-top:18px;border-top:1px solid var(--line);}
+.opts.compact{gap:6px !important;}
+.opts.compact .opt{padding:10px 10px !important;margin-left:0 !important;font-style:normal !important;letter-spacing:.04em !important;}
+/* Semua teks opsi jawaban di form program berwarna hitam (permintaan klinik) —
+   sorotan warna lama (.hl, abu-abu) tidak dipakai lagi untuk opsi. */
+.ovl label.ck,.ovl .ck label,.ovl label.chk-item,.ovl label.consent-item{color:var(--ink) !important;}
+/* Dialog Muat Form 1 / Muat Handoff */
+.mdlg-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2000;display:none;align-items:flex-start;justify-content:center;padding:12vh 16px 16px;}
+.mdlg-bg.on{display:flex;}
+.mdlg{background:var(--surface);border-radius:var(--r-card);width:100%;max-width:460px;padding:24px 24px 20px;box-shadow:0 18px 50px rgba(0,0,0,.25);}
+.mdlg-t{font-size:18px;font-weight:620;color:var(--ink);margin-bottom:16px;}
+.mdlg-l{display:block;font-size:11px;font-weight:620;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2);margin-bottom:6px;}
+.mdlg-l span{font-weight:400;letter-spacing:0;text-transform:none;color:var(--ink-muted);margin-left:6px;}
+.mdlg-in{width:100%;font:inherit;font-size:16px;color:var(--ink-fill);padding:11px 13px;border:1px solid var(--line-strong);border-radius:var(--r-box);background:#fff;}
+.mdlg-in:focus{outline:none;border-color:var(--accent-act);}
+.mdlg-msg{min-height:20px;font-size:13px;color:var(--accent-deep);margin:8px 0 6px;}
+.mdlg-b{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.mdlg-sp{flex:1;}
+.mdlg-b button{font:inherit;font-size:14px;font-weight:600;min-height:44px;padding:0 18px;border-radius:var(--r-pill);cursor:pointer;border:1px solid var(--line-strong);background:var(--surface);color:var(--ink);}
+.mdlg-b .mdlg-ok{background:var(--accent-act);border-color:var(--accent-act);color:#fff;}
+.mdlg-b .mdlg-file{border-color:var(--accent-act);color:var(--accent-deep);}
+@media print{ .mdlg-bg{display:none !important;} }
+.metrik .mempty{font-size:13.5px;color:var(--ink-muted);line-height:1.5;}
 
 @media (max-width:860px){ .f.s1,.f.s2{grid-column:span 2;} }
 @media (max-width:560px){ .f.s1,.f.s2{grid-column:span 1 !important;} }
@@ -1067,6 +1096,9 @@ body.showall .step{display:block;}
 .mcard{border:1px solid var(--line);border-radius:var(--r-box);background:var(--surface-quiet);
   padding:14px 16px;margin-bottom:12px;}
 .mcard.alt{background:var(--surface);}
+.derajat .mcard{margin:4px 0 8px;padding:12px 14px;}
+.derajat .mcard .mrow{margin-bottom:8px;}
+.derajat .mcard:last-of-type{margin-bottom:0;}
 .mrow{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:11px;}
 .mp{font-size:15px;font-weight:620;color:var(--ink);}
 .mstat{font-size:13px;color:var(--ink-muted);}
@@ -1151,9 +1183,8 @@ body.showall .step{display:block;}
   #ovl_hair .f{padding:4px 0 !important;}
 }
 
-/* Keadaan umum: dokter butuh ruang narasi ±5 baris, bukan satu baris. */
+/* Catatan klinis: dokter butuh ruang narasi ±5 baris, bukan satu baris. */
 textarea.in{height:auto;min-height:138px;resize:vertical;line-height:1.55;padding-top:11px;font:inherit;}
-textarea.in#d1_umum{min-height:138px;}
 
 /* ==========================================================================
    MODAL HAIR-LOSS — perbaikan tabrakan kelas dwi-fungsi (kejadian ke-5).
@@ -1291,9 +1322,12 @@ body.mode-kontrol #rb2{display:none;}
   </div>
   
 
-  <div class="flag">
+  <!-- Pasien BARU: alergi diisi di Form 1 dan tampil (baca-saja) di Ringkasan Anamnesis —
+       kotak ini disembunyikan. Kunjungan KONTROL / tanpa Form 1: kotak ini tampil dan bisa
+       diisi/dikoreksi dokter (terisi dari handoff), karena Form 1 hanya untuk pasien baru. -->
+  <div class="flag" id="alergi_box">
     <span class="badge">Alergi / kontraindikasi</span><span class="req">wajib</span>
-    <input class="fin" id="alergi_flag" placeholder="Terisi otomatis dari Form 1 — bahan/obat yang WAJIB dihindari">
+    <input class="fin" id="alergi_flag" placeholder="konfirmasi ulang ke pasien — bahan/obat yang WAJIB dihindari">
     <label class="none"><input type="checkbox" id="alergi_none"> Nihil (dikonfirmasi)</label>
   </div>
 
@@ -1330,13 +1364,18 @@ body.mode-kontrol #rb2{display:none;}
   <div class="vis-awal">
   
   
+  <!-- Urutan D1 mengikuti alur pemeriksaan: siapa memeriksa → profil kulit → diagnosis &
+       derajat → catatan klinis. Keadaan umum, hasil asesmen & penunjang kini SATU kolom
+       "Catatan klinis" (#d2_hasil). #d1_umum dipertahankan tersembunyi agar skema handoff tetap. -->
   <div class="row">
-    <div class="f s12"><span class="lab">Keadaan umum / kesan klinis</span><textarea class="in" id="d1_umum" rows="5" placeholder="mis. tampak sehat, kulit sensitif, obesitas sentral — tulis selengkap yang diperlukan"></textarea></div>
+    <div class="f s4"><span class="lab">Dokter pemeriksa</span><input class="in" id="d1_dokter" placeholder="dr. …, Sp.DVE / Sp.GK"></div>
   </div>
+  <input type="hidden" id="d1_umum">
+  <div class="d1h">Profil kulit</div>
   <div class="row">
     <!-- Fitzpatrick: RADIO — satu tipe kulit saja per pasien, tidak mungkin ganda. -->
-    <div class="f s6"><span class="lab">Fitzpatrick <span class="opt">pilih satu</span></span>
-      <div class="opts tight" style="padding-top:4px">
+    <div class="f s5"><span class="lab">Fitzpatrick <span class="opt">pilih satu</span></span>
+      <div class="opts tight compact" style="padding-top:4px">
         <label class="opt"><input type="radio" name="d1_fitz" value="I"> I</label>
         <label class="opt"><input type="radio" name="d1_fitz" value="II"> II</label>
         <label class="opt"><input type="radio" name="d1_fitz" value="III"> III</label>
@@ -1345,8 +1384,18 @@ body.mode-kontrol #rb2{display:none;}
         <label class="opt"><input type="radio" name="d1_fitz" value="VI"> VI</label>
       </div>
     </div>
-    <div class="f s3"><label class="lab" for="d1_tipekulit">Tipe kulit</label><select class="in" id="d1_tipekulit"><option value="">— pilih —</option><option>Kering</option><option>Normal</option><option>Kombinasi</option><option>Berminyak</option><option>Sensitif</option></select></div>
-    <div class="f s3"><span class="lab">Dokter pemeriksa</span><input class="in" id="d1_dokter" placeholder="dr. …, Sp.DVE / Sp.GK"></div>
+    <!-- Tipe kulit: boleh lebih dari satu (mis. Kombinasi + Sensitif). Nilai digabung ke
+         hidden #d1_tipekulit — id yang sama dibaca buildHandoff & _bawaKontrol. -->
+    <div class="f s7"><span class="lab">Tipe kulit <span class="opt">boleh lebih dari satu</span></span>
+      <div class="opts tight compact" style="padding-top:4px" id="d1_tk">
+        <label class="opt"><input type="checkbox" value="Kering" onchange="syncTipeKulit()"> Kering</label>
+        <label class="opt"><input type="checkbox" value="Normal" onchange="syncTipeKulit()"> Normal</label>
+        <label class="opt"><input type="checkbox" value="Kombinasi" onchange="syncTipeKulit()"> Kombinasi</label>
+        <label class="opt"><input type="checkbox" value="Berminyak" onchange="syncTipeKulit()"> Berminyak</label>
+        <label class="opt"><input type="checkbox" value="Sensitif" onchange="syncTipeKulit()"> Sensitif</label>
+      </div>
+      <input type="hidden" id="d1_tipekulit">
+    </div>
   </div>
   <!-- BB/TB/IMT diukur PERAWAT di Form 1; nilainya masuk lewat Muat Form 1 dan
        tetap tersimpan ke handoff lewat id yang sama (hidden). -->
@@ -1355,46 +1404,57 @@ body.mode-kontrol #rb2{display:none;}
   </div>
   <!-- D1 lama (diagnosis, IGA) — kini bagian D1; tampil di awal & kontrol -->
   <div class="dxblk">
+  <div class="d1h">Diagnosis</div>
+  <!-- Derajat = skor IGA 0–4 (satu-satunya tempat mengisi IGA). Sebelum program dipilih,
+       kartu umum menyimpan nilai sementara (d1_iga) yang otomatis dipakai program Acne /
+       Melasma begitu aktif. Kartu per program tetap memakai id ac_iga / me_iga yang sama,
+       jadi igaData, metricStatus, _progDetail & buildHandoff tidak berubah. d2_derajat
+       (hidden) dirangkum otomatis dari skor ini untuk handoff. -->
   <div class="row">
-    <div class="f w3 s9"><span class="lab">Diagnosis<span class="req">wajib</span></span><input class="in" id="d2_dx" placeholder="mis. Acne vulgaris + PIH; Melasma sentrofasial; AGA; Obesitas grade I"></div>
-    <div class="f s3"><span class="lab">Derajat / tipe</span><input class="in" id="d2_derajat" placeholder="Ringan / sedang / berat"></div>
+    <div class="f w3 s6"><span class="lab">Diagnosis<span class="req">wajib</span></span><input class="in" id="d2_dx" placeholder="mis. Acne vulgaris + PIH; Melasma sentrofasial; AGA; Obesitas grade I"></div>
+    <div class="f s6 derajat"><span class="lab">Derajat <span class="opt">skala IGA · nilai kondisi hari ini</span></span>
+  <input type="hidden" id="d2_derajat">
+  <div class="mcard" id="igacard_umum">
+    <div class="mrow"><span class="mstat" id="igastat_umum">Pilih derajat hari ini</span></div>
+    <div class="igaseg" role="group" aria-label="Derajat (IGA)">
+        <button type="button" data-v="0" title="Clear" onclick="setIGAUmum('d1_iga','0')"><b>0</b><em>Bersih</em></button>
+        <button type="button" data-v="1" title="Almost clear" onclick="setIGAUmum('d1_iga','1')"><b>1</b><em>Hampir bersih</em></button>
+        <button type="button" data-v="2" title="Mild" onclick="setIGAUmum('d1_iga','2')"><b>2</b><em>Ringan</em></button>
+        <button type="button" data-v="3" title="Moderate" onclick="setIGAUmum('d1_iga','3')"><b>3</b><em>Sedang</em></button>
+        <button type="button" data-v="4" title="Severe" onclick="setIGAUmum('d1_iga','4')"><b>4</b><em>Berat</em></button>
+      </div>
+      <input type="hidden" id="d1_iga">
   </div>
-  <div class="row">
-    <div class="f w3 s9"><span class="lab">Hasil asesmen</span><input class="in" id="d2_hasil" placeholder="mis. acne grade sedang dominan rahang, PIH ringan, kulit sensitif"></div>
-    <div class="f s3"><span class="lab">Perlu pemeriksaan penunjang?<span class="opt">opsional</span></span><input class="in" placeholder="mis. panel hormon, InBody, Hair Analyser"></div>
-  </div>
-  <div class="metrik">
-  <div class="mh"><span class="mk">Metrik terukur</span></div>
   <div class="mcard" id="igacard_acne" style="display:none">
     <div class="mrow"><span class="mp">Acne</span><span class="mstat" id="igastat_acne">Pilih skor IGA hari ini</span></div>
     <div class="igaseg" role="group" aria-label="Skor IGA Acne">
-        <button type="button" data-v="0" onclick="setIGA('ac_iga','0')"><b>0</b><em>Clear</em></button>
-        <button type="button" data-v="1" onclick="setIGA('ac_iga','1')"><b>1</b><em>Almost clear</em></button>
-        <button type="button" data-v="2" onclick="setIGA('ac_iga','2')"><b>2</b><em>Mild</em></button>
-        <button type="button" data-v="3" onclick="setIGA('ac_iga','3')"><b>3</b><em>Moderate</em></button>
-        <button type="button" data-v="4" onclick="setIGA('ac_iga','4')"><b>4</b><em>Severe</em></button>
+        <button type="button" data-v="0" title="Clear" onclick="setIGA('ac_iga','0')"><b>0</b><em>Bersih</em></button>
+        <button type="button" data-v="1" title="Almost clear" onclick="setIGA('ac_iga','1')"><b>1</b><em>Hampir bersih</em></button>
+        <button type="button" data-v="2" title="Mild" onclick="setIGA('ac_iga','2')"><b>2</b><em>Ringan</em></button>
+        <button type="button" data-v="3" title="Moderate" onclick="setIGA('ac_iga','3')"><b>3</b><em>Sedang</em></button>
+        <button type="button" data-v="4" title="Severe" onclick="setIGA('ac_iga','4')"><b>4</b><em>Berat</em></button>
       </div>
       <input type="hidden" id="ac_iga">
-    
   </div>
   <div class="mcard" id="igacard_melasma" style="display:none">
     <div class="mrow"><span class="mp">Hiperpigmentasi / Melasma</span><span class="mstat" id="igastat_melasma">Pilih skor IGA hari ini</span></div>
     <div class="igaseg" role="group" aria-label="Skor IGA Melasma">
-        <button type="button" data-v="0" onclick="setIGA('me_iga','0')"><b>0</b><em>Clear</em></button>
-        <button type="button" data-v="1" onclick="setIGA('me_iga','1')"><b>1</b><em>Almost clear</em></button>
-        <button type="button" data-v="2" onclick="setIGA('me_iga','2')"><b>2</b><em>Mild</em></button>
-        <button type="button" data-v="3" onclick="setIGA('me_iga','3')"><b>3</b><em>Moderate</em></button>
-        <button type="button" data-v="4" onclick="setIGA('me_iga','4')"><b>4</b><em>Severe</em></button>
+        <button type="button" data-v="0" title="Clear" onclick="setIGA('me_iga','0')"><b>0</b><em>Bersih</em></button>
+        <button type="button" data-v="1" title="Almost clear" onclick="setIGA('me_iga','1')"><b>1</b><em>Hampir bersih</em></button>
+        <button type="button" data-v="2" title="Mild" onclick="setIGA('me_iga','2')"><b>2</b><em>Ringan</em></button>
+        <button type="button" data-v="3" title="Moderate" onclick="setIGA('me_iga','3')"><b>3</b><em>Sedang</em></button>
+        <button type="button" data-v="4" title="Severe" onclick="setIGA('me_iga','4')"><b>4</b><em>Berat</em></button>
       </div>
       <input type="hidden" id="me_iga">
-    
   </div>
   <div class="mcard alt" id="igacard_hair" style="display:none">
-    <div class="mrow"><span class="mp">Hair-Loss</span><span class="mstat">Tanpa IGA</span></div>
-    
+    <div class="mrow"><span class="mp">Hair-Loss</span><span class="mstat">Tanpa IGA — staging Norwood/Ludwig di form program</span></div>
   </div>
-  
-</div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="f s12"><span class="lab">Catatan klinis</span><textarea class="in" id="d2_hasil" rows="4" placeholder="Temuan: mis. tampak sehat; papul-pustul dominan rahang, PIH ringan; kulit sensitif&#10;Penunjang: mis. panel hormon / InBody / Hair Analyser — atau &quot;tidak perlu&quot;"></textarea></div>
+  </div>
 
   </div>
   <div class="vis-kontrol">
@@ -1414,9 +1474,9 @@ body.mode-kontrol #rb2{display:none;}
   <div class="row">
     <div class="f w2 s8"><span class="lab">Hasil hari ini vs kunjungan lalu<span class="req">wajib</span></span><input class="in" id="k1_hasil" placeholder="mis. grade sedang → ringan; lesi aktif berkurang, PIH menetap"></div>
     <div class="f s4"><span class="lab">Arah <span class="opt">terisi otomatis dari IGA</span></span>
-      <input class="in" id="k1_arah" readonly placeholder="isi IGA di form program"></div>
+      <input class="in" id="k1_arah" readonly placeholder="otomatis dari Derajat (IGA) di D1"></div>
   </div>
-  <div class="imp-box" id="k1_iga_strip">Perbaikan dihitung otomatis dari <b>IGA</b>. Buka form program dan isi IGA hari ini — nilai baseline diambil dari kunjungan pertama.</div>
+  <div class="imp-box" id="k1_iga_strip">Perbaikan dihitung otomatis dari <b>IGA</b>. Nilai <b>Derajat</b> hari ini di D1 — baseline diambil dari kunjungan pertama.</div>
   
   <div class="row" id="k1_gis_acne" style="display:none">
     <div class="f w2 s12"><span class="lab">Bekas (PIH/PIE) vs baseline <span class="opt">tidak tercakup IGA</span></span>
@@ -1594,10 +1654,10 @@ body.mode-kontrol #rb2{display:none;}
   <div class="sec-label">A · Riwayat &amp; Pemicu <span class="hint">khusus acne — tidak diulang dari Form 1/2</span></div>
   
   <div class="qline"><span class="q">Pakai produk beli sendiri (skincare aktif / "probiotik" oles)?</span>
-    <label class="ck"><input type="checkbox" id="ac_a_self_n"> Tidak</label><label class="ck hl"><input type="checkbox" id="ac_a_self_y"> Ya</label>
+    <label class="ck"><input type="checkbox" id="ac_a_self_n"> Tidak</label><label class="ck"><input type="checkbox" id="ac_a_self_y"> Ya</label>
     <span class="sub">→ catat:</span><input class="ln" placeholder="produk apa (risiko relaps)"></div>
   <div class="qline"><span class="q">Riwayat keluarga jerawat/bekas?</span><label class="ck"><input type="checkbox"> Ya</label><label class="ck"><input type="checkbox"> Tidak</label>
-    <span class="q" style="margin-left:10px;">Mudah menghitam (PIH)?</span><label class="ck hl"><input type="checkbox"> Ya</label><label class="ck"><input type="checkbox"> Tidak</label></div>
+    <span class="q" style="margin-left:10px;">Mudah menghitam (PIH)?</span><label class="ck"><input type="checkbox"> Ya</label><label class="ck"><input type="checkbox"> Tidak</label></div>
 
   <!-- B. PENILAIAN KLINIS -->
   <div class="sec-label">B · Penilaian Klinis <span class="hint">dokter</span></div>
@@ -1606,7 +1666,7 @@ body.mode-kontrol #rb2{display:none;}
   
   <div class="qline"><span class="q">Bekas:</span><label class="ck"><input type="checkbox"> PIE (merah)</label><label class="ck"><input type="checkbox"> PIH (gelap)</label>
     <span class="q" style="margin-left:14px;">Jumlah lesi <span class="sub">(opsional)</span>:</span><input class="ln" placeholder="boleh dikosongkan" style="min-width:80px;"></div>
-  <div class="qline"><span class="q">Distribusi:</span><label class="ck"><input type="checkbox"> Dahi</label><label class="ck"><input type="checkbox"> Pipi</label><label class="ck hl"><input type="checkbox"> Rahang/dagu → hormonal</label><label class="ck"><input type="checkbox"> Dada</label><label class="ck"><input type="checkbox"> Punggung</label></div>
+  <div class="qline"><span class="q">Distribusi:</span><label class="ck"><input type="checkbox"> Dahi</label><label class="ck"><input type="checkbox"> Pipi</label><label class="ck"><input type="checkbox"> Rahang/dagu</label><label class="ck"><input type="checkbox"> Dada</label><label class="ck"><input type="checkbox"> Punggung</label><label class="ck" style="margin-left:auto"><input type="checkbox"> Hormonal</label></div>
 
   <div class="qline"><span class="q">Baseline waktu pemulihan (rentang — dari pengalaman dokter):</span><span class="q">Mulai membaik:</span><input class="ln" placeholder="mis. 4–6 minggu" style="min-width:75px;"><span class="q">Hasil optimal:</span><input class="ln" placeholder="mis. 3–6 bulan" style="min-width:75px;"><span class="sub">— sampaikan rentang, bukan janji absolut (no overclaiming)</span></div>
 
@@ -1663,9 +1723,9 @@ body.mode-kontrol #rb2{display:none;}
       <div class="chk-grid"><label class="chk-item"><input type="checkbox" checked> Peeling</label><label class="chk-item"><input type="checkbox" checked> Ekstraksi komedo</label><label class="chk-item"><input type="checkbox"> Glow Peel</label></div>
       <div class="subhead">Resep Cream / Obat Oles</div>
       <table class="rx-table"><thead><tr><th style="width:30%">Cream</th><th style="width:22%">Jadwal</th><th style="width:28%">Cara Pakai</th><th style="width:20%">Durasi</th></tr></thead><tbody>
-        <tr><td><input class="td-input" value="Retinoid (Tretinoin/Adapalene)"></td><td><input class="td-input" value="Malam"></td><td><input class="td-input" value="Tipis seluruh wajah"></td><td><input class="td-input" value="Lanjut"></td></tr>
-        <tr><td><input class="td-input" value="Clindamycin / BPO"></td><td><input class="td-input" value="Pagi/malam"></td><td><input class="td-input" value="Area bruntusan"></td><td><input class="td-input" value="1–3 bln"></td></tr>
-        <tr><td><input class="td-input" value="Sunscreen SPF 30+"></td><td><input class="td-input" value="Pagi"></td><td><input class="td-input" value="Merata"></td><td><input class="td-input" value="Tiap hari"></td></tr>
+        <tr><td><input class="td-input" placeholder="Retinoid (Tretinoin/Adapalene)"></td><td><input class="td-input" placeholder="Malam"></td><td><input class="td-input" placeholder="Tipis seluruh wajah"></td><td><input class="td-input" placeholder="Lanjut"></td></tr>
+        <tr><td><input class="td-input" placeholder="Clindamycin / BPO"></td><td><input class="td-input" placeholder="Pagi/malam"></td><td><input class="td-input" placeholder="Area bruntusan"></td><td><input class="td-input" placeholder="1–3 bln"></td></tr>
+        <tr><td><input class="td-input" placeholder="Sunscreen SPF 30+"></td><td><input class="td-input" placeholder="Pagi"></td><td><input class="td-input" placeholder="Merata"></td><td><input class="td-input" placeholder="Tiap hari"></td></tr>
       </tbody></table>
       <div class="imp-box">Kunjungan pertama: masa adaptasi krim ±1 bulan sebelum evaluasi penuh.</div>
     </div>
@@ -1678,15 +1738,15 @@ body.mode-kontrol #rb2{display:none;}
       <div class="chk-grid"><label class="chk-item"><input type="checkbox" checked> Peeling</label><label class="chk-item"><input type="checkbox" checked> Ekstraksi</label><label class="chk-item"><input type="checkbox" checked> Excel V</label><label class="chk-item"><input type="checkbox" checked> Plazion (awal)</label><label class="chk-item"><input type="checkbox"> Deep Pore Combo (IPL)</label><label class="chk-item"><input type="checkbox"> Microneedling RF (nodul)</label></div>
       <div class="subhead red">Resep Cream / Obat Oles</div>
       <table class="rx-table"><thead><tr><th class="red" style="width:30%">Cream</th><th class="red" style="width:22%">Jadwal</th><th class="red" style="width:28%">Cara Pakai</th><th class="red" style="width:20%">Durasi</th></tr></thead><tbody>
-        <tr><td><input class="td-input" value="Tretinoin 0.025–0.05%"></td><td><input class="td-input" value="Malam"></td><td><input class="td-input" value="Seluruh wajah"></td><td><input class="td-input" value="Lanjut"></td></tr>
-        <tr><td><input class="td-input" value="Clindamycin 1% / BPO"></td><td><input class="td-input" value="Pagi & malam"></td><td><input class="td-input" value="Area inflamasi"></td><td><input class="td-input" value="Sesuai dokter"></td></tr>
-        <tr><td><input class="td-input" value="Sunscreen SPF 50+ PA+++"></td><td><input class="td-input" value="Pagi + re-apply"></td><td><input class="td-input" value="Merata"></td><td><input class="td-input" value="Tiap hari"></td></tr>
+        <tr><td><input class="td-input" placeholder="Tretinoin 0.025–0.05%"></td><td><input class="td-input" placeholder="Malam"></td><td><input class="td-input" placeholder="Seluruh wajah"></td><td><input class="td-input" placeholder="Lanjut"></td></tr>
+        <tr><td><input class="td-input" placeholder="Clindamycin 1% / BPO"></td><td><input class="td-input" placeholder="Pagi & malam"></td><td><input class="td-input" placeholder="Area inflamasi"></td><td><input class="td-input" placeholder="Sesuai dokter"></td></tr>
+        <tr><td><input class="td-input" placeholder="Sunscreen SPF 50+ PA+++"></td><td><input class="td-input" placeholder="Pagi + re-apply"></td><td><input class="td-input" placeholder="Merata"></td><td><input class="td-input" placeholder="Tiap hari"></td></tr>
       </tbody></table>
       <div class="subhead red">Obat Minum (Oral)</div>
       <table class="rx-table"><thead><tr><th class="red" style="width:30%">Obat</th><th class="red" style="width:22%">Dosis</th><th class="red" style="width:28%">Indikasi</th><th class="red" style="width:20%">Durasi</th></tr></thead><tbody>
-        <tr><td><input class="td-input" value="Antibiotik oral — Eritromisin (acuan ADC; alt: Doxy/Azithro)"></td><td><input class="td-input"></td><td><input class="td-input" value="Bakteri + peradangan"></td><td><input class="td-input" value="±1 bulan"></td></tr>
-        <tr><td><input class="td-input" value="Isotretinoin (Vit A)"></td><td><input class="td-input"></td><td><input class="td-input" value="Sebum sangat berlebih"></td><td><input class="td-input" value="3–6 bulan"></td></tr>
-        <tr><td><input class="td-input" value="Spironolactone / pil KB (hormonal)"></td><td><input class="td-input"></td><td><input class="td-input" value="Jerawat hormonal (rahang)"></td><td><input class="td-input" value="Sesuai dokter"></td></tr>
+        <tr><td><input class="td-input" placeholder="Antibiotik oral — Eritromisin (acuan ADC; alt: Doxy/Azithro)"></td><td><input class="td-input"></td><td><input class="td-input" placeholder="Bakteri + peradangan"></td><td><input class="td-input" placeholder="±1 bulan"></td></tr>
+        <tr><td><input class="td-input" placeholder="Isotretinoin (Vit A)"></td><td><input class="td-input"></td><td><input class="td-input" placeholder="Sebum sangat berlebih"></td><td><input class="td-input" placeholder="3–6 bulan"></td></tr>
+        <tr><td><input class="td-input" placeholder="Spironolactone / pil KB (hormonal)"></td><td><input class="td-input"></td><td><input class="td-input" placeholder="Jerawat hormonal (rahang)"></td><td><input class="td-input" placeholder="Sesuai dokter"></td></tr>
       </tbody></table>
       <div class="warn-box"><strong>Isotretinoin:</strong> teratogenik &amp; diatur ketat — hanya dalam jalur medis dengan monitoring (kontrasepsi, lab). Semua dosis per indikasi dokter. <strong>Acne berat (nodular/konglobata):</strong> pertimbangkan terapi sistemik / rujuk bila perlu.</div>
     </div>
@@ -1699,9 +1759,9 @@ body.mode-kontrol #rb2{display:none;}
       <div class="chk-grid"><label class="chk-item"><input type="checkbox"> PicoSure — cokelat (PIH)</label><label class="chk-item"><input type="checkbox"> Excel V — merah (PIE)</label><label class="chk-item"><input type="checkbox"> Dermapen/MN-RF — tekstur</label></div>
       <div class="subhead" style="color:var(--gold)">Resep Cream Penunjang</div>
       <table class="rx-table"><thead><tr><th style="background:var(--gold);width:30%">Cream</th><th style="background:var(--gold);width:22%">Jadwal</th><th style="background:var(--gold);width:28%">Cara Pakai</th><th style="background:var(--gold);width:20%">Durasi</th></tr></thead><tbody>
-        <tr><td><input class="td-input" value="Retinoid (lanjut)"></td><td><input class="td-input" value="Malam"></td><td><input class="td-input" value="Seluruh wajah"></td><td><input class="td-input" value="Lanjut"></td></tr>
-        <tr><td><input class="td-input" value="Brightening (Azelaic/HQ + serum TXA)"></td><td><input class="td-input" value="Sesuai dokter"></td><td><input class="td-input" value="Area bekas"></td><td><input class="td-input" value="Sesuai dokter"></td></tr>
-        <tr><td><input class="td-input" value="Sunscreen SPF 50+ PA+++"></td><td><input class="td-input" value="Pagi + re-apply"></td><td><input class="td-input" value="Cegah PIH gelap"></td><td><input class="td-input" value="Tiap hari"></td></tr>
+        <tr><td><input class="td-input" placeholder="Retinoid (lanjut)"></td><td><input class="td-input" placeholder="Malam"></td><td><input class="td-input" placeholder="Seluruh wajah"></td><td><input class="td-input" placeholder="Lanjut"></td></tr>
+        <tr><td><input class="td-input" placeholder="Brightening (Azelaic/HQ + serum TXA)"></td><td><input class="td-input" placeholder="Sesuai dokter"></td><td><input class="td-input" placeholder="Area bekas"></td><td><input class="td-input" placeholder="Sesuai dokter"></td></tr>
+        <tr><td><input class="td-input" placeholder="Sunscreen SPF 50+ PA+++"></td><td><input class="td-input" placeholder="Pagi + re-apply"></td><td><input class="td-input" placeholder="Cegah PIH gelap"></td><td><input class="td-input" placeholder="Tiap hari"></td></tr>
       </tbody></table>
     </div>
   </div>
@@ -1713,9 +1773,9 @@ body.mode-kontrol #rb2{display:none;}
       <div class="chk-grid"><label class="chk-item"><input type="checkbox" checked> Peeling — sebulan sekali</label><label class="chk-item"><input type="checkbox"> Pencerah: krim</label><label class="chk-item"><input type="checkbox"> Pencerah: PicoSure</label></div>
       <div class="subhead" style="color:var(--green)">Resep Cream Maintenance</div>
       <table class="rx-table"><thead><tr><th class="green" style="width:30%;background:var(--green)">Cream</th><th class="green" style="width:22%;background:var(--green)">Jadwal</th><th class="green" style="width:28%;background:var(--green)">Cara Pakai</th><th class="green" style="width:20%;background:var(--green)">Durasi</th></tr></thead><tbody>
-        <tr><td><input class="td-input" value="Tretinoin 2–3x/mgg"></td><td><input class="td-input" value="Malam 2–3x/mgg"></td><td><input class="td-input" value="Seluruh wajah"></td><td><input class="td-input" value="Maintenance"></td></tr>
-        <tr><td><input class="td-input" value="Krim pencerah (opsional)"></td><td><input class="td-input" value="Sesuai dokter"></td><td><input class="td-input" value="Area target"></td><td><input class="td-input" value="Maintenance"></td></tr>
-        <tr><td><input class="td-input" value="Sunscreen SPF 30+"></td><td><input class="td-input" value="Pagi"></td><td><input class="td-input" value="Merata"></td><td><input class="td-input" value="Tiap hari"></td></tr>
+        <tr><td><input class="td-input" placeholder="Tretinoin 2–3x/mgg"></td><td><input class="td-input" placeholder="Malam 2–3x/mgg"></td><td><input class="td-input" placeholder="Seluruh wajah"></td><td><input class="td-input" placeholder="Maintenance"></td></tr>
+        <tr><td><input class="td-input" placeholder="Krim pencerah (opsional)"></td><td><input class="td-input" placeholder="Sesuai dokter"></td><td><input class="td-input" placeholder="Area target"></td><td><input class="td-input" placeholder="Maintenance"></td></tr>
+        <tr><td><input class="td-input" placeholder="Sunscreen SPF 30+"></td><td><input class="td-input" placeholder="Pagi"></td><td><input class="td-input" placeholder="Merata"></td><td><input class="td-input" placeholder="Tiap hari"></td></tr>
       </tbody></table>
       
     </div>
@@ -1758,25 +1818,25 @@ body.mode-kontrol #rb2{display:none;}
   <div class="sec-label">A · Riwayat &amp; Pemicu <span class="hint">khusus melasma — tidak diulang dari Form 1/2</span></div>
   
   <div class="qline"><span class="q">Krim/pemutih dipakai sekarang:</span><input class="ln" placeholder="produk saat ini (termasuk racikan)">
-    <span class="q" style="margin-left:10px;">Beli sendiri / racikan tanpa anjuran dokter?</span><label class="ck"><input type="checkbox"> Tidak</label><label class="ck hl"><input type="checkbox"> Ya</label></div>
+    <span class="q" style="margin-left:10px;">Beli sendiri / racikan tanpa anjuran dokter?</span><label class="ck"><input type="checkbox"> Tidak</label><label class="ck"><input type="checkbox"> Ya</label></div>
   <div class="qline"><span class="q">Paparan panas tak disadari</span><span class="sub">(sauna / mandi air panas / masak / sering naik pesawat)</span>
-    <label class="ck hl"><input type="checkbox"> Ya</label><label class="ck"><input type="checkbox"> Tidak</label>
+    <label class="ck"><input type="checkbox"> Ya</label><label class="ck"><input type="checkbox"> Tidak</label>
     <span class="sub">→ sumber:</span><input class="ln" placeholder="mis. masak tiap hari"></div>
   <div class="qline"><span class="q">Riwayat laser/pemutih sebelumnya?</span><label class="ck"><input type="checkbox"> Ya</label><label class="ck"><input type="checkbox"> Tidak</label><span class="sub">→ reaksi/hasil:</span><input class="ln" placeholder="mis. sempat menggelap (rebound)"></div>
 
   <!-- B. PENILAIAN KLINIS -->
   <div class="sec-label">B · Penilaian Klinis <span class="hint">dokter — nilai kesiapan kulit untuk laser</span></div>
   <div class="qline"><span class="q">Tipe melasma:</span><label class="ck"><input type="checkbox"> Epidermal</label><label class="ck"><input type="checkbox"> Dermal</label><label class="ck"><input type="checkbox"> Mixed</label><label class="ck"><input type="checkbox"> PIH pasca-acne</label><label class="ck"><input type="checkbox"> Lentigo/flek surya</label>
-    <span class="sub">Fitzpatrick sudah dinilai di Form 2</span></div>
+    <span class="sub">Fitzpatrick sudah dinilai di D1</span></div>
   <div class="qline"><span class="q">IGA Melasma:</span><span class="igamirror" id="igamir_melasma">belum dinilai</span></div>
   
   
   <div class="qline"><span class="q">Foto klinis baseline diambil</span><span class="sub">(wajib — sumber kebenaran hasil)</span>
-    <label class="ck hl"><input type="checkbox" id="me_foto_ok"> Sudah, pencahayaan &amp; sudut standar</label>
+    <label class="ck"><input type="checkbox" id="me_foto_ok"> Sudah, pencahayaan &amp; sudut standar</label>
     <span class="q" style="margin-left:10px;">Area difoto:</span><input class="ln" placeholder="mis. malar kanan-kiri, dahi"></div>
   <div class="qline"><span class="q">Distribusi:</span><label class="ck"><input type="checkbox"> Sentrofasial</label><label class="ck"><input type="checkbox"> Malar (pipi)</label><label class="ck"><input type="checkbox"> Mandibular (rahang)</label></div>
-  <div class="qline"><span class="q">Kondisi barrier:</span><label class="ck"><input type="checkbox"> Baik</label><label class="ck hl"><input type="checkbox"> Kering/lemah</label><label class="ck hl"><input type="checkbox"> Sensitif</label></div>
-  <div class="qline"><span class="q">Kesiapan laser:</span><label class="ck"><input type="checkbox"> Kulit cukup kuat → fase aktif</label><label class="ck hl"><input type="checkbox"> Belum → priming dulu</label></div>
+  <div class="qline"><span class="q">Kondisi barrier:</span><label class="ck"><input type="checkbox"> Baik</label><label class="ck"><input type="checkbox"> Kering/lemah</label><label class="ck"><input type="checkbox"> Sensitif</label></div>
+  <div class="qline"><span class="q">Kesiapan laser:</span><label class="ck"><input type="checkbox"> Kulit cukup kuat → fase aktif</label><label class="ck"><input type="checkbox"> Belum → priming dulu</label></div>
 
   <div class="qline"><span class="q">Baseline waktu (rentang — dari pengalaman dokter):</span><span class="q">Mulai memudar:</span><input class="ln" placeholder="mis. 4–8 minggu" style="min-width:75px;"><span class="q">Perbaikan maks:</span><input class="ln" placeholder="mis. 3–6 bulan" style="min-width:75px;"><span class="sub">— terkontrol, bukan sembuh total (no overclaiming)</span></div>
 
@@ -1804,10 +1864,10 @@ body.mode-kontrol #rb2{display:none;}
       <div class="chk-grid"><label class="chk-item"><input type="checkbox" checked> Peeling (ringan)</label><label class="chk-item"><input type="checkbox"> Asesmen kesiapan laser</label><label class="chk-item"><input type="checkbox"> Hydrating facial (bila kering)</label></div>
       <div class="subhead">Resep Awal (kunjungan pertama)</div>
       <table class="rx-table"><thead><tr><th style="width:30%">Obat/Krim</th><th style="width:22%">Jadwal</th><th style="width:28%">Cara Pakai</th><th style="width:20%">Durasi</th></tr></thead><tbody>
-        <tr><td><input class="td-input" value="Krim malam priming (mis. Azelaic / retinoid ringan)"></td><td><input class="td-input" value="Malam"></td><td><input class="td-input" value="Tipis, bertahap"></td><td><input class="td-input" value="±1 bln"></td></tr>
-        <tr><td><input class="td-input" value="Krim pagi (antioksidan/pelembap)"></td><td><input class="td-input" value="Pagi"></td><td><input class="td-input" value="Sebelum sunscreen"></td><td><input class="td-input" value="Lanjut"></td></tr>
-        <tr><td><input class="td-input" value="Tranexamic Acid oral 250mg"></td><td><input class="td-input" value="2x/hari"></td><td><input class="td-input" value="Sesudah makan"></td><td><input class="td-input" value="Sesuai dokter"></td></tr>
-        <tr><td><input class="td-input" value="Sunscreen SPF 50+ PA+++"></td><td><input class="td-input" value="Pagi + re-apply"></td><td><input class="td-input" value="Merata, ulang 2–3 jam"></td><td><input class="td-input" value="Tiap hari"></td></tr>
+        <tr><td><input class="td-input" placeholder="Krim malam priming (mis. Azelaic / retinoid ringan)"></td><td><input class="td-input" placeholder="Malam"></td><td><input class="td-input" placeholder="Tipis, bertahap"></td><td><input class="td-input" placeholder="±1 bln"></td></tr>
+        <tr><td><input class="td-input" placeholder="Krim pagi (antioksidan/pelembap)"></td><td><input class="td-input" placeholder="Pagi"></td><td><input class="td-input" placeholder="Sebelum sunscreen"></td><td><input class="td-input" placeholder="Lanjut"></td></tr>
+        <tr><td><input class="td-input" placeholder="Tranexamic Acid oral 250mg"></td><td><input class="td-input" placeholder="2x/hari"></td><td><input class="td-input" placeholder="Sesudah makan"></td><td><input class="td-input" placeholder="Sesuai dokter"></td></tr>
+        <tr><td><input class="td-input" placeholder="Sunscreen SPF 50+ PA+++"></td><td><input class="td-input" placeholder="Pagi + re-apply"></td><td><input class="td-input" placeholder="Merata, ulang 2–3 jam"></td><td><input class="td-input" placeholder="Tiap hari"></td></tr>
       </tbody></table>
       <div class="imp-box">Priming menyiapkan kulit (terutama bila kering) agar kuat menerima energi laser. Durasi ±1 bulan, lalu evaluasi → masuk fase aktif.</div>
     </div>
@@ -1822,10 +1882,10 @@ body.mode-kontrol #rb2{display:none;}
       <div class="chk-grid"><label class="chk-item"><input type="checkbox"> Injeksi Tranexamic Acid</label><label class="chk-item"><input type="checkbox"> Injeksi Rejuran</label><label class="chk-item"><input type="checkbox"> Injeksi Nucleofill</label><label class="chk-item"><input type="checkbox"> Skin Booster (bln 3)</label><label class="chk-item"><input type="checkbox"> Dermapen (bln 3)</label><label class="chk-item"><input type="checkbox"> Excel V (vaskular)</label></div>
       <div class="subhead">Resep Cream / Obat</div>
       <table class="rx-table"><thead><tr><th style="width:30%">Krim/Obat</th><th style="width:22%">Jadwal</th><th style="width:28%">Cara Pakai</th><th style="width:20%">Durasi</th></tr></thead><tbody>
-        <tr><td><input class="td-input" value="MALAM — Triple Combination (HQ 4% + Tretinoin + steroid ringan)"></td><td><input class="td-input" value="Malam"></td><td><input class="td-input" value="Tipis area pigmentasi"></td><td><input class="td-input" value="8–12 mgg"></td></tr>
-        <tr><td><input class="td-input" value="PAGI — Vitamin C Serum"></td><td><input class="td-input" value="Pagi"></td><td><input class="td-input" value="Sebelum sunscreen"></td><td><input class="td-input" value="Lanjut"></td></tr>
-        <tr><td><input class="td-input" value="ORAL — Tranexamic Acid 250mg"></td><td><input class="td-input" value="2x/hari"></td><td><input class="td-input" value="Sesudah makan"></td><td><input class="td-input" value="Sesuai dokter"></td></tr>
-        <tr><td><input class="td-input" value="PAGI & SIANG — Sunscreen SPF 50+ PA+++"></td><td><input class="td-input" value="Pagi + re-apply 2–3 jam"></td><td><input class="td-input" value="Merata, wajib"></td><td><input class="td-input" value="Tiap hari"></td></tr>
+        <tr><td><input class="td-input" placeholder="MALAM — Triple Combination (HQ 4% + Tretinoin + steroid ringan)"></td><td><input class="td-input" placeholder="Malam"></td><td><input class="td-input" placeholder="Tipis area pigmentasi"></td><td><input class="td-input" placeholder="8–12 mgg"></td></tr>
+        <tr><td><input class="td-input" placeholder="PAGI — Vitamin C Serum"></td><td><input class="td-input" placeholder="Pagi"></td><td><input class="td-input" placeholder="Sebelum sunscreen"></td><td><input class="td-input" placeholder="Lanjut"></td></tr>
+        <tr><td><input class="td-input" placeholder="ORAL — Tranexamic Acid 250mg"></td><td><input class="td-input" placeholder="2x/hari"></td><td><input class="td-input" placeholder="Sesudah makan"></td><td><input class="td-input" placeholder="Sesuai dokter"></td></tr>
+        <tr><td><input class="td-input" placeholder="PAGI & SIANG — Sunscreen SPF 50+ PA+++"></td><td><input class="td-input" placeholder="Pagi + re-apply 2–3 jam"></td><td><input class="td-input" placeholder="Merata, wajib"></td><td><input class="td-input" placeholder="Tiap hari"></td></tr>
       </tbody></table>
       <div class="imp-box">PicoSure Pro bekerja ~4 minggu → kontrol sebulan sekali. Injeksi (TXA/Rejuran/Nucleofill) untuk perbaiki barrier &amp; kelembapan; skin booster + Dermapen mulai bulan ke-3. Hasil mulai jelas dalam 3–6 bulan.</div>
     </div>
@@ -1838,10 +1898,10 @@ body.mode-kontrol #rb2{display:none;}
       <div class="chk-grid"><label class="chk-item"><input type="checkbox" checked> Peeling rutin</label><label class="chk-item"><input type="checkbox" checked> Krim pencerah</label><label class="chk-item"><input type="checkbox"> Laser sesekali</label><label class="chk-item"><input type="checkbox"> Skin booster periodik</label></div>
       <div class="subhead">Resep Maintenance</div>
       <table class="rx-table"><thead><tr><th class="green" style="width:30%;background:var(--green)">Krim/Obat</th><th class="green" style="width:22%;background:var(--green)">Jadwal</th><th class="green" style="width:28%;background:var(--green)">Cara Pakai</th><th class="green" style="width:20%;background:var(--green)">Durasi</th></tr></thead><tbody>
-        <tr><td><input class="td-input" value="MALAM — Azelaic Acid (ganti HQ jangka panjang) / krim pencerah"></td><td><input class="td-input" value="Malam"></td><td><input class="td-input" value="Area pigmentasi"></td><td><input class="td-input" value="Maintenance"></td></tr>
-        <tr><td><input class="td-input" value="PAGI — Vit C + Niacinamide"></td><td><input class="td-input" value="Pagi"></td><td><input class="td-input" value="Sebelum sunscreen"></td><td><input class="td-input" value="Lanjut"></td></tr>
-        <tr><td><input class="td-input" value="ORAL — Tranexamic Acid (sesuai respons)"></td><td><input class="td-input" value="Sesuai dokter"></td><td><input class="td-input" value="—"></td><td><input class="td-input" value="Sesuai dokter"></td></tr>
-        <tr><td><input class="td-input" value="Sunscreen SPF 50+ PA+++ (PERMANEN)"></td><td><input class="td-input" value="Pagi + re-apply"></td><td><input class="td-input" value="Merata, tiap hari"></td><td><input class="td-input" value="Selamanya"></td></tr>
+        <tr><td><input class="td-input" placeholder="MALAM — Azelaic Acid (ganti HQ jangka panjang) / krim pencerah"></td><td><input class="td-input" placeholder="Malam"></td><td><input class="td-input" placeholder="Area pigmentasi"></td><td><input class="td-input" placeholder="Maintenance"></td></tr>
+        <tr><td><input class="td-input" placeholder="PAGI — Vit C + Niacinamide"></td><td><input class="td-input" placeholder="Pagi"></td><td><input class="td-input" placeholder="Sebelum sunscreen"></td><td><input class="td-input" placeholder="Lanjut"></td></tr>
+        <tr><td><input class="td-input" placeholder="ORAL — Tranexamic Acid (sesuai respons)"></td><td><input class="td-input" placeholder="Sesuai dokter"></td><td><input class="td-input" placeholder="—"></td><td><input class="td-input" placeholder="Sesuai dokter"></td></tr>
+        <tr><td><input class="td-input" placeholder="Sunscreen SPF 50+ PA+++ (PERMANEN)"></td><td><input class="td-input" placeholder="Pagi + re-apply"></td><td><input class="td-input" placeholder="Merata, tiap hari"></td><td><input class="td-input" placeholder="Selamanya"></td></tr>
       </tbody></table>
       <div class="warn-box">Melasma terkait hormon — wajib dijaga seumur hidup agar tidak kambuh. Pantau pemicu hormonal (perimenopause/menopause/KB). Disiplin sunscreen, hindari panas, jaga kelembapan.</div>
     </div>
@@ -2240,7 +2300,7 @@ function renderIGA(){
   if(box){
     box.innerHTML = lines.length
       ? lines.map(function(s){return '<div>'+s+'</div>';}).join('')
-      : 'Perbaikan dihitung otomatis dari <b>IGA</b>. Buka form program dan isi IGA hari ini — nilai baseline diambil dari kunjungan pertama.';
+      : 'Perbaikan dihitung otomatis dari <b>IGA</b>. Nilai <b>Derajat</b> hari ini di D1 — baseline diambil dari kunjungan pertama.';
   }
   var a=document.getElementById('k1_arah'); if(a) a.value=_arahDariIGA();
   if(typeof updateReq==='function') updateReq();
@@ -2404,7 +2464,9 @@ function saveSchedToRecord(){
 }
 function resetForm(){
   if(!confirm('Reset semua isian formulir?')) return;
-  document.querySelectorAll('input,textarea').forEach(function(i){ if(i.type==='checkbox'){i.checked=false;} else {i.value='';} });
+  /* radio juga hanya dilepas centangnya — mengosongkan value-nya membuat Fitzpatrick
+     terekam kosong setelah Reset. */
+  document.querySelectorAll('input,textarea').forEach(function(i){ if(i.type==='checkbox'||i.type==='radio'){i.checked=false;} else {i.value='';} });
   document.querySelectorAll('.progbtn').forEach(function(e){e.classList.remove('on');});
   document.querySelectorAll('.sev-card').forEach(function(e){e.classList.remove('active');});
   document.querySelectorAll('.stage-block,.blk').forEach(function(e){e.classList.remove('show');});
@@ -2499,7 +2561,7 @@ function _ringkasProgram(pd){
   }).join('  ||  ');
 }
 /* Mode kontrol menyembunyikan D1/D2 dan tidak membuka tabel resep program, jadi
-   diagnosis, derajat, pemeriksaan, & resep berjalan terbit KOSONG — handoff
+   diagnosis, pemeriksaan, & resep berjalan terbit KOSONG — handoff
    berikutnya kehilangan konteks. Bawa dari handoff yang dimuat bila kosong hari
    ini; nilai yang diisi hari ini selalu menang. Daftar yang dibawa dicatat di
    asesmen.dibawa agar jejak audit jelas. */
@@ -2507,7 +2569,8 @@ function _bawaKontrol(h){
   var prev=window._prevHandoff, dibawa=[];
   if(_mode!=='kontrol'||!prev||!prev.asesmen) return h;
   var pa=prev.asesmen, a=h.asesmen;
-  ['diagnosis','derajat','alasan_program','rujukan'].forEach(function(k){
+  /* derajat TIDAK dibawa: kini = skor IGA hari ini, dinilai ulang tiap kunjungan */
+  ['diagnosis','alasan_program','rujukan'].forEach(function(k){
     if(!a[k]&&pa[k]){ a[k]=pa[k]; dibawa.push(k); } });
   /* Hanya ciri yang menetap (tipe kulit, Fitzpatrick). BB/TB/IMT & keadaan umum
      berubah tiap kunjungan — menyalinnya akan menampilkan angka lama seolah
@@ -2613,8 +2676,8 @@ function handoffText(h){
   L.push('Asesmen: '+(a.tanggal||'—')+'  ·  Dokter: '+(a.dokter||'—')+(h.kunjungan_ke?('  ·  Kunjungan ke-'+h.kunjungan_ke):''));
   if(a.program) L.push('Program: '+a.program);
   L.push('Diagnosis: '+(a.diagnosis||'—'));
-  if(a.derajat) L.push('Derajat / tipe: '+a.derajat);
-  if(a.hasil) L.push('Hasil asesmen: '+a.hasil);
+  if(a.derajat) L.push('Derajat (IGA): '+a.derajat);
+  if(a.hasil) L.push('Catatan klinis: '+a.hasil);
   L.push('Alergi/kontraindikasi: '+(a.alergi||(a.alergi_nihil?'Nihil (dikonfirmasi)':'BELUM DIKONFIRMASI')));
   if((a.resep||[]).length) L.push('Resep: '+a.resep.map(function(r){return [r.obat,r.jadwal,r.durasi].filter(Boolean).join(' · ');}).join(' | '));
   if(a.rencana) L.push('Rencana & timeline: '+a.rencana);
@@ -2674,7 +2737,7 @@ function handoffDocHTML(h){
   '<div class="flag"><b>Alergi / kontraindikasi</b>'+_hesc(alergi)+'</div>'+
   ((h.penerbitan&&!h.penerbitan.signoff_dokter)?'<div class="flag"><b>Perhatian</b>Diterbitkan tanpa sign-off dokter — konfirmasi ke dokter pemeriksa sebelum dijadikan acuan.</div>':'')+
   '<h2>Asesmen umum</h2><table>'+
-  r('Program',a.program)+r('Diagnosis',a.diagnosis)+r('Derajat / tipe',a.derajat)+r('Hasil asesmen',a.hasil)+
+  r('Program',a.program)+r('Diagnosis',a.diagnosis)+r('Derajat (IGA)',a.derajat)+r('Catatan klinis',a.hasil)+
   (a.pemeriksaan?(r('Keadaan umum',a.pemeriksaan.umum)+r('Tipe kulit',a.pemeriksaan.tipe_kulit)+
     r('Fitzpatrick',a.pemeriksaan.fitzpatrick)+
     ((a.pemeriksaan.bb||a.pemeriksaan.tb)?r('BB / TB / IMT',[a.pemeriksaan.bb&&(a.pemeriksaan.bb+' kg'),a.pemeriksaan.tb&&(a.pemeriksaan.tb+' cm'),a.pemeriksaan.imt].filter(Boolean).join(' / ')):'')):'')+
@@ -2798,8 +2861,11 @@ function applyIntake(o){
   var pg=o.pengukuran||{}; _put('d1_bb',pg.bb); _put('d1_tb',pg.tb); _put('d1_imt',pg.imt);
   /* Alergi: satu-satunya data Form 1 yang jadi field wajib di Form 2.
      Sebelumnya disalin tangan oleh perawat — sumber salah-salin paling berisiko. */
-  if(k.alergi) _put('alergi_flag',k.alergi);
-  if(k.alergi_nihil){ var an=document.getElementById('alergi_none'); if(an&&!document.getElementById('alergi_flag').value) an.checked=true; }
+  /* Alergi tidak bisa diketik di Form 2 — Form 1 satu-satunya sumber, jadi memuat
+     ulang Form 1 (setelah dikoreksi) MENIMPA nilai lama, bukan hanya mengisi yang kosong. */
+  var af=document.getElementById('alergi_flag'), an=document.getElementById('alergi_none');
+  if(af) af.value=(k.alergi||'').trim();
+  if(an) an.checked=!!(k.alergi_nihil && !(k.alergi||'').trim());
   renderIntake();
   if(typeof updateReq==='function') updateReq();
   var per=(o.persetujuan||{});
@@ -2870,7 +2936,15 @@ function renderIntake(){
                : '<b>BELUM ADA TANDA TANGAN PASIEN</b> pada lembar persetujuan — lengkapi sebelum tindakan.')+
         '</div></div>';
 
-  document.getElementById('intake_body').innerHTML=t1+tF+t2+t3+t4;
+  /* Tingkat 2b — jawaban P4 "Detail sesuai keluhan" (jenis jerawat, lokasi, pemicu flek,
+     sunscreen, riwayat rambut, dst). Sebelumnya terkirim di intake (seksi) tetapi tidak
+     pernah ditampilkan, sehingga dokter menanyakannya ulang di form program. */
+  var p4=(o.seksi||[]).filter(function(s){ return s.kode==='P4'; });
+  var tD = p4.length && p4[0].isian && p4[0].isian.length
+    ? '<div class="tier"><span class="tg">Detail keluhan</span><div class="tc"><div class="kvgrid">'+
+      p4[0].isian.map(function(x){ return _kv(x.k,x.v); }).join('')+'</div></div></div>' : '';
+
+  document.getElementById('intake_body').innerHTML=t1+tF+t2+tD+t3+t4;
   box.style.display='';
 }
 function renderPrev(h,baru){
@@ -2878,7 +2952,7 @@ function renderPrev(h,baru){
   if(!box||!body) return;
   var a=h.asesmen||{};
   var rows=[['Kunjungan ke-',h.kunjungan_ke],['Tanggal asesmen',a.tanggal],['Dokter yang meng-asses',a.dokter],['Program',a.program],
-    ['Diagnosis',a.diagnosis],['Derajat / tipe',a.derajat],['Hasil asesmen',a.hasil],
+    ['Diagnosis',a.diagnosis],['Derajat (IGA)',a.derajat],['Catatan klinis',a.hasil],
     ['Alergi / kontraindikasi', a.alergi || (a.alergi_nihil?'Nihil (dikonfirmasi)':'')],
     ['Resep saat itu',(a.resep||[]).map(function(r){return [r.obat,r.jadwal,r.cara,r.durasi].filter(Boolean).join(' · ');}).join('  |  ')],
     ['Rencana & timeline',a.rencana],['Instruksi kontrol',a.instruksi_kontrol],
@@ -2933,7 +3007,7 @@ function metricStatus(){
 }
 /* Daftar isian yang benar-benar menentukan mutu — inilah yang tampil di bar atas. */
 function reqStatus(){
-  var out=[{label:'Alergi dikonfirmasi', ok:!!(_v('alergi_flag')||_ck('alergi_none')), go:'alergi_flag'}];
+  var out=[{label:'Alergi dikonfirmasi', ok:!!(_v('alergi_flag')||_ck('alergi_none')), go:(window._intake?'intake_box':'alergi_box')}];
   if(_mode==='kontrol'){
     /* Di kontrol, diagnosis & program sudah ditetapkan di kunjungan awal.
        Yang menentukan mutu justru: hasil hari ini, remarks berikutnya, ritme, sign-off. */
@@ -3006,7 +3080,21 @@ function goTo(id){
   e.classList.add('hl-target'); setTimeout(function(){e.classList.remove('hl-target');},1800);
   if(e.focus) try{e.focus({preventScroll:true});}catch(err){}
 }
+function syncTipeKulit(){
+  var h=document.getElementById('d1_tipekulit'); if(!h) return;
+  h.value=Array.prototype.map.call(document.querySelectorAll('#d1_tk input:checked'),function(c){return c.value;}).join(', ');
+}
+/* Alergi tampil baca-saja: sumbernya Form 1 (pasien baru) atau handoff (kontrol). */
+/* Pasien baru (Form 1 dimuat): alergi tampil di Ringkasan Anamnesis, kotak isian disembunyikan
+   — koreksi lewat Form 1. Tanpa Form 1 (kontrol, berkas hilang): kotak tampil & bisa diisi. */
+function renderAlergi(){
+  var box=document.getElementById('alergi_box'); if(!box) return;
+  box.style.display = window._intake ? 'none' : '';
+  var f=document.getElementById('alergi_flag'), n=document.getElementById('alergi_none');
+  if(f&&n&&f.value.trim()&&n.checked) n.checked=false;   /* isi alergi & "nihil" tak boleh bersamaan */
+}
 function updateReq(){
+  renderAlergi();
   syncFaktor();
   renderRxMirror();
   var st=reqStatus(), done=st.filter(function(x){return x.ok;}).length;
@@ -3094,8 +3182,13 @@ function applyHandoff(h){
       put('h_next',a.instruksi_kontrol||a.remarks);
       put('h_meds',(a.resep||[]).map(function(x){return [x.obat,x.jadwal].filter(Boolean).join(' ');}).filter(Boolean).join('; '));
       put('h_avoid',a.remarks);
-      put('alergi_flag',a.alergi);
-      if(a.alergi_nihil){var an=document.getElementById('alergi_none'); if(an) an.checked=true;}
+      /* alergi: set kedua field bersamaan (bukan hanya mengisi yang kosong) supaya
+         "Penisilin" + "nihil" tidak pernah tercatat bersamaan */
+      if(a.alergi||a.alergi_nihil){
+        var af=document.getElementById('alergi_flag'), an=document.getElementById('alergi_none');
+        if(af) af.value=(a.alergi||'').trim();
+        if(an) an.checked=!!(a.alergi_nihil&&!(a.alergi||'').trim());
+      }
       if(h.pasien){ put('p_nama',h.pasien.nama); put('rm',h.pasien.rm); put('p_wa',h.pasien.wa); }
       window._prevHandoff=h;
       renderPrev(h,false);
@@ -3116,28 +3209,87 @@ function loadHandoffFile(input){
   };
   r.readAsText(f);
 }
-/* ===== muat via HUB (No. RM) — fallback otomatis ke pemilih berkas ===== */
-function _rmTanya(){
-  var v=(document.getElementById('rm')||{}).value||'';
-  var rm=prompt('No. RM pasien:',v.trim()); 
-  return rm===null?null:rm.trim();
+/* ===== muat via HUB (No. RM) atau BERKAS =====
+   Satu dialog dengan dua jalan yang terlihat jelas: ketik No. RM (dari hub) atau
+   tombol "Pilih berkas…" (mis. Intake_….json di folder Downloads). Sebelumnya
+   pemilih berkas hanya muncul bila kotak RM dikosongkan — tidak ada yang tahu. */
+var _dlgSeq=0, _dlgKb=null;
+function _dlgMuat(judul, berkasId, onRM){
+  var bg=document.getElementById('mdlg');
+  if(!bg){
+    bg=document.createElement('div'); bg.id='mdlg'; bg.className='mdlg-bg';
+    bg.innerHTML='<div class="mdlg" role="dialog" aria-modal="true" aria-labelledby="mdlg_t">'+
+      '<div class="mdlg-t" id="mdlg_t"></div>'+
+      '<label class="mdlg-l" for="mdlg_rm">No. RM pasien <span>dari hub klinik</span></label>'+
+      '<input class="mdlg-in" id="mdlg_rm" list="mdlg_list" autocomplete="off" placeholder="ketik No. RM">'+
+      '<datalist id="mdlg_list"></datalist>'+
+      '<div class="mdlg-msg" id="mdlg_msg"></div>'+
+      '<div class="mdlg-b">'+
+        '<button type="button" class="mdlg-file" id="mdlg_file">Pilih berkas…</button>'+
+        '<span class="mdlg-sp"></span>'+
+        '<button type="button" class="mdlg-x" id="mdlg_x">Batal</button>'+
+        '<button type="button" class="mdlg-ok" id="mdlg_ok">Muat</button>'+
+      '</div></div>';
+    document.body.appendChild(bg);
+  }
+  /* Satu token per pembukaan dialog: respons hub yang datang setelah Batal / dialog lain
+     dibuka diabaikan (tidak memuat pasien, tidak menutup dialog yang salah). Satu
+     listener keydown global — dilepas sebelum dipasang lagi, supaya Esc tidak "bocor". */
+  var tok=++_dlgSeq, btnOk=document.getElementById('mdlg_ok');
+  var tutup=function(){ _dlgSeq++; bg.classList.remove('on'); btnOk.disabled=false;
+    if(_dlgKb){ document.removeEventListener('keydown',_dlgKb,true); _dlgKb=null; } };
+  var inp=document.getElementById('mdlg_rm'), msg=document.getElementById('mdlg_msg');
+  var ok=function(){
+    if(btnOk.disabled) return;                       /* cegah klik ganda = muat ganda */
+    var rm=(inp.value||'').trim();
+    if(!rm){ msg.textContent='Ketik No. RM, atau klik "Pilih berkas…".'; inp.focus(); return; }
+    msg.textContent='Memuat…'; btnOk.disabled=true;
+    /* selesai(gagal) -> true bila permintaan ini masih berlaku (pemanggil boleh memuat data) */
+    onRM(rm,function(gagal){
+      if(tok!==_dlgSeq) return false;
+      btnOk.disabled=false;
+      if(gagal){ msg.textContent=gagal+' Coba RM lain, atau klik "Pilih berkas…".'; return false; }
+      tutup(); return true;
+    });
+  };
+  if(_dlgKb) document.removeEventListener('keydown',_dlgKb,true);
+  _dlgKb=function(e){ if(e.key==='Escape'){ e.stopPropagation(); tutup(); }
+                      else if(e.key==='Enter'&&document.activeElement&&document.activeElement.id==='mdlg_rm'){ e.preventDefault(); ok(); } };
+  document.getElementById('mdlg_t').textContent=judul;
+  inp.value=((document.getElementById('rm')||{}).value||'').trim(); msg.textContent='';
+  document.getElementById('mdlg_ok').onclick=ok;
+  document.getElementById('mdlg_x').onclick=tutup;
+  /* klik berkas harus langsung di dalam klik pengguna — browser memblokir pemilih berkas yang dibuka belakangan */
+  document.getElementById('mdlg_file').onclick=function(){ tutup(); document.getElementById(berkasId).click(); };
+  bg.onclick=function(e){ if(e.target===bg) tutup(); };
+  btnOk.disabled=false;
+  document.addEventListener('keydown',_dlgKb,true);
+  bg.classList.add('on'); setTimeout(function(){ try{ inp.focus(); inp.select(); }catch(e){} },0);
+  /* saran RM dari daftar pasien di hub */
+  try{
+    fetch(hubURL()+'/api/pasien',{headers:{'X-ADC-Key':hubKey()},cache:'no-store'}).then(function(r){return r.json();})
+    .then(function(j){ var dl=document.getElementById('mdlg_list'); if(!dl||!j||!j.pasien) return;
+      dl.innerHTML=j.pasien.slice(0,200).map(function(p){
+        return '<option value="'+_esc(p.rm)+'">'+_esc((p.nama||'')+(p.kunjungan_ke?(' · kunjungan '+p.kunjungan_ke):''))+'</option>'; }).join(''); })
+    .catch(function(){});
+  }catch(e){}
 }
 function muatIntakeHub(){
   if(!_hubOn){ document.getElementById('_intakefile').click(); return; }
-  var rm=_rmTanya(); if(rm===null) return;
-  if(!rm){ document.getElementById('_intakefile').click(); return; }
-  hubGetPasien(rm,function(j,err){
-    if(j&&j.intake){ applyIntake(j.intake); }
-    else if(confirm('RM '+rm+' tidak ditemukan di hub'+(err?(' ('+err+')'):'')+'.\nPilih berkas Intake secara manual?')) document.getElementById('_intakefile').click();
+  _dlgMuat('Muat Form 1 (data pasien baru)','_intakefile',function(rm,selesai){
+    hubGetPasien(rm,function(j,err){
+      if(j&&j.intake){ if(selesai()) applyIntake(j.intake); }
+      else selesai('Form 1 untuk RM '+rm+' tidak ada di hub'+(err?(' ('+err+')'):'')+'.');
+    });
   });
 }
 function muatHandoffHub(){
   if(!_hubOn){ document.getElementById('_handofffile').click(); return; }
-  var rm=_rmTanya(); if(rm===null) return;
-  if(!rm){ document.getElementById('_handofffile').click(); return; }
-  hubGetPasien(rm,function(j,err){
-    if(j&&j.handoff_terakhir){ applyHandoff(j.handoff_terakhir); }
-    else if(confirm('Handoff RM '+rm+' tidak ditemukan di hub'+(err?(' ('+err+')'):'')+'.\nPilih berkas Handoff secara manual?')) document.getElementById('_handofffile').click();
+  _dlgMuat('Muat Handoff (kunjungan kontrol)','_handofffile',function(rm,selesai){
+    hubGetPasien(rm,function(j,err){
+      if(j&&j.handoff_terakhir){ if(selesai()) applyHandoff(j.handoff_terakhir); }
+      else selesai('Handoff untuk RM '+rm+' tidak ada di hub'+(err?(' ('+err+')'):'')+'.');
+    });
   });
 }
 
@@ -3198,7 +3350,24 @@ function hitungIMT(){
    input ber-id ac_iga / me_iga yang SAMA seperti sebelumnya, sehingga seluruh
    mesin (igaData, metricStatus, metricWarnings, reqStatus, _progDetail,
    buildHandoff) tidak berubah sama sekali. */
-var IGA_LBL={'0':'Clear','1':'Almost clear','2':'Mild','3':'Moderate','4':'Severe'};
+var IGA_LBL={'0':'Bersih (Clear)','1':'Hampir bersih (Almost clear)','2':'Ringan (Mild)','3':'Sedang (Moderate)','4':'Berat (Severe)'};
+/* Derajat sebelum program dipilih: disimpan sementara di d1_iga, lalu dipakai
+   (dan dikosongkan) oleh updateIgaCards begitu program Acne/Melasma aktif. */
+function setIGAUmum(id,v){
+  var el=document.getElementById(id); if(!el) return;
+  el.value=(el.value===v)?'':v;
+  if(typeof updateIgaCards==='function') updateIgaCards();
+  if(typeof updateReq==='function') updateReq();
+}
+function _derajatTeks(){
+  var t=[];
+  [['acne','Acne'],['melasma','Melasma']].forEach(function(x){
+    var c=document.getElementById('igacard_'+x[0]), v=_v(IGA_ID[x[0]]);
+    if(c&&c.style.display!=='none'&&v!=='') t.push(x[1]+' IGA '+v+' · '+(IGA_LBL[v]||''));
+  });
+  var u=_v('d1_iga'); if(!t.length&&u!=='') t.push('IGA '+u+' · '+(IGA_LBL[u]||''));
+  return t.join('; ');
+}
 function setIGA(id,v){
   var el=document.getElementById(id); if(!el) return;
   el.value=(el.value===v)?'':v;          /* ketuk lagi = batalkan */
@@ -3228,6 +3397,16 @@ function syncIGAseg(){
       }
     }
   });
+  /* kartu derajat umum (sebelum program dipilih) */
+  var u=_v('d1_iga'), cu=document.getElementById('igacard_umum');
+  if(cu){
+    var sg=cu.querySelector('.igaseg');
+    if(sg) sg.querySelectorAll('button').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-v')===u); });
+    var su=document.getElementById('igastat_umum');
+    if(su){ su.textContent = u===''?'Pilih derajat hari ini':('IGA '+u+' · '+(IGA_LBL[u]||'')+' — dipakai program Acne/Melasma setelah dipilih');
+            su.className='mstat'+(u===''?'':' ok'); }
+  }
+  var dj=document.getElementById('d2_derajat'); if(dj) dj.value=_derajatTeks();
 }
 function updateIgaCards(){
   [['acne','igacard_acne'],['melasma','igacard_melasma'],['hair','igacard_hair']].forEach(function(x){
@@ -3235,7 +3414,22 @@ function updateIgaCards(){
     var on=(typeof progFilled==='function'&&progFilled(x[0]))||
            (typeof _progInHandoff==='function'&&_progInHandoff(x[0]));
     c.style.display=on?'':'none';
+    /* derajat yang dipilih sebelum program aktif -> dipakai sekali, lalu dikosongkan
+       (supaya mengetuk ulang untuk membatalkan skor program tetap bisa) */
+    /* hanya untuk program yang DIPILIH (tahap ditentukan) atau tercantum di handoff —
+       bukan program yang sekadar tersentuh satu centang; dan hanya ke SATU program */
+    var u=document.getElementById('d1_iga'), ig=IGA_ID[x[0]]&&document.getElementById(IGA_ID[x[0]]);
+    var dipilih=(window._stage&&window._stage[x[0]])||(typeof _progInHandoff==='function'&&_progInHandoff(x[0]));
+    if(on && dipilih && ig && u && u.value!=='' && ig.value===''){ ig.value=u.value; u.value=''; }
   });
+  var cardOn=function(id){ var c=document.getElementById(id); return c&&c.style.display!=='none'; };
+  var u=document.getElementById('d1_iga');
+  /* Hair-Loss tanpa Acne/Melasma: tidak ada IGA — buang nilai sementara agar tidak
+     terbawa ke handoff sebagai "derajat" */
+  if(u && u.value!=='' && cardOn('igacard_hair') && !cardOn('igacard_acne') && !cardOn('igacard_melasma')) u.value='';
+  var anyCard=cardOn('igacard_acne')||cardOn('igacard_melasma')||cardOn('igacard_hair');
+  /* kartu umum tetap tampil selama masih ada nilai sementara yang belum dipakai program */
+  var cu=document.getElementById('igacard_umum'); if(cu) cu.style.display=(anyCard&&!(u&&u.value!==''))?'none':'';
   syncIGAseg();
 }
 </script>
