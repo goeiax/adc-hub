@@ -349,6 +349,24 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
         /^Isotretinoin low-dose/.test(ph[0]) && /Antibiotik oral — jangka pendek/.test(ph[ph.length - 1]) && /jangan bersama antibiotik tetrasiklin/.test(ok.d.querySelector('#ac_block-2 .warn-box').textContent) &&
         [...ok.d.querySelectorAll('#ovl_acne .rx-table input')].some(i => /^BPO 2,5/.test(i.placeholder)) && [...ok.d.querySelectorAll('#ovl_acne .qline .q')].some(q => /Risiko bekas/.test(q.textContent)) &&
         /id="oku"/.test(fs.readFileSync(path.join('www', 'ADC_Panduan_Pengisian_Form.html'), 'utf8')), ph); }
+    /* ===== 5h. pemilih produk resep ===== */
+    { const rp = await open('ADC_Form2_Asesmen_Umum_Dokter.html');
+      const tbs = [...rp.d.querySelectorAll('#ac_block-2 .rx-table')];
+      check('Rx picker: daftar produk tersuntik (>=170) & tombol ▾ hanya di tabel topikal (bukan Obat Minum)', rp.w.ADC_PRODUK.length >= 170 && tbs[0].querySelectorAll('.rxpick-btn').length === 3 && tbs[tbs.length - 1].querySelectorAll('.rxpick-btn').length === 0 && rp.d.querySelectorAll('#hr_rxTable .rxpick-btn').length >= 4, { n: rp.w.ADC_PRODUK.length });
+      rp.w.pickStage('acne', 1);
+      const inp = rp.d.querySelector('#ac_block-1 .rx-table tbody tr td input');
+      rp.w.openRxPick(inp);
+      check('Rx picker: terbuka dengan tab kategori sesuai program (Acne)', rp.d.getElementById('rxpick').classList.contains('on') && rp.w._rxKat === 'Acne' && rp.d.querySelectorAll('#rxp_list .rxp-it').length > 20);
+      const q = rp.d.getElementById('rxp_q'); q.value = 'benzopalene'; q.dispatchEvent(new rp.w.Event('input', { bubbles: true }));
+      const hits = rp.d.querySelectorAll('#rxp_list .rxp-it');
+      check('Rx picker: pencarian menyaring', hits.length === 1 && /Benzopalene/.test(hits[0].textContent));
+      hits[0].click();
+      const ins = inp.closest('tr').querySelectorAll('input');
+      check('Rx picker: pilih produk mengisi nama + jadwal + cara pakai, dialog tertutup, resep terekam', /Benzopalene/.test(ins[0].value) && ins[1].value === 'Pagi atau Malam' && /totol/.test(ins[2].value) && !rp.d.getElementById('rxpick').classList.contains('on') && rp.w.collectRx().some(r => /Benzopalene/.test(r.obat)), [...ins].map(i => i.value));
+      const inp2 = rp.d.querySelectorAll('#ac_block-1 .rx-table tbody tr')[1].querySelector('td input');
+      rp.w.openRxPick(inp2); rp.w._rxKat = ''; const q2 = rp.d.getElementById('rxp_q'); q2.value = 'Night Cream B 10'; q2.dispatchEvent(new rp.w.Event('input', { bubbles: true })); rp.d.querySelector('#rxp_list .rxp-it').click();
+      check('Gerbang obat membaca KANDUNGAN produk yang dipilih (Night Cream B = tretinoin)', rp.w._obatBerisiko().some(x => /Night Cream B.*tretinoin/i.test(x)), rp.w._obatBerisiko()); }
+
     /* ===== 5f. gerbang keamanan D7 ===== */
     { const gt = await open('ADC_Form2_Asesmen_Umum_Dokter.html');
       gt.w.applyIntake({ doc: 'ADC-INTAKE', pasien: { nama: 'Bumil', rm: 'RM-GATE' }, kritis: { alergi_nihil: true, hormonal: ['Sedang hamil'], flags: ['SEDANG HAMIL'] }, penugasan: {}, pengukuran: {}, persetujuan: {} });
