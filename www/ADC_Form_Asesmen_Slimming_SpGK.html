@@ -380,7 +380,7 @@ function hubPing(){
     fetch(hubURL()+'/api/ping',{cache:'no-store'}).then(function(r){return r.json();})
     .then(function(j){ _hubOn=!!(j&&j.ok); hubChip(_hubOn?'on':'off',_hubOn?'tersambung':'mati');
       /* URL webhook Make.com dibagikan hub (config.json) -> tidak perlu ditempel per pasien */
-      if(j&&j.webhook){ var wh=document.getElementById('cfg_webhook'); if(wh&&!wh.value.trim()) wh.value=j.webhook; } })
+      if(j&&j.webhook){ var wh=document.getElementById('cfg_webhook'); if(wh&&wh.value.trim()!==j.webhook){ wh.value=j.webhook; try{ localStorage.setItem('adc_webhook',j.webhook); }catch(e){} } } })
     .catch(function(){ _hubOn=false; hubChip('off','mati'); });
   }catch(e){ _hubOn=false; }
 }
@@ -698,8 +698,8 @@ function muatHandoffHub(){
   if(!_hubOn){ document.getElementById('_hofile').click(); return; }
   _dlgMuat('Muat Handoff (kunjungan kontrol)','_hofile',function(rm,selesai){
     hubGetPasien(rm,function(j,err){
-      if(j&&j.handoff_terakhir){ if(selesai()) applyHandoff(j.handoff_terakhir); }
-      else selesai('Handoff untuk RM '+rm+' tidak ada di hub'+(err?(' ('+err+')'):'')+'.');
+      if(j&&j.handoff_terakhir_slimming){ if(selesai()) applyHandoff(j.handoff_terakhir_slimming); }
+      else selesai('Handoff Slimming untuk RM '+rm+' tidak ada di hub'+(err?(' ('+err+')'):'')+'.');
     });
   });
 }
@@ -877,9 +877,12 @@ function issueHandoff(){
   if(!h.penerbitan.signoff_dokter) w.push('Dokter belum menandai "Asesmen selesai" (H).');
   if(w.length){ if(!confirm('Belum lengkap ('+w.length+'):\n\n· '+w.join('\n· ')+'\n\nTetap terbitkan handoff?')) return; }
   window._handoff=h;
-  hubPost('handoff',h,function(ok,err){
-    if(!ok&&_hubOn) alert('PERHATIAN: handoff TIDAK tersimpan di hub'+(err?('\n('+err+')'):'')+'.\n\nCek chip HUB (kunci hub salah?) lalu Terbitkan lagi — atau unduh JSON dari pop-up.');
+  /* hasil hub harus terlihat (sama seperti Form 1/2): ✓ / ✗ / hub mati */
+  if(_hubOn) hubPost('handoff',h,function(ok,err){
+    if(ok) alert('✓ Handoff Slimming tersimpan di hub (RM '+(h.pasien.rm||'?')+').');
+    else alert('PERHATIAN: handoff TIDAK tersimpan di hub'+(err?('\n('+err+')'):'')+'.\n\nCek chip HUB (kunci hub salah?) lalu Terbitkan lagi — atau unduh JSON dari pop-up.');
   });
+  else setTimeout(function(){ alert('Hub klinik TIDAK tersambung — handoff hanya di pop-up/berkas. Unduh JSON dan lampirkan ke rekam medis.'); },300);
   var w=window.open('','_blank','width=900,height=940,scrollbars=yes,resizable=yes');
   if(!w){
     var body=document.getElementById('ho_body');

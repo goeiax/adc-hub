@@ -130,6 +130,7 @@ const server = http.createServer((req, res) => {
       rm,
       intake: bacaJSON(path.join(dir, 'intake.json')),
       handoff_terakhir: bacaJSON(path.join(dir, 'handoff_terakhir.json')),
+      handoff_terakhir_slimming: bacaJSON(path.join(dir, 'handoff_terakhir_slimming.json')),
       jumlah_handoff: riwayat.length
     });
   }
@@ -154,8 +155,10 @@ const server = http.createServer((req, res) => {
         fs.writeFileSync(lama, JSON.stringify(o, null, 1));
       } else {
         /* SEMUA handoff disimpan (jejak audit) + penunjuk "terakhir" */
-        fs.writeFileSync(path.join(dir, 'handoff_' + stampe() + '.json'), JSON.stringify(o, null, 1));
-        fs.writeFileSync(path.join(dir, 'handoff_terakhir.json'), JSON.stringify(o, null, 1));
+        /* Slimming (Sp.GK) punya rantai sendiri — jangan menimpa handoff Skin Quality RM yang sama */
+        const slim = /^ADC-SLIMMING/i.test(o.sumber || '');
+        fs.writeFileSync(path.join(dir, (slim ? 'handoffslim_' : 'handoff_') + stampe() + '.json'), JSON.stringify(o, null, 1));
+        fs.writeFileSync(path.join(dir, slim ? 'handoff_terakhir_slimming.json' : 'handoff_terakhir.json'), JSON.stringify(o, null, 1));
       }
       return kirim(res, 200, { ok: true, rm, jenis });
     });

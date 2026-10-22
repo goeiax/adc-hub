@@ -443,7 +443,8 @@ function muatHandoffHub(){
   if(!_hubOn){ document.getElementById('_hofile').click(); return; }
   _dlgMuat('Muat rekam medis (handoff terakhir)','_hofile',function(rm,selesai){
     hubGetPasien(rm,function(j,err){
-      if(j&&j.handoff_terakhir){ if(selesai()) renderHO(j.handoff_terakhir); }
+      var ho=j&&(j.handoff_terakhir||j.handoff_terakhir_slimming);
+      if(ho){ if(selesai()) renderHO(ho); }
       else selesai('Handoff untuk RM '+rm+' tidak ada di hub'+(err?(' ('+err+')'):'')+'.');
     });
   });

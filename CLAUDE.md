@@ -28,6 +28,7 @@ Indonesia (all form/patient text). Code comments: Indonesian is fine.
 
 ## Data contracts (JSON)
 - `ADC-INTAKE v1` (Form 1 → Form 2): `pasien{nama,rm,wa,tanggal,…}`, `kritis{alergi,…,flags}`, `penugasan{dokter,foto_baseline,foto_area}`, `pengukuran{bb,tb,imt}`, `persetujuan{…,tanda_tangan}`.
+- Hub stores Slimming handoffs separately (`handoff_terakhir_slimming.json`, `handoffslim_<stamp>.json`; `/api/pasien/:rm` returns both); Form 2 refuses `sumber` ADC-SLIMMING-*. `pasien.hormonal`/`pasien.flags` ride in the handoff so the D7 drug gate sees pregnancy at kontrol visits. Acne modal Rx placeholders/cautions follow Dr. Oku's 4-factor note (Panduan §8).
 - `ADC-HANDOFF v1` (Form 2, every visit): `asesmen{dokter,diagnosis,pemeriksaan{…},resep[],…}`, `program_detail{acne|melasma|hair}`, `jadwal[]`, `riwayat[]` (cumulative — newest handoff carries the whole history), `kunjungan_ke`, `penerbitan{signoff_dokter,…}`.
 - IGA (FDA 0–4) entered once in Form 2 D1 via buttons (hidden inputs `ac_iga`/`me_iga`); modals show read-only mirrors. Success = IGA ≤1 AND drop ≥2 from baseline (`iga_baseline` anchored at visit 1, carried in handoff).
 
@@ -44,7 +45,7 @@ Kontrol mode = `body.mode-kontrol` (`.vis-awal` hidden, `.vis-kontrol` shown); i
 ## Testing
 No browser in the sandbox; tests use jsdom (`npm i jsdom css-tree` in a temp dir). Standard checks after every change: CSS parse (skip `<style>` blocks containing `'+`), `node --check` on extracted scripts, duplicate-id scan, plus a functional run through the real click paths (save intake → load in F2 → IGA → issue handoff → reload as kontrol). For hub tests, start `node server.js` and run the test in the same shell session.
 
-Automated end-to-end: `node e2e-test.js` (127 checks; runs on a temp copy of `server.js` + `www/`, jsdom auto-installed to temp, real `data/` untouched). Run `update-forms.bat` first so `www/` is current. Covers F1 → hub → F2 → handoff #1 → two chained kontrol handoffs, hub auth/path guards, offline fallbacks. Not covered: signature canvas, print/popup layout, real tablets.
+Automated end-to-end: `node e2e-test.js` (132 checks; runs on a temp copy of `server.js` + `www/`, jsdom auto-installed to temp, real `data/` untouched). Run `update-forms.bat` first so `www/` is current. Covers F1 → hub → F2 → handoff #1 → two chained kontrol handoffs, hub auth/path guards, offline fallbacks. Not covered: signature canvas, print/popup layout, real tablets.
 Kontrol handoffs carry diagnosis/pemeriksaan (tipe kulit, Fitzpatrick)/resep/program tahap forward from the loaded handoff when empty today (`_bawaKontrol()`, listed in `asesmen.dibawa`); values entered today always win.
 
 D1 data rules (2026-10-08/09): allergy is entered in Form 1 for new patients (Form 2 hides the editable box when an intake is loaded; shown in Ringkasan), but is editable in Form 2 when no intake is loaded (kontrol). `d2_derajat` is computed from IGA (`_derajatTeks()`), not typed; a Derajat chosen before any program (`d1_iga`) is applied only when a program STAGE is picked (or the program is in the handoff). `d2_hasil` = "Catatan klinis" (temuan + penunjang); `d1_umum` is a hidden legacy field.

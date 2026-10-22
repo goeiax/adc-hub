@@ -342,6 +342,13 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
     { const lg = await open('ADC_Form2_Asesmen_Umum_Dokter.html');
       lg.w.applyIntake({ doc: 'ADC-INTAKE', pasien: { nama: 'Lama' }, kritis: { alergi_nihil: true }, penugasan: { foto_baseline: true }, pengukuran: {}, persetujuan: {} });
       check('F2: intake lama (tanpa foto_izin) tidak diberi label "belum dicatat"', !/belum dicatat/.test($(lg.d, 'intake_body').textContent) && !/izin lisan/.test($(lg.d, 'intake_body').textContent)); }
+    { const ok = await open('ADC_Form2_Asesmen_Umum_Dokter.html');
+      const oral = [...ok.d.querySelectorAll('#ac_block-2 .rx-table')].pop().querySelectorAll('tbody tr td:first-child input');
+      const ph = [...oral].map(i => i.placeholder);
+      check('Acne selaras Dr. Oku: isotretinoin low-dose pertama, antibiotik terakhir & jangka pendek, BPO dulu, triase risiko bekas, Panduan §8',
+        /^Isotretinoin low-dose/.test(ph[0]) && /Antibiotik oral — jangka pendek/.test(ph[ph.length - 1]) && /jangan bersama antibiotik tetrasiklin/.test(ok.d.querySelector('#ac_block-2 .warn-box').textContent) &&
+        [...ok.d.querySelectorAll('#ovl_acne .rx-table input')].some(i => /^BPO 2,5/.test(i.placeholder)) && [...ok.d.querySelectorAll('#ovl_acne .qline .q')].some(q => /Risiko bekas/.test(q.textContent)) &&
+        /id="oku"/.test(fs.readFileSync(path.join('www', 'ADC_Panduan_Pengisian_Form.html'), 'utf8')), ph); }
     /* ===== 5f. gerbang keamanan D7 ===== */
     { const gt = await open('ADC_Form2_Asesmen_Umum_Dokter.html');
       gt.w.applyIntake({ doc: 'ADC-INTAKE', pasien: { nama: 'Bumil', rm: 'RM-GATE' }, kritis: { alergi_nihil: true, hormonal: ['Sedang hamil'], flags: ['SEDANG HAMIL'] }, penugasan: {}, pengukuran: {}, persetujuan: {} });
@@ -352,17 +359,26 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
       gt.dialogs.length = 0; gt.w.issueHandoff(); await sleep(300);
       const cf = (gt.dialogs.find(x => x.type === 'confirm') || {}).msg || '';
       check('Gerbang: Terbitkan memperingatkan obat berisiko + consent tindakan; pasien hamil ditandai PALING ATAS',
-        /Obat berisiko.*Isotretinoin/.test(cf) && /Informed consent tindakan/.test(cf) && /^Belum lengkap[^\n]*\n\n· PASIEN SEDANG HAMIL/.test(cf), cf.slice(0, 260)); }
+        /Obat berisiko.*Isotretinoin/.test(cf) && /Informed consent tindakan/.test(cf) && /^Belum lengkap[^\n]*\n\n· PASIEN SEDANG HAMIL/.test(cf), cf.slice(0, 260));
+      const hg = gt.w.buildHandoff(); const k2 = await open('ADC_Form2_Asesmen_Umum_Dokter.html'); k2.w.applyHandoff(hg);
+      check('Gerbang kontrol: status hamil dirantai lewat handoff (tanpa Form 1) & obat dari isian lalu tetap terdeteksi', k2.w._pasienHamilMenyusui() === 'Sedang hamil' && k2.w._obatBerisiko().some(x => /Isotretinoin/.test(x)), { hm: k2.w._pasienHamilMenyusui(), ob: k2.w._obatBerisiko() }); }
 
     /* ===== 5g. Slimming (Sp.GK) & Tracker lewat hub ===== */
     { const sl = await open('ADC_Form_Asesmen_Slimming_SpGK.html');
       check('Slimming: hub tersambung & webhook terisi dari hub', sl.w._hubOn === true && $(sl.d, 'cfg_webhook').value === 'https://hook.test/adc', { on: sl.w._hubOn, wh: $(sl.d, 'cfg_webhook').value });
       muatRM(sl, 'muatIntakeHub', RM); await until(() => sl.w._intake);
       check('Slimming: Muat Form 1 (RM) mengisi identitas, alergi, BB/TB & ringkasan', $(sl.d, 'nama').value === 'Pasien Uji Coba' && $(sl.d, 'no_rm').value === RM && $(sl.d, 'alergi').value === 'Penisilin' && $(sl.d, 'b_bb').value === '58' && $(sl.d, 'ik_sec').style.display === 'block' && /Penisilin/.test($(sl.d, 'ik_body').textContent), { nama: $(sl.d, 'nama').value, bb: $(sl.d, 'b_bb').value });
-      set(sl.d, 'no_rm', 'RM-SLIM'); sl.dialogs.length = 0; sl.w.issueHandoff();
-      await until(() => fs.existsSync(path.join('data', 'RM-SLIM', 'handoff_terakhir.json')), 4000);
-      const hs = JSON.parse(fs.readFileSync(path.join('data', 'RM-SLIM', 'handoff_terakhir.json'), 'utf8'));
-      check('Slimming: Terbitkan Handoff tersimpan di hub (sumber ADC-SLIMMING-4FAKTOR)', hs.doc === 'ADC-HANDOFF' && hs.sumber === 'ADC-SLIMMING-4FAKTOR' && hs.pasien.rm === 'RM-SLIM', hs.sumber);
+      sl.dialogs.length = 0; sl.w.issueHandoff();
+      await until(() => fs.existsSync(path.join('data', RM, 'handoff_terakhir_slimming.json')), 4000);
+      const hs = JSON.parse(fs.readFileSync(path.join('data', RM, 'handoff_terakhir_slimming.json'), 'utf8'));
+      const hk = JSON.parse(fs.readFileSync(path.join('data', RM, 'handoff_terakhir.json'), 'utf8'));
+      check('Slimming: handoff tersimpan di rantai sendiri; handoff Skin Quality RM yang sama TIDAK tertimpa', hs.sumber === 'ADC-SLIMMING-4FAKTOR' && hs.pasien.rm === RM && hk.sumber === 'ADC-FORM2-UMUM' && hk.kunjungan_ke === 3, { slim: hs.sumber, skin: hk.sumber });
+      await until(() => sl.dialogs.some(x => x.type === 'alert' && /tersimpan di hub/.test(x.msg)), 3000);
+      check('Slimming: Terbitkan memberi pesan ✓ tersimpan di hub', sl.dialogs.some(x => x.type === 'alert' && /✓ Handoff Slimming tersimpan di hub/.test(x.msg)));
+      const s2 = await open('ADC_Form_Asesmen_Slimming_SpGK.html'); muatRM(s2, 'muatHandoffHub', RM); await until(() => s2.w._prevHandoff);
+      check('Slimming: Muat Handoff (RM) mengambil rantai Slimming, bukan Skin Quality', s2.w._prevHandoff && s2.w._prevHandoff.sumber === 'ADC-SLIMMING-4FAKTOR');
+      const f2s = await open('ADC_Form2_Asesmen_Umum_Dokter.html'); f2s.w.applyHandoff(hs);
+      check('F2: menolak handoff Slimming (program lain)', !f2s.w._prevHandoff && f2s.dialogs.some(x => x.type === 'alert' && /SLIMMING/.test(x.msg)));
       const tr = await open('ADC_SkinQualityProgram_Journey_Outcome_Tracker.html');
       muatRM(tr, 'muatHandoffHub', RM); await until(() => tr.w._ho);
       check('Tracker: Muat handoff terakhir lewat hub (RM) -> kunjungan ke-3', tr.w._ho && tr.w._ho.pasien.rm === RM && tr.w._ho.kunjungan_ke === 3, tr.w._ho && tr.w._ho.kunjungan_ke);
