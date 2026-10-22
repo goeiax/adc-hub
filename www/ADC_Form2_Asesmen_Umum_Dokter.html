@@ -149,6 +149,12 @@ table.tbl td{padding:4px 8px;border:1px solid var(--line);vertical-align:middle;
 .pmhead .sub{font-size:11px;color:#847D70;margin-top:2px;}
 .pmhead button{font-family:var(--ff-body);font-weight:600;font-size:11px;letter-spacing:.14em;text-transform:uppercase;padding:8px 14px;border:1px solid var(--accent);background:var(--accent);color:#1d130c;cursor:pointer;}
 .pmhead button.ghost{background:transparent;color:var(--canvas);border-color:rgba(255,255,255,.5);}
+/* tombol aksi form program — di BAWAH, setelah semua isian */
+.pmfoot{display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap;padding:16px 18px;border-top:1px solid var(--line);background:var(--surface-quiet);}
+.pmfoot button{font-family:var(--ff-body);font-weight:600;font-size:12px;letter-spacing:.14em;text-transform:uppercase;min-height:44px;padding:0 18px;cursor:pointer;border:1px solid var(--accent);background:var(--accent);color:#fff;}
+.pmfoot button.ghost{background:var(--ink);border-color:var(--ink);color:var(--canvas);}
+/* tutup cepat (×) di kepala — tetap ada untuk tablet tanpa tombol Esc */
+.pmhead .pmx{background:transparent !important;border:1px solid rgba(255,255,255,.4) !important;color:var(--canvas) !important;font-size:22px !important;letter-spacing:0 !important;line-height:1;min-width:44px;min-height:44px;padding:0 !important;}
 .pmbody{padding:16px 20px 20px;}
 .pmctx{border:1px solid var(--line-strong);border-left:3px solid var(--accent-deep);background:var(--surface-quiet);padding:7px 11px;font-size:11.5px;margin-bottom:10px;}
 
@@ -482,7 +488,7 @@ table.tbl td{padding:4px 8px;border:1px solid var(--line);vertical-align:middle;
   .ovl{display:none!important;}
   .ovl.printme{display:block!important;position:static;background:none;padding:0;overflow:visible;}
   .ovl.printme .pmodal{border:none;max-width:none;}
-  .ovl.printme .pmhead{display:none!important;}
+  .ovl.printme .pmhead,.ovl.printme .pmfoot{display:none!important;}
   .progbtn{break-inside:avoid;}
   .band{break-after:avoid;}
 }
@@ -1034,7 +1040,48 @@ body.showall .step{display:block;}
 .mdlg-b button{font:inherit;font-size:14px;font-weight:600;min-height:44px;padding:0 18px;border-radius:var(--r-pill);cursor:pointer;border:1px solid var(--line-strong);background:var(--surface);color:var(--ink);}
 .mdlg-b .mdlg-ok{background:var(--accent-act);border-color:var(--accent-act);color:#fff;}
 .mdlg-b .mdlg-file{border-color:var(--accent-act);color:var(--accent-deep);}
-@media print{ .mdlg-bg{display:none !important;} }
+@media print{ .mdlg-bg,.pmfoot,.pmhead .pmx{display:none !important;} }
+/* ===== Lembar cetak 1 halaman (cetakSemua) ===== */
+#printsheet{display:none;}
+@media print{
+  body.ps-on > *:not(#printsheet){display:none !important;}
+  body.ps-on{background:#fff !important;}
+  body.ps-on #printsheet{display:block !important;}
+  @page{size:A4;}
+}
+#printsheet{font-family:var(--ff-body);color:#1B1A18;font-size:8.6pt;line-height:1.32;}
+#printsheet *{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+#printsheet .ps-h{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:1.5pt solid #1B1A18;padding-bottom:3pt;margin-bottom:4pt;}
+#printsheet .ps-eb{font-size:6.8pt;letter-spacing:.14em;text-transform:uppercase;color:#6B675E;}
+#printsheet h1{font-size:13pt;margin:1pt 0 0;font-weight:700;}
+#printsheet .ps-meta{text-align:right;font-size:8pt;}
+#printsheet .ps-pt{font-size:9.2pt;margin:0 0 3pt;}
+#printsheet .ps-alg{border:1.2pt solid #1B1A18;background:#FCF4F0;padding:3pt 6pt;margin-bottom:5pt;font-size:9pt;}
+#printsheet .ps-fl{margin-left:8pt;font-size:8pt;color:#8E4A33;}
+#printsheet .ps-g{display:grid;grid-template-columns:1fr 1fr;gap:4pt 10pt;}
+#printsheet .ps-b{break-inside:avoid;}
+#printsheet .ps-b.ps-wide{grid-column:1 / -1;}
+#printsheet h3{font-size:7pt;letter-spacing:.14em;text-transform:uppercase;color:#8E4A33;margin:0 0 1.5pt;padding-bottom:1pt;border-bottom:.6pt solid #D9CCB7;}
+#printsheet .ps-kv{display:grid;grid-template-columns:30mm 1fr;gap:0 5pt;padding:.6pt 0;white-space:pre-wrap;}
+#printsheet .ps-kv span{color:#6B675E;font-size:7.6pt;}
+#printsheet .ps-prog{border:.6pt solid #D9CCB7;border-radius:3pt;padding:3pt 5pt 2pt;margin:0 0 3pt;break-inside:avoid;}
+#printsheet .ps-ph{display:flex;align-items:baseline;gap:6pt;flex-wrap:wrap;margin-bottom:2pt;font-size:9.4pt;}
+#printsheet .ps-tag{font-size:7.4pt;border:.6pt solid #8E4A33;color:#8E4A33;border-radius:8pt;padding:0 5pt;}
+#printsheet .ps-ig{margin-left:auto;font-size:8.2pt;}
+#printsheet .ps-dl{color:#6B675E;}
+#printsheet .ps-pc{display:grid;gap:0 8pt;}
+#printsheet .ps-pc.c1{grid-template-columns:1fr;} #printsheet .ps-pc.c2{grid-template-columns:1fr 1fr;} #printsheet .ps-pc.c3{grid-template-columns:1fr 1.15fr 1.25fr;}
+#printsheet h4{font-size:6.8pt;letter-spacing:.1em;text-transform:uppercase;color:#6B675E;margin:0 0 1pt;font-weight:600;}
+#printsheet .ps-pc ul{margin:0;padding-left:9pt;}
+#printsheet .ps-pc li{margin:0 0 .6pt;font-size:7.9pt;}
+#printsheet .ps-tx{font-size:8pt;color:#3A3833;}
+#printsheet .ps-t{width:100%;border-collapse:collapse;font-size:8pt;}
+#printsheet .ps-t th,#printsheet .ps-t td{border:.5pt solid #D9CCB7;padding:1.5pt 4pt;text-align:left;vertical-align:top;}
+#printsheet .ps-t th{background:#F5EFE6;font-size:6.8pt;letter-spacing:.08em;text-transform:uppercase;}
+#printsheet .ps-f{display:flex;justify-content:space-between;align-items:flex-end;gap:10pt;border-top:1pt solid #1B1A18;margin-top:6pt;padding-top:3pt;font-size:8pt;}
+#printsheet .ps-sig{text-align:center;font-size:7pt;color:#6B675E;}
+#printsheet .ps-sig img{display:block;height:26pt;max-width:46mm;object-fit:contain;margin:0 auto;border-bottom:.5pt solid #999;}
+#printsheet .ps-note{font-size:6.8pt;color:#6B675E;font-style:italic;margin-top:3pt;}
 .metrik .mempty{font-size:13.5px;color:var(--ink-muted);line-height:1.5;}
 
 @media (max-width:860px){ .f.s1,.f.s2{grid-column:span 2;} }
@@ -1644,8 +1691,7 @@ body.mode-kontrol #rb2{display:none;}
   <div class="pmodal">
     <div class="pmhead">
       <div><div class="t">Asesmen Acne — 4 Faktor</div><div class="sub">Akar penyebab → tahap → resep &amp; parameter jadwal</div></div>
-      <div><button type="button" onclick="printProg('acne')">Cetak program ini</button>
-      <button type="button" class="ghost" onclick="closeProg('acne')">Tutup &amp; simpan</button></div>
+      <button type="button" class="pmx" onclick="closeProg('acne')" aria-label="Tutup" title="Tutup (isian tersimpan)">&times;</button>
     </div>
     <div class="pmbody">
       <div class="pmctx" id="ctx_acne"></div>
@@ -1802,14 +1848,15 @@ body.mode-kontrol #rb2{display:none;}
   
 
   </div>
+    <!-- tombol di bawah: diklik setelah dokter selesai mengisi -->
+    <div class="pmfoot"><button type="button" onclick="printProg('acne')">Cetak program ini</button><button type="button" class="ghost" onclick="closeProg('acne')">Tutup &amp; simpan</button></div>
   </div>
 </div>
 <div class="ovl" id="ovl_melasma" data-prog="melasma">
   <div class="pmodal">
     <div class="pmhead">
       <div><div class="t">Asesmen Hiperpigmentasi / Melasma</div><div class="sub">Multi-modalitas · metrik: foto klinis + deskriptif</div></div>
-      <div><button type="button" onclick="printProg('melasma')">Cetak program ini</button>
-      <button type="button" class="ghost" onclick="closeProg('melasma')">Tutup &amp; simpan</button></div>
+      <button type="button" class="pmx" onclick="closeProg('melasma')" aria-label="Tutup" title="Tutup (isian tersimpan)">&times;</button>
     </div>
     <div class="pmbody">
       <div class="pmctx" id="ctx_melasma"></div>
@@ -1928,14 +1975,15 @@ body.mode-kontrol #rb2{display:none;}
   
 
   </div>
+    <!-- tombol di bawah: diklik setelah dokter selesai mengisi -->
+    <div class="pmfoot"><button type="button" onclick="printProg('melasma')">Cetak program ini</button><button type="button" class="ghost" onclick="closeProg('melasma')">Tutup &amp; simpan</button></div>
   </div>
 </div>
 <div class="ovl" id="ovl_hair" data-prog="hair">
   <div class="pmodal">
     <div class="pmhead">
       <div><div class="t">Asesmen Hair-Loss</div><div class="sub">Staging Norwood/Ludwig oleh dokter · Hair Analyser</div></div>
-      <div><button type="button" onclick="printProg('hair')">Cetak program ini</button>
-      <button type="button" class="ghost" onclick="closeProg('hair')">Tutup &amp; simpan</button></div>
+      <button type="button" class="pmx" onclick="closeProg('hair')" aria-label="Tutup" title="Tutup (isian tersimpan)">&times;</button>
     </div>
     <div class="pmbody">
       <div class="pmctx" id="ctx_hair"></div>
@@ -2128,6 +2176,8 @@ body.mode-kontrol #rb2{display:none;}
     </div>
 
   </div>
+    <!-- tombol di bawah: diklik setelah dokter selesai mengisi -->
+    <div class="pmfoot"><button type="button" onclick="printProg('hair')">Cetak program ini</button><button type="button" class="ghost" onclick="closeProg('hair')">Tutup &amp; simpan</button></div>
   </div>
 </div>
 <div class="disc">Rencana perawatan disusun berdasarkan kondisi klinis pasien pada tanggal konsultasi dan dapat berubah sesuai perkembangan. Rekomendasi bersifat bertahap sesuai kondisi, bukan jaminan hasil. Semua keputusan klinis berada di bawah tanggung jawab dokter yang menangani.</div>
@@ -2626,13 +2676,15 @@ function buildHandoff(){
 /* Ringkas isi tiap form program yang dibuka — ikut ke handoff & rekam NeoSoft. */
 /* Treatment tambahan bebas-tulis per faktor (Acne & Slimming). Diprefiks nama faktor
    supaya konteksnya tidak hilang di handoff & Tracker. */
+/* nama faktor tanpa nomor badge ("1Sebum berlebih" -> "Sebum berlebih") */
+function _faktorNama(td){ var c=td.cloneNode(true); c.querySelectorAll('.ff-badge').forEach(function(b){b.remove();}); return c.textContent.replace(/\s+/g,' ').trim(); }
 function _faktorExtra(root){
   var out=[];
   root.querySelectorAll('tr').forEach(function(tr){
-    var fk=tr.querySelector('td.fk'); if(!fk) return;
+    var fk=tr.querySelector('td.ff-fac, td.fk'); if(!fk) return;
     var ex=tr.querySelector('.tx-extra'); if(!ex) return;
     var v=(ex.value||'').trim(); if(!v) return;
-    out.push('Faktor "'+fk.textContent.trim()+'" — treatment tambahan: '+v);
+    out.push('Faktor "'+_faktorNama(fk)+'" — treatment tambahan: '+v);
   });
   return out;
 }
@@ -2873,6 +2925,7 @@ function applyIntake(o){
   alert('Form 1 dimuat'+(p.nama?(' — '+p.nama):'')+'.\n\nIdentitas & alergi terisi otomatis. Ringkasan anamnesis tampil di atas.'+
     ((per.total&&per.disetujui<per.total)?('\n\nPerhatian: persetujuan pasien baru '+per.disetujui+' dari '+per.total+' butir.'):''));
 }
+function _isImgData(v){ return typeof v==='string' && v.indexOf('data:image/')===0; }
 function _esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
 function _kv(k,v){ return v?('<div class="kv"><span class="k">'+_esc(k)+'</span><span class="v">'+_esc(v)+'</span></div>'):''; }
 function renderIntake(){
@@ -2922,11 +2975,11 @@ function renderIntake(){
   /* Persetujuan + bukti tanda tangan. Tanpa menampilkan ini, dokter tidak punya
      cara tahu apakah pasien benar-benar menandatangani lembar persetujuan. */
   var tt=per.tanda_tangan||{}, ttp=tt.pasien||{};
-  var sigOk=!!ttp.gambar;
+  var sigOk=_isImgData(ttp.gambar);
   var sigImg = sigOk
-    ? '<img src="'+ttp.gambar+'" alt="Tanda tangan pasien" style="height:44px;display:block;margin-top:6px;'+
+    ? '<img src="'+_esc(ttp.gambar)+'" alt="Tanda tangan pasien" style="height:44px;display:block;margin-top:6px;'+
       'border-bottom:1px solid var(--line);max-width:220px;object-fit:contain">' : '';
-  var sigWho = [ttp.nama, ttp.tanggal].filter(Boolean).join(' &middot; ');
+  var sigWho = [ttp.nama, ttp.tanggal].filter(Boolean).join(' · ');   /* teks biasa — di-_esc saat ditampilkan */
   var t4='';
   if(per.total && per.disetujui<per.total)
     t4+='<div class="tier"><span class="tg">Persetujuan</span><div class="tc"><b>Baru '+per.disetujui+'/'+per.total+
@@ -3320,11 +3373,133 @@ function goStep(i){
   document.querySelectorAll('#rail button').forEach(function(b,k){ b.classList.toggle('on',k===_step); });
   window.scrollTo({top:0,behavior:'smooth'});
 }
+/* ===== LEMBAR CETAK 1 HALAMAN =====
+   Cetak / Simpan PDF tidak lagi mencetak seluruh langkah form (berhalaman-halaman,
+   banyak kolom kosong). Lembar ini disusun dari data yang SAMA dengan handoff
+   (buildHandoff + intake), hanya yang terisi, padat dalam satu halaman A4. */
+/* Isi form program dikelompokkan untuk pasien: penyebab (pemicu yang dicentang di tabel
+   4 faktor), rencana perawatan di klinik (treatment faktor + prosedur tahap terpilih +
+   treatment tambahan), dan edukasi yang sudah dijelaskan. Jawaban klinis (Ya/Tidak,
+   lokasi, dll.) tidak dicetak — tetap tersimpan di handoff. */
+function _psLab(c){ var l=c.closest('label'); return l?l.textContent.replace(/\s+/g,' ').trim():''; }
+/* nama tahap yang dibaca pasien: kartu tahap Acne/Melasma, atau judul fase Hair */
+function _psNamaTahap(p,k){
+  if(!k) return '';
+  var root=document.getElementById('ovl_'+p); if(!root) return String(k);
+  var kartu=root.querySelector('.sev-card[id$="sev-'+k+'"] .sev-name');
+  if(kartu) return kartu.textContent.replace(/\s+/g,' ').trim();
+  var fase=root.querySelector('.s[data-s="'+k+'"] .n');
+  if(fase) return fase.textContent.replace(/\s+/g,' ').trim();
+  return String(k);
+}
+/* label pemicu: huruf pertama kecil, singkatan (PIE, PIH, GI) tetap kapital */
+function _psKecil(t){ return (t.length>1&&t[1]===t[1].toLowerCase())?(t[0].toLowerCase()+t.slice(1)):t; }
+function _psProgram(p){
+  var root=document.getElementById('ovl_'+p), g={tahap:'',penyebab:[],klinik:[],edukasi:[]}; if(!root) return g;
+  g.tahap=_psNamaTahap(p,(window._stage&&window._stage[p])||'');
+  root.querySelectorAll('.ff-table tbody tr').forEach(function(tr){
+    var td=tr.querySelectorAll('td'); if(td.length<3) return;
+    var pem=[].map.call(td[1].querySelectorAll('input:checked'),_psLab).filter(Boolean);
+    if(pem.length) g.penyebab.push(_faktorNama(td[0])+': '+pem.map(_psKecil).join(', '));
+    [].forEach.call(td[2].querySelectorAll('input[type=checkbox]:checked'),function(c){ var t=_psLab(c); if(t) g.klinik.push(t); });
+  });
+  root.querySelectorAll('.stage-block.show input[type=checkbox]:checked, .blk.show input[type=checkbox]:checked').forEach(function(c){
+    if(c.closest('.ff-table')) return; var t=_psLab(c); if(t) g.klinik.push(t); });
+  _faktorExtra(root).forEach(function(x){ g.klinik.push(x.replace(/^Faktor "([^"]*)" — treatment tambahan: /,'$1: ')); });
+  root.querySelectorAll('label.consent-item input:checked').forEach(function(c){ var t=_psLab(c); if(t) g.edukasi.push(t); });
+  root.querySelectorAll('.sec').forEach(function(sec){
+    var hd=sec.querySelector('.sech'); if(!hd||!/Edukasi/i.test(hd.textContent)) return;
+    sec.querySelectorAll('input[type=checkbox]:checked').forEach(function(c){
+      var t=_psLab(c).replace(/^Jelaskan\s+/i,''); if(t) g.edukasi.push(t.charAt(0).toUpperCase()+t.slice(1)); });
+  });
+  g.klinik=g.klinik.filter(function(x,i,a){ return a.indexOf(x)===i; });
+  return g;
+}
+function _lembarCetak(){
+  var h=buildHandoff(), a=h.asesmen||{}, ps=h.pasien||{}, ik=window._intake||{}, ip=ik.pasien||{}, k=ik.kritis||{};
+  var E=_esc, kontrol=(h.jenis_kunjungan==='kontrol');
+  function kv(lbl,v){ return v?('<div class="ps-kv"><span>'+E(lbl)+'</span>'+E(v)+'</div>'):''; }
+  function blok(judul,isi,cls){ return isi?('<section class="ps-b'+(cls?(' '+cls):'')+'"><h3>'+E(judul)+'</h3>'+isi+'</section>'):''; }
+  var alergi=a.alergi||(a.alergi_nihil?'Nihil (dikonfirmasi)':'BELUM DIKONFIRMASI');
+  var flags=(k.flags||[]).join(' · ');
+  var pm=a.pemeriksaan||{};
+  var bt=[pm.bb&&(pm.bb+' kg'),pm.tb&&(pm.tb+' cm'),pm.imt&&('IMT '+pm.imt)].filter(Boolean).join(' · ');
+  /* anamnesis (pasien baru) */
+  var p4=(ik.seksi||[]).filter(function(s){return s.kode==='P4';});
+  var anam = kv('Keluhan',[k.keluhan,k.sejak&&('sejak '+k.sejak)].filter(Boolean).join(' · '))+
+    kv('Harapan',k.harapan)+kv('Hormonal',(k.hormonal||[]).join(', '))+kv('Obat/produk dipakai',k.obat_kini)+
+    kv('Kondisi medis',k.kondisi_medis)+kv('Pernah dirawat',k.dirawat_lain)+
+    (p4.length?(p4[0].isian||[]).map(function(x){return kv(x.k,x.v);}).join(''):'');
+  /* program, IGA, tindakan */
+  function ul(arr){ return '<ul>'+arr.map(function(x){return '<li>'+E(x)+'</li>';}).join('')+'</ul>'; }
+  var prog=Object.keys(h.program_detail||{}).map(function(p){
+    var d=h.program_detail[p], g=_psProgram(p), ig='';
+    if(!g.tahap&&d.tahap) g.tahap=_psNamaTahap(p,d.tahap);
+    var dibawa=(a.dibawa||[]).some(function(x){ return x==='program_detail.'+p||x==='tahap.'+p; });
+    if(d.iga!=null){
+      var lbl=(IGA_LBL[String(d.iga)]||'').split(' (')[0];
+      ig='Derajat hari ini: <b>'+E(d.iga)+' · '+E(lbl)+'</b>';
+      if(d.iga_baseline!=null&&d.iga_baseline!==d.iga)
+        ig+=' <span class="ps-dl">(awal '+E(d.iga_baseline)+' → '+(d.iga_delta>0?'membaik ':'memburuk ')+E(Math.abs(d.iga_delta))+' tingkat'+(d.iga_sukses?' · target tercapai':'')+')</span>';
+    }
+    var kol=[[ 'Penyebab yang ditemukan', g.penyebab ],[ 'Rencana perawatan di klinik', g.klinik ],[ 'Sudah dijelaskan ke pasien', g.edukasi ]]
+      .filter(function(x){ return x[1].length; });
+    return '<div class="ps-prog"><div class="ps-ph"><b>'+E(d.program||p)+'</b>'+(g.tahap?('<span class="ps-tag">'+(/^Fase/.test(g.tahap)?'':'Tahap ')+E(g.tahap)+'</span>'):'')+
+      (ig?('<span class="ps-ig">'+ig+'</span>'):'')+'</div>'+
+      (kol.length?('<div class="ps-pc c'+kol.length+'">'+kol.map(function(x){ return '<div><h4>'+E(x[0])+'</h4>'+ul(x[1])+'</div>'; }).join('')+'</div>')
+                 :('<div class="ps-tx">'+(dibawa?'Melanjutkan rencana perawatan dari kunjungan sebelumnya — tindakan hari ini tercatat di Evaluasi kunjungan ini.':'Belum ada tindakan yang dicentang di form program.')+'</div>'))+'</div>';
+  }).join('');
+  var rx=(a.resep||[]).length?('<table class="ps-t"><tr><th>Obat / krim</th><th>Jadwal</th><th>Cara pakai</th><th>Durasi</th></tr>'+
+    a.resep.map(function(r){return '<tr><td>'+E(r.obat)+'</td><td>'+E(r.jadwal)+'</td><td>'+E(r.cara)+'</td><td>'+E(r.durasi)+'</td></tr>';}).join('')+'</table>'):'';
+  /* derajat sudah tampil di kotak program -> tidak diulang di blok Diagnosis */
+  var igaDiProgram=Object.keys(h.program_detail||{}).some(function(p){ return h.program_detail[p].iga!=null; });
+  var ev=h.evaluasi_kontrol;
+  var evHtml=ev?(kv('Hasil vs kunjungan lalu',ev.hasil)+kv('Arah (IGA)',ev.arah)+kv('Tindakan hari ini',ev.tindakan)+
+    kv('Kepatuhan',ev.kepatuhan)+kv('Efek samping',ev.efek_samping)+kv('Perubahan resep',ev.perubahan_resep)):'';
+  var riw=(h.riwayat||[]).slice(-3).map(function(v){
+    return '<div class="ps-kv"><span>Kunj. '+E(v.kunjungan_ke||'')+' · '+E(v.tanggal||'')+'</span>'+E([v.dokter,v.diagnosis,v.resep].filter(Boolean).join(' · '))+'</div>';
+  }).join('');
+  var jd=h.jadwal||[];
+  var ritme=(_v('d5_iv')||_v('d5_start'))?[_v('d5_iv')&&('kontrol tiap '+_v('d5_iv')+' hari'),_v('d5_start')&&('mulai '+_v('d5_start')),
+             _v('d5_months')&&(_v('d5_months')+' bulan'),jd.length&&(jd.length+' reminder WA')].filter(Boolean).join(' · '):'';
+  var pn=h.penerbitan||{}, per=ik.persetujuan||{}, tt=(per.tanda_tangan||{}).pasien||{};
+  var html=
+    '<header class="ps-h"><div><div class="ps-eb">Aesthetic Derma Centre · Skin Quality Program</div>'+
+      '<h1>Lembar Asesmen Dokter</h1></div>'+
+      '<div class="ps-meta">'+E(a.tanggal||'')+' · '+(kontrol?'Kunjungan kontrol':'Kunjungan awal')+(h.kunjungan_ke?(' ke-'+E(h.kunjungan_ke)):'')+
+      '<br>Dokter pemeriksa: <b>'+E(a.dokter||'—')+'</b></div></header>'+
+    '<div class="ps-pt"><b>'+E(ps.nama||'—')+'</b> · RM '+E(ps.rm||'—')+(ps.wa?(' · WA '+E(ps.wa)):'')+
+      (ip.usia?(' · '+E(ip.usia)):'')+(ip.kelamin?(' · '+E(ip.kelamin)):'')+(ip.kota?(' · '+E(ip.kota)):'')+'</div>'+
+    '<div class="ps-alg"><b>Alergi / kontraindikasi:</b> '+E(alergi)+(flags?('<span class="ps-fl">'+E(flags)+'</span>'):'')+'</div>'+
+    '<div class="ps-g">'+
+      blok('Anamnesis (Form 1)',anam)+
+      blok('Pemeriksaan',kv('Fitzpatrick',pm.fitzpatrick)+kv('Tipe kulit',pm.tipe_kulit)+kv('BB · TB · IMT',bt)+
+        kv('Foto baseline',(ik.penugasan&&ik.penugasan.foto_baseline)?('sudah'+(ik.penugasan.foto_area?(' · '+ik.penugasan.foto_area):'')):''))+
+      blok('Diagnosis',kv('Diagnosis',a.diagnosis)+(igaDiProgram?'':kv('Derajat (IGA)',a.derajat))+kv('Catatan klinis',a.hasil),'ps-wide')+
+      blok('Evaluasi kunjungan ini',evHtml,'ps-wide')+
+      blok('Program & tindakan',prog,'ps-wide')+
+      blok('Resep',rx,'ps-wide')+
+      blok('Rencana',kv('Ritme kontrol',ritme)+kv('Kunjungan berikutnya',a.kunjungan_berikutnya)+kv('Rencana & timeline',a.rencana)+
+        kv('Instruksi kontrol',a.instruksi_kontrol)+kv('Remarks',a.remarks)+kv('Yang harus dihindari',a.hindari),'ps-wide')+
+      blok('Riwayat (3 kunjungan terakhir)',riw,'ps-wide')+
+    '</div>'+
+    '<footer class="ps-f"><div>Sign-off dokter: <b>'+(pn.signoff_dokter?E(pn.dokter_signoff||a.dokter||'ada'):'BELUM')+'</b>'+
+      (pn.tgl_signoff?(' · '+E(pn.tgl_signoff)):'')+(pn.oleh?(' · diterbitkan oleh '+E(pn.oleh)):'')+
+      (per.total?('<br>Persetujuan pasien: '+E(per.disetujui)+'/'+E(per.total)+' butir'):'')+'</div>'+
+      (_isImgData(tt.gambar)?('<div class="ps-sig"><img src="'+E(tt.gambar)+'" alt=""><span>Tanda tangan pasien'+(tt.nama?(' · '+E(tt.nama)):'')+'</span></div>'):'')+
+    '</footer>'+
+    '<div class="ps-note">Rencana perawatan disusun berdasarkan kondisi klinis pada tanggal konsultasi dan dapat berubah. Data lengkap: berkas Handoff (JSON).</div>';
+  var el=document.getElementById('printsheet');
+  if(!el){ el=document.createElement('div'); el.id='printsheet'; document.body.appendChild(el); }
+  el.innerHTML=html;
+  return el;
+}
 function cetakSemua(){
-  document.body.classList.add('showall');
-  setTimeout(function(){ window.print();
-    setTimeout(function(){ document.body.classList.remove('showall'); },400);
-  },30);
+  _lembarCetak();
+  document.body.classList.add('ps-on');
+  var lepas=function(){ document.body.classList.remove('ps-on'); window.removeEventListener('afterprint',lepas); };
+  window.addEventListener('afterprint',lepas);
+  setTimeout(function(){ window.print(); },30);
 }
 /* Bar wajib mengarahkan ke field — pastikan langkahnya dibuka dulu. */
 (function(){
