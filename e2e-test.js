@@ -364,7 +364,9 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
       const ins = inp.closest('tr').querySelectorAll('input');
       check('Rx picker: pilih produk mengisi nama + jadwal + cara pakai, dialog tertutup, resep terekam', /Benzopalene/.test(ins[0].value) && ins[1].value === 'Pagi atau Malam' && /totol/.test(ins[2].value) && !rp.d.getElementById('rxpick').classList.contains('on') && rp.w.collectRx().some(r => /Benzopalene/.test(r.obat)), [...ins].map(i => i.value));
       const inp2 = rp.d.querySelectorAll('#ac_block-1 .rx-table tbody tr')[1].querySelector('td input');
-      rp.w.openRxPick(inp2); rp.w._rxKat = ''; const q2 = rp.d.getElementById('rxp_q'); q2.value = 'Night Cream B 10'; q2.dispatchEvent(new rp.w.Event('input', { bubbles: true })); rp.d.querySelector('#rxp_list .rxp-it').click();
+      rp.w.openRxPick(inp2); const q2 = rp.d.getElementById('rxp_q'); q2.value = 'Night Cream B 10'; q2.dispatchEvent(new rp.w.Event('input', { bubbles: true }));
+      check('Rx picker: pencarian tanpa hasil di tab Acne jatuh ke semua kategori (dengan catatan)', rp.w._rxKat === 'Acne' && /menampilkan semua kategori/.test(rp.d.getElementById('rxp_list').textContent) && rp.d.querySelectorAll('#rxp_list .rxp-it').length === 1);
+      rp.d.querySelector('#rxp_list .rxp-it').click();
       check('Gerbang obat membaca KANDUNGAN produk yang dipilih (Night Cream B = tretinoin)', rp.w._obatBerisiko().some(x => /Night Cream B.*tretinoin/i.test(x)), rp.w._obatBerisiko()); }
 
     /* ===== 5f. gerbang keamanan D7 ===== */
