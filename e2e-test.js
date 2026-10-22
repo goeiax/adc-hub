@@ -175,6 +175,8 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
     check('F2: program Acne dikenali dari handoff', b.w.progsKunjungan().includes('acne'));
     const baru = b.w.reqStatus().filter(x => !x.ok).map(x => x.label);
     check('F2 kontrol: bar wajib menagih IGA/hasil/dokter/dll (belum diisi)', ['Dokter pemeriksa', 'Hasil vs kunjungan lalu', 'IGA Acne', 'Remarks berikutnya', 'Ritme kontrol', 'Sign-off dokter'].every(l => baru.includes(l)), baru);
+    b.w.updateReq();
+    check('F2 kontrol: gerbang obat melihat resep yang DIBAWA dari handoff (modal tak dibuka)', b.w._obatBerisiko().includes('Tretinoin 0,025%') && $(b.d, 'lbl_skrining').style.display !== 'none', b.w._obatBerisiko());
     set(b.d, 'k1_dokter', 'dr. Pengganti, Sp.DVE'); set(b.d, 'k1_hasil', 'Lesi aktif berkurang');
     b.w.setIGA('ac_iga', '1');
     check('F2: IGA delta=2 & sukses', (() => { const g = b.w.igaData('acne'); return g && g.baseline === 3 && g.kini === 1 && g.delta === 2 && g.sukses === true; })(), b.w.igaData('acne'));
@@ -337,6 +339,9 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
       xs.w.applyIntake({ doc: 'ADC-INTAKE', pasien: {}, kritis: {}, penugasan: {}, pengukuran: {}, persetujuan: { total: 1, disetujui: 1, tanda_tangan: { pasien: { nama: 'Z', gambar: 'x" onerror="window.__xss=1' } } } });
       check('Keamanan: tanda tangan bukan data:image ditolak (tidak ada <img onerror>)', !xs.d.querySelector('#intake_body img') && !xs.d.querySelector('[onerror]') && !xs.w.__xss); }
 
+    { const lg = await open('ADC_Form2_Asesmen_Umum_Dokter.html');
+      lg.w.applyIntake({ doc: 'ADC-INTAKE', pasien: { nama: 'Lama' }, kritis: { alergi_nihil: true }, penugasan: { foto_baseline: true }, pengukuran: {}, persetujuan: {} });
+      check('F2: intake lama (tanpa foto_izin) tidak diberi label "belum dicatat"', !/belum dicatat/.test($(lg.d, 'intake_body').textContent) && !/izin lisan/.test($(lg.d, 'intake_body').textContent)); }
     /* ===== 5f. gerbang keamanan D7 ===== */
     { const gt = await open('ADC_Form2_Asesmen_Umum_Dokter.html');
       gt.w.applyIntake({ doc: 'ADC-INTAKE', pasien: { nama: 'Bumil', rm: 'RM-GATE' }, kritis: { alergi_nihil: true, hormonal: ['Sedang hamil'], flags: ['SEDANG HAMIL'] }, penugasan: {}, pengukuran: {}, persetujuan: {} });

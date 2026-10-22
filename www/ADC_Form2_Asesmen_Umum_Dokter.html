@@ -2969,7 +2969,7 @@ function renderIntake(){
   var tF = pn.foto_baseline
     ? '<div class="tier"><span class="tg">Foto baseline</span><div class="tc">Sudah diambil'+
       (pn.foto_area?(' &middot; <b>'+_esc(pn.foto_area)+'</b>'):'')+
-      (pn.foto_izin?' &middot; izin lisan ✓':' &middot; <b>izin difoto belum dicatat</b>')+
+      (pn.foto_izin?' &middot; izin lisan ✓':(pn.foto_izin===false?' &middot; <b>izin difoto belum dicatat</b>':''))+
       ' <span class="none">— jadi pembanding untuk seluruh evaluasi berikutnya</span></div></div>'
     : '<div class="tier crit"><span class="tg">Foto baseline</span><div class="tc">'+
       '<b>BELUM DIAMBIL</b> — ambil sebelum tindakan hari ini. Tanpa foto baseline, '+
@@ -3177,10 +3177,15 @@ function renderAlergi(){
    atau punya kontraindikasi penting. Dicocokkan ke resep (collectRx) & isian form program. */
 var OBAT_RISIKO=/isotretinoin|roaccutane|spironolact|tretinoin|retinoid|adapalen|hydroquin|hidrokuinon|\bHQ\b|triple combination|finasterid|dutasterid|minoxidil\s*oral|tranexam|\bTXA\b|doxycyclin|doksisiklin|minocyclin|tetracyclin|pil KB/i;
 function _obatBerisiko(){
-  var out=[];
-  collectRx().forEach(function(r){ if(OBAT_RISIKO.test(r.obat)) out.push(r.obat); });
+  var out=[], prev=(_mode==='kontrol'&&window._prevHandoff)||null, pa=(prev&&prev.asesmen)||{}, ppd=(prev&&prev.program_detail)||{};
+  /* kontrol: bila tabel resep / form program tidak disentuh, yang terbit adalah resep & isian
+     yang DIBAWA dari handoff lalu (_bawaKontrol) — gerbang harus melihat itu juga */
+  var rx=collectRx(); if(!rx.length&&(pa.resep||[]).length) rx=pa.resep;
+  rx.forEach(function(r){ if(OBAT_RISIKO.test(r.obat)) out.push(r.obat); });
   var pd=_progDetail();
-  Object.keys(pd).forEach(function(p){ (pd[p].isian||[]).forEach(function(x){ if(OBAT_RISIKO.test(x)&&!/Form 1|Panduan/.test(x)) out.push(x.length>60?x.slice(0,57)+'…':x); }); });
+  Object.keys(pd).forEach(function(p){
+    var isian=(pd[p].isian||[]).length?pd[p].isian:((ppd[p]&&ppd[p].isian)||[]);
+    isian.forEach(function(x){ if(OBAT_RISIKO.test(x)&&!/Form 1|Panduan/.test(x)) out.push(x.length>60?x.slice(0,57)+'…':x); }); });
   return out.filter(function(x,i,a){ return a.indexOf(x)===i; }).slice(0,8);
 }
 function _pasienHamilMenyusui(){
