@@ -5,4 +5,6 @@ cd /d "%~dp0"
 copy /Y "..\ADC_Form1_Registrasi_Anamnesis_Pasien.html" www\ >nul && echo Form 1 diperbarui
 copy /Y "..\ADC_Form2_Asesmen_Umum_Dokter.html" www\ >nul && echo Form 2 diperbarui
 copy /Y "..\ADC_Panduan_Pengisian_Form.html" www\ >nul && echo Panduan diperbarui
+copy /Y "..\ADC_Form_Asesmen_Slimming_SpGK.html" www\ >nul && echo Slimming diperbarui
+copy /Y "..\ADC_SkinQualityProgram_Journey_Outcome_Tracker.html" www\ >nul && echo Tracker diperbarui
 pause

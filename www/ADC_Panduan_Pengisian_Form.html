@@ -95,8 +95,9 @@ td.v{font-weight:620;color:var(--accent-deep);white-space:nowrap;}
     <span class="who nr">Perawat</span><div>Isi <b>panel gelap "Khusus staf"</b> di Form 1: No. RM, tanggal, status, <b>dokter pemeriksa</b>, dan tandai <b>foto klinis baseline sudah diambil</b> (wajib sebelum pasien bertemu dokter — foto ini titik pembanding seluruh evaluasi hasil).</div>
     <span class="who nr">Pasien</span><div>Mengisi langkah 1–5 (boleh dibantu perawat), menandatangani lembar persetujuan di layar.</div>
     <span class="who nr">Perawat</span><div>Klik <b>Simpan Data Pasien</b> → berkas <span class="file">Intake_Nama_tanggal.json</span> terunduh. Serahkan/pindahkan ke PC dokter.</div>
+    <span class="who nr">Perawat</span><div>Setelah Simpan, baca pesannya: <b>"✓ tersimpan di hub"</b> berarti dokter bisa memuat dengan No. RM; <b>"✗ GAGAL"</b> / "hub tidak tersambung" berarti data hanya ada di berkas unduhan — perbaiki chip HUB (alamat &amp; kunci) lalu Simpan lagi.</div>
     <span class="who">Dokter</span><div>Buka Form 2 → klik <b>Muat Form 1</b>. Identitas &amp; alergi terisi otomatis; seluruh anamnesis tampil sebagai <b>Ringkasan Anamnesis</b> — baca ringkasan &amp; konfirmasi alergi <b>sebelum</b> memeriksa. Lanjutkan D1 → D7 (rincian di bagian 3).</div>
-    <span class="who nr">Perawat</span><div>Setelah dokter menetapkan ritme kontrol: generate jadwal (D4b), reserve slot NeoSoft, lalu — setelah dokter sign-off — klik <b>Terbitkan Handoff</b> dan lampirkan berkasnya ke rekam medis.</div>
+    <span class="who nr">Perawat</span><div><b>Setelah dokter sign-off (D7)</b>, di langkah 5: reserve slot NeoSoft → <b>Generate</b> jadwal → <b>Simpan</b> → <b>Kirim</b> ke SleekFlow (D4b), lalu klik <b>Terbitkan Handoff</b>. Baca status di D7: <b>"✓ tersimpan di hub"</b>; bila "✗", perbaiki chip HUB dan terbitkan lagi. Perangkat hanya berpindah tangan sekali: dokter → perawat.</div>
   </div>
   <h3>Pasien kontrol</h3>
   <div class="step-flow">
@@ -109,13 +110,13 @@ td.v{font-weight:620;color:var(--accent-deep);white-space:nowrap;}
 <div class="sec" id="f1"><span class="n">2</span><h2>Form 1 — Registrasi &amp; anamnesis</h2></div>
 <ul>
   <li><b>Panel gelap "Khusus staf"</b> diisi pendaftaran sebelum pasien mulai. Field <b>Dokter pemeriksa</b> menjadi acuan awal di Form 2 (masih bisa diubah dokter).</li>
-  <li><b>Foto klinis baseline</b>: ambil foto dengan pencahayaan &amp; sudut standar, centang "Sudah diambil", tulis area yang difoto. Tanpa ini tombol Simpan akan memperingatkan — evaluasi IGA di kunjungan berikutnya tidak punya titik awal.</li>
+  <li><b>Foto klinis baseline</b>: <b>minta izin lisan dulu</b> (centang "Pasien setuju difoto"), lalu ambil foto dengan pencahayaan &amp; sudut standar, centang "Sudah diambil", tulis area yang difoto. Persetujuan tertulis pasien menyusul di langkah 5. Tanpa ini tombol Simpan akan memperingatkan — evaluasi IGA di kunjungan berikutnya tidak punya titik awal.</li>
   <li><b>Berat &amp; tinggi badan</b> diukur perawat dan diisi di panel staf — IMT terhitung otomatis. Nilainya ikut terbawa ke Form 2 dan tersimpan di handoff; dokter tinggal membaca.</li>
   <li>Pasien mengisi 5 langkah; navigasi lewat rel di atas atau tombol Lanjut/Kembali. Field boleh dikosongkan bila pasien tidak tahu — tidak ada yang memblokir.</li>
   <li><b>Langkah 1 = data diri + riwayat kesehatan</b> (alergi, obat yang dipakai, kondisi medis, hormonal, haid) — sengaja digabung supaya seluruhnya bisa ditanyakan perawat sekali duduk, lalu dokter tinggal me-review hasilnya di Ringkasan Anamnesis Form 2.</li>
   <li>Memilih program di langkah 2 otomatis memunculkan blok detail terkait di langkah 3.</li>
   <li>Langkah 6: pasien mencentang butir persetujuan lalu <b>tanda tangan langsung di kotak</b> (jari di tablet / mouse). Tombol Hapus untuk mengulang. Tanda tangan ikut tersimpan ke berkas.</li>
-  <li><b>Simpan Data Pasien</b> memeriksa kelengkapan (nama/RM, dokter, foto, alergi, tanda tangan, persetujuan) dan menampilkan satu daftar kekurangan — boleh tetap disimpan, tetapi lengkapi bila memungkinkan.</li>
+  <li><b>Simpan Data Pasien</b> (tombol di atas, juga di akhir langkah 5) memeriksa kelengkapan (nama/RM, dokter, foto, alergi, tanda tangan, persetujuan) dan menampilkan satu daftar kekurangan — boleh tetap disimpan, tetapi lengkapi bila memungkinkan.</li>
   <li>Setelah lengkap, serahkan ke dokter bersama Form 2. Pertanyaan di form ini <b>tidak diulang</b> di form dokter maupun form program.</li>
 </ul>
 
@@ -130,9 +131,9 @@ Pada <b>kunjungan kontrol</b> (tanpa Form 1) kotak alergi tampil di D0, terisi d
 <h3>D1 · Pemeriksaan &amp; diagnosis</h3>
 <p>Foto klinis baseline serta berat/tinggi/IMT sudah diisi perawat di Form 1 — semuanya tampil di ringkasan, dokter tinggal membaca. Selain dokter pemeriksa dan profil kulit (Fitzpatrick, tipe kulit), bagian diagnosis hanya berisi tiga kolom:</p>
 <ul>
-  <li><b>Diagnosis</b> (wajib) — nama kondisi saja, singkat, mis. "Acne vulgaris + PIH". Kolom ini dibawa ke kunjungan kontrol dan tampil di semua ringkasan, jadi jangan diisi uraian.</li>
+  <li><b>Catatan klinis</b> (diisi dulu) — satu kolom untuk semua uraian: <b>Temuan</b> (kesan umum, lokasi &amp; ciri lesi, hal yang perlu diperhatikan) dan <b>Penunjang</b> (pemeriksaan tambahan yang diminta, atau "tidak perlu"). Tampil juga pada kunjungan kontrol.</li>
+  <li><b>Diagnosis</b> (wajib) — ditulis setelah temuan; nama kondisi saja, singkat, mis. "Acne vulgaris + PIH". Kolom ini dibawa ke kunjungan kontrol dan tampil di semua ringkasan, jadi jangan diisi uraian.</li>
   <li><b>Derajat</b> — skor IGA 0–4 (lihat di bawah).</li>
-  <li><b>Catatan klinis</b> — satu kolom untuk semua uraian: <b>Temuan</b> (kesan umum, lokasi &amp; ciri lesi, hal yang perlu diperhatikan) dan <b>Penunjang</b> (pemeriksaan tambahan yang diminta, atau "tidak perlu"). Tampil juga pada kunjungan kontrol.</li>
 </ul>
 <p>Seluruh isian D1 ikut tersimpan ke handoff.</p>
 
@@ -142,7 +143,7 @@ Pada <b>kunjungan kontrol</b> (tanpa Form 1) kotak alergi tampil di D0, terisi d
 <h3>D2 · Penentuan program</h3>
 <ul>
   <li>Klik kartu program untuk membuka form asesmennya (pop-up) — data pasien, alergi &amp; diagnosis D0–D1 terbawa otomatis.</li>
-  <li><b>Slimming dinilai terpisah</b> oleh Sp.GK di berkas <i>Asesmen Slimming (Sp.GK)</i> — buka file itu, bukan di sini.</li>
+  <li><b>Slimming dinilai terpisah</b> oleh Sp.GK di <i>Asesmen Slimming (Sp.GK)</i> — ada di halaman depan hub; di sana klik <b>Muat Form 1</b> (No. RM) agar identitas, alergi, BB/TB dan jawaban Slimming pasien terbawa. Handoff-nya tersimpan di hub yang sama.</li>
   <li>Di dalam modal: data diri, alergi, hormonal, gaya hidup <b>sudah ditanyakan di Form 1/2 — jangan diulang</b>; isi hanya yang spesifik program.</li>
   <li>Kolom <b>Treatment ADC terbuka setelah minimal satu pemicu dicentang</b>. Memilih <b>tahap</b> mengisi otomatis prosedur, resep cream &amp; obat minum default — semuanya tetap dapat diubah dokter. Tahap juga menetapkan tag &amp; jadwal reminder pasien.</li>
 </ul>
@@ -150,9 +151,10 @@ Pada <b>kunjungan kontrol</b> (tanpa Form 1) kotak alergi tampil di D0, terisi d
 <h3>D3 · Resep berjalan</h3>
 <p>Hanya cermin — resep ditulis <b>di dalam form program</b>, tempat tabelnya punya default per tahap. Satu sumber supaya tidak ada dua versi resep yang bertentangan di handoff. Obat hormonal oral (Finasteride/Spironolactone/Minoxidil oral, dsb.) dirujuk keluar; treatment in-clinic ADC berjalan paralel — catat di handoff agar dokter berikutnya tahu.</p>
 
-<h3>D4 → D4b · Ritme kontrol &amp; jadwal reminder</h3>
+<h3>D4 · Ritme kontrol (dokter) → D4b · Penjadwalan (perawat, langkah 5 setelah sign-off)</h3>
 <ul>
-  <li><b>Dokter</b> menetapkan ritme kontrol + tanggal mulai. Blok penjadwalan perawat terbuka setelah keduanya terisi.</li>
+  <li><b>Dokter</b> menetapkan ritme kontrol + tanggal mulai di D4 (langkah 4). Blok penjadwalan perawat (D4b) ada di <b>langkah 5, setelah D7</b>, dan terbuka setelah keduanya terisi.</li>
+  <li><b>URL webhook Make.com</b> terisi otomatis dari hub (IT mengisi <span class="file">"webhook"</span> di <span class="file">config.json</span> sekali) atau diingat per perangkat setelah diisi sekali — tidak perlu ditempel per pasien.</li>
   <li><b>Perawat</b>: reserve slot di NeoSoft → <b>Generate</b> jadwal → <b>Simpan</b> (berkas <span class="file">Jadwal_Nama.json</span>, lampirkan ke rekam medis) → <b>Kirim</b> ke SleekFlow via webhook Make.com, atau <b>Salin</b> untuk tempel manual.</li>
 </ul>
 <div class="warn"><span class="k">Wajib dipasang di Make.com</span>
@@ -170,7 +172,8 @@ Gerbang kehadirannya dipasang di skenario Make.com — jangan dikirim tanpa syar
   <span class="who">Dokter</span><div>Centang <b>Asesmen selesai</b> — tanda sign-off klinis Anda.</div>
   <span class="who nr">Perawat</span><div>Setelah sign-off dan jadwal ter-generate: klik <b>Terbitkan Handoff</b> → simpan berkas <span class="file">Handoff_Nama_tanggal.json</span> &amp; lampirkan ke rekam medis. Sampaikan edukasi sebelum pasien pulang (checklist di form program; untuk Melasma pakai skrip di <a href="#skrip">§6</a>).</div>
 </div>
-<p>Urutan lengkap satu kunjungan: dokter D0–D1 → form program di D2 → ritme D4 → perawat jadwal D4b → dokter sign-off D7 → perawat terbitkan.</p>
+<p>Urutan lengkap satu kunjungan: dokter D0–D1 → form program di D2 → resep &amp; ritme D3–D4 → rekomendasi &amp; sign-off D5–D7 → <b>perawat</b>: jadwal D4b → Terbitkan Handoff.</p>
+<p><b>Gerbang keamanan di D7</b> (dicatat, bukan menggantikan lembar consent klinik): centang <b>Informed consent tindakan</b> bila ada tindakan hari ini; bila resep memuat obat berisiko (isotretinoin, spironolactone, retinoid, hidrokuinon, finasteride, TXA, antibiotik tetrasiklin, pil KB) muncul baris <b>Skrining obat berisiko</b> — centang setelah status hamil/menyusui &amp; KB dikonfirmasi. Form memperingatkan saat Terbitkan bila belum, dan menandai keras bila Form 1 mencatat pasien hamil/menyusui.</p>
 
 <div class="sec" id="kontrol"><span class="n">4</span><h2>Kunjungan kontrol (mode Kontrol)</h2></div>
 <ul>
@@ -203,6 +206,7 @@ Gerbang kehadirannya dipasang di skenario Make.com — jangan dikirim tanpa syar
   <li><b>Simpan Data Pasien</b> dan <b>Terbitkan Handoff</b> otomatis ikut terkirim ke hub. Berkas unduhan <b>tetap dibuat</b> — itu cadangan resmi; tetap lampirkan ke rekam medis.</li>
   <li><b>Muat Form 1</b> / <b>Muat Handoff</b> cukup mengetik No. RM. Bila pasien tidak ada di hub, form otomatis menawarkan pemilih berkas seperti biasa.</li>
   <li>Hub mati bukan masalah: semua tombol kembali ke perilaku berkas. NeoSoft Cube tetap sumber kebenaran untuk jadwal, kasir, dan rekam medis resmi.</li>
+  <li><b>Journey &amp; Outcome Tracker</b> dan <b>Asesmen Slimming (Sp.GK)</b> juga disajikan hub (halaman depan) dan bisa memuat handoff / Form 1 dengan No. RM.</li>
 </ul>
 
 <div class="sec" id="skrip"><span class="n">6</span><h2>Skrip re-edukasi perawat — Melasma</h2></div>

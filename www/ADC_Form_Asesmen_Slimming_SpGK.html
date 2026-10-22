@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ADC · Asesmen Slimming (Sp.GK) — Program Terpisah</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Archivo+Narrow:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --canvas:#FAF8F5; --surface:#FFFFFF; --quiet:#E8EBE9;
+    --ink:#000; --ink-2:#3A3F3C; --mut:#6B6F6C;
+    --line:#DADCD9; --line-s:#C8CBC8;
+    --tan:#CDAF97; --tanbg:#EBE3D8; --tanink:#5A4632; --blush:#EDE6E7;
+    --ok:#3D7A5F; --okbg:#E3EDE4; --risk:#8C2F2F; --riskbg:#F3E4E0;
+    --ff-head:'Archivo',sans-serif; --ff-body:'Archivo Narrow','Archivo',sans-serif;
+  --ink-fill:#1F4E9C;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--canvas);color:var(--ink);font-family:var(--ff-body);font-size:15px;line-height:1.55}
+  .bar{background:var(--ink);color:var(--canvas);padding:11px 30px;display:flex;justify-content:space-between;align-items:center;gap:16px;position:sticky;top:0;z-index:10;flex-wrap:wrap}
+  .bar .t{font-family:var(--ff-body);font-weight:600;font-size:11px;letter-spacing:.16em;text-transform:uppercase}
+  .bar button{font-family:var(--ff-body);font-weight:600;font-size:11px;letter-spacing:.12em;text-transform:uppercase;padding:8px 15px;border:1px solid currentColor;background:transparent;color:var(--canvas);cursor:pointer}
+  .bar button:hover{background:var(--tan);color:#1d130c;border-color:var(--tan)}
+  .page{max-width:900px;margin:22px auto;background:var(--surface);border:1px solid var(--line);padding:26px 32px 24px}
+
+  .top{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:1px solid var(--ink);padding-bottom:12px;margin-bottom:14px}
+  .brand{font-family:var(--ff-head);font-weight:700;letter-spacing:.15em;font-size:15px}
+  .brand small{display:block;font-family:var(--ff-body);font-weight:400;letter-spacing:.04em;font-size:10px;color:var(--mut);margin-top:3px}
+  .code{text-align:right;font-size:10px;color:var(--mut);letter-spacing:.1em;text-transform:uppercase}
+
+  .sec{margin-top:18px}
+  .sech{font-family:var(--ff-head);font-weight:700;font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;padding:7px 12px;background:var(--quiet);border:1px solid var(--line-s);display:flex;justify-content:space-between;align-items:center}
+  .sech em{font-family:var(--ff-body);font-style:normal;font-weight:600;font-size:10px;letter-spacing:.05em;text-transform:none;color:var(--mut)}
+  .body{border:1px solid var(--line-s);border-top:none;padding:12px}
+
+  .g{display:grid;gap:8px 16px}
+  .g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:1fr 1fr 1fr}.g4{grid-template-columns:repeat(4,1fr)}.g5{grid-template-columns:repeat(5,1fr)}
+  .f{display:flex;flex-direction:column;gap:2px}
+  .f label{font-size:10px;font-weight:600;color:var(--ink-2);text-transform:uppercase;letter-spacing:.03em}
+  .in{border:none;border-bottom:1px solid var(--line-s);background:transparent;font-family:var(--ff-body);font-size:14.5px;padding:3px 2px;outline:none;width:100%}
+  .in::placeholder{color:#7E817D}
+  .in:focus{border-bottom-color:var(--tan)}
+  .ck{display:flex;flex-wrap:wrap;gap:5px 14px;margin-top:4px}
+  .ck label{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:400;text-transform:none;letter-spacing:0}
+  .hint{font-size:11px;color:var(--mut);margin-top:5px}
+  .warn{background:var(--riskbg);border:1px solid var(--risk);color:var(--risk);padding:7px 10px;font-size:11.5px;margin-top:8px}
+  .note{background:var(--tanbg);border:1px solid var(--tan);color:var(--tanink);padding:8px 11px;font-size:11.5px;margin-top:8px}
+
+  table{width:100%;border-collapse:collapse;font-size:12px;margin-top:6px}
+  th,td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+  thead th{background:var(--quiet);font-family:var(--ff-head);font-size:9.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase}
+  td.fk{font-family:var(--ff-head);font-weight:700;font-size:12px;width:19%}
+  .sched td{font-size:11.5px}
+  .sched .d{white-space:nowrap;font-weight:600}
+  .tagpill{display:inline-block;background:var(--tanbg);color:var(--tanink);border:1px solid var(--tan);font-size:9.5px;font-weight:700;letter-spacing:.06em;padding:1px 6px;text-transform:uppercase}
+  .stage{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border:1px solid var(--line-s);margin-top:6px}
+  .stage .s{padding:10px 12px;border-right:1px solid var(--line);cursor:pointer}
+  .stage .s:last-child{border-right:none}
+  .stage .s.on{background:var(--tanbg)}
+  .stage .s .n{font-family:var(--ff-head);font-weight:700;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--tanink)}
+  .stage .s .d{font-size:11.5px;color:var(--ink-2);margin-top:3px}
+  .btn{font-family:var(--ff-body);font-weight:600;font-size:11px;letter-spacing:.12em;text-transform:uppercase;padding:9px 16px;border:1px solid var(--ink);background:var(--ink);color:#fff;cursor:pointer;margin-right:6px}
+  .btn.alt{background:transparent;color:var(--ink)}
+  .btn:hover{background:var(--tan);border-color:var(--tan);color:#1d130c}
+  .st{font-size:11.5px;margin-top:8px;font-weight:600}
+  .foot{margin-top:18px;border-top:1px solid var(--line-s);padding-top:9px;font-size:10px;color:var(--mut);display:flex;justify-content:space-between}
+  .sign{display:grid;grid-template-columns:1fr 1fr;gap:26px;margin-top:20px}
+  .sign div{border-top:1px solid var(--line-s);padding-top:5px;font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:.05em}
+  @media print{
+    .bar{display:none!important}
+    body{background:#fff}
+    .page{margin:0;border:none;max-width:none;padding:0}
+    @page{size:A4;margin:11mm}
+    .sec{break-inside:avoid}
+    *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  }
+/* ===== konvensi terbaru: advisory 10px, sudut siku, no shadow ===== */
+*,*::before,*::after{border-radius:0 !important;box-shadow:none !important}
+.note,.warn,.hint,.tagpill{font-size:10px !important;line-height:1.45}
+.tx-extra{display:block;width:100%;margin-top:6px;border:none;border-bottom:1px solid var(--line-s);background:transparent;font-family:var(--ff-body);font-size:13px;padding:2px 1px;outline:none;color:var(--ink)}
+.tx-extra:focus{border-bottom-color:var(--tan)}
+.tx-extra::placeholder{color:#7E817D;font-style:italic}
+
+/* ===== ISIAN = TINTA BIRU =====
+   Konvensi rekam medis: yang DIISI dibedakan dari yang TERCETAK, supaya sekali
+   pandang jelas mana data pasien/dokter dan mana teks formulir. Placeholder tetap
+   abu (bukan data). Biru dipertahankan saat cetak — itu justru gunanya. */
+input:not([type=checkbox]):not([type=radio]):not([type=file]),
+select, textarea{color:var(--ink-fill) !important;}
+input::placeholder, textarea::placeholder{color:#7E817D !important; opacity:1;}
+input::-webkit-input-placeholder, textarea::-webkit-input-placeholder{color:#7E817D !important;}
+@media print{
+  input:not([type=checkbox]):not([type=radio]):not([type=file]),
+  select, textarea{color:var(--ink-fill) !important; -webkit-print-color-adjust:exact; print-color-adjust:exact;}
+}
+
+/* ===== ADC Hub (chip + dialog Muat) — disalin dari Form 2 ===== */
+.hubchip{display:inline-flex;align-items:center;font-size:10.5px;font-weight:600;
+  letter-spacing:.1em;text-transform:uppercase;padding:7px 13px;border-radius:999px;
+  cursor:pointer;border:1px solid rgba(245,239,230,.3);color:rgba(245,239,230,.55);
+  margin-right:10px;user-select:none;}
+.hubchip.on{border-color:#7FA37F;color:#A8C8A8;}
+.hubchip.off{border-color:rgba(245,239,230,.25);color:rgba(245,239,230,.45);}
+.hubchip.sync{border-color:#C9A86A;color:#C9A86A;}
+.mdlg-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2000;display:none;align-items:flex-start;justify-content:center;padding:12vh 16px 16px;}
+.mdlg-bg.on{display:flex;}
+.mdlg{background:var(--surface, #fff);border-radius:var(--r-card, 14px);width:100%;max-width:460px;padding:24px 24px 20px;box-shadow:0 18px 50px rgba(0,0,0,.25);}
+.mdlg-t{font-size:18px;font-weight:620;color:var(--ink, #1B1A18);margin-bottom:16px;}
+.mdlg-l{display:block;font-size:11px;font-weight:620;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2, #3A3833);margin-bottom:6px;}
+.mdlg-l span{font-weight:400;letter-spacing:0;text-transform:none;color:var(--ink-muted, #6B675E);margin-left:6px;}
+.mdlg-in{width:100%;font:inherit;font-size:16px;color:var(--ink-fill, #1F4E9C);padding:11px 13px;border:1px solid var(--line-strong, #D9CCB7);border-radius:var(--r-box, 8px);background:#fff;}
+.mdlg-in:focus{outline:none;border-color:var(--accent-act, #B0603F);}
+.mdlg-msg{min-height:20px;font-size:13px;color:var(--accent-deep, #8E4A33);margin:8px 0 6px;}
+.mdlg-b{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.mdlg-sp{flex:1;}
+.mdlg-b button{font:inherit;font-size:14px;font-weight:600;min-height:44px;padding:0 18px;border-radius:var(--r-pill, 999px);cursor:pointer;border:1px solid var(--line-strong, #D9CCB7);background:var(--surface, #fff);color:var(--ink, #1B1A18);}
+.mdlg-b .mdlg-ok{background:var(--accent-act, #B0603F);border-color:var(--accent-act, #B0603F);color:#fff;}
+.mdlg-b .mdlg-file{border-color:var(--accent-act, #B0603F);color:var(--accent-deep, #8E4A33);}
+@media print{ .hubchip,.mdlg-bg{display:none !important;} }
+</style>
+</head>
+<body>
+
+<input type="file" id="_hofile" accept=".json,application/json" style="display:none" onchange="loadHandoffFile(this)">
+<input type="file" id="_intakefile" accept=".json,application/json" style="display:none" onchange="loadIntakeFile(this)">
+<div class="bar">
+  <span class="t">ADC · Asesmen Slimming (Sp.GK) · Program terpisah dari Skin Quality</span>
+  <span>
+    <span class="hubchip off" id="hubchip" onclick="hubSetup()" title="Klik untuk mengatur alamat &amp; kunci hub" style="margin-right:6px">HUB &middot; …</span>
+    <button type="button" onclick="muatIntakeHub()">Muat Form 1</button>
+    <button type="button" onclick="muatHandoffHub()">Muat Handoff</button>
+    <button type="button" onclick="issueHandoff()">Terbitkan Handoff</button>
+    <button type="button" onclick="copyHandoffText()">Salin Ringkasan</button>
+    <button type="button" onclick="generateSchedule()">Generate Jadwal</button>
+    <button type="button" onclick="window.print()">Cetak / PDF</button>
+    <button type="button" onclick="clearForm()">Reset</button>
+  </span>
+</div>
+
+<div class="page">
+  <div class="top">
+    <div class="brand">AESTHETIC DERMA CENTRE<small>ADC Slimming Program · Sp.GK</small></div>
+    <div class="code">ADC-SLIMMING-MED-01 · v1<br>Program terpisah · Juli 2026</div>
+  </div>
+
+  <!-- DATA PASIEN -->
+  <div class="sec">
+    <div class="sech"><span>Data Pasien</span><em>diisi asisten saat registrasi</em></div>
+    <div class="body">
+      <div class="g g4">
+        <div class="f" style="grid-column:span 2"><label>Nama lengkap</label><input class="in" id="nama"></div>
+        <div class="f"><label>No. RM</label><input class="in" id="no_rm"></div>
+        <div class="f"><label>Tanggal</label><input class="in" type="date" id="tgl_doc"></div>
+        <div class="f"><label>WhatsApp</label><input class="in" id="wa" placeholder="08xx / 62xx"></div>
+        <div class="f"><label>Dokter Sp.GK</label><input class="in" id="dokter"></div>
+        <div class="f"><label>Status</label><select class="in" id="status"><option value="">—</option><option>Baru</option><option>Lama</option></select></div>
+        <div class="f" style="grid-column:span 3"><label>Asisten / nutritionist yang mendampingi</label><input class="in" id="asisten"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec" id="ik_sec" style="display:none">
+    <div class="sech"><span>Ringkasan Form 1 (registrasi &amp; anamnesis)</span><em>dari perawat/pasien — tidak perlu ditanya ulang</em></div>
+    <div class="body" id="ik_body"></div>
+  </div>
+  <div class="sec" id="ho_sec" style="display:none">
+    <div class="sech"><span>Ringkasan Handoff</span><em>riwayat dari kunjungan sebelumnya</em></div>
+    <div class="body" id="ho_body"></div>
+  </div>
+
+  <!-- A -->
+  <div class="sec">
+    <div class="sech"><span>A · Riwayat &amp; Pemicu</span><em>tanya pasien</em></div>
+    <div class="body">
+      <div class="note" style="margin-top:0">Berat badan sekarang &amp; tertinggi, tinggi badan, target berat badan, program penurunan berat badan yang pernah dicoba, riwayat hormonal (PCOS/tiroid/KB/hamil/menopause), riwayat metabolik diri &amp; keluarga, dan obat rutin <b>sudah ditanyakan di Form 1 (Registrasi &amp; Anamnesis)</b> — baca dari sana, jangan diulang. Isi di sini hanya yang spesifik program Slimming.</div>
+      <div class="g g2" style="margin-top:9px;margin-bottom:9px">
+        <div class="f"><label>Berat badan terendah 5 thn (kg)</label><input class="in" id="a_bb_min"></div>
+        <div class="f"><label>Sejak kapan berat badan naik</label><input class="in" id="a_bb_naik"></div>
+      </div>
+      <label class="hint" style="font-weight:600;text-transform:uppercase;display:block">Pola makan &amp; perilaku <span style="font-weight:400;text-transform:none">— pemetaan ke Faktor 3 &amp; 4</span></label>
+      <div class="ck" id="pola_makan">
+        <label><input type="checkbox"> Tinggi gula / karbo</label>
+        <label><input type="checkbox"> Sering ngemil</label>
+        <label><input type="checkbox"> Sering lapar walau baru makan</label>
+        <label><input type="checkbox"> Makan besar malam hari</label>
+        <label><input type="checkbox"> Makan saat stres / emosional</label>
+        <label><input type="checkbox"> Keluhan pencernaan (kembung/sembelit)</label>
+      </div>
+      <div class="g g2" style="margin-top:9px">
+        <div class="f"><label>Alergi obat / bahan <span style="text-transform:none;font-weight:400">(wajib dikonfirmasi — ikut ke handoff)</span></label><input class="in" id="alergi" placeholder="Tulis alergi &amp; kontraindikasi yang WAJIB dihindari"></div>
+        <div class="f"><label>Konfirmasi</label><div class="ck"><label><input type="checkbox" id="alergi_none"> Nihil (dikonfirmasi)</label></div></div>
+      </div>
+      <div class="warn" style="display:block">Alergi wajib dikonfirmasi &amp; disalin ke rekam NeoSoft (flag B0) sebelum resep apa pun ditulis. Kontraindikasi GLP-1 dicek di sini.</div>
+    </div>
+  </div>
+
+  <!-- B -->
+  <div class="sec">
+    <div class="sech"><span>B · Penilaian Klinis + InBody 770 (Baseline)</span><em>dokter · asisten operasikan scan sebelum konsultasi</em></div>
+    <div class="body">
+      <div class="g g5" style="margin-bottom:9px">
+        <div class="f"><label>Berat Badan (kg)</label><input class="in" id="b_bb"></div>
+        <div class="f"><label>Tinggi Badan (cm)</label><input class="in" id="b_tb"></div>
+        <div class="f"><label>Indeks Massa Tubuh</label><input class="in" id="b_imt"></div>
+        <div class="f"><label>Lingkar pinggang (cm)</label><input class="in" id="b_pinggang"></div>
+        <div class="f"><label>Tekanan darah</label><input class="in" id="b_td"></div>
+      </div>
+      <div class="g g2" style="margin-bottom:9px">
+        <div class="f"><label>Kategori</label><input class="in" id="b_kategori" placeholder="Overweight / Obes I / Obes II"></div>
+        <div class="f"><label>Alergi / kontraindikasi <span style="text-transform:none;font-weight:400">(dari Form 1 — wajib dibaca)</span></label><input class="in" placeholder="tercermin dari A · Riwayat" readonly></div>
+      </div>
+      <label class="hint" style="font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px">InBody 770 — baseline terukur</label>
+      <div class="g g5">
+        <div class="f"><label>Persen lemak / PBF (%)</label><input class="in" id="ib_pbf"></div>
+        <div class="f"><label>Massa lemak (kg)</label><input class="in" id="ib_fm"></div>
+        <div class="f"><label>Massa otot / SMM (kg)</label><input class="in" id="ib_smm"></div>
+        <div class="f"><label>Lemak visceral / VFA (cm²)</label><input class="in" id="ib_vfa"></div>
+        <div class="f"><label>Metabolisme basal / BMR (kcal)</label><input class="in" id="ib_bmr"></div>
+        <div class="f"><label>Rasio cairan tubuh / ECW:TBW</label><input class="in" id="ib_ecw"></div>
+        <div class="f"><label>InBody Score</label><input class="in" id="ib_score"></div>
+        <div class="f" style="grid-column:span 3"><label>Segmen dengan lemak membandel (bila ada)</label><input class="in" id="ib_segmen"></div>
+      </div>
+      <div class="g g2" style="margin-top:9px">
+        <div class="f"><label>Target terukur bersama pasien (berat badan + % lemak)</label><input class="in" id="b_target"></div>
+        <div class="f"><label>Estimasi waktu — rentang</label><input class="in" id="b_estimasi" placeholder="mis. 3–6 bulan"></div>
+      </div>
+      <div class="note">Sampaikan <b>rentang</b>, bukan janji absolut. Target ditetapkan pada <b>berat badan DAN persen lemak</b> — bukan timbangan semata, agar pasien tidak berhenti saat plateau padahal lemak masih turun.</div>
+    </div>
+  </div>
+
+  <!-- C -->
+  <div class="sec">
+    <div class="sech"><span>C · Penilaian 4 Faktor Metabolik → Treatment ADC</span><em>centang pemicu yang ada &amp; treatment yang dipilih</em></div>
+    <div class="body">
+      <table>
+        <thead><tr><th style="width:5%">#</th><th class="fk">Faktor</th><th style="width:36%">Pemicu (centang yang ada)</th><th>Treatment ADC (centang yang dipilih)</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td class="fk">Adipositas &amp; lemak visceral</td>
+            <td><div class="ck"><label><input type="checkbox"> VFA tinggi</label><label><input type="checkbox"> PBF tinggi</label><label><input type="checkbox"> Lingkar pinggang ↑</label></div></td>
+            <td><div class="ck"><label><input type="checkbox"> Suplemen ADC (Fat Blocker / Carbo Blocker / Fat Elimination)</label><label><input type="checkbox"> ADC Metabolic Injection (GLP-1)</label><label><input type="checkbox"> ADC Meal Plan</label></div><input class="tx-extra" placeholder="+ treatment lain (tulis bebas)"></td></tr>
+          <tr><td>2</td><td class="fk">Massa otot &amp; metabolisme rendah</td>
+            <td><div class="ck"><label><input type="checkbox"> SMM rendah</label><label><input type="checkbox"> BMR rendah</label><label><input type="checkbox"> Skinny-fat</label></div></td>
+            <td><div class="ck"><label><input type="checkbox"> Protein terstruktur</label><label><input type="checkbox"> Sport Nutrition</label><label><input type="checkbox"> ADC Power Supplement / Energy Booster</label></div><input class="tx-extra" placeholder="+ treatment lain (tulis bebas)"></td></tr>
+          <tr><td>3</td><td class="fk">Regulasi nafsu makan / hormonal</td>
+            <td><div class="ck"><label><input type="checkbox"> Sering lapar</label><label><input type="checkbox"> Makan emosional</label><label><input type="checkbox"> PCOS</label><label><input type="checkbox"> Tiroid</label></div></td>
+            <td><div class="ck"><label><input type="checkbox"> ADC Metabolic Injection (GLP-1)</label><label><input type="checkbox"> PCOS-Promil</label><label><input type="checkbox"> Lab hormonal (KALBE/PRAMITA)</label></div><input class="tx-extra" placeholder="+ treatment lain (tulis bebas)"></td></tr>
+          <tr><td>4</td><td class="fk">Sensitivitas makanan / gut &amp; genetik</td>
+            <td><div class="ck"><label><input type="checkbox"> Keluhan pencernaan</label><label><input type="checkbox"> Diet gagal berulang</label><label><input type="checkbox"> Rujukan dari asesmen Acne (Faktor 4)</label></div></td>
+            <td><div class="ck"><label><input type="checkbox"> ADC GenMe (nutrigenomik)</label><label><input type="checkbox"> Food Detective</label><label><input type="checkbox"> ADC Premium Detox</label><label><input type="checkbox"> IV Infusion Healthy Gut</label></div><input class="tx-extra" placeholder="+ treatment lain (tulis bebas)"></td></tr>
+          <tr style="background:var(--tanbg)"><td>+</td><td class="fk" style="color:var(--tanink)">Kontur pasca-penurunan</td>
+            <td><div class="ck"><label><input type="checkbox"> Kulit kendur</label><label><input type="checkbox"> Lemak segmental membandel</label></div><div style="font-size:10.5px;color:var(--tanink);margin-top:3px"><b>GATE:</b> hanya bila lemak sudah terbukti turun &amp; otot terjaga (Refill 4+)</div></td>
+            <td><div class="ck"><label><input type="checkbox"> Meso Lipo (5/10/15 cc)</label><label><input type="checkbox"> Exilis / Exipro</label><label><input type="checkbox"> X-Wave</label><label><input type="checkbox"> Combo Abdomen 3+3</label></div><input class="tx-extra" placeholder="+ treatment lain (tulis bebas)"></td></tr>
+        </tbody>
+      </table>
+      <div class="note">Faktor 3 &amp; 4 adalah <b>jalur balik dari asesmen Acne</b> — pasien acne hormonal/gut yang dirujuk ke Metabolic Health mendarat di sini. Cek apakah pasien punya rekam Acne di NeoSoft.</div>
+    </div>
+  </div>
+
+  <!-- D -->
+  <div class="sec">
+    <div class="sech"><span>D · Tahap Program</span><em>menentukan tag &amp; jadwal reminder SleekFlow</em></div>
+    <div class="body">
+      <div class="stage" id="stageBox">
+        <div class="s" data-s="1" onclick="pickStage(1)"><div class="n">Tahap 1 · Fondasi</div><div class="d">Suplemen + pola makan. GLP-1 bila indikasi. Refill 1–3.</div></div>
+        <div class="s" data-s="2" onclick="pickStage(2)"><div class="n">Tahap 2 · Metabolik</div><div class="d">Regimen berjalan, dosis dititrasi. Refill 4+ dengan respons.</div></div>
+        <div class="s" data-s="3" onclick="pickStage(3)"><div class="n">Tahap 3 · Sculpt</div><div class="d">Meso / contouring. Hanya setelah lemak terbukti turun.</div></div>
+      </div>
+      <div class="g g4" style="margin-top:10px">
+        <div class="f"><label>Tag program</label><input class="in" id="s_tag" readonly></div>
+        <div class="f"><label>Tanggal mulai</label><input class="in" type="date" id="s_start"></div>
+        <div class="f"><label>Durasi (bulan)</label><input class="in" type="number" id="s_months" value="6" min="1" max="12"></div>
+        <div class="f"><label>Resep GLP-1 (pen)?</label><select class="in" id="s_glp1"><option value="0">Tidak</option><option value="1">Ya — siklus 28 hari</option></select></div>
+      </div>
+      <div class="note"><b>Dua siklus berbeda.</b> Suplemen/obat racikan = <b>21 hari</b> (detak jantung program, attach 93%). Pen GLP-1 = <b>28 hari</b> (realisasi beli-ulang 44 hari → gap 16 hari). Reminder dibuat terpisah. <b>Titik paling rawan bukan Golden Gate, tapi 14 hari pertama</b> — 32% pasien hilang sebelum refill pertama.</div>
+    </div>
+  </div>
+
+  <!-- E -->
+  <div class="sec">
+    <div class="sech"><span>E · Rencana &amp; Tes</span><em>opsional — direkomendasikan, bukan wajib</em></div>
+    <div class="body">
+      <div class="ck">
+        <label><input type="checkbox"> ADC GenMe (Rp4,9jt) — nutrigenomik</label>
+        <label><input type="checkbox"> Food Detective (Rp2,25jt)</label>
+        <label><input type="checkbox"> Lab dasar (GDS, lipid, tiroid, fungsi hati) — KALBE / PRAMITA</label>
+      </div>
+      <div class="warn">Bila dokter menyatakan lab tertentu <b>wajib demi keamanan obat</b> (mis. sebelum GLP-1), itu bukan opsional — pindahkan ke syarat sebelum resep.</div>
+      <div class="f" style="margin-top:9px"><label>Catatan dokter</label><input class="in" id="catatan"></div>
+    </div>
+  </div>
+
+  <!-- F -->
+  <div class="sec">
+    <div class="sech"><span>F · Penjadwalan &amp; Reminder SleekFlow</span><em>refill 21 hari · pen 28 hari · re-scan InBody</em></div>
+    <div class="body">
+      <button class="btn" type="button" onclick="generateSchedule()">Generate Jadwal</button>
+      <button class="btn alt" type="button" onclick="saveSchedToRecord()">Simpan ke Rekam Medis</button>
+      <button class="btn alt" type="button" onclick="copySchedule()">Salin Jadwal</button>
+      <div class="st" id="rec_status"></div>
+      <table class="sched" style="margin-top:10px">
+        <thead><tr><th style="width:11%">Hari</th><th style="width:14%">Tanggal</th><th style="width:19%">Jenis</th><th>Pesan</th></tr></thead>
+        <tbody id="schedBody"><tr><td colspan="4" style="color:var(--mut)">Pilih tahap &amp; tanggal mulai, lalu klik Generate Jadwal.</td></tr></tbody>
+      </table>
+
+      <div class="sech" style="margin-top:14px"><span>Kirim ke SleekFlow</span><em>via webhook Make.com</em></div>
+      <div class="body">
+        <div class="g g2">
+          <div class="f"><label>Webhook URL (Make.com)</label><input class="in" id="cfg_webhook" onchange="try{localStorage.setItem('adc_webhook',this.value.trim());}catch(e){}" placeholder="https://hook.eu2.make.com/..."></div>
+          <div class="f"><label>Kontrol berikutnya (tanggal)</label><input class="in" type="date" id="s_next"></div>
+        </div>
+        <div class="ck" style="margin-top:8px">
+          <label><input type="checkbox" id="slot_reserved"> <b>Slot NeoSoft sudah di-reserve</b> (wajib sebelum kirim)</label>
+        </div>
+        <div style="margin-top:9px">
+          <button class="btn" type="button" onclick="sendToSleekFlow()">Kirim ke SleekFlow</button>
+          <button class="btn alt" type="button" onclick="copyPayload()">Salin Payload</button>
+        </div>
+        <div class="st" id="send_status"></div>
+        <div class="hint">NeoSoft = sumber kebenaran kalender (manual). Reserve slot dulu → isi tanggal → Generate → Kirim. Payload minimal, tanpa isi klinis lengkap.</div>
+        <div class="warn"><b>Wajib dipasang di Make.com:</b> reminder bertanda <b>[KONDISIONAL]</b> (Recovery) hanya boleh menyala bila pasien <b>tidak hadir</b>. Form mengirim seluruh jadwal sekaligus; logika suppress-bila-hadir ada di scenario Make/SleekFlow. Tanpa ini, pasien yang rajin tetap ditegur karena bolos — dan itu merusak kepercayaan.</div>
+        <div class="note"><b>Kenapa ada dua reminder di 14 hari pertama.</b> Data invoice Jan–Jul 2026: <b>32% pasien hilang sebelum refill pertama sempat terjadi</b> — kebocoran terbesar di seluruh program, lebih besar dari Golden Gate. Hari 7 dan hari 14 adalah titik paling rawan.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- H · SIGN-OFF -->
+  <div class="sec">
+    <div class="sech"><span>H · Sign-off &amp; Penerbitan Handoff</span><em>dokter Sp.GK menutup asesmen, lalu terbitkan</em></div>
+    <div class="body">
+      <div class="warn" style="border-color:var(--tan);background:var(--tanbg);color:var(--tanink);display:block">
+        <label style="font-size:13.5px"><input type="checkbox" id="signoff"> <b>Asesmen selesai — siap diterbitkan</b> (sign-off dokter Sp.GK)</label>
+      </div>
+      <div class="g g3" style="margin-top:9px">
+        <div class="f"><label>Nama dokter yang menandatangani</label><input class="in" id="signoff_dokter" placeholder="dr. ……, Sp.GK"></div>
+        <div class="f"><label>Tanggal sign-off</label><input class="in" type="date" id="signoff_tgl"></div>
+        <div class="f"><label>Diterbitkan oleh</label><input class="in" id="terbit_oleh" placeholder="nama perawat / dokter"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- G -->
+  <div class="sec">
+    <div class="sech"><span>G · Edukasi Pasien</span><em>disampaikan asisten / nutritionist sebelum pasien pulang</em></div>
+    <div class="body">
+      <div class="ck" style="flex-direction:column;gap:5px">
+        <label><input type="checkbox"> Jelaskan hasil InBody — fokus lemak visceral &amp; massa otot, bukan timbangan</label>
+        <label><input type="checkbox"> Jelaskan target: berat badan <b>dan</b> % lemak, dalam rentang waktu — bukan janji angka</label>
+        <label><input type="checkbox"> Jelaskan cara pakai obat + efek samping awal; laporkan via WA bila mengganggu</label>
+        <label><input type="checkbox"> Jelaskan siklus refill 21 hari — obat jangan sampai putus</label>
+        <label><input type="checkbox"> Beri tahu: <b>re-scan InBody GRATIS</b> di kunjungan refill ke-1, ke-4, dan ke-8</label>
+        <label><input type="checkbox"> Jadwalkan kunjungan refill berikutnya sebelum pasien pulang</label>
+      </div>
+      <div class="warn"><b>Jangan dikatakan:</b> &ldquo;kurang disiplin&rdquo; · janji angka penurunan spesifik · &ldquo;obatnya bikin kurus langsung&rdquo; · &ldquo;pasti sembuh setelah program&rdquo;.</div>
+      <div class="sign">
+        <div>Tanda tangan pasien</div>
+        <div>Dokter Sp.GK</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">
+    <span>ADC Slimming Program · Asesmen 4 Faktor Metabolik · Dokumen Internal</span>
+    <span>Juli 2026</span>
+  </div>
+</div>
+
+<script>
+var SLEEKFLOW_WEBHOOK='';
+/* ===== ADC HUB — disalin dari Form 2 (companion server, Tahap 1) ===== */
+var RM_ID='no_rm';
+function _dEsc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+function hubDefault(){ /* disajikan hub sendiri (http) -> pakai origin; dibuka sbg file -> localhost */
+  return (location.protocol==='http:'||location.protocol==='https:')?location.origin:'http://localhost:3777'; }
+function hubURL(){ try{return (localStorage.getItem('adc_hub_url')||hubDefault()).replace(/\/+$/,'');}catch(e){return hubDefault();} }
+function hubKey(){ try{return localStorage.getItem('adc_hub_key')||'';}catch(e){return '';} }
+var _hubOn=false;
+function hubChip(st,txt){ var c=document.getElementById('hubchip'); if(!c) return;
+  c.className='hubchip '+st; c.textContent='HUB · '+txt; }
+function hubPing(){
+  try{
+    fetch(hubURL()+'/api/ping',{cache:'no-store'}).then(function(r){return r.json();})
+    .then(function(j){ _hubOn=!!(j&&j.ok); hubChip(_hubOn?'on':'off',_hubOn?'tersambung':'mati');
+      /* URL webhook Make.com dibagikan hub (config.json) -> tidak perlu ditempel per pasien */
+      if(j&&j.webhook){ var wh=document.getElementById('cfg_webhook'); if(wh&&!wh.value.trim()) wh.value=j.webhook; } })
+    .catch(function(){ _hubOn=false; hubChip('off','mati'); });
+  }catch(e){ _hubOn=false; }
+}
+function hubSetup(){
+  var u=prompt('Alamat hub (PC yang menjalankan adc-hub):',hubURL()); if(u===null) return;
+  try{ localStorage.setItem('adc_hub_url',(u||'http://localhost:3777')); }catch(e){}
+  var k=prompt('Kunci hub (lihat jendela server / config.json):',hubKey());
+  if(k!==null){ try{ localStorage.setItem('adc_hub_key',k); }catch(e){} }
+  hubPing();
+}
+function hubPost(jenis,obj,cb){
+  if(!_hubOn){ if(cb) cb(false,'hub tidak tersambung'); return; }
+  try{
+    hubChip('sync','mengirim…');
+    fetch(hubURL()+'/api/'+jenis,{method:'POST',
+      headers:{'Content-Type':'application/json','X-ADC-Key':hubKey()},
+      body:JSON.stringify(obj)})
+    .then(function(r){return r.json();})
+    .then(function(j){ hubChip(j.ok?'on':'off', j.ok?(jenis+' tersimpan'):('gagal: '+(j.error||''))); if(cb) cb(!!j.ok,j.error||''); })
+    .catch(function(e){ hubChip('off','gagal kirim'); if(cb) cb(false,String(e)); });
+  }catch(e){ if(cb) cb(false,String(e)); }
+}
+function hubGetPasien(rm,cb){
+  try{
+    fetch(hubURL()+'/api/pasien/'+encodeURIComponent(rm),{headers:{'X-ADC-Key':hubKey()},cache:'no-store'})
+    .then(function(r){return r.json();})
+    .then(function(j){ cb(j&&!j.error?j:null, j&&j.error); })
+    .catch(function(e){ cb(null,String(e)); });
+  }catch(e){ cb(null,String(e)); }
+}
+
+window.addEventListener('load',function(){
+  try{ var wh=document.getElementById('cfg_webhook'), v=localStorage.getItem('adc_webhook'); if(wh&&v&&!wh.value.trim()) wh.value=v; }catch(e){}
+  hubPing(); setInterval(hubPing,30000);
+});
+var _dlgSeq=0, _dlgKb=null;
+function _dlgMuat(judul, berkasId, onRM){
+  var bg=document.getElementById('mdlg');
+  if(!bg){
+    bg=document.createElement('div'); bg.id='mdlg'; bg.className='mdlg-bg';
+    bg.innerHTML='<div class="mdlg" role="dialog" aria-modal="true" aria-labelledby="mdlg_t">'+
+      '<div class="mdlg-t" id="mdlg_t"></div>'+
+      '<label class="mdlg-l" for="mdlg_rm">No. RM pasien <span>dari hub klinik</span></label>'+
+      '<input class="mdlg-in" id="mdlg_rm" list="mdlg_list" autocomplete="off" placeholder="ketik No. RM">'+
+      '<datalist id="mdlg_list"></datalist>'+
+      '<div class="mdlg-msg" id="mdlg_msg"></div>'+
+      '<div class="mdlg-b">'+
+        '<button type="button" class="mdlg-file" id="mdlg_file">Pilih berkas…</button>'+
+        '<span class="mdlg-sp"></span>'+
+        '<button type="button" class="mdlg-x" id="mdlg_x">Batal</button>'+
+        '<button type="button" class="mdlg-ok" id="mdlg_ok">Muat</button>'+
+      '</div></div>';
+    document.body.appendChild(bg);
+  }
+  /* Satu token per pembukaan dialog: respons hub yang datang setelah Batal / dialog lain
+     dibuka diabaikan (tidak memuat pasien, tidak menutup dialog yang salah). Satu
+     listener keydown global — dilepas sebelum dipasang lagi, supaya Esc tidak "bocor". */
+  var tok=++_dlgSeq, btnOk=document.getElementById('mdlg_ok');
+  var tutup=function(){ _dlgSeq++; bg.classList.remove('on'); btnOk.disabled=false;
+    if(_dlgKb){ document.removeEventListener('keydown',_dlgKb,true); _dlgKb=null; } };
+  var inp=document.getElementById('mdlg_rm'), msg=document.getElementById('mdlg_msg');
+  var ok=function(){
+    if(btnOk.disabled) return;                       /* cegah klik ganda = muat ganda */
+    var rm=(inp.value||'').trim();
+    if(!rm){ msg.textContent='Ketik No. RM, atau klik "Pilih berkas…".'; inp.focus(); return; }
+    msg.textContent='Memuat…'; btnOk.disabled=true;
+    /* selesai(gagal) -> true bila permintaan ini masih berlaku (pemanggil boleh memuat data) */
+    onRM(rm,function(gagal){
+      if(tok!==_dlgSeq) return false;
+      btnOk.disabled=false;
+      if(gagal){ msg.textContent=gagal+' Coba RM lain, atau klik "Pilih berkas…".'; return false; }
+      tutup(); return true;
+    });
+  };
+  if(_dlgKb) document.removeEventListener('keydown',_dlgKb,true);
+  _dlgKb=function(e){ if(e.key==='Escape'){ e.stopPropagation(); tutup(); }
+                      else if(e.key==='Enter'&&document.activeElement&&document.activeElement.id==='mdlg_rm'){ e.preventDefault(); ok(); } };
+  document.getElementById('mdlg_t').textContent=judul;
+  inp.value=((document.getElementById(RM_ID)||{}).value||'').trim(); msg.textContent='';
+  document.getElementById('mdlg_ok').onclick=ok;
+  document.getElementById('mdlg_x').onclick=tutup;
+  /* klik berkas harus langsung di dalam klik pengguna — browser memblokir pemilih berkas yang dibuka belakangan */
+  document.getElementById('mdlg_file').onclick=function(){ tutup(); document.getElementById(berkasId).click(); };
+  bg.onclick=function(e){ if(e.target===bg) tutup(); };
+  btnOk.disabled=false;
+  document.addEventListener('keydown',_dlgKb,true);
+  bg.classList.add('on'); setTimeout(function(){ try{ inp.focus(); inp.select(); }catch(e){} },0);
+  /* saran RM dari daftar pasien di hub */
+  try{
+    fetch(hubURL()+'/api/pasien',{headers:{'X-ADC-Key':hubKey()},cache:'no-store'}).then(function(r){return r.json();})
+    .then(function(j){ var dl=document.getElementById('mdlg_list'); if(!dl||!j||!j.pasien) return;
+      dl.innerHTML=j.pasien.slice(0,200).map(function(p){
+        return '<option value="'+_dEsc(p.rm)+'">'+_dEsc((p.nama||'')+(p.kunjungan_ke?(' · kunjungan '+p.kunjungan_ke):''))+'</option>'; }).join(''); })
+    .catch(function(){});
+  }catch(e){}
+}
+
+var REFILL=21, PEN=28, RESCAN=[1,4,8], GATE=4;
+var STAGE={1:{tag:'SLIM-FONDASI'},2:{tag:'SLIM-METABOLIK'},3:{tag:'SLIM-SCULPT'}};
+var _stage=null;
+
+function pickStage(n){_stage=n;
+  document.querySelectorAll('#stageBox .s').forEach(function(e){e.classList.toggle('on', e.getAttribute('data-s')==String(n));});
+  document.getElementById('s_tag').value=STAGE[n].tag;
+}
+function addDays(b,n){var d=new Date(b.getTime());d.setDate(d.getDate()+n);return d;}
+function fmt(d){var D=['Min','Sen','Sel','Rab','Kam','Jum','Sab'];return D[d.getDay()]+', '+d.getDate()+'/'+(d.getMonth()+1)+'/'+d.getFullYear();}
+function _iso(d){return d.toISOString().slice(0,10);}
+function _val(id){var e=document.getElementById(id);return e?(e.value||'').trim():'';}
+function _wa(v){v=(v||'').replace(/\D/g,'');if(v.indexOf('0')===0)v='62'+v.slice(1);return v;}
+
+function buildSchedule(startStr,stageN,months,glp1){
+  if(!startStr||!stageN)return null;
+  var start=new Date(startStr+'T00:00:00'), tag=STAGE[stageN].tag, rows=[], total=months*30;
+  function push(off,jenis,msg){rows.push({off:off,date:addDays(start,off),jenis:jenis,tag:tag,msg:msg});}
+
+  push(0,'Welcome','Selamat datang di ADC Slimming Program. Program ini diukur, bukan ditebak — hasil InBody Anda hari ini jadi titik awal. Mulai obat sesuai arahan dokter.');
+  push(3,'Check-in','Check-in awal: bagaimana kondisi Anda? Efek ringan di minggu pertama umumnya normal. Bila mengganggu, balas pesan ini — jangan dihentikan sendiri.');
+  push(7,'Monitoring H+7 (RAWAN)','Sudah seminggu. Sudah rutin minum obatnya? Boleh kirim foto menu makan hari ini dan berat badan terakhir. Ada keluhan? Semua kami catat sebagai bahan evaluasi dokter. Minggu pertama masa penyesuaian — banyak yang berhenti di sini padahal tubuh baru mulai merespons.');
+  push(14,'Monitoring H+14 (RAWAN)','Dua minggu — titik paling rawan berhenti. Boleh kirim foto makan + berat badan + ceritakan keluhan (dicatat untuk dokter). Refill pertama Anda ±minggu depan, di kunjungan itu ada re-scan InBody GRATIS — kita lihat apakah yang turun benar-benar lemak. Sudah ada jadwalnya?');
+
+  var n=1;
+  for(var r=REFILL;r<=total;r+=REFILL){
+    push(r-3,'Refill Suplemen','Obat Anda diperkirakan habis ±3 hari lagi. Mari siapkan refill di kunjungan berikutnya — jangan sampai ada jeda obat.');
+    if(n>=2){ push(r-10,'Monitoring','Update: sudah rutin obatnya? Boleh kirim foto makan + berat badan + keluhan. Membantu dokter menyesuaikan program Anda di kunjungan berikutnya.'); }
+    if(RESCAN.indexOf(n)>=0){
+      push(r,'Re-scan InBody (GRATIS)','Di kunjungan refill ini Anda dapat re-scan InBody GRATIS. Kita lihat bersama: yang turun lemak atau otot.');
+    }
+    if(n===GATE){
+      push(r,'GOLDEN GATE — CR prioritas','Evaluasi penting (akhir golden period). Bandingkan InBody vs awal: lemak visceral turun, otot terjaga. Bahas tahap berikutnya. TELEPON PERSONAL, bukan blast.');
+    }
+    push(r+3,'Recovery [KONDISIONAL]','Kami belum bertemu Anda di jadwal refill. Tidak masalah — mari atur ulang. Jeda obat membuat progres Anda mundur.');
+    n++;
+  }
+  if(glp1){
+    for(var p=PEN;p<=total;p+=PEN){
+      push(p-3,'Re-order Pen GLP-1','Pen Anda diperkirakan habis ±3 hari lagi. Siklus pen 28 hari — beda dari refill suplemen. Mari siapkan agar tidak ada jeda dosis.');
+    }
+  }
+  rows.sort(function(a,b){return a.off-b.off;});
+  return rows;
+}
+function generateSchedule(){
+  var months=parseInt(_val('s_months')||'6',10), glp1=_val('s_glp1')==='1';
+  var rows=buildSchedule(_val('s_start'),_stage,months,glp1);
+  var tb=document.getElementById('schedBody');
+  if(!rows){tb.innerHTML='<tr><td colspan="4" style="color:var(--risk)">Pilih tahap (D) dan tanggal mulai dulu.</td></tr>';return;}
+  window._schedRows=rows;
+  tb.innerHTML=rows.map(function(r){
+    var hi = (r.jenis.indexOf('GOLDEN')>=0)?' style="background:var(--riskbg)"':((r.jenis.indexOf('Re-scan')>=0)?' style="background:var(--tanbg)"':'');
+    return '<tr'+hi+'><td class="d">H+'+r.off+'</td><td class="d">'+fmt(r.date)+'</td><td><span class="tagpill">'+r.jenis+'</span></td><td>'+r.msg+'</td></tr>';
+  }).join('');
+}
+function copySchedule(){
+  var rows=window._schedRows||[];if(!rows.length){alert('Generate Jadwal dulu.');return;}
+  var t=rows.map(function(r){return 'H+'+r.off+'\t'+_iso(r.date)+'\t'+r.jenis+'\t'+r.msg;}).join('\n');
+  navigator.clipboard.writeText(t).then(function(){alert('Jadwal disalin ('+rows.length+' reminder).');});
+}
+function buildPayload(){
+  var rows=window._schedRows||[];
+  return {
+    source:'ADC-SLIMMING-4FAKTOR', submitted_at:new Date().toISOString(),
+    nama:_val('nama'), no_rm:_val('no_rm'), wa:_wa(_val('wa')), dokter:_val('dokter'),
+    program_tag:_val('s_tag'), tgl_mulai:_val('s_start'), durasi_bulan:_val('s_months'),
+    glp1:_val('s_glp1')==='1', siklus_refill_hari:REFILL, siklus_pen_hari:PEN,
+    kontrol_berikut:_val('s_next'),
+    slot_reserved:!!(document.getElementById('slot_reserved')&&document.getElementById('slot_reserved').checked),
+    schedule:rows.map(function(r){return {off:r.off,tanggal:_iso(r.date),jenis:r.jenis,tag:r.tag,pesan:r.msg};})
+  };
+}
+function sendToSleekFlow(){
+  var st=document.getElementById('send_status');
+  var url=_val('cfg_webhook')||SLEEKFLOW_WEBHOOK;
+  if(!url){alert('Isi URL Webhook Make.com dulu.');return;}
+  if(!_val('s_tag')){alert('Pilih tahap program dulu (Bagian D).');return;}
+  if(!(window._schedRows&&window._schedRows.length)){alert('Generate Jadwal dulu.');return;}
+  var wa=_wa(_val('wa')); if(wa.length<9){alert('Nomor WhatsApp pasien belum valid.');return;}
+  if(!(document.getElementById('slot_reserved')&&document.getElementById('slot_reserved').checked)){
+    if(!confirm('Slot NeoSoft belum ditandai ter-reserve. Tetap kirim?'))return;
+  }
+  var p=buildPayload(), body=JSON.stringify(p), ok=false;
+  try{ if(navigator.sendBeacon){ ok=navigator.sendBeacon(url,new Blob([body],{type:'application/json'})); } }catch(e){}
+  if(!ok){ try{ fetch(url,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:body}); ok=true; }catch(e){} }
+  if(st){ st.textContent = ok ? ('Terkirim ke antrean Make.com — '+p.nama+' ('+p.program_tag+') · '+p.schedule.length+' reminder')
+                              : 'Gagal. Cek koneksi / URL webhook, atau pakai Salin Payload.';
+          st.style.color = ok ? 'var(--ok)' : 'var(--risk)'; }
+}
+function recordText(){
+  var rows=window._schedRows||[], L=[];
+  L.push('CATATAN JADWAL PROGRAM — ADC Slimming (Sp.GK)');
+  L.push('Pasien: '+(_val('nama')||'—')+'  ·  RM: '+(_val('no_rm')||'—')+'  ·  WA: '+_wa(_val('wa')));
+  L.push('Dokter Sp.GK: '+(_val('dokter')||'—')+'  ·  Tanggal: '+(_val('tgl_doc')||'—'));
+  L.push('Tahap: '+(_val('s_tag')||'—')+'  ·  Mulai: '+(_val('s_start')||'—')+'  ·  Durasi: '+(_val('s_months')||'—')+' bln'+(_val('s_glp1')==='1'?'  ·  GLP-1 pen (28 hari)':''));
+  L.push('Kunjungan berikutnya: '+(_val('s_next')||'—')+'  ·  Slot NeoSoft: '+((document.getElementById('slot_reserved')||{}).checked?'ter-reserve':'BELUM'));
+  L.push('');
+  L.push('JADWAL REMINDER ('+rows.length+' item):');
+  rows.forEach(function(r){ L.push('  H+'+r.off+'  '+_iso(r.date)+'  '+r.jenis+'  —  '+r.msg); });
+  L.push('');
+  L.push('Catatan: reminder [KONDISIONAL] hanya menyala bila pasien tidak hadir.');
+  return L.join('\n');
+}
+function saveSchedToRecord(){
+  if(!(window._schedRows&&window._schedRows.length)){ alert('Generate Jadwal dulu sebelum menyimpan ke rekam medis.'); return; }
+  var txt=recordText(), st=document.getElementById('rec_status');
+  var nm=(_val('nama')||'Pasien').replace(/[^A-Za-z0-9]+/g,'_').replace(/^_+|_+$/g,'');
+  var d=new Date(), ymd=d.getFullYear()+('0'+(d.getMonth()+1)).slice(-2)+('0'+d.getDate()).slice(-2);
+  try{ var b=new Blob([txt],{type:'text/plain'}), u=URL.createObjectURL(b), a=document.createElement('a');
+    a.href=u; a.download='Jadwal_Slimming_'+nm+'_'+ymd+'.txt'; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function(){URL.revokeObjectURL(u);},1500);
+  }catch(e){}
+  if(navigator.clipboard) navigator.clipboard.writeText(txt).catch(function(){});
+  window._schedSaved=true;
+  if(st){ st.textContent='Catatan jadwal tersimpan — berkas diunduh & disalin. Lampirkan ke rekam medis NeoSoft.'; st.style.color='var(--ok)'; }
+}
+function copyPayload(){
+  if(!(window._schedRows&&window._schedRows.length)){alert('Generate Jadwal dulu.');return;}
+  navigator.clipboard.writeText(JSON.stringify(buildPayload(),null,2)).then(function(){alert('Payload JSON disalin.');});
+}
+/* ===== HANDOFF — rangkum asesmen awal + rencana perawatan berjalan =====
+   Skema ADC-HANDOFF v1 - identik dengan Form 2 & form program lain.
+   Metrik Slimming = InBody 770 baseline (terukur). */
+function _riwayatDari(prev){
+  if(!prev) return [];
+  var arr=(prev.riwayat||[]).slice(), a=prev.asesmen||{};
+  arr.push({kunjungan_ke:prev.kunjungan_ke||arr.length+1, tanggal:a.tanggal, dokter:a.dokter,
+    diagnosis:a.diagnosis, hasil:a.hasil, rencana:a.rencana,
+    instruksi_kontrol:a.instruksi_kontrol, remarks:a.remarks,
+    resep:(a.resep||[]).map(function(r){return [r.obat,r.jadwal].filter(Boolean).join(' ');}).filter(Boolean).join('; ')});
+  return arr;
+}
+function loadHandoffFile(input){
+  var f=input.files&&input.files[0]; if(!f) return;
+  var r=new FileReader();
+  r.onload=function(e){
+    try{
+      var h=JSON.parse(e.target.result);
+      if(h.doc!=='ADC-HANDOFF'){ if(!confirm('Berkas ini bukan Handoff ADC. Tetap muat?')){input.value='';return;} }
+      applyHandoff(h);
+    }catch(err){ alert('Gagal membaca berkas: '+err.message); }
+    input.value='';
+  };
+  r.readAsText(f);
+}
+function applyHandoff(h){
+    try{
+      window._prevHandoff=h;
+      var a=h.asesmen||{};
+      function put(id,v){var el=document.getElementById(id); if(el&&v&&!el.value) el.value=v;}
+      if(h.pasien){ put('nama',h.pasien.nama); put('no_rm',h.pasien.rm); put('wa',h.pasien.wa); }
+      put('dokter',a.dokter);
+      put('alergi',a.alergi);
+      if(a.alergi_nihil){var an=document.getElementById('alergi_none'); if(an) an.checked=true;}
+      var all=_riwayatDari(h);
+      var body=document.getElementById('ho_body');
+      if(body){
+        body.innerHTML='<b>Riwayat perawatan pasien (dari handoff kunjungan sebelumnya)</b>'+
+          '<table style="margin-top:5px"><thead><tr><th>Kunj.</th><th>Tanggal</th><th>Dokter</th><th>Diagnosis / hasil</th><th>Resep · kontrol · remarks</th></tr></thead><tbody>'+
+          all.map(function(v){return '<tr><td>'+_hesc(v.kunjungan_ke||'')+'</td><td>'+_hesc(v.tanggal)+'</td><td>'+_hesc(v.dokter)+'</td><td>'+_hesc([v.diagnosis,v.hasil].filter(Boolean).join(' — '))+'</td><td>'+_hesc([v.resep,v.instruksi_kontrol,v.remarks].filter(Boolean).join(' · '))+'</td></tr>';}).join('')+
+          '</tbody></table><div class="hint">Panduan berdasarkan penilaian sebelumnya — penatalaksanaan hari ini tetap keputusan dokter yang memeriksa. Riwayat ini otomatis ikut terbawa saat kamu Terbitkan Handoff.</div>';
+      }
+      document.getElementById('ho_sec').style.display='block';
+      alert('Handoff sebelumnya dimuat (kunjungan ke-'+(h.kunjungan_ke||1)+'). Riwayat tampil di bagian Ringkasan Handoff.');
+    }catch(err){ alert('Gagal memuat handoff: '+err.message); }
+}
+/* ===== MUAT FORM 1 (ADC-INTAKE) — identitas, alergi, BB/TB & jawaban Slimming pasien ===== */
+window._intake=null;
+function loadIntakeFile(input){
+  var f=input.files&&input.files[0]; if(!f) return;
+  var r=new FileReader();
+  r.onload=function(e){
+    try{
+      var o=JSON.parse(e.target.result);
+      if(o.doc!=='ADC-INTAKE'){ alert('Berkas tidak dikenali. Yang dibutuhkan: berkas dari Form 1 (Simpan Data Pasien).'); input.value=''; return; }
+      applyIntake(o);
+    }catch(err){ alert('Gagal membaca berkas: '+err.message); }
+    input.value='';
+  };
+  r.readAsText(f);
+}
+function applyIntake(o){
+  window._intake=o;
+  var p=o.pasien||{}, k=o.kritis||{}, pn=o.penugasan||{}, pg=o.pengukuran||{}, g=o.gaya_hidup||{};
+  function put(id,v){ var el=document.getElementById(id); if(el&&v&&!(el.value||'').trim()) el.value=v; }
+  put('nama',p.nama); put('no_rm',p.rm); put('wa',p.wa); put('dokter',pn.dokter);
+  put('b_bb',pg.bb); put('b_tb',pg.tb); put('b_imt',pg.imt);
+  /* alergi: Form 1 satu-satunya sumber -> menimpa, dan "nihil" tidak pernah bersamaan dengan isi */
+  var af=document.getElementById('alergi'), an=document.getElementById('alergi_none');
+  if(af) af.value=(k.alergi||'').trim();
+  if(an) an.checked=!!(k.alergi_nihil&&!(k.alergi||'').trim());
+  var kv=function(l,v){ return v?('<div style="display:flex;gap:8px;padding:2px 0"><span style="min-width:150px;color:#6B675E;font-size:11px;text-transform:uppercase;letter-spacing:.06em">'+_dEsc(l)+'</span><span>'+_dEsc(v)+'</span></div>'):''; };
+  var p4=(o.seksi||[]).filter(function(s){ return s.kode==='P4'; });
+  var html='<div style="border:2px solid #1B1A18;background:#FCF4F0;padding:5px 9px;margin-bottom:6px"><b>Alergi / kontraindikasi:</b> '+
+    _dEsc(k.alergi||(k.alergi_nihil?'Nihil (dikonfirmasi pasien)':'BELUM DIISI — konfirmasi lisan'))+
+    ((k.flags||[]).length?('<br><span style="font-size:11px">'+_dEsc((k.flags||[]).join(' · '))+'</span>'):'')+'</div>'+
+    kv('Keluhan',[k.keluhan,k.sejak&&('sejak '+k.sejak)].filter(Boolean).join(' · '))+kv('Harapan',k.harapan)+
+    kv('Hormonal',(k.hormonal||[]).join(', '))+kv('Haid',k.haid)+kv('Kondisi medis / obat rutin',k.kondisi_medis)+kv('Produk / obat dipakai',k.obat_kini)+
+    kv('BB · TB · IMT',[pg.bb&&(pg.bb+' kg'),pg.tb&&(pg.tb+' cm'),pg.imt&&('IMT '+pg.imt)].filter(Boolean).join(' · '))+
+    (p4.length?(p4[0].isian||[]).map(function(x){ return kv(x.k,x.v); }).join(''):'')+
+    kv('Pola makan',g.pola_makan)+kv('Aktivitas',g.aktivitas)+kv('Tidur',g.tidur)+kv('Stres',g.stres)+
+    (pn.foto_baseline?kv('Foto baseline','sudah'+(pn.foto_area?(' · '+pn.foto_area):'')):'');
+  var b=document.getElementById('ik_body'), s=document.getElementById('ik_sec');
+  if(b) b.innerHTML=html; if(s) s.style.display='block';
+  alert('Form 1 dimuat'+(p.nama?(' — '+p.nama):'')+'. Identitas, alergi & BB/TB terisi; ringkasan anamnesis tampil di atas.');
+}
+function muatIntakeHub(){
+  if(!_hubOn){ document.getElementById('_intakefile').click(); return; }
+  _dlgMuat('Muat Form 1 (data pasien baru)','_intakefile',function(rm,selesai){
+    hubGetPasien(rm,function(j,err){
+      if(j&&j.intake){ if(selesai()) applyIntake(j.intake); }
+      else selesai('Form 1 untuk RM '+rm+' tidak ada di hub'+(err?(' ('+err+')'):'')+'.');
+    });
+  });
+}
+function muatHandoffHub(){
+  if(!_hubOn){ document.getElementById('_hofile').click(); return; }
+  _dlgMuat('Muat Handoff (kunjungan kontrol)','_hofile',function(rm,selesai){
+    hubGetPasien(rm,function(j,err){
+      if(j&&j.handoff_terakhir){ if(selesai()) applyHandoff(j.handoff_terakhir); }
+      else selesai('Handoff untuk RM '+rm+' tidak ada di hub'+(err?(' ('+err+')'):'')+'.');
+    });
+  });
+}
+function _ckList(sel){
+  var out=[]; document.querySelectorAll(sel).forEach(function(l){
+    var cb=l.querySelector('input[type=checkbox]'); if(cb&&cb.checked) out.push(l.textContent.trim());
+  }); return out;
+}
+function _faktor4(){
+  var out=[];
+  document.querySelectorAll('table tbody tr').forEach(function(tr){
+    var fk=tr.querySelector('td.fk'); if(!fk) return;
+    var tds=tr.querySelectorAll('td'); if(tds.length<4) return;
+    function pick(td){var a=[];td.querySelectorAll('label').forEach(function(l){
+      var cb=l.querySelector('input[type=checkbox]'); if(cb&&cb.checked) a.push(l.textContent.trim());}); return a;}
+    var pemicu=pick(tds[2]), tx=pick(tds[3]);
+    var ex=tr.querySelector('.tx-extra'); if(ex&&(ex.value||'').trim()) tx=tx.concat(['+ '+ex.value.trim()]);
+    if(pemicu.length||tx.length) out.push({faktor:fk.textContent.trim(), pemicu:pemicu, treatment:tx});
+  });
+  return out;
+}
+function _inbody(){
+  var map={ib_pbf:'PBF %',ib_fm:'Massa lemak kg',ib_smm:'SMM kg',ib_vfa:'VFA cm2',
+           ib_bmr:'BMR kcal',ib_ecw:'ECW/TBW',ib_score:'InBody Score',ib_segmen:'Segmen membandel'};
+  var o={}; Object.keys(map).forEach(function(k){var v=_val(k); if(v) o[map[k]]=v;}); return o;
+}
+function buildHandoffDoc(){
+  var _riw=_riwayatDari(window._prevHandoff);
+  var ib=_inbody(), ibTxt=Object.keys(ib).map(function(k){return k+': '+ib[k];}).join('; ');
+  var f4=_faktor4();
+  var tahap=(_stage&&STAGE[_stage])?STAGE[_stage].tag:'';
+  var resep=[];
+  f4.forEach(function(f){ f.treatment.forEach(function(t){ resep.push({obat:t, jadwal:'', cara:f.faktor, durasi:''}); }); });
+  var hasil=[_val('b_kategori')?('kategori: '+_val('b_kategori')):'',
+             (_val('b_bb')||_val('b_imt'))?('Berat Badan '+_val('b_bb')+' kg / Indeks Massa Tubuh '+_val('b_imt')):'',
+             _val('b_pinggang')?('lingkar pinggang: '+_val('b_pinggang')+' cm'):'',
+             _val('b_td')?('TD: '+_val('b_td')):'',
+             ibTxt?('InBody 770 — '+ibTxt):'InBody 770 — BELUM DISCAN'].filter(Boolean).join('; ');
+  var sched=(window._schedRows||[]).slice(0,60).map(function(r){
+    return {tanggal:_iso(r.date), jenis:r.jenis, pesan:r.msg};
+  });
+  return {
+    doc:'ADC-HANDOFF', versi:1, sumber:'ADC-SLIMMING-4FAKTOR', diterbitkan:new Date().toISOString(),
+    kunjungan_ke:_riw.length+1, riwayat:_riw,
+    pasien:(function(){
+      var p=(window._prevHandoff&&window._prevHandoff.pasien)||{};
+      return {nama:_val('nama')||p.nama||'', rm:_val('no_rm')||p.rm||'', wa:_wa(_val('wa'))||p.wa||'',
+              usia:p.usia||'', kelamin:p.kelamin||''};
+    })(),
+    asesmen:{
+      tanggal:_val('tgl_doc'), dokter:_val('dokter'), program:'slimming/metabolik',
+      diagnosis:['Obesitas/metabolik', _val('b_kategori')].filter(Boolean).join(' — '),
+      derajat:_val('b_kategori'), hasil:hasil,
+      alergi:_val('alergi'),
+      alergi_nihil:!!(document.getElementById('alergi_none')&&document.getElementById('alergi_none').checked),
+      resep:resep,
+      rencana:['Tahap: '+(tahap||'—'),
+               _val('b_target')?('Target: '+_val('b_target')):'',
+               _val('b_estimasi')?('Estimasi: '+_val('b_estimasi')):'',
+               _val('s_glp1')==='1'?'GLP-1 pen (siklus 28 hari)':''].filter(Boolean).join(' · '),
+      instruksi_kontrol:'refill suplemen tiap '+REFILL+' hari'+(_val('s_glp1')==='1'?(' · pen GLP-1 tiap '+PEN+' hari'):''),
+      remarks:_val('catatan'),
+      kunjungan_berikutnya:_val('s_next')
+    },
+    penerbitan:{ oleh:_val('terbit_oleh'), waktu:new Date().toISOString(),
+                 signoff_dokter:!!(document.getElementById('signoff')&&document.getElementById('signoff').checked),
+                 dokter_signoff:_val('signoff_dokter'), tgl_signoff:_val('signoff_tgl') },
+    slimming:{ tahap:tahap, tag:_val('s_tag'), inbody:ib, faktor:f4,
+               bb:_val('b_bb'), tb:_val('b_tb'), imt:_val('b_imt'),
+               pola_makan:_ckList('#pola_makan label'), jadwal:sched }
+  };
+}
+function handoffText(h){
+  var a=h.asesmen, L=[];
+  L.push('RINGKASAN HANDOFF — ADC Slimming Program (4 Faktor Metabolik)');
+  L.push('Pasien: '+(h.pasien.nama||'—')+'  ·  RM: '+(h.pasien.rm||'—'));
+  L.push('Asesmen: '+(a.tanggal||'—')+'  ·  Dokter: '+(a.dokter||'—'));
+  L.push('Diagnosis: '+(a.diagnosis||'—'));
+  if(a.hasil) L.push('Hasil asesmen: '+a.hasil);
+  L.push('Alergi/kontraindikasi: '+(a.alergi || (a.alergi_nihil?'Nihil (dikonfirmasi)':'BELUM DIKONFIRMASI')));
+  if(h.slimming.faktor.length) L.push('4 Faktor Metabolik: '+h.slimming.faktor.map(function(f){return f.faktor+' -> '+f.treatment.join(', ');}).join(' | '));
+  L.push('Rencana: '+(a.rencana||'—'));
+  if(a.resep.length) L.push('Resep berjalan: '+a.resep.map(function(r){return [r.obat,r.jadwal,r.durasi].filter(Boolean).join(' · ');}).join(' | '));
+  if(a.instruksi_kontrol) L.push('Instruksi kontrol: '+a.instruksi_kontrol);
+  if(a.kunjungan_berikutnya) L.push('Kunjungan berikutnya: '+a.kunjungan_berikutnya);
+  if(a.remarks) L.push('Remarks dokter: '+a.remarks);
+  L.push('');
+  L.push('Sifat handoff: panduan berdasarkan penilaian awal — penatalaksanaan hari ini ditentukan dokter yang memeriksa.');
+  return L.join('\n');
+}
+function _hesc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function handoffDocHTML(h){
+  var a=h.asesmen||{}, p=h.pasien||{};
+  function r(k,v){return v?('<tr><th>'+_hesc(k)+'</th><td>'+_hesc(v)+'</td></tr>'):'';}
+  var alergi=a.alergi||(a.alergi_nihil?'Nihil (dikonfirmasi)':'BELUM DIKONFIRMASI');
+  var rx=(a.resep||[]).map(function(x){return '<tr><td>'+_hesc(x.obat)+'</td><td>'+_hesc(x.jadwal)+'</td><td>'+_hesc(x.cara)+'</td><td>'+_hesc(x.durasi)+'</td></tr>';}).join('');
+  var sl=h.slimming||{};
+  var fak=((sl.faktor)||[]).map(function(f){return '<tr><td>'+_hesc(f.faktor)+'</td><td>'+_hesc((f.pemicu||[]).join(', '))+'</td><td>'+_hesc((f.treatment||[]).join(', '))+'</td></tr>';}).join('');
+  var ibo=sl.inbody||{}, ibr=Object.keys(ibo).map(function(k){return '<tr><th>'+_hesc(k)+'</th><td>'+_hesc(ibo[k])+'</td></tr>';}).join('');
+  var riw=(h.riwayat||[]).map(function(v){return '<tr><td>'+_hesc(v.kunjungan_ke||'')+'</td><td>'+_hesc(v.tanggal)+'</td><td>'+_hesc(v.dokter)+'</td><td>'+_hesc([v.diagnosis,v.hasil].filter(Boolean).join(' — '))+'</td><td>'+_hesc([v.resep,v.instruksi_kontrol,v.remarks].filter(Boolean).join(' · '))+'</td></tr>';}).join('');
+  var nm=(p.nama||'Pasien').replace(/[^A-Za-z0-9]+/g,'_').replace(/^_+|_+$/g,'')||'Pasien';
+  var d=new Date(), ymd=d.getFullYear()+('0'+(d.getMonth()+1)).slice(-2)+('0'+d.getDate()).slice(-2);
+  var JT=JSON.stringify(handoffText(h)).replace(/</g,'\\u003c');
+  var JD=JSON.stringify(JSON.stringify(h,null,2)).replace(/</g,'\\u003c');
+  var JN=JSON.stringify('Handoff_'+nm+'_'+ymd);
+  return '<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><title>Ringkasan Handoff — '+_hesc(p.nama||'')+'</title>'+
+  '<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700&family=Archivo+Narrow:wght@400;600&display=swap" rel="stylesheet">'+
+  '<style>'+
+  'body{font-family:\'Archivo Narrow\',Arial,sans-serif;color:#000;background:#FAF8F5;margin:0;font-size:13px;line-height:1.55;}'+
+  '.bar{background:#000;color:#FAF8F5;padding:10px 20px;display:flex;gap:8px;align-items:center;justify-content:space-between;position:sticky;top:0;}'+
+  '.bar b{font-family:Archivo,Arial,sans-serif;font-size:13px;letter-spacing:.04em;}'+
+  '.bar button{font-family:inherit;font-size:10.5px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;padding:8px 14px;border:1px solid #CDAF97;background:#CDAF97;color:#1d130c;cursor:pointer;}'+
+  '.bar button.ghost{background:transparent;color:#FAF8F5;border-color:rgba(255,255,255,.5);}'+
+  '.sheet{background:#fff;max-width:190mm;margin:18px auto;padding:16mm 16mm 14mm;border:1px solid #DADCD9;}'+
+  'h1{font-family:Archivo,Arial,sans-serif;font-size:20px;font-weight:600;margin:0 0 2px;}'+
+  '.eyebrow{font-size:9.5px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6B6F6C;}'+
+  '.meta{font-size:11px;color:#3A3F3C;margin-top:4px;}'+
+  'hr{border:none;border-top:1px solid #000;margin:10px 0 14px;}'+
+  'h2{font-family:Archivo,Arial,sans-serif;font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;margin:16px 0 6px;padding-bottom:3px;border-bottom:1px solid #C8CBC8;}'+
+  'table{width:100%;border-collapse:collapse;font-size:12px;}'+
+  'th,td{text-align:left;vertical-align:top;padding:5px 8px;border:1px solid #DADCD9;}'+
+  'th{background:#E8EBE9;font-size:9.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;width:170px;}'+
+  'table.rx th{width:auto;}'+
+  '.flag{border:2px solid #000;background:#EDE6E7;padding:9px 12px;margin:12px 0;font-size:13px;}'+
+  '.flag b{font-family:Archivo,Arial,sans-serif;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;display:block;margin-bottom:3px;}'+
+  '.note{font-size:11px;color:#6B6F6C;font-style:italic;margin-top:12px;border-top:1px solid #DADCD9;padding-top:8px;}'+
+  '@media print{.bar{display:none}.sheet{border:none;margin:0;max-width:none;padding:0}body{background:#fff}@page{size:A4;margin:14mm}}'+
+  '</style></head><body>'+
+  '<div class="bar"><b>Ringkasan Handoff — '+_hesc(p.nama||'Pasien')+'</b><span>'+
+  '<button onclick="window.print()">Cetak / PDF</button> '+
+  '<button onclick="hCopy()">Salin (Google Docs)</button> '+
+  '<button onclick="hDoc()">Unduh .doc</button> '+
+  '<button class="ghost" onclick="hJson()">Unduh JSON</button> '+
+  '<button class="ghost" onclick="window.close()">Tutup</button></span></div>'+
+  '<div class="sheet" id="sheet">'+
+  '<div class="eyebrow">Aesthetic Derma Centre · Skin Quality Program</div>'+
+  '<h1>Ringkasan Handoff</h1>'+
+  '<div class="meta">Pasien: <b>'+_hesc(p.nama||'—')+'</b> · No. RM: '+_hesc(p.rm||'—')+
+  (p.usia?(' · Usia: '+_hesc(p.usia)):'')+(p.kelamin?(' · '+_hesc(p.kelamin)):'')+'</div>'+
+  '<div class="meta">Asesmen: '+_hesc(a.tanggal||'—')+' · Dokter: '+_hesc(a.dokter||'—')+(h.kunjungan_ke?(' · <b>Kunjungan ke-'+_hesc(h.kunjungan_ke)+'</b>'):'')+'</div>'+
+  '<hr>'+
+  '<div class="flag"><b>Alergi / kontraindikasi</b>'+_hesc(alergi)+'</div>'+
+  ((h.penerbitan&&!h.penerbitan.signoff_dokter)?'<div class="flag"><b>Perhatian</b>Diterbitkan tanpa sign-off dokter — konfirmasi ke dokter Sp.GK sebelum dijadikan acuan.</div>':'')+
+  '<h2>Asesmen</h2><table>'+
+  r('Program',a.program)+r('Diagnosis',a.diagnosis)+r('Derajat / grade',a.derajat)+r('Hasil asesmen',a.hasil)+
+  '</table>'+
+  (ibr?('<h2>InBody 770 — baseline terukur</h2><table>'+ibr+'</table>'):'<div class="flag"><b>InBody 770</b>Belum discan — baseline terukur belum ada.</div>')+
+  (fak?('<h2>4 Faktor Metabolik</h2><table class="rx"><tr><th>Faktor</th><th>Pemicu</th><th>Treatment dipilih</th></tr>'+fak+'</table>'):'')+
+  '<h2>Rencana &amp; perawatan berjalan</h2><table>'+
+  r('Tahap / rencana',a.rencana)+r('Instruksi kontrol',a.instruksi_kontrol)+r('Kunjungan berikutnya',a.kunjungan_berikutnya)+
+  '</table>'+
+  (rx?('<h2>Regimen berjalan</h2><table class="rx"><tr><th>Treatment / produk</th><th>Jadwal</th><th>Faktor</th><th>Durasi</th></tr>'+rx+'</table>'):'')+
+  (a.remarks?('<h2>Remarks dokter</h2><table>'+r('Catatan',a.remarks)+'</table>'):'')+
+  ((h.penerbitan)?('<h2>Penerbitan</h2><table>'+r('Sign-off dokter',h.penerbitan.signoff_dokter?((h.penerbitan.dokter_signoff||'ada')+(h.penerbitan.tgl_signoff?(' · '+h.penerbitan.tgl_signoff):'')):'BELUM')+r('Diterbitkan oleh',h.penerbitan.oleh)+'</table>'):'')+
+  (riw?('<h2>Riwayat perawatan sebelumnya</h2><table class="rx"><tr><th>Kunj.</th><th>Tanggal</th><th>Dokter</th><th>Diagnosis / hasil</th><th>Resep · kontrol · remarks</th></tr>'+riw+'</table>'):'')+
+  '<div class="note">Sifat handoff: rencana yang disusun berdasarkan penilaian awal — bersifat panduan, bukan instruksi mengikat. '+
+  'Penatalaksanaan hari ini ditentukan oleh dokter yang memeriksa, berdasarkan panduan ini, riwayat perkembangan, dan kondisi pasien saat itu.<br>'+
+  'Setelah integrasi NeoSoft, ringkasan ini tersimpan otomatis di rekam medis dan tampil bagi dokter kunjungan berikutnya.</div>'+
+  '</div>'+
+  '<script>var HT='+JT+',HD='+JD+',HN='+JN+';'+
+  'function hCopy(){var el=document.getElementById("sheet");'+
+  'try{var b=new Blob([el.innerHTML],{type:"text/html"}),t=new Blob([HT],{type:"text/plain"});'+
+  'navigator.clipboard.write([new ClipboardItem({"text/html":b,"text/plain":t})]).then(function(){alert("Tersalin. Paste ke Google Docs — format tabel ikut terbawa.");},function(){hCopyPlain();});}catch(e){hCopyPlain();}}'+
+  'function hCopyPlain(){var ta=document.createElement("textarea");ta.value=HT;document.body.appendChild(ta);ta.select();document.execCommand("copy");ta.remove();alert("Tersalin sebagai teks.");}'+
+  'function hDl(content,mime,ext){var b=new Blob([content],{type:mime}),u=URL.createObjectURL(b),a=document.createElement("a");a.href=u;a.download=HN+ext;document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(u);},1500);}'+
+  'function hDoc(){hDl("\\uFEFF<html xmlns:w=\\"urn:schemas-microsoft-com:office:word\\"><head><meta charset=\\"utf-8\\"></head><body>"+document.getElementById("sheet").innerHTML+"</body></html>","application/msword",".doc");}'+
+  'function hJson(){hDl(HD,"application/json",".json");}'+
+  '<\/script></body></html>';
+}
+function issueHandoff(){
+  var h=buildHandoffDoc(), a=h.asesmen;
+  var w=[];
+  if(!(h.slimming&&h.slimming.inbody&&Object.keys(h.slimming.inbody).length)) w.push('InBody 770 belum diisi (metrik baseline wajib).');
+  if(!a.alergi && !a.alergi_nihil) w.push('Alergi / kontraindikasi belum dikonfirmasi.');
+  if(!h.penerbitan.signoff_dokter) w.push('Dokter belum menandai "Asesmen selesai" (H).');
+  if(w.length){ if(!confirm('Belum lengkap ('+w.length+'):\n\n· '+w.join('\n· ')+'\n\nTetap terbitkan handoff?')) return; }
+  window._handoff=h;
+  hubPost('handoff',h,function(ok,err){
+    if(!ok&&_hubOn) alert('PERHATIAN: handoff TIDAK tersimpan di hub'+(err?('\n('+err+')'):'')+'.\n\nCek chip HUB (kunci hub salah?) lalu Terbitkan lagi — atau unduh JSON dari pop-up.');
+  });
+  var w=window.open('','_blank','width=900,height=940,scrollbars=yes,resizable=yes');
+  if(!w){
+    var body=document.getElementById('ho_body');
+    if(body){ body.innerHTML='<pre style="white-space:pre-wrap;font-family:inherit;font-size:11.5px;margin:0">'+
+      _hesc(handoffText(h))+'</pre><div class="hint">Pop-up diblokir browser — izinkan pop-up untuk membuka tampilan handoff. Ringkasan ditampilkan di sini sebagai cadangan.</div>'; }
+    document.getElementById('ho_sec').style.display='block';
+    alert('Pop-up diblokir browser. Ringkasan ditampilkan di bawah form. Izinkan pop-up untuk tampilan penuh.');
+    return;
+  }
+  w.document.open(); w.document.write(handoffDocHTML(h)); w.document.close();
+}
+function copyHandoffText(){
+  var h=window._handoff||buildHandoffDoc(), txt=handoffText(h);
+  navigator.clipboard.writeText(txt).then(function(){alert('Ringkasan handoff disalin — paste ke rekam medis NeoSoft.');},
+  function(){var ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();alert('Ringkasan handoff disalin.');});
+}
+
+function clearForm(){
+  if(!confirm('Reset seluruh form?'))return;
+  document.querySelectorAll('.in').forEach(function(e){ if(!e.readOnly) e.value=''; });
+  document.querySelectorAll('input[type=checkbox]').forEach(function(e){e.checked=false;});
+  document.querySelectorAll('#stageBox .s').forEach(function(e){e.classList.remove('on');});
+  _stage=null; window._schedRows=null; window._prevHandoff=null; window._handoff=null; window._schedSaved=false; window._intake=null;
+  var ik=document.getElementById('ik_sec'); if(ik) ik.style.display='none';
+  var hs=document.getElementById('ho_sec'); if(hs) hs.style.display='none';
+  document.getElementById('s_tag').value='';
+  document.getElementById('schedBody').innerHTML='<tr><td colspan="4" style="color:var(--mut)">Pilih tahap &amp; tanggal mulai, lalu klik Generate Jadwal.</td></tr>';
+  document.getElementById('send_status').textContent='';
+}
+</script>
+</body>
+</html>

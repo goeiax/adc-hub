@@ -9,10 +9,11 @@ Indonesia (all form/patient text). Code comments: Indonesian is fine.
   `../ADC_Form1_Registrasi_Anamnesis_Pasien.html` (nurse+patient intake, new patients only),
   `../ADC_Form2_Asesmen_Umum_Dokter.html` (doctor assessment, contains program modals),
   `../ADC_Panduan_Pengisian_Form.html` (how-to guide — ALL instructional text lives here, not in forms).
+- Also served by the hub (same copy rule): `../ADC_Form_Asesmen_Slimming_SpGK.html` (Sp.GK Slimming; has Muat Form 1 + hub) and `../ADC_SkinQualityProgram_Journey_Outcome_Tracker.html` (loads handoff by RM). Their hub/dialog code is a verbatim copy of Form 2's (`hubDefault…hubGetPasien`, `_dlgMuat`); change Form 2 first, then re-copy.
 - `www/` holds **copies** served by the hub. Edit the `../` sources, then sync with
   `update-forms.bat` (or `push.bat`, which syncs + commits + pushes). Never edit `www/` directly.
 - `server.js` — zero-dependency Node stdlib server (port 3777): serves `www/`, stores
-  intake/handoff per No. RM under `data/<RM>/`. Key in `config.json` (header `X-ADC-Key`).
+  intake/handoff per No. RM under `data/<RM>/`. Key in `config.json` (header `X-ADC-Key`). Optional `"webhook"` in `config.json` = Make.com URL, returned by `/api/ping` so every form pre-fills `cfg_webhook` (also remembered per device in `localStorage.adc_webhook`).
 - `neosoft-explore.js` — read-only NeoSoft Cube DB schema explorer (needs `npm i mysql2`
   + local `neosoft.json`). Run on clinic PC only.
 - Launch Claude Code from here with the parent added: `claude --add-dir ..`
@@ -43,13 +44,18 @@ Kontrol mode = `body.mode-kontrol` (`.vis-awal` hidden, `.vis-kontrol` shown); i
 ## Testing
 No browser in the sandbox; tests use jsdom (`npm i jsdom css-tree` in a temp dir). Standard checks after every change: CSS parse (skip `<style>` blocks containing `'+`), `node --check` on extracted scripts, duplicate-id scan, plus a functional run through the real click paths (save intake → load in F2 → IGA → issue handoff → reload as kontrol). For hub tests, start `node server.js` and run the test in the same shell session.
 
-Automated end-to-end: `node e2e-test.js` (104 checks; runs on a temp copy of `server.js` + `www/`, jsdom auto-installed to temp, real `data/` untouched). Run `update-forms.bat` first so `www/` is current. Covers F1 → hub → F2 → handoff #1 → two chained kontrol handoffs, hub auth/path guards, offline fallbacks. Not covered: signature canvas, print/popup layout, real tablets.
+Automated end-to-end: `node e2e-test.js` (125 checks; runs on a temp copy of `server.js` + `www/`, jsdom auto-installed to temp, real `data/` untouched). Run `update-forms.bat` first so `www/` is current. Covers F1 → hub → F2 → handoff #1 → two chained kontrol handoffs, hub auth/path guards, offline fallbacks. Not covered: signature canvas, print/popup layout, real tablets.
 Kontrol handoffs carry diagnosis/pemeriksaan (tipe kulit, Fitzpatrick)/resep/program tahap forward from the loaded handoff when empty today (`_bawaKontrol()`, listed in `asesmen.dibawa`); values entered today always win.
 
 D1 data rules (2026-10-08/09): allergy is entered in Form 1 for new patients (Form 2 hides the editable box when an intake is loaded; shown in Ringkasan), but is editable in Form 2 when no intake is loaded (kontrol). `d2_derajat` is computed from IGA (`_derajatTeks()`), not typed; a Derajat chosen before any program (`d1_iga`) is applied only when a program STAGE is picked (or the program is in the handoff). `d2_hasil` = "Catatan klinis" (temuan + penunjang); `d1_umum` is a hidden legacy field.
 
+Hub result is surfaced, never silent: Form 1 Save waits for the hub reply and alerts "✓ tersimpan di hub (RM)" / "✗ GAGAL" / "TIDAK tersambung"; Form 2 Terbitkan writes ✓/✗/HUB MATI into `d8_status` and alerts on failure when the hub is up. Keep it that way.
+Step order in Form 2: D4b (nurse scheduling) lives in step 5 after D7, so the device changes hands once. D1 is findings (`d2_hasil`) → diagnosis → derajat. D7 has two gate checkboxes recorded in `penerbitan`: `consent_tindakan` (warned when any procedure is checked or `k1_tindakan` filled) and `skrining_obat` (row shown only when `_obatBerisiko()` matches `OBAT_RISIKO`; Terbitkan warns, and puts a PASIEN HAMIL/MENYUSUI line first when Form 1 says so). These record that the clinic's own consent/screening happened — the wording is not legal consent text. Form 1 staff panel: `p_foto_izin` (verbal photo consent) must precede `p_foto_ok`.
+
 ## Open items
-- Clinic trial run (one fake patient end-to-end on clinic tablets) — not yet done.
+- Clinic trial run (one fake patient end-to-end on clinic tablets) — not yet done. Also untested on real tablets: hub-key entry per device, print dialog timing, pop-up blocking.
+- Still manual (NeoSoft has no API): "Simpan ke Rekam Medis" is a .txt download + clipboard paste; slot reserve is an honor-system checkbox.
+- Doctor decisions still open: procedure informed-consent wording (form only records that it was signed), exact isotretinoin/pregnancy protocol checklist, whether Peeling/Excel V should live in the 4-factor table or the stage list (currently both, unlinked).
 - NeoSoft: run `neosoft-explore.js` on clinic PC, then build `GET /api/neosoft/:rm` (read identity by RM) + form pre-fill.
 - GitHub: `goeiax/adc-hub` (private) exists; `main` pushed and tracking `origin/main`.
 - IGA memo awaiting doctor ratification; Dr. Kamelia hair-loss answers pending.

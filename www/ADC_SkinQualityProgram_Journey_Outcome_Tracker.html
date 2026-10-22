@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ADC — Journey & Outcome Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Archivo+Narrow:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --canvas:#FAF8F5; --surface:#FFFFFF; --surface-quiet:#E8EBE9;
+  --ink:#000000; --ink-2:#3A3F3C; --ink-muted:#6B6F6C;
+  --line:#DADCD9; --line-strong:#C8CBC8;
+  --accent:#CDAF97; --accent-deep:#6E5A47; --accent-quiet:#BAA3A3; --blush:#EDE6E7;
+  --ff-head:'Archivo','Helvetica Neue',Helvetica,sans-serif;
+  --ff-body:'Archivo Narrow','Archivo',sans-serif;
+  --ink-fill:#1F4E9C;
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+html,body{background:var(--canvas); color:var(--ink); font-family:var(--ff-body); font-size:14px; line-height:1.5;}
+.toolbar{background:var(--ink); color:var(--canvas); padding:12px 32px; display:flex; align-items:center; justify-content:space-between; gap:18px; position:sticky; top:0; z-index:10;}
+.toolbar .tb-title{font-family:var(--ff-head); font-size:14px; font-weight:600; letter-spacing:.04em;}
+.toolbar .tb-hint{font-size:12px; color:#BBBDBA;}
+.tb-actions{display:flex; gap:9px;}
+.btn{font-family:var(--ff-body); font-weight:600; font-size:11px; letter-spacing:.16em; text-transform:uppercase; padding:9px 18px; border:1px solid currentColor; background:transparent; color:var(--canvas); cursor:pointer; transition:all .16s ease;}
+.btn.tan{background:var(--accent); border-color:var(--accent); color:#1d130c;}
+.btn:hover{background:var(--accent-deep); border-color:var(--accent-deep); color:#fff;}
+.page{width:297mm; min-height:210mm; background:var(--surface); margin:20px auto; padding:12mm 12mm 10mm; border:1px solid var(--line);}
+.doc-head{display:flex; justify-content:space-between; align-items:flex-end; border-bottom:1px solid var(--ink); padding-bottom:8px; margin-bottom:8px;}
+.brand .eyebrow{font-size:10px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-muted); margin-bottom:3px;}
+.brand .name{font-family:var(--ff-head); font-size:22px; font-weight:600; letter-spacing:.02em; line-height:1;}
+.brand .addr{font-size:11px; color:var(--ink-muted); margin-top:4px;}
+.doc-meta{text-align:right; font-size:11px; color:var(--ink-2);}
+.doc-meta .title{font-family:var(--ff-head); font-size:17px; font-weight:600; color:var(--ink); margin-bottom:3px;}
+.mini{border:none; border-bottom:1px solid var(--line-strong); font-family:var(--ff-body); font-size:12px; color:var(--ink); background:transparent; padding:1px 2px;}
+.mini:focus{outline:none; border-bottom-color:var(--accent-deep);}
+.sec{font-size:11px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:var(--ink); margin:13px 0 6px; padding-bottom:3px; border-bottom:1px solid var(--line-strong);}
+.sec .n{color:var(--accent-deep); margin-right:6px;}
+.note{font-size:11px; color:var(--ink-muted); margin:0 0 8px; font-style:italic;}
+.note b{color:var(--ink-2); font-style:normal;}
+.lab{font-size:9.5px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-muted);}
+.in{border:none; border-bottom:1px solid var(--line-strong); padding:3px 2px; font-family:var(--ff-body); font-size:12.5px; color:var(--ink); background:transparent; width:100%;}
+.in:focus{outline:none; border-bottom-color:var(--accent-deep);}
+.in::placeholder{color:#7E817D; font-size:11.5px;}
+.row{display:flex; gap:14px; margin-bottom:8px;}
+.f{flex:1; display:flex; flex-direction:column; gap:2px;}
+.f.w2{flex:2;}
+.strip{display:flex; gap:12px; margin:6px 0 2px;}
+.strip .box{border:1px solid var(--line); padding:8px 12px; flex:1;}
+.strip .box.base{flex:1.5;}
+.box-h{font-family:var(--ff-head); font-size:12px; font-weight:600; margin-bottom:6px;}
+.flag{border:2px solid var(--ink); background:var(--blush); padding:7px 12px; display:flex; align-items:center; gap:12px;}
+.flag .badge{font-family:var(--ff-head); font-size:10px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:#fff; background:var(--ink); padding:5px 9px; white-space:nowrap;}
+.flag .fin{flex:1; border:none; border-bottom:1px solid var(--ink); background:transparent; font-family:var(--ff-body); font-size:13px; font-weight:600; color:var(--ink); padding:3px 2px;}
+.flag .fin:focus{outline:none;}
+.flag .none{display:flex; align-items:center; gap:6px; font-size:11px; color:var(--ink-2); white-space:nowrap;}
+.flag .none input{width:14px; height:14px; accent-color:var(--ink);}
+table.tbl{width:100%; border-collapse:collapse; font-size:11.5px;}
+table.tbl th{background:var(--surface-quiet); color:var(--ink); text-align:left; font-size:9px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; padding:5px 6px; border:1px solid var(--line); vertical-align:middle;}
+table.tbl td{padding:3px 6px; border:1px solid var(--line); vertical-align:top;}
+.cell{border:none; width:100%; font-family:var(--ff-body); font-size:11.5px; color:var(--ink); background:transparent; padding:2px 0; resize:none; line-height:1.35;}
+.cell:focus{outline:none;}
+textarea.cell{min-height:34px;}
+tbody tr:nth-child(even) td{background:#FCFBF9;}
+td.idx{text-align:center; font-weight:600; color:var(--ink-muted); font-size:10.5px;}
+.callout{border:1px solid var(--line-strong); background:var(--surface-quiet); padding:7px 12px; margin:8px 0; font-size:11px; color:var(--ink-2);}
+.callout .k{font-weight:700; letter-spacing:.1em; text-transform:uppercase; font-size:9.5px; color:var(--accent-deep); display:block; margin-bottom:2px;}
+.handoff{border:1px solid var(--accent-deep); border-top:3px solid var(--accent-deep); margin:6px 0;}
+.handoff .hh{background:var(--surface-quiet); border-bottom:1px solid var(--line); padding:5px 12px; display:flex; justify-content:space-between; align-items:baseline;}
+.handoff .hh .t{font-family:var(--ff-head); font-size:12.5px; font-weight:600;}
+.handoff .hh .s{font-size:9px; letter-spacing:.12em; text-transform:uppercase; color:var(--accent-deep); font-weight:600;}
+.handoff .hb{padding:8px 12px;}
+.hgrid{display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px 16px;}
+.hcell{display:flex; flex-direction:column; gap:2px;}
+.dod{display:flex; flex-wrap:wrap; gap:8px 18px; margin-top:4px;}
+.dod label{display:flex; align-items:center; gap:6px; font-size:11.5px; color:var(--ink-2); border:1px solid var(--line); padding:5px 10px;}
+.dod input{width:14px; height:14px; accent-color:var(--accent-deep);}
+.foot{display:flex; justify-content:space-between; align-items:flex-end; border-top:1px solid var(--ink); padding-top:7px; margin-top:12px;}
+.foot .l{font-size:10px; color:var(--ink-muted); line-height:1.5;} .foot .l b{color:var(--ink-2);}
+.foot .r{text-align:right; font-size:10px; color:var(--ink-muted);}
+.foot .r .nm{font-family:var(--ff-head); font-size:11px; font-weight:600; color:var(--ink); letter-spacing:.04em;}
+.disc{max-width:297mm; margin:0 auto 24px; padding:6px 12mm; font-size:9.5px; color:var(--ink-muted); text-align:center; border-top:1px solid var(--line);}
+@media print{
+  @page{size:A4 landscape; margin:8mm;}
+  html,body{background:#fff;}
+  .toolbar{display:none !important;}
+  .page{width:100%; min-height:auto; margin:0; padding:0; border:none;}
+  .disc{margin:6px auto 0;}
+  *{ -webkit-print-color-adjust:exact; print-color-adjust:exact;}
+  .in,.mini,.cell{border-bottom-color:#C8CBC8 !important;}
+  tr{break-inside:avoid;}
+  .handoff,.flag,.strip{break-inside:avoid;}
+}
+
+/* ===== TEKS ADVISORY SERAGAM 10px ===== */
+.note,.callout,.callout .k,.disc,.hint{font-size:10px !important;line-height:1.45;}
+
+
+/* ===== BODY FONT DISAMAKAN DENGAN FORM 1 & 2 (permintaan Alex 21 Jul) ===== */
+html,body{font-size:15px !important;line-height:1.55;}
+.in{font-size:14.5px !important;}
+.cell{font-size:13px !important;}
+.mini{font-size:13px !important;}
+@media print{ html,body{font-size:12.5px !important;} .in{font-size:12px !important;} .cell{font-size:11px !important;} }
+
+/* ===== ISIAN = TINTA BIRU =====
+   Konvensi rekam medis: yang DIISI dibedakan dari yang TERCETAK, supaya sekali
+   pandang jelas mana data pasien/dokter dan mana teks formulir. Placeholder tetap
+   abu (bukan data). Biru dipertahankan saat cetak — itu justru gunanya. */
+input:not([type=checkbox]):not([type=radio]):not([type=file]),
+select, textarea{color:var(--ink-fill) !important;}
+input::placeholder, textarea::placeholder{color:#7E817D !important; opacity:1;}
+input::-webkit-input-placeholder, textarea::-webkit-input-placeholder{color:#7E817D !important;}
+@media print{
+  input:not([type=checkbox]):not([type=radio]):not([type=file]),
+  select, textarea{color:var(--ink-fill) !important; -webkit-print-color-adjust:exact; print-color-adjust:exact;}
+}
+
+/* ===== ADC Hub (chip + dialog Muat) — disalin dari Form 2 ===== */
+.hubchip{display:inline-flex;align-items:center;font-size:10.5px;font-weight:600;
+  letter-spacing:.1em;text-transform:uppercase;padding:7px 13px;border-radius:999px;
+  cursor:pointer;border:1px solid rgba(245,239,230,.3);color:rgba(245,239,230,.55);
+  margin-right:10px;user-select:none;}
+.hubchip.on{border-color:#7FA37F;color:#A8C8A8;}
+.hubchip.off{border-color:rgba(245,239,230,.25);color:rgba(245,239,230,.45);}
+.hubchip.sync{border-color:#C9A86A;color:#C9A86A;}
+.mdlg-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2000;display:none;align-items:flex-start;justify-content:center;padding:12vh 16px 16px;}
+.mdlg-bg.on{display:flex;}
+.mdlg{background:var(--surface, #fff);border-radius:var(--r-card, 14px);width:100%;max-width:460px;padding:24px 24px 20px;box-shadow:0 18px 50px rgba(0,0,0,.25);}
+.mdlg-t{font-size:18px;font-weight:620;color:var(--ink, #1B1A18);margin-bottom:16px;}
+.mdlg-l{display:block;font-size:11px;font-weight:620;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2, #3A3833);margin-bottom:6px;}
+.mdlg-l span{font-weight:400;letter-spacing:0;text-transform:none;color:var(--ink-muted, #6B675E);margin-left:6px;}
+.mdlg-in{width:100%;font:inherit;font-size:16px;color:var(--ink-fill, #1F4E9C);padding:11px 13px;border:1px solid var(--line-strong, #D9CCB7);border-radius:var(--r-box, 8px);background:#fff;}
+.mdlg-in:focus{outline:none;border-color:var(--accent-act, #B0603F);}
+.mdlg-msg{min-height:20px;font-size:13px;color:var(--accent-deep, #8E4A33);margin:8px 0 6px;}
+.mdlg-b{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.mdlg-sp{flex:1;}
+.mdlg-b button{font:inherit;font-size:14px;font-weight:600;min-height:44px;padding:0 18px;border-radius:var(--r-pill, 999px);cursor:pointer;border:1px solid var(--line-strong, #D9CCB7);background:var(--surface, #fff);color:var(--ink, #1B1A18);}
+.mdlg-b .mdlg-ok{background:var(--accent-act, #B0603F);border-color:var(--accent-act, #B0603F);color:#fff;}
+.mdlg-b .mdlg-file{border-color:var(--accent-act, #B0603F);color:var(--accent-deep, #8E4A33);}
+@media print{ .hubchip,.mdlg-bg{display:none !important;} }
+</style>
+</head>
+<body>
+
+<input type="file" id="_hofile" accept=".json,application/json" style="display:none" onchange="loadHOFile(this)">
+<input type="file" id="_wafile" accept=".json,application/json" style="display:none" onchange="loadWAFile(this)">
+<div class="toolbar">
+  <div>
+    <div class="tb-title">ADC · Journey &amp; Outcome Tracker</div>
+    <div class="tb-hint">Satu lembar per pasien · diperbarui tiap kunjungan</div>
+  </div>
+  <div class="tb-actions">
+    <span class="hubchip off" id="hubchip" onclick="hubSetup()" title="Klik untuk mengatur alamat &amp; kunci hub">HUB &middot; …</span>
+    <button class="btn tan" onclick="muatHandoffHub()">Muat Rekam Medis (Handoff)</button>
+    <button class="btn" onclick="cetakJourney()">Ringkasan untuk Pasien</button>
+    <button class="btn" onclick="document.getElementById('_wafile').click()">Muat Rangkuman WA</button>
+    <button class="btn" onclick="pasteWA()">Tempel JSON</button>
+    <button class="btn" onclick="addRow()">+ Baris kunjungan</button>
+    <button class="btn" onclick="resetForm()">Reset</button>
+    <button class="btn tan" onclick="window.print()">Cetak / Simpan PDF</button>
+  </div>
+</div>
+
+<div class="page">
+
+  <div class="doc-head">
+    <div class="brand">
+      <div class="eyebrow">Skin Quality Program · pemantauan journey &amp; hasil</div>
+      <div class="name">AESTHETIC DERMA CENTRE</div>
+      <div class="addr">Jl. Ir. H. Djuanda 88, Bandung &nbsp;·&nbsp; WhatsApp +62 821 30144778 &nbsp;·&nbsp; aestheticdermacentre.com</div>
+    </div>
+    <div class="doc-meta">
+      <div class="title">Journey &amp; Outcome Tracker</div>
+      <div>No. RM <input class="mini" style="width:92px" id="t_rm" placeholder="RM-______"> &nbsp; Nama <input class="mini" style="width:150px" id="t_nama" placeholder="Nama pasien"></div>
+      <div style="margin-top:3px">Program <input class="mini" style="width:150px" id="t_prog" placeholder="Acne / Melasma / Hair-Loss / Slimming"> &nbsp; Dokter pemilik <input class="mini" style="width:150px" id="t_dokter" placeholder="dr. …, Sp.DVE"></div>
+    </div>
+  </div>
+  <p class="note"><b>Terisi otomatis.</b> Klik <b>Muat Rekam Medis (Handoff)</b> — berkas handoff terakhir sudah membawa seluruh riwayat sejak kunjungan pertama, jadi baseline, log kunjungan, dan status terkini terisi sendiri. Lembar ini mendampingi <b>Form 2 (Asesmen Dokter)</b>. Asesmen mengunci rencana awal; tracker ini mencatat perjalanan &amp; hasil dari kunjungan ke kunjungan, agar pasien terpantau dan dokter melihat progres penyembuhan secara objektif (foto + metrik).</p>
+
+  <!-- BASELINE + ALLERGY -->
+  <div class="strip">
+    <div class="box base">
+      <div class="box-h">Baseline (kunjungan 0)</div>
+      <div class="row" style="margin-bottom:6px">
+        <div class="f w2"><span class="lab">Diagnosis / kondisi</span><input class="in" id="t_dx" placeholder="mis. Acne vulgaris grade II + PIH"></div>
+        <div class="f"><span class="lab">Tanggal baseline</span><input class="in" type="date" id="t_tgl0"></div>
+      </div>
+      <div class="row" style="margin-bottom:0">
+        <div class="f"><span class="lab">Metrik terukur baseline</span><input class="in" id="t_metrik0" placeholder="mis. hitung lesi 24"></div>
+        <div class="f"><span class="lab">Foto baseline</span><input class="in" placeholder="diambil ya/tidak · link"></div>
+      </div>
+    </div>
+    <div class="box" style="display:flex; flex-direction:column; justify-content:center;">
+      <div class="flag" style="margin-bottom:0">
+        <span class="badge">Alergi / kontra</span>
+        <input class="fin" id="t_alergi" placeholder="Terisi otomatis dari rekam medis (handoff)">
+        <label class="none"><input type="checkbox"> Nihil</label>
+      </div>
+      <div class="note" style="margin:6px 0 0">Wajib dibaca &amp; dikonfirmasi sebelum tiap tindakan/resep.</div>
+    </div>
+  </div>
+
+  <!-- OUTCOME TREND -->
+  <div class="sec"><span class="n">1</span>Tren hasil (progres penyembuhan)</div>
+  <p class="note">Foto = sumber kebenaran hasil. <b>Acne: grade + foto klinis WAJIB</b> (hitung lesi opsional). Program lain deskriptif/opsional — Hair: densitas (Hair Analyser); Melasma: area/tone + foto, bukan angka tunggal; Slimming: InBody 770 (berkas Sp.GK). Kolom <b>IGA</b> memakai skala standar internasional <b>0 Clear &middot; 1 Almost Clear &middot; 2 Mild &middot; 3 Moderate &middot; 4 Severe</b> — dinilai dokter tiap kunjungan; perbaikan = selisih terhadap baseline. <b>Berhasil</b> (standar FDA) = IGA mencapai 0/1 <i>dan</i> turun minimal 2 tingkat.</p>
+  <table class="tbl">
+    <thead><tr>
+      <th style="width:20%">Metrik hasil</th><th style="width:16%">Baseline (tgl)</th><th style="width:16%">Terkini (tgl)</th><th style="width:14%">Target fase</th><th style="width:14%">IGA / arah</th><th style="width:20%">Status</th>
+    </tr></thead>
+    <tbody>
+      <tr><td><input class="cell" placeholder="mis. jumlah lesi inflamasi"></td><td><input class="cell"></td><td><input class="cell"></td><td><input class="cell"></td><td><input class="cell" placeholder="mis. 4→2"></td><td><input class="cell" placeholder="on-track / perlu perhatian"></td></tr>
+      <tr><td><input class="cell" placeholder="mis. PIH/PIE (skala/foto)"></td><td><input class="cell"></td><td><input class="cell"></td><td><input class="cell"></td><td><input class="cell"></td><td><input class="cell"></td></tr>
+      <tr><td><input class="cell" placeholder="mis. densitas rambut /cm2"></td><td><input class="cell"></td><td><input class="cell"></td><td><input class="cell"></td><td><input class="cell"></td><td><input class="cell"></td></tr>
+    </tbody>
+  </table>
+
+  <!-- PROGRESS CHART (Build 3) -->
+  <div class="sec"><span class="n">1b</span>Grafik progres penyembuhan</div>
+  <p class="note">Isi <b>satu angka metrik utama</b> tiap kunjungan (mis. jumlah lesi turun / densitas naik / skor area). Grafik &amp; status terisi otomatis — dokter melihat kurva penyembuhan sekilas.</p>
+  <div class="row" style="align-items:flex-end">
+    <div class="f w2"><span class="lab">Metrik utama</span><input class="in" id="pm_label" placeholder="mis. jumlah lesi inflamasi"></div>
+    <div class="f"><span class="lab">Baseline</span><input class="in" id="pm_base" placeholder="mis. 24" oninput="drawProg()"></div>
+    <div class="f"><span class="lab">Target fase</span><input class="in" id="pm_target" placeholder="mis. 6" oninput="drawProg()"></div>
+    <div class="f"><span class="lab">Arah membaik</span><select class="in" id="pm_dir" style="border:1px solid var(--line-strong);padding:3px" onchange="drawProg()"><option value="down">turun (mis. lesi)</option><option value="up">naik (mis. densitas)</option></select></div>
+  </div>
+  <div class="row" style="align-items:flex-end;margin-bottom:4px">
+    <div class="f"><span class="lab">Angka per kunjungan (1..8)</span><div style="display:flex;gap:6px;flex-wrap:wrap"><input class="in pm-v" style="width:44px;text-align:center" placeholder="1" oninput="drawProg()"><input class="in pm-v" style="width:44px;text-align:center" placeholder="2" oninput="drawProg()"><input class="in pm-v" style="width:44px;text-align:center" placeholder="3" oninput="drawProg()"><input class="in pm-v" style="width:44px;text-align:center" placeholder="4" oninput="drawProg()"><input class="in pm-v" style="width:44px;text-align:center" placeholder="5" oninput="drawProg()"><input class="in pm-v" style="width:44px;text-align:center" placeholder="6" oninput="drawProg()"><input class="in pm-v" style="width:44px;text-align:center" placeholder="7" oninput="drawProg()"><input class="in pm-v" style="width:44px;text-align:center" placeholder="8" oninput="drawProg()"></div></div>
+  </div>
+  <div style="display:flex;gap:18px;align-items:center;margin:4px 0 2px">
+    <svg id="pm_svg" width="430" height="92" style="border:1px solid var(--line);background:var(--surface)"></svg>
+    <div id="pm_stat" style="font-size:12px;line-height:1.5"></div>
+  </div>
+
+  <!-- VISIT LOG -->
+  <div class="sec"><span class="n">2</span>Log kunjungan (journey)</div>
+  <table class="tbl" id="visitTbl">
+    <thead><tr>
+      <th style="width:3%">#</th>
+      <th style="width:7%">Tanggal</th>
+      <th style="width:9%">Dokter</th>
+      <th style="width:8%">Fase</th>
+      <th style="width:14%">Rencana kunjungan ini (remarks lalu)</th>
+      <th style="width:13%">Tindakan dilakukan</th>
+      <th style="width:11%">Metrik / hasil hari ini</th>
+      <th style="width:5%">Foto</th>
+      <th style="width:8%">Kepatuhan obat</th>
+      <th style="width:17%">Remarks untuk kunjungan berikutnya</th>
+      <th style="width:5%">Kontrol</th>
+    </tr></thead>
+    <tbody id="visitBody">
+      <tr><td class="idx">1</td><td><input class="cell" type="date"></td><td><input class="cell" placeholder="dr. …"></td><td><input class="cell" placeholder="P1/P2/P3"></td><td><textarea class="cell" placeholder="rencana (dari remarks lalu)"></textarea></td><td><textarea class="cell" placeholder="tindakan in-clinic hari ini"></textarea></td><td><textarea class="cell" placeholder="metrik + kondisi"></textarea></td><td><input class="cell" placeholder="ya/tgl"></td><td><input class="cell" placeholder="baik/kurang"></td><td><textarea class="cell" placeholder="rencana untuk kunjungan berikutnya"></textarea></td><td><input class="cell" type="date"></td></tr>
+      <tr><td class="idx">2</td><td><input class="cell" type="date"></td><td><input class="cell"></td><td><input class="cell"></td><td><textarea class="cell"></textarea></td><td><textarea class="cell"></textarea></td><td><textarea class="cell"></textarea></td><td><input class="cell"></td><td><input class="cell"></td><td><textarea class="cell"></textarea></td><td><input class="cell" type="date"></td></tr>
+      <tr><td class="idx">3</td><td><input class="cell" type="date"></td><td><input class="cell"></td><td><input class="cell"></td><td><textarea class="cell"></textarea></td><td><textarea class="cell"></textarea></td><td><textarea class="cell"></textarea></td><td><input class="cell"></td><td><input class="cell"></td><td><textarea class="cell"></textarea></td><td><input class="cell" type="date"></td></tr>
+      <tr><td class="idx">4</td><td><input class="cell" type="date"></td><td><input class="cell"></td><td><input class="cell"></td><td><textarea class="cell"></textarea></td><td><textarea class="cell"></textarea></td><td><textarea class="cell"></textarea></td><td><input class="cell"></td><td><input class="cell"></td><td><textarea class="cell"></textarea></td><td><input class="cell" type="date"></td></tr>
+      <tr><td class="idx">5</td><td><input class="cell" type="date"></td><td><input class="cell"></td><td><input class="cell"></td><td><textarea class="cell"></textarea></td><td><textarea class="cell"></textarea></td><td><textarea class="cell"></textarea></td><td><input class="cell"></td><td><input class="cell"></td><td><textarea class="cell"></textarea></td><td><input class="cell" type="date"></td></tr>
+      <tr><td class="idx">6</td><td><input class="cell" type="date"></td><td><input class="cell"></td><td><input class="cell"></td><td><textarea class="cell"></textarea></td><td><textarea class="cell"></textarea></td><td><textarea class="cell"></textarea></td><td><input class="cell"></td><td><input class="cell"></td><td><textarea class="cell"></textarea></td><td><input class="cell" type="date"></td></tr>
+      <tr><td class="idx">7</td><td><input class="cell" type="date"></td><td><input class="cell"></td><td><input class="cell"></td><td><textarea class="cell"></textarea></td><td><textarea class="cell"></textarea></td><td><textarea class="cell"></textarea></td><td><input class="cell"></td><td><input class="cell"></td><td><textarea class="cell"></textarea></td><td><input class="cell" type="date"></td></tr>
+      <tr><td class="idx">8</td><td><input class="cell" type="date"></td><td><input class="cell"></td><td><input class="cell"></td><td><textarea class="cell"></textarea></td><td><textarea class="cell"></textarea></td><td><textarea class="cell"></textarea></td><td><input class="cell"></td><td><input class="cell"></td><td><textarea class="cell"></textarea></td><td><input class="cell" type="date"></td></tr>
+    </tbody>
+  </table>
+
+
+  <!-- RANGKUMAN FOLLOW-UP WHATSAPP (SleekFlow -> Make.com) -->
+  <div class="sec"><span class="n">3</span>Rangkuman follow-up WhatsApp <span style="font-weight:600;color:var(--ink-muted);letter-spacing:.04em;text-transform:none">— dari SleekFlow via Make.com</span></div>
+  <p class="note">Diisi <b>otomatis</b>: Make.com menarik riwayat percakapan SleekFlow lalu mengirim berkas rangkuman ke tracker ini. Klik <b>Muat Rangkuman WA</b> (berkas) atau <b>Tempel JSON</b>. Yang dibaca dokter adalah <b>pola respons</b> pasien — bukan isi obrolan satu per satu.</p>
+
+  <div class="strip" style="margin-bottom:8px">
+    <div class="box base">
+      <div class="box-h">Statistik periode</div>
+      <div class="row" style="margin-bottom:0">
+        <div class="f"><span class="lab">Periode</span><input class="in" id="wa_periode" placeholder="belum dimuat" readonly></div>
+        <div class="f"><span class="lab">Terkirim</span><input class="in" id="wa_kirim" readonly></div>
+        <div class="f"><span class="lab">Dibalas</span><input class="in" id="wa_balas" readonly></div>
+        <div class="f"><span class="lab">Tidak dibalas</span><input class="in" id="wa_hening" readonly></div>
+      </div>
+    </div>
+    <div class="box" style="display:flex;flex-direction:column;justify-content:center">
+      <div class="flag" style="margin-bottom:0">
+        <span class="badge">Perlu perhatian</span>
+        <input class="fin" id="wa_flag" placeholder="terisi otomatis — keluhan / kendala obat / minta reschedule" readonly>
+      </div>
+      <div class="note" style="margin:6px 0 0">Sinyal dari percakapan yang perlu dibahas dokter saat kontrol.</div>
+    </div>
+  </div>
+
+  <div class="f" style="margin-bottom:8px"><span class="lab">Ringkasan naratif (dibuat Make.com)</span>
+    <textarea class="in" id="wa_ringkas" rows="2" placeholder="mis. Pasien responsif di 3 minggu pertama, lalu tidak membalas 2 reminder terakhir. Sempat mengeluh kulit mengelupas di minggu ke-2." style="min-height:42px"></textarea></div>
+
+  <table class="tbl" id="waTbl">
+    <thead><tr>
+      <th style="width:9%">Tanggal</th>
+      <th style="width:15%">Jenis reminder</th>
+      <th style="width:30%">Pesan dikirim</th>
+      <th style="width:30%">Balasan pasien</th>
+      <th style="width:16%">Status / flag</th>
+    </tr></thead>
+    <tbody id="waBody">
+      <tr><td colspan="5" style="color:var(--ink-muted);padding:8px">Belum ada data. Muat berkas rangkuman dari Make.com, atau tempel JSON-nya.</td></tr>
+    </tbody>
+  </table>
+  <div class="callout"><span class="k">Cara membacanya</span><b>Hening bukan berarti patuh.</b> Pasien yang tidak membalas 2 reminder berturut-turut adalah sinyal risiko putus program — bahas saat kontrol, jangan diasumsikan baik-baik saja. Sebaliknya, keluhan di WA yang sudah ditangani CS tetap perlu diketahui dokter agar tidak ditanyakan ulang dari nol.</div>
+
+  <!-- HANDOFF SNAPSHOT -->
+  <div class="sec"><span class="n">4</span>Ringkasan handoff (status terkini)</div>
+  <p class="note">Salin dari baris kunjungan terakhir. Dibaca dokter pemeriksa sebagai <b>panduan, bukan instruksi mengikat</b> — penatalaksanaan hari ini ditentukan dokter yang memeriksa berdasarkan panduan ini, riwayat perkembangan, dan kondisi pasien saat itu. Flag alergi tetap dibaca sebelum tindakan.</p>
+  <div class="handoff">
+    <div class="hh"><div class="t">Status journey pasien saat ini</div><div class="s">Ikuti rencana dokter pemilik</div></div>
+    <div class="hb">
+      <div class="hgrid">
+        <div class="hcell"><span class="lab">Fase saat ini</span><input class="in" placeholder="mis. Acne Fase 2 (bekas/PIH)"></div>
+        <div class="hcell"><span class="lab">Tindakan terakhir + tgl</span><input class="in" placeholder="mis. PicoSure Pro, 12 Jul 2026"></div>
+        <div class="hcell"><span class="lab">Rencana berikutnya (remarks)</span><input class="in" placeholder="mis. Peeling, bukan Pico lagi"></div>
+        <div class="hcell"><span class="lab">Obat / krim aktif</span><input class="in" placeholder="mis. tretinoin malam, azelaic pagi"></div>
+      </div>
+      <div class="callout" style="margin:8px 0 0"><span class="k">Sifat handoff</span>Ringkasan di atas adalah rencana berdasarkan penilaian awal — bersifat <b>panduan, bukan instruksi mengikat</b>. Penatalaksanaan hari ini ditentukan dokter yang memeriksa, berdasarkan panduan ini, riwayat perkembangan, dan kondisi pasien saat itu. Cek alergi/kontraindikasi sebelum tiap tindakan &amp; resep.</div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="foot">
+    <div class="l">Pertanyaan di antara kunjungan? WhatsApp <b>+62 821 30144778</b><br>Lembar ini mendampingi <b>Form 2 (Asesmen Dokter)</b>.<br>Perbarui tiap kunjungan &amp; simpan bersama rekam medis.</div>
+    <div class="r"><div class="nm">AESTHETIC DERMA CENTRE</div>Jl. Ir. H. Djuanda 88, Bandung<br>Pemantauan journey &amp; hasil</div>
+  </div>
+
+</div><!-- /page -->
+
+<div class="disc">Tracker ini mendampingi Form 1 + Form 2. Hasil bersifat bertahap sesuai kondisi pasien, bukan jaminan. Semua keputusan klinis di bawah tanggung jawab dokter yang menangani.</div>
+
+<script>
+/* ===== ADC HUB — disalin dari Form 2 (companion server, Tahap 1) ===== */
+var RM_ID='t_rm';
+function _dEsc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+function hubDefault(){ /* disajikan hub sendiri (http) -> pakai origin; dibuka sbg file -> localhost */
+  return (location.protocol==='http:'||location.protocol==='https:')?location.origin:'http://localhost:3777'; }
+function hubURL(){ try{return (localStorage.getItem('adc_hub_url')||hubDefault()).replace(/\/+$/,'');}catch(e){return hubDefault();} }
+function hubKey(){ try{return localStorage.getItem('adc_hub_key')||'';}catch(e){return '';} }
+var _hubOn=false;
+function hubChip(st,txt){ var c=document.getElementById('hubchip'); if(!c) return;
+  c.className='hubchip '+st; c.textContent='HUB · '+txt; }
+function hubPing(){
+  try{
+    fetch(hubURL()+'/api/ping',{cache:'no-store'}).then(function(r){return r.json();})
+    .then(function(j){ _hubOn=!!(j&&j.ok); hubChip(_hubOn?'on':'off',_hubOn?'tersambung':'mati');
+      /* URL webhook Make.com dibagikan hub (config.json) -> tidak perlu ditempel per pasien */
+      if(j&&j.webhook){ var wh=document.getElementById('cfg_webhook'); if(wh&&!wh.value.trim()) wh.value=j.webhook; } })
+    .catch(function(){ _hubOn=false; hubChip('off','mati'); });
+  }catch(e){ _hubOn=false; }
+}
+function hubSetup(){
+  var u=prompt('Alamat hub (PC yang menjalankan adc-hub):',hubURL()); if(u===null) return;
+  try{ localStorage.setItem('adc_hub_url',(u||'http://localhost:3777')); }catch(e){}
+  var k=prompt('Kunci hub (lihat jendela server / config.json):',hubKey());
+  if(k!==null){ try{ localStorage.setItem('adc_hub_key',k); }catch(e){} }
+  hubPing();
+}
+function hubPost(jenis,obj,cb){
+  if(!_hubOn){ if(cb) cb(false,'hub tidak tersambung'); return; }
+  try{
+    hubChip('sync','mengirim…');
+    fetch(hubURL()+'/api/'+jenis,{method:'POST',
+      headers:{'Content-Type':'application/json','X-ADC-Key':hubKey()},
+      body:JSON.stringify(obj)})
+    .then(function(r){return r.json();})
+    .then(function(j){ hubChip(j.ok?'on':'off', j.ok?(jenis+' tersimpan'):('gagal: '+(j.error||''))); if(cb) cb(!!j.ok,j.error||''); })
+    .catch(function(e){ hubChip('off','gagal kirim'); if(cb) cb(false,String(e)); });
+  }catch(e){ if(cb) cb(false,String(e)); }
+}
+function hubGetPasien(rm,cb){
+  try{
+    fetch(hubURL()+'/api/pasien/'+encodeURIComponent(rm),{headers:{'X-ADC-Key':hubKey()},cache:'no-store'})
+    .then(function(r){return r.json();})
+    .then(function(j){ cb(j&&!j.error?j:null, j&&j.error); })
+    .catch(function(e){ cb(null,String(e)); });
+  }catch(e){ cb(null,String(e)); }
+}
+
+window.addEventListener('load',function(){ hubPing(); setInterval(hubPing,30000); });
+var _dlgSeq=0, _dlgKb=null;
+function _dlgMuat(judul, berkasId, onRM){
+  var bg=document.getElementById('mdlg');
+  if(!bg){
+    bg=document.createElement('div'); bg.id='mdlg'; bg.className='mdlg-bg';
+    bg.innerHTML='<div class="mdlg" role="dialog" aria-modal="true" aria-labelledby="mdlg_t">'+
+      '<div class="mdlg-t" id="mdlg_t"></div>'+
+      '<label class="mdlg-l" for="mdlg_rm">No. RM pasien <span>dari hub klinik</span></label>'+
+      '<input class="mdlg-in" id="mdlg_rm" list="mdlg_list" autocomplete="off" placeholder="ketik No. RM">'+
+      '<datalist id="mdlg_list"></datalist>'+
+      '<div class="mdlg-msg" id="mdlg_msg"></div>'+
+      '<div class="mdlg-b">'+
+        '<button type="button" class="mdlg-file" id="mdlg_file">Pilih berkas…</button>'+
+        '<span class="mdlg-sp"></span>'+
+        '<button type="button" class="mdlg-x" id="mdlg_x">Batal</button>'+
+        '<button type="button" class="mdlg-ok" id="mdlg_ok">Muat</button>'+
+      '</div></div>';
+    document.body.appendChild(bg);
+  }
+  /* Satu token per pembukaan dialog: respons hub yang datang setelah Batal / dialog lain
+     dibuka diabaikan (tidak memuat pasien, tidak menutup dialog yang salah). Satu
+     listener keydown global — dilepas sebelum dipasang lagi, supaya Esc tidak "bocor". */
+  var tok=++_dlgSeq, btnOk=document.getElementById('mdlg_ok');
+  var tutup=function(){ _dlgSeq++; bg.classList.remove('on'); btnOk.disabled=false;
+    if(_dlgKb){ document.removeEventListener('keydown',_dlgKb,true); _dlgKb=null; } };
+  var inp=document.getElementById('mdlg_rm'), msg=document.getElementById('mdlg_msg');
+  var ok=function(){
+    if(btnOk.disabled) return;                       /* cegah klik ganda = muat ganda */
+    var rm=(inp.value||'').trim();
+    if(!rm){ msg.textContent='Ketik No. RM, atau klik "Pilih berkas…".'; inp.focus(); return; }
+    msg.textContent='Memuat…'; btnOk.disabled=true;
+    /* selesai(gagal) -> true bila permintaan ini masih berlaku (pemanggil boleh memuat data) */
+    onRM(rm,function(gagal){
+      if(tok!==_dlgSeq) return false;
+      btnOk.disabled=false;
+      if(gagal){ msg.textContent=gagal+' Coba RM lain, atau klik "Pilih berkas…".'; return false; }
+      tutup(); return true;
+    });
+  };
+  if(_dlgKb) document.removeEventListener('keydown',_dlgKb,true);
+  _dlgKb=function(e){ if(e.key==='Escape'){ e.stopPropagation(); tutup(); }
+                      else if(e.key==='Enter'&&document.activeElement&&document.activeElement.id==='mdlg_rm'){ e.preventDefault(); ok(); } };
+  document.getElementById('mdlg_t').textContent=judul;
+  inp.value=((document.getElementById(RM_ID)||{}).value||'').trim(); msg.textContent='';
+  document.getElementById('mdlg_ok').onclick=ok;
+  document.getElementById('mdlg_x').onclick=tutup;
+  /* klik berkas harus langsung di dalam klik pengguna — browser memblokir pemilih berkas yang dibuka belakangan */
+  document.getElementById('mdlg_file').onclick=function(){ tutup(); document.getElementById(berkasId).click(); };
+  bg.onclick=function(e){ if(e.target===bg) tutup(); };
+  btnOk.disabled=false;
+  document.addEventListener('keydown',_dlgKb,true);
+  bg.classList.add('on'); setTimeout(function(){ try{ inp.focus(); inp.select(); }catch(e){} },0);
+  /* saran RM dari daftar pasien di hub */
+  try{
+    fetch(hubURL()+'/api/pasien',{headers:{'X-ADC-Key':hubKey()},cache:'no-store'}).then(function(r){return r.json();})
+    .then(function(j){ var dl=document.getElementById('mdlg_list'); if(!dl||!j||!j.pasien) return;
+      dl.innerHTML=j.pasien.slice(0,200).map(function(p){
+        return '<option value="'+_dEsc(p.rm)+'">'+_dEsc((p.nama||'')+(p.kunjungan_ke?(' · kunjungan '+p.kunjungan_ke):''))+'</option>'; }).join(''); })
+    .catch(function(){});
+  }catch(e){}
+}
+
+function muatHandoffHub(){
+  if(!_hubOn){ document.getElementById('_hofile').click(); return; }
+  _dlgMuat('Muat rekam medis (handoff terakhir)','_hofile',function(rm,selesai){
+    hubGetPasien(rm,function(j,err){
+      if(j&&j.handoff_terakhir){ if(selesai()) renderHO(j.handoff_terakhir); }
+      else selesai('Handoff untuk RM '+rm+' tidak ada di hub'+(err?(' ('+err+')'):'')+'.');
+    });
+  });
+}
+
+/* ===== ISI OTOMATIS DARI REKAM MEDIS =====
+   Berkas handoff terakhir membawa riwayat[] sejak kunjungan pertama, jadi satu
+   berkas cukup untuk merekonstruksi seluruh journey — tidak perlu ketik ulang. */
+function _tset(id,v){var e=document.getElementById(id); if(e&&v!=null&&v!=='') e.value=v;}
+function _rowsFromHandoff(h){
+  var arr=(h.riwayat||[]).slice();
+  var a=h.asesmen||{};
+  arr.push({kunjungan_ke:h.kunjungan_ke||arr.length+1, tanggal:a.tanggal, dokter:a.dokter,
+            diagnosis:a.diagnosis, hasil:a.hasil, rencana:a.rencana,
+            instruksi_kontrol:a.instruksi_kontrol, remarks:a.remarks,
+            temuan_program:_ringkasProgramT(h.program_detail),
+            evaluasi:h.evaluasi_kontrol||null,
+            resep:(a.resep||[]).map(function(r){return [r.obat,r.jadwal].filter(Boolean).join(' ');}).filter(Boolean).join('; '),
+            kunjungan_berikutnya:a.kunjungan_berikutnya});
+  return arr;
+}
+function _ringkasProgramT(pd){
+  if(!pd) return '';
+  return Object.keys(pd).map(function(k){
+    var d=pd[k]||{};
+    return (d.program||k)+(d.tahap?(' [tahap '+d.tahap+']'):'')+': '+((d.isian||[]).slice(0,20).join(' · '));
+  }).join(' || ');
+}
+function renderHO(h){
+  if(!h || h.doc!=='ADC-HANDOFF'){ alert('Berkas ini bukan handoff ADC (doc harus "ADC-HANDOFF").'); return; }
+  window._ho=h;
+  var p=h.pasien||{}, a=h.asesmen||{};
+  _tset('t_nama',p.nama); _tset('t_rm',p.rm);
+  _tset('t_prog',a.program); _tset('t_dokter',a.dokter);
+  _tset('t_alergi', a.alergi || (a.alergi_nihil?'Nihil (dikonfirmasi)':''));
+  var rows=_rowsFromHandoff(h), first=rows[0]||{};
+  _tset('t_dx', first.diagnosis||a.diagnosis);
+  _tset('t_tgl0', first.tanggal);
+  _tset('t_metrik0', first.temuan_program||first.hasil);
+
+  var tb=document.getElementById('visitBody');
+  if(tb){
+    tb.innerHTML = rows.map(function(v,i){
+      var ev=v.evaluasi||{};
+      function c(x){return '<td>'+_wesc(x==null?'':x)+'</td>';}
+      return '<tr><td class="idx">'+(v.kunjungan_ke||i+1)+'</td>'+
+        c(v.tanggal)+c(v.dokter)+c((v.temuan_program||'').split(':')[0])+
+        c(i>0?(rows[i-1].remarks||rows[i-1].instruksi_kontrol||''):'—')+
+        c(ev.tindakan||'')+
+        c([v.hasil, ev.hasil?('vs lalu: '+ev.hasil):'',
+           (function(){var g=ev.iga; if(!g) return '';
+             var PL={acne:'Acne',melasma:'Melasma'};
+             return Object.keys(g).map(function(k){var d=g[k];
+               return 'IGA '+(PL[k]||k)+' '+d.baseline+'→'+d.kini+(d.sukses?' (BERHASIL)':'');}).join(', ');})(),
+           (function(){var d=ev.gis&&ev.gis.dimensi; if(!d) return '';
+             var DL={acne_bekas:'bekas',hair_growth:'rambut'};
+             return Object.keys(d).map(function(k){return (DL[k]||k)+' '+d[k].split(' ')[0];}).join(', ');})()
+          ].filter(Boolean).join(' · ')||v.temuan_program)+
+        c('')+c(ev.kepatuhan||'')+
+        c(v.remarks||'')+c(v.kunjungan_berikutnya||'')+'</tr>';
+    }).join('');
+  }
+  alert('Rekam medis dimuat: '+rows.length+' kunjungan'+(p.nama?(' — '+p.nama):'')+'. Log kunjungan & baseline terisi otomatis.');
+}
+function loadHOFile(input){
+  var f=input.files&&input.files[0]; if(!f) return;
+  var r=new FileReader();
+  r.onload=function(e){ try{ renderHO(JSON.parse(e.target.result)); }catch(err){ alert('Gagal membaca berkas: '+err.message); } input.value=''; };
+  r.readAsText(f);
+}
+
+/* ===== RINGKASAN UNTUK PASIEN =====
+   Bahasa pasien, bukan bahasa rekam medis. Tanpa istilah teknis & tanpa janji hasil. */
+function cetakJourney(){
+  var h=window._ho;
+  if(!h){ alert('Muat Rekam Medis (Handoff) dulu.'); return; }
+  var p=h.pasien||{}, rows=_rowsFromHandoff(h), a=h.asesmen||{};
+  var li=rows.map(function(v,i){
+    var ev=v.evaluasi||{};
+    var isi=[v.hasil, ev.hasil, ev.arah?('perkembangan: '+ev.arah):''].filter(Boolean).join(' — ');
+    return '<tr><td><b>Kunjungan '+(v.kunjungan_ke||i+1)+'</b><br><span class="d">'+_wesc(v.tanggal||'')+'</span></td>'+
+           '<td>'+_wesc(isi||'—')+'</td><td>'+_wesc(ev.tindakan||'')+'</td></tr>';
+  }).join('');
+  var w=window.open('','_blank','width=860,height=900,scrollbars=yes');
+  if(!w){ alert('Pop-up diblokir browser. Izinkan pop-up untuk membuka ringkasan pasien.'); return; }
+  w.document.open();
+  w.document.write('<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><title>Perjalanan Perawatan — '+_wesc(p.nama||'')+'</title>'+
+  '<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700&family=Archivo+Narrow:wght@400;600&display=swap" rel="stylesheet">'+
+  '<style>body{font-family:\'Archivo Narrow\',Arial,sans-serif;color:#000;background:#FAF8F5;margin:0;font-size:15px;line-height:1.6}'+
+  '.bar{background:#000;color:#FAF8F5;padding:11px 22px;display:flex;justify-content:space-between;align-items:center}'+
+  '.bar button{font-family:inherit;font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;padding:8px 15px;border:1px solid #CDAF97;background:#CDAF97;color:#1d130c;cursor:pointer}'+
+  '.sheet{background:#fff;max-width:190mm;margin:18px auto;padding:16mm;border:1px solid #DADCD9}'+
+  'h1{font-family:Archivo,Arial,sans-serif;font-size:23px;font-weight:600;margin:0 0 4px}'+
+  '.eyebrow{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6B6F6C}'+
+  '.meta{font-size:13px;color:#3A3F3C;margin-top:6px}'+
+  'hr{border:none;border-top:1px solid #000;margin:14px 0}'+
+  'h2{font-family:Archivo,Arial,sans-serif;font-size:13px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;margin:20px 0 8px;padding-bottom:4px;border-bottom:1px solid #C8CBC8}'+
+  'table{width:100%;border-collapse:collapse;font-size:13.5px}th,td{text-align:left;vertical-align:top;padding:7px 9px;border:1px solid #DADCD9}'+
+  'th{background:#E8EBE9;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase}'+
+  '.d{font-size:12px;color:#6B6F6C}'+
+  '.note{font-size:12.5px;color:#3A3F3C;background:#EDE6E7;border:1px solid #BAA3A3;padding:10px 13px;margin-top:16px}'+
+  '@media print{.bar{display:none}.sheet{border:none;margin:0;max-width:none;padding:0}body{background:#fff}@page{size:A4;margin:15mm}}'+
+  '</style></head><body>'+
+  '<div class="bar"><b>Perjalanan Perawatan — '+_wesc(p.nama||'Pasien')+'</b>'+
+  '<button onclick="window.print()">Cetak / Simpan PDF</button></div>'+
+  '<div class="sheet"><div class="eyebrow">Aesthetic Derma Centre · Skin Quality Program</div>'+
+  '<h1>Perjalanan perawatan Anda</h1>'+
+  '<div class="meta">'+_wesc(p.nama||'—')+' · Program '+_wesc(a.program||'—')+' · '+rows.length+' kunjungan tercatat</div><hr>'+
+  '<h2>Ringkasan tiap kunjungan</h2>'+
+  '<table><tr><th style="width:22%">Kunjungan</th><th>Yang dinilai dokter</th><th style="width:28%">Tindakan</th></tr>'+li+'</table>'+
+  (a.kunjungan_berikutnya?('<h2>Kunjungan berikutnya</h2><p>'+_wesc(a.kunjungan_berikutnya)+'</p>'):'')+
+  '<div class="note"><b>Cara membaca lembar ini.</b> Ini catatan perjalanan perawatan Anda, bukan janji hasil. '+
+  'Perawatan kulit dan rambut bekerja bertahap — perubahan dihitung dalam bulan, bukan hari. '+
+  'Yang paling menentukan hasil adalah konsistensi pemakaian di rumah dan kehadiran di jadwal kontrol. '+
+  'Pertanyaan di antara kunjungan: WhatsApp +62 821 30144778.</div>'+
+  '</div></body></html>');
+  w.document.close();
+}
+
+/* ===== IMPOR RANGKUMAN FOLLOW-UP WHATSAPP =====
+   Sumber: SleekFlow -> Make.com -> berkas JSON (skema ADC-WA-DIGEST v1).
+   Make.com yang meringkas; tracker hanya menampilkan. */
+function _wesc(x){return String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function _wset(id,val){var e=document.getElementById(id); if(e) e.value=(val==null?'':val);}
+function renderWA(d){
+  if(!d || d.doc!=='ADC-WA-DIGEST'){ alert('Berkas ini bukan rangkuman WA ADC (doc harus "ADC-WA-DIGEST").'); return; }
+  var p=d.periode||{}, st=d.statistik||{}, it=d.interaksi||[];
+  _wset('wa_periode',[p.dari,p.sampai].filter(Boolean).join(' s/d ')||'—');
+  _wset('wa_kirim', st.terkirim!=null?st.terkirim:it.length);
+  var balas=st.dibalas!=null?st.dibalas:it.filter(function(x){return (x.balasan||'').trim();}).length;
+  _wset('wa_balas', balas);
+  _wset('wa_hening', st.tidak_dibalas!=null?st.tidak_dibalas:(it.length-balas));
+  _wset('wa_ringkas', d.ringkasan||'');
+  var flags=[];
+  it.forEach(function(x){ if(x.flag && flags.indexOf(x.flag)<0) flags.push(x.flag); });
+  if(st.reschedule) flags.push('minta reschedule ('+st.reschedule+'x)');
+  // dua reminder beruntun tanpa balasan = sinyal risiko
+  var beruntun=0, maxBeruntun=0;
+  it.forEach(function(x){ if((x.balasan||'').trim()){beruntun=0;} else {beruntun++; if(beruntun>maxBeruntun)maxBeruntun=beruntun;} });
+  if(maxBeruntun>=2) flags.unshift('HENING '+maxBeruntun+' reminder beruntun — risiko putus program');
+  _wset('wa_flag', flags.join(' · ')||'tidak ada sinyal khusus');
+  var tb=document.getElementById('waBody');
+  tb.innerHTML = it.length ? it.map(function(x){
+    var st2=(x.balasan||'').trim()?'dibalas':'tidak dibalas';
+    return '<tr><td>'+_wesc(x.tanggal)+'</td><td>'+_wesc(x.jenis)+'</td><td>'+_wesc(x.pesan)+'</td><td>'+_wesc(x.balasan)+
+           '</td><td>'+_wesc([st2,x.flag].filter(Boolean).join(' · '))+'</td></tr>';
+  }).join('') : '<tr><td colspan="5" style="color:var(--ink-muted);padding:8px">Rangkuman dimuat, tapi tidak ada interaksi pada periode ini.</td></tr>';
+  var nm=(d.pasien||{}).nama;
+  alert('Rangkuman WA dimuat'+(nm?(' untuk '+nm):'')+' — '+it.length+' interaksi.');
+}
+function loadWAFile(input){
+  var f=input.files&&input.files[0]; if(!f) return;
+  var r=new FileReader();
+  r.onload=function(e){ try{ renderWA(JSON.parse(e.target.result)); }catch(err){ alert('Gagal membaca berkas: '+err.message); } input.value=''; };
+  r.readAsText(f);
+}
+function pasteWA(){
+  var t=prompt('Tempel JSON rangkuman WA dari Make.com:');
+  if(!t) return;
+  try{ renderWA(JSON.parse(t)); }catch(err){ alert('JSON tidak valid: '+err.message); }
+}
+
+function v(id){var e=document.getElementById(id);return e?e.value:'';}
+function _num(x){x=parseFloat((x||'').toString().replace(',','.'));return isNaN(x)?null:x;}
+function drawProg(){
+  var base=_num(v('pm_base')),target=_num(v('pm_target')),dir=v('pm_dir')||'down';
+  var raw=document.querySelectorAll('.pm-v'), vals=[]; raw.forEach(function(i){vals.push(_num(i.value));});
+  var series=[]; if(base!==null)series.push({x:0,y:base});
+  vals.forEach(function(n,i){ if(n!==null)series.push({x:i+1,y:n}); });
+  var svg=document.getElementById('pm_svg'),stat=document.getElementById('pm_stat');
+  if(series.length<1){svg.innerHTML='';stat.innerHTML='<span style="color:var(--ink-muted)">Isi baseline + minimal 1 kunjungan.</span>';return;}
+  var W=430,H=92,pad=18,slots=raw.length;
+  var ys=series.map(function(s){return s.y;}); if(target!==null)ys.push(target);
+  var ymin=Math.min.apply(null,ys),ymax=Math.max.apply(null,ys); if(ymin===ymax)ymax=ymin+1;
+  function X(i){return pad+(W-2*pad)*(i/slots);}
+  function Y(val){return pad+(H-2*pad)*(1-(val-ymin)/(ymax-ymin));}
+  var pts=series.map(function(s){return X(s.x).toFixed(1)+','+Y(s.y).toFixed(1);}).join(' ');
+  var dots=series.map(function(s){return '<rect x="'+(X(s.x)-2.5).toFixed(1)+'" y="'+(Y(s.y)-2.5).toFixed(1)+'" width="5" height="5" fill="#6E5A47"/>';}).join('');
+  var tline=''; if(target!==null){var ty=Y(target).toFixed(1);tline='<line x1="'+pad+'" y1="'+ty+'" x2="'+(W-pad)+'" y2="'+ty+'" stroke="#BAA3A3" stroke-dasharray="4 3"/><text x="'+(W-pad)+'" y="'+(ty-3)+'" font-size="8" fill="#6B6F6C" text-anchor="end">target '+target+'</text>';}
+  svg.innerHTML='<polyline points="'+pts+'" fill="none" stroke="#6E5A47" stroke-width="1.5"/>'+tline+dots;
+  var first=series[0].y,last=series[series.length-1].y,delta=+(last-first).toFixed(2);
+  var improving=dir==='down'?(last<first):(last>first);
+  var atTarget=target===null?null:(dir==='down'?last<=target:last>=target);
+  var pct=null; if(target!==null&&base!==null&&target!==base){ pct=dir==='down'?((base-last)/(base-target)*100):((last-base)/(target-base)*100); pct=Math.max(0,Math.min(100,Math.round(pct))); }
+  var status=atTarget?'Target tercapai':(improving?'On-track':'Perlu perhatian');
+  var col=(atTarget||improving)?'#3A6B4A':'#8a3b2c';
+  stat.innerHTML='<div style="font-weight:700;color:'+col+';font-size:13px">'+status+'</div>'+
+    '<div style="color:var(--ink-2)">Baseline '+first+' &rarr; terkini '+last+' ('+(delta>0?'+':'')+delta+')</div>'+
+    (pct!==null?'<div style="color:var(--ink-muted)">Menuju target: '+pct+'%</div>':'');
+}
+function addRow(){
+  var tb=document.getElementById('visitBody'),n=tb.querySelectorAll('tr').length+1,tr=document.createElement('tr');
+  tr.innerHTML='<td class="idx">'+n+'</td><td><input class="cell" type="date"></td><td><input class="cell"></td><td><input class="cell"></td><td><textarea class="cell"></textarea></td><td><textarea class="cell"></textarea></td><td><textarea class="cell"></textarea></td><td><input class="cell"></td><td><input class="cell"></td><td><textarea class="cell"></textarea></td><td><input class="cell" type="date"></td>';
+  tb.appendChild(tr);
+}
+function resetForm(){ if(!confirm('Reset semua isian?'))return; document.querySelectorAll('input,textarea').forEach(function(i){if(i.type==='checkbox')i.checked=false;else i.value='';}); document.querySelectorAll('select').forEach(function(s){s.selectedIndex=0;}); drawProg(); }
+window.addEventListener('load',drawProg);
+</script>
+</body>
+</html>

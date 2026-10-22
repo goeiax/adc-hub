@@ -14,6 +14,7 @@
    Jalankan:  node server.js         (atau klik dua kali start.bat)
    Uji:       http://localhost:3777/api/ping
    Kunci:     ganti KEY di config.json (dibuat otomatis saat pertama jalan).
+   Webhook:   isi "webhook" di config.json dengan URL Make.com → semua form memakainya otomatis.
    NeoSoft Cube tetap sumber kebenaran utk jadwal/kasir/RM resmi; hub hanya
    memegang data klinis program. Integrasi vendor (Tahap 2) menempel di sini.
    ============================================================================ */
@@ -28,7 +29,7 @@ const DATA = path.join(ROOT, 'data');
 const CFGP = path.join(ROOT, 'config.json');
 
 /* ---- konfigurasi (dibuat otomatis) ---- */
-let CFG = { port: 3777, key: '' };
+let CFG = { port: 3777, key: '', webhook: '' };   // webhook = URL Make.com (opsional) → dibagikan ke semua form
 try { CFG = Object.assign(CFG, JSON.parse(fs.readFileSync(CFGP, 'utf8'))); }
 catch (e) {
   CFG.key = 'adc-' + crypto.randomBytes(4).toString('hex');
@@ -93,7 +94,7 @@ const server = http.createServer((req, res) => {
   if (parts[0] !== 'api') return sajikan(req, res, u.pathname);
 
   /* ping tidak butuh kunci — dipakai form untuk deteksi hub */
-  if (parts[1] === 'ping') return kirim(res, 200, { ok: true, app: 'adc-hub', versi: 1 });
+  if (parts[1] === 'ping') return kirim(res, 200, { ok: true, app: 'adc-hub', versi: 1, webhook: CFG.webhook || '' });
 
   if ((req.headers['x-adc-key'] || '') !== CFG.key)
     return kirim(res, 401, { error: 'kunci salah. Lihat config.json di folder adc-hub.' });

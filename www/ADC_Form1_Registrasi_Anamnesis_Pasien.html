@@ -566,6 +566,7 @@ body.past0 #staff_mini{display:flex !important;}
       <div class="sf k12"><span class="slab">Foto klinis baseline <span class="sreq">wajib sebelum pasien masuk</span></span>
         <div class="foto-row">
           <div class="spills" id="p_foto">
+            <label class="opt spill"><input type="checkbox" id="p_foto_izin"> Pasien setuju difoto (lisan)</label>
             <label class="opt spill"><input type="checkbox" id="p_foto_ok"> Sudah diambil</label>
           </div>
           <input class="sin" id="p_foto_area" placeholder="Area difoto — mis. wajah frontal, malar kanan-kiri">
@@ -860,7 +861,7 @@ body.past0 #staff_mini{display:flex !important;}
 
   
 
-  <div class="stepnav no-print"><button type="button" class="nb" onclick="goStep(3)">&lsaquo; Kembali</button><span class="donehint">Selesai &mdash; klik <b>Simpan Data Pasien</b> di atas.</span></div></section>
+  <div class="stepnav no-print"><button type="button" class="nb" onclick="goStep(3)">&lsaquo; Kembali</button><span class="donehint">Selesai &mdash; perawat: <button type="button" class="nb nb-p" onclick="simpanIntake()" style="margin-left:8px">Simpan Data Pasien</button></span></div></section>
   <div class="foot">
     <div class="l">Pertanyaan sebelum kunjungan? WhatsApp <b>+62 821 30144778</b><br>Tips perawatan: <b>@adc.skinexpert</b><br>Simpan salinan ini dan bawa saat kunjungan.</div>
     <div class="r"><div class="nm">AESTHETIC DERMA CENTRE</div>Jl. Ir. H. Djuanda 88, Bandung<br>Form 1 dari 2 · Registrasi &amp; anamnesis</div>
@@ -1015,6 +1016,7 @@ function buildIntake(){
        Form 1 hanya untuk PASIEN BARU; kunjungan kontrol langsung ke Form 2. */
     penugasan:{ dokter:_v('p_dokter'),
                 foto_baseline:!!(document.getElementById('p_foto_ok')||{}).checked,
+                foto_izin:!!(document.getElementById('p_foto_izin')||{}).checked,
                 foto_area:_v('p_foto_area') },
     pengukuran:{ bb:_v('p_bb'), tb:_v('p_tb'), imt:_v('p_imt') },
     pasien:{ nama:_v('p_nama'), rm:_v('rm'), wa:_v('p_wa'), tanggal:_v('tgl'),
@@ -1089,6 +1091,7 @@ function simpanIntake(){
   var w=[];
   if(!d.pasien.nama && !d.pasien.rm) w.push('Nama dan No. RM masih kosong.');
   if(!d.penugasan.dokter) w.push('Dokter pemeriksa belum ditentukan — nama ini jadi acuan awal di Form 2.');
+  if(d.penugasan.foto_baseline && !d.penugasan.foto_izin) w.push('Foto baseline diambil tetapi persetujuan lisan pasien belum dicentang — minta izin SEBELUM memotret (persetujuan tertulis menyusul di langkah 5).');
   if(!d.penugasan.foto_baseline) w.push('Foto klinis baseline belum ditandai. Foto ini TITIK PEMBANDING seluruh evaluasi hasil; tanpa itu perbandingan di kunjungan berikutnya tidak punya titik awal.');
   if(!d.kritis.alergi && !d.kritis.alergi_nihil) w.push('Alergi belum diisi dan "Tidak ada" belum dicentang — ini data keselamatan.');
   var tt=d.persetujuan.tanda_tangan||{};
@@ -1104,9 +1107,18 @@ function simpanIntake(){
   a.href=u; a.download='Intake_'+nm+'_'+tg+'.json';
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(function(){URL.revokeObjectURL(u);},1500);
-  /* kirim juga ke hub bila tersambung — berkas unduhan tetap jadi cadangan */
-  hubPost('intake',d);
-  alert('Data pasien tersimpan sebagai berkas.\n\nBerikan berkas ini ke perawat/dokter — di Form 2 klik "Muat Form 1" agar identitas, alergi, dan ringkasan anamnesis terisi otomatis (tidak perlu ketik ulang).');
+  /* Hasil hub HARUS terlihat perawat: sebelumnya pesan "tersimpan" muncul walau hub menolak
+     (kunci belum diisi di tablet, jaringan) — dokter lalu tidak menemukan RM-nya. */
+  if(!_hubOn){
+    alert('Hub klinik TIDAK tersambung — data tersimpan hanya sebagai berkas unduhan.\n\n'+
+      'Berikan berkas Intake_… ini ke dokter (Form 2 → Muat Form 1 → Pilih berkas).\n'+
+      'Bila hub seharusnya nyala: klik chip HUB, isi alamat & kunci, lalu Simpan lagi.');
+    return;
+  }
+  hubPost('intake',d,function(ok,err){
+    if(ok) alert('✓ Data pasien tersimpan di hub klinik (RM '+(d.pasien.rm||'?')+').\n\nDokter: buka Form 2 → Muat Form 1 → ketik No. RM.\nBerkas unduhan = cadangan.');
+    else alert('✗ GAGAL menyimpan ke hub'+(err?(' — '+err):'')+'.\n\nData hanya tersimpan sebagai berkas unduhan.\nCek chip HUB (kunci hub salah?) lalu klik Simpan Data Pasien lagi — atau berikan berkas Intake_… ke dokter.');
+  });
 }
 
 /* ===== WIZARD BERTAHAP =====

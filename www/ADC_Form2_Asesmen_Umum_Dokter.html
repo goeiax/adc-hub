@@ -1451,7 +1451,10 @@ body.mode-kontrol #rb2{display:none;}
   </div>
   <!-- D1 lama (diagnosis, IGA) — kini bagian D1; tampil di awal & kontrol -->
   <div class="dxblk">
-  <div class="d1h">Diagnosis</div>
+  <div class="d1h">Temuan &amp; diagnosis</div>
+  <div class="row">
+    <div class="f s12"><span class="lab">Catatan klinis</span><textarea class="in" id="d2_hasil" rows="4" placeholder="Temuan: mis. tampak sehat; papul-pustul dominan rahang, PIH ringan; kulit sensitif&#10;Penunjang: mis. panel hormon / InBody / Hair Analyser — atau &quot;tidak perlu&quot;"></textarea></div>
+  </div>
   <!-- Derajat = skor IGA 0–4 (satu-satunya tempat mengisi IGA). Sebelum program dipilih,
        kartu umum menyimpan nilai sementara (d1_iga) yang otomatis dipakai program Acne /
        Melasma begitu aktif. Kartu per program tetap memakai id ac_iga / me_iga yang sama,
@@ -1498,9 +1501,6 @@ body.mode-kontrol #rb2{display:none;}
     <div class="mrow"><span class="mp">Hair-Loss</span><span class="mstat">Tanpa IGA — staging Norwood/Ludwig di form program</span></div>
   </div>
     </div>
-  </div>
-  <div class="row">
-    <div class="f s12"><span class="lab">Catatan klinis</span><textarea class="in" id="d2_hasil" rows="4" placeholder="Temuan: mis. tampak sehat; papul-pustul dominan rahang, PIH ringan; kulit sensitif&#10;Penunjang: mis. panel hormon / InBody / Hair Analyser — atau &quot;tidak perlu&quot;"></textarea></div>
   </div>
 
   </div>
@@ -1606,33 +1606,6 @@ body.mode-kontrol #rb2{display:none;}
   </div>
 
   
-  <div class="sec"><span class="n">D4b</span>Penjadwalan &amp; reminder SleekFlow</div>
-  <div id="sched_lock" class="lockmsg">Terkunci — menunggu dokter mengisi <b>kontrol tiap</b> dan <b>tanggal mulai</b> di D4.</div>
-  <div class="zone nr lock" id="sched_zone">
-    <div class="row">
-      <div class="f s3"><span class="lab">Kunjungan berikutnya</span><input class="in" type="date" id="d5_next"></div>
-      <div class="f s3"><span class="lab">Jam / slot</span><input class="in" id="d5_jam" placeholder="mis. 14:00"></div>
-      <div class="f s3"><span class="lab">Slot NeoSoft</span><div class="opts" style="padding-top:4px"><label class="opt"><input type="checkbox" id="d5_slot"> Ter-reserve</label></div></div>
-      <div class="f s3"><span class="lab">Disiapkan oleh (perawat)</span><input class="in" id="d5_by" placeholder="nama perawat"></div>
-      <div class="f w2 s12"><span class="lab">Webhook Make.com</span><input class="in" id="cfg_webhook" placeholder="https://hook.eu2.make.com/..."></div>
-    </div>
-    <div class="schedbtns">
-      <button type="button" class="sbtn pri" onclick="generateSchedule()"><span class="sn">1</span>Generate Jadwal</button>
-      <button type="button" class="sbtn" onclick="saveSchedToRecord()"><span class="sn">2</span>Simpan ke Rekam Medis</button>
-      <button type="button" class="sbtn" onclick="sendToSleekFlow()"><span class="sn">3</span>Kirim ke SleekFlow</button>
-      <button type="button" class="sbtn ghost" onclick="copySchedule()">Salin Jadwal</button>
-    </div>
-    <div id="send_status" style="font-size:13px;font-weight:600;margin-bottom:6px"></div>
-    <div id="rec_status" style="font-size:13px;font-weight:600;margin-bottom:6px"></div>
-    <table class="tbl">
-      <thead><tr><th style="width:10%">Hari</th><th style="width:16%">Tanggal</th><th style="width:22%">Jenis</th><th>Pesan</th></tr></thead>
-      <tbody id="schedBody"><tr><td colspan="4" style="color:var(--ink-muted)">Belum ada jadwal.</td></tr></tbody>
-    </table>
-    
-  </div>
-
-  <!-- D5 -->
-  
   <div class="stepnav no-print"><button type="button" class="nb" onclick="goStep(2)">&lsaquo; Kembali</button><button type="button" class="nb nb-p" onclick="goStep(4)">Lanjut &rsaquo;</button></div></section>
   <section class="step" data-step="4"><div class="sec"><span class="n">D5</span>Rekomendasi bertahap<span class="opt">opsional — isi bila pasien menanyakan langkah lanjutan</span> &nbsp;<span style="font-weight:600;color:var(--ink-muted);letter-spacing:.04em;text-transform:none">— catatan pegangan pasien (case-by-case)</span></div>
   <p class="note">Bersifat bertahap sesuai kondisi pasien — <b>bukan janji hasil</b>. Pasien membawa pulang catatan ini agar tahu langkah berikutnya; harga ditanyakan ke bagian depan.</p>
@@ -1663,6 +1636,16 @@ body.mode-kontrol #rb2{display:none;}
       <div class="f w2 s8"><span class="lab">Nama dokter yang menandatangani</span><input class="in" id="d8_dokter" placeholder="dr. ……, Sp.DVE"></div>
       <div class="f s4"><span class="lab">Tanggal sign-off</span><input class="in" type="date" id="d8_tgl"></div>
     </div>
+    <!-- Gerbang keamanan sebelum terbit. Teks ini pencatatan (consent kertas sudah ditandatangani,
+         skrining sudah dilakukan) — bukan pengganti lembar informed consent klinik. -->
+    <div class="row" style="margin-top:4px">
+      <div class="f s12"><span class="lab">Keamanan sebelum terbit</span>
+        <div class="opts" style="padding-top:4px">
+          <label class="opt"><input type="checkbox" id="d8_consent"> Informed consent tindakan hari ini sudah ditandatangani pasien (bila ada tindakan)</label>
+          <label class="opt" id="lbl_skrining" style="display:none"><input type="checkbox" id="d8_skrining"> Skrining obat berisiko: status hamil/menyusui &amp; KB dikonfirmasi, kontraindikasi dicek <em id="skrining_obat" style="font-style:normal;color:var(--ink-muted)"></em></label>
+        </div>
+      </div>
+    </div>
   </div>
   
   <div class="zone nr">
@@ -1677,6 +1660,36 @@ body.mode-kontrol #rb2{display:none;}
     <div class="stamp">Cap<br>klinik</div>
   </div>
 
+  
+
+  <!-- D4b = langkah PERAWAT: dikerjakan setelah dokter sign-off (D7), lalu Terbitkan Handoff —
+       supaya perangkat hanya berpindah tangan sekali (dokter → perawat). -->
+  <div class="sec"><span class="n">D4b</span>Penjadwalan &amp; reminder SleekFlow <span class="opt">perawat — setelah sign-off dokter</span></div>
+  <div id="sched_lock" class="lockmsg">Terkunci — menunggu dokter mengisi <b>kontrol tiap</b> dan <b>tanggal mulai</b> di D4.</div>
+  <div class="zone nr lock" id="sched_zone">
+    <div class="row">
+      <div class="f s3"><span class="lab">Kunjungan berikutnya</span><input class="in" type="date" id="d5_next"></div>
+      <div class="f s3"><span class="lab">Jam / slot</span><input class="in" id="d5_jam" placeholder="mis. 14:00"></div>
+      <div class="f s3"><span class="lab">Slot NeoSoft</span><div class="opts" style="padding-top:4px"><label class="opt"><input type="checkbox" id="d5_slot"> Ter-reserve</label></div></div>
+      <div class="f s3"><span class="lab">Disiapkan oleh (perawat)</span><input class="in" id="d5_by" placeholder="nama perawat"></div>
+      <div class="f w2 s12"><span class="lab">Webhook Make.com</span><input class="in" id="cfg_webhook" onchange="try{localStorage.setItem('adc_webhook',this.value.trim());}catch(e){}" placeholder="https://hook.eu2.make.com/..."></div>
+    </div>
+    <div class="schedbtns">
+      <button type="button" class="sbtn pri" onclick="generateSchedule()"><span class="sn">1</span>Generate Jadwal</button>
+      <button type="button" class="sbtn" onclick="saveSchedToRecord()"><span class="sn">2</span>Simpan ke Rekam Medis</button>
+      <button type="button" class="sbtn" onclick="sendToSleekFlow()"><span class="sn">3</span>Kirim ke SleekFlow</button>
+      <button type="button" class="sbtn ghost" onclick="copySchedule()">Salin Jadwal</button>
+    </div>
+    <div id="send_status" style="font-size:13px;font-weight:600;margin-bottom:6px"></div>
+    <div id="rec_status" style="font-size:13px;font-weight:600;margin-bottom:6px"></div>
+    <table class="tbl">
+      <thead><tr><th style="width:10%">Hari</th><th style="width:16%">Tanggal</th><th style="width:22%">Jenis</th><th>Pesan</th></tr></thead>
+      <tbody id="schedBody"><tr><td colspan="4" style="color:var(--ink-muted)">Belum ada jadwal.</td></tr></tbody>
+    </table>
+    
+  </div>
+
+  <!-- D5 -->
   
 
   <div class="stepnav no-print"><button type="button" class="nb" onclick="goStep(3)">&lsaquo; Kembali</button><span class="donehint">Selesai &mdash; klik <b>Terbitkan Handoff</b> di atas.</span></div></section>
@@ -2666,6 +2679,7 @@ function buildHandoff(){
     }:null,
     penerbitan:{ oleh:_hv('d8_by'), waktu:new Date().toISOString(),
                  signoff_dokter:_ck('d8_signoff'), dokter_signoff:_hv('d8_dokter'), tgl_signoff:_hv('d8_tgl'),
+                 consent_tindakan:_ck('d8_consent'), skrining_obat:_ck('d8_skrining'), obat_berisiko:_obatBerisiko(),
                  /* jejak audit: kontrol yang terbit tanpa handoff sebelumnya */
                  tanpa_handoff_sebelumnya:(_mode==='kontrol' && !window._prevHandoff) || undefined },
     program_detail:_progDetail(),
@@ -2855,7 +2869,9 @@ function hubChip(st,txt){ var c=document.getElementById('hubchip'); if(!c) retur
 function hubPing(){
   try{
     fetch(hubURL()+'/api/ping',{cache:'no-store'}).then(function(r){return r.json();})
-    .then(function(j){ _hubOn=!!(j&&j.ok); hubChip(_hubOn?'on':'off',_hubOn?'tersambung':'mati'); })
+    .then(function(j){ _hubOn=!!(j&&j.ok); hubChip(_hubOn?'on':'off',_hubOn?'tersambung':'mati');
+      /* URL webhook Make.com dibagikan hub (config.json) -> tidak perlu ditempel per pasien */
+      if(j&&j.webhook){ var wh=document.getElementById('cfg_webhook'); if(wh&&!wh.value.trim()) wh.value=j.webhook; } })
     .catch(function(){ _hubOn=false; hubChip('off','mati'); });
   }catch(e){ _hubOn=false; }
 }
@@ -2886,7 +2902,11 @@ function hubGetPasien(rm,cb){
     .catch(function(e){ cb(null,String(e)); });
   }catch(e){ cb(null,String(e)); }
 }
-window.addEventListener('load',function(){ hubPing(); setInterval(hubPing,30000); });
+window.addEventListener('load',function(){
+  /* webhook diingat per perangkat setelah diisi sekali (seperti kunci hub) */
+  try{ var wh=document.getElementById('cfg_webhook'), v=localStorage.getItem('adc_webhook'); if(wh&&v&&!wh.value.trim()) wh.value=v; }catch(e){}
+  hubPing(); setInterval(hubPing,30000);
+});
 
 function loadIntakeFile(input){
   var f=input.files&&input.files[0]; if(!f) return;
@@ -2949,6 +2969,7 @@ function renderIntake(){
   var tF = pn.foto_baseline
     ? '<div class="tier"><span class="tg">Foto baseline</span><div class="tc">Sudah diambil'+
       (pn.foto_area?(' &middot; <b>'+_esc(pn.foto_area)+'</b>'):'')+
+      (pn.foto_izin?' &middot; izin lisan ✓':' &middot; <b>izin difoto belum dicatat</b>')+
       ' <span class="none">— jadi pembanding untuk seluruh evaluasi berikutnya</span></div></div>'
     : '<div class="tier crit"><span class="tg">Foto baseline</span><div class="tc">'+
       '<b>BELUM DIAMBIL</b> — ambil sebelum tindakan hari ini. Tanpa foto baseline, '+
@@ -3151,8 +3172,29 @@ function renderAlergi(){
   var f=document.getElementById('alergi_flag'), n=document.getElementById('alergi_none');
   if(f&&n&&f.value.trim()&&n.checked) n.checked=false;   /* isi alergi & "nihil" tak boleh bersamaan */
 }
+/* ===== Gerbang keamanan obat =====
+   Daftar kata kunci = obat yang di buku resep ADC perlu konfirmasi kehamilan/menyusui/KB
+   atau punya kontraindikasi penting. Dicocokkan ke resep (collectRx) & isian form program. */
+var OBAT_RISIKO=/isotretinoin|roaccutane|spironolact|tretinoin|retinoid|adapalen|hydroquin|hidrokuinon|\bHQ\b|triple combination|finasterid|dutasterid|minoxidil\s*oral|tranexam|\bTXA\b|doxycyclin|doksisiklin|minocyclin|tetracyclin|pil KB/i;
+function _obatBerisiko(){
+  var out=[];
+  collectRx().forEach(function(r){ if(OBAT_RISIKO.test(r.obat)) out.push(r.obat); });
+  var pd=_progDetail();
+  Object.keys(pd).forEach(function(p){ (pd[p].isian||[]).forEach(function(x){ if(OBAT_RISIKO.test(x)&&!/Form 1|Panduan/.test(x)) out.push(x.length>60?x.slice(0,57)+'…':x); }); });
+  return out.filter(function(x,i,a){ return a.indexOf(x)===i; }).slice(0,8);
+}
+function _pasienHamilMenyusui(){
+  var k=(window._intake&&window._intake.kritis)||{}, h=(k.hormonal||[]).concat(k.flags||[]).join(' ');
+  var m=h.match(/sedang hamil|hamil|menyusui/i); return m?m[0]:'';
+}
+function renderSkrining(){
+  var l=document.getElementById('lbl_skrining'), e=document.getElementById('skrining_obat'); if(!l) return;
+  var ob=_obatBerisiko();
+  l.style.display=ob.length?'':'none';
+  if(e) e.textContent=ob.length?('— '+ob.join(', ')):'';
+}
 function updateReq(){
-  renderAlergi();
+  renderAlergi(); renderSkrining();
   syncFaktor();
   renderRxMirror();
   var st=reqStatus(), done=st.filter(function(x){return x.ok;}).length;
@@ -3210,6 +3252,12 @@ function issueHandoff(){
     w.push('Jadwal belum di-generate (D4b) — handoff ini tidak akan memuat jadwal kontrol.');
   if(!a.diagnosis && !a.hasil) w.push('Diagnosis / hasil asesmen masih kosong.');
   if(!a.alergi && !a.alergi_nihil) w.push('Alergi / kontraindikasi belum dikonfirmasi.');
+  /* gerbang keamanan (D7) */
+  var ob=_obatBerisiko(), hm=_pasienHamilMenyusui();
+  if(ob.length && !_ck('d8_skrining')) w.push('Obat berisiko (kehamilan / kontraindikasi): '+ob.join(', ')+' — konfirmasi status hamil/menyusui & KB, lalu centang "Skrining obat berisiko" di D7.');
+  if(ob.length && hm) w.unshift('PASIEN '+hm.toUpperCase()+' (Form 1) dan resep memuat obat berisiko: '+ob.join(', ')+' — periksa ulang sebelum terbit.');
+  var adaTindakan=activeProgs().some(function(p){ return _psProgram(p).klinik.length>0; })||!!_hv('k1_tindakan');
+  if(adaTindakan && !_ck('d8_consent')) w.push('Ada tindakan direncanakan/dilakukan hari ini tetapi "Informed consent tindakan" belum dicentang (D7).');
   if(w.length){
     if(!confirm('Belum lengkap ('+w.length+'):\n\n· '+w.join('\n· ')+'\n\nTetap terbitkan handoff sekarang?')) return;
   }
@@ -3222,11 +3270,18 @@ function issueHandoff(){
   set('h_avoid', a.hindari||a.remarks);
   renderPrev(h,true);
   window._handoff=h;
-  /* kirim ke hub bila tersambung — berkas & pop-up tetap dibuat seperti biasa */
-  hubPost('handoff',h);
   var ds=document.getElementById('d8_status');
-  if(ds) ds.value='Diterbitkan '+new Date().toLocaleString('id-ID')+(_hv('d8_by')?(' oleh '+_hv('d8_by')):'')+
-                  (_ck('d8_signoff')?' · sign-off dokter ADA':' · TANPA sign-off dokter');
+  var stamp='Diterbitkan '+new Date().toLocaleString('id-ID')+(_hv('d8_by')?(' oleh '+_hv('d8_by')):'')+
+            (_ck('d8_signoff')?' · sign-off dokter ADA':' · TANPA sign-off dokter');
+  if(ds) ds.value=stamp+(_hubOn?' · mengirim ke hub…':' · HUB MATI — hanya berkas/pop-up (unduh JSON!)');
+  /* Hasil hub HARUS terlihat: sebelumnya status selalu "Diterbitkan" walau hub menolak (kunci
+     salah, jaringan), dan baru ketahuan di kunjungan kontrol berikutnya ("RM tidak ada di hub"). */
+  if(_hubOn) hubPost('handoff',h,function(ok,err){
+    if(ds) ds.value=stamp+(ok?(' · ✓ tersimpan di hub (RM '+(h.pasien.rm||'?')+')'):(' · ✗ TIDAK tersimpan di hub'+(err?(' — '+err):'')));
+    if(!ok&&_hubOn) alert('PERHATIAN: handoff TIDAK tersimpan di hub'+(err?('\n('+err+')'):'')+'.\n\n'+
+      'Kunjungan kontrol berikutnya tidak akan menemukan RM ini di hub.\n'+
+      'Cek chip HUB (kunci hub salah?) lalu klik Terbitkan Handoff lagi — atau unduh JSON dari pop-up dan lampirkan ke rekam medis.');
+  });
   var w=window.open('','_blank','width=900,height=940,scrollbars=yes,resizable=yes');
   if(!w){ alert('Pop-up diblokir browser. Ringkasan ditampilkan di panel pada halaman ini. Izinkan pop-up untuk tampilan penuh + tombol Google Docs / .doc / JSON.'); return; }
   w.document.open(); w.document.write(handoffDocHTML(h)); w.document.close();
@@ -3355,7 +3410,7 @@ function muatHandoffHub(){
    Navigasi tampilan saja. Field tidak dilepas dari DOM, jadi buildHandoff(),
    reqStatus(), metricWarnings(), dan palang handoff tetap membaca semuanya
    walau langkahnya sedang tidak tampil. */
-var RAIL=['Handoff & riwayat','Pemeriksaan & diagnosis','Program','Resep & jadwal','Rekomendasi & sign-off'];
+var RAIL=['Handoff & riwayat','Pemeriksaan & diagnosis','Program','Resep & ritme kontrol','Sign-off & penjadwalan'];
 var _step=0;
 function buildRail(){
   var r=document.getElementById('rail'); if(!r) return;
@@ -3484,7 +3539,7 @@ function _lembarCetak(){
       blok('Riwayat (3 kunjungan terakhir)',riw,'ps-wide')+
     '</div>'+
     '<footer class="ps-f"><div>Sign-off dokter: <b>'+(pn.signoff_dokter?E(pn.dokter_signoff||a.dokter||'ada'):'BELUM')+'</b>'+
-      (pn.tgl_signoff?(' · '+E(pn.tgl_signoff)):'')+(pn.oleh?(' · diterbitkan oleh '+E(pn.oleh)):'')+
+      (pn.tgl_signoff?(' · '+E(pn.tgl_signoff)):'')+(pn.oleh?(' · diterbitkan oleh '+E(pn.oleh)):'')+(pn.consent_tindakan?' · consent tindakan ✓':'')+
       (per.total?('<br>Persetujuan pasien: '+E(per.disetujui)+'/'+E(per.total)+' butir'):'')+'</div>'+
       (_isImgData(tt.gambar)?('<div class="ps-sig"><img src="'+E(tt.gambar)+'" alt=""><span>Tanda tangan pasien'+(tt.nama?(' · '+E(tt.nama)):'')+'</span></div>'):'')+
     '</footer>'+

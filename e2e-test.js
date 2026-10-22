@@ -16,7 +16,7 @@ if (!fs.existsSync(path.join(JS_DIR, 'node_modules', 'jsdom'))) {
 const { JSDOM, VirtualConsole } = require(path.join(JS_DIR, 'node_modules', 'jsdom'));
 fs.copyFileSync(path.join(SRC, 'server.js'), path.join(WORK, 'server.js'));
 fs.cpSync(path.join(SRC, 'www'), path.join(WORK, 'www'), { recursive: true });
-fs.writeFileSync(path.join(WORK, 'config.json'), JSON.stringify({ port: 3791, key: 'adc-test' }));
+fs.writeFileSync(path.join(WORK, 'config.json'), JSON.stringify({ port: 3791, key: 'adc-test', webhook: 'https://hook.test/adc' }));
 process.chdir(WORK);
 
 const BASE = 'http://localhost:3791', KEY = 'adc-test', RM = 'RM-TEST-001';
@@ -69,7 +69,7 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
     const f1 = await open('ADC_Form1_Registrasi_Anamnesis_Pasien.html');
     check('F1: halaman termuat & hub tersambung', f1.w._hubOn === true, f1.dialogs.filter(x => x.type === 'jsdomError'));
     set(f1.d, 'p_nama', 'Pasien Uji Coba'); set(f1.d, 'rm', RM); set(f1.d, 'p_wa', '081234567890');
-    set(f1.d, 'p_dokter', 'dr. Uji, Sp.DVE'); chk(f1.d, 'p_foto_ok'); set(f1.d, 'p_foto_area', 'Wajah');
+    set(f1.d, 'p_dokter', 'dr. Uji, Sp.DVE'); chk(f1.d, 'p_foto_ok'); chk(f1.d, 'p_foto_izin'); set(f1.d, 'p_foto_area', 'Wajah');
     set(f1.d, 'p_bb', '58'); set(f1.d, 'p_tb', '160'); set(f1.d, 'alergi', 'Penisilin');
     f1.d.querySelectorAll('label.ack input').forEach(c => { c.checked = true; });
     { const pc = f1.d.querySelector('.prog[data-p=acne] input'); pc.checked = true; f1.w.tog('acne');
@@ -82,6 +82,9 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
     const c1 = lastDlg(f1, 'confirm');
     check('F1: dialog "belum lengkap" hanya soal tanda tangan (canvas tak ada di jsdom)', !c1 || /tanda tangan/i.test(c1.msg) && (c1.msg.match(/·/g) || []).length === 1, c1 && c1.msg);
     check('F1: unduhan cadangan dibuat', f1.dialogs.some(x => x.type === 'download' && /^Intake_/.test(x.msg)), f1.dialogs);
+    await until(() => f1.dialogs.some(x => x.type === 'alert' && /tersimpan di hub/.test(x.msg)));
+    check('F1: pesan Simpan menyebut hub ✓ + RM (bukan pesan generik)', f1.dialogs.some(x => x.type === 'alert' && /✓.*tersimpan di hub klinik \(RM RM-TEST-001\)/.test(x.msg)), f1.dialogs.filter(x => x.type === 'alert').map(x => x.msg.slice(0, 80)));
+    check('F1: tombol Simpan juga ada di akhir langkah 5', !!f1.d.querySelector('.donehint button[onclick="simpanIntake()"]'));
     await until(() => disk('intake.json'));
     const ik = disk('intake.json');
     check('hub: intake.json tersimpan per RM', ik && ik.doc === 'ADC-INTAKE' && ik.pasien.rm === RM);
@@ -103,6 +106,12 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
     await until(() => a.w._intake);
     check('F2: intake termuat dari hub', a.w._intake && a.w._intake.pasien.rm === RM, a.dialogs.slice(-2));
     check('F2: identitas terisi otomatis', $(a.d, 'p_nama').value === 'Pasien Uji Coba' && $(a.d, 'rm').value === RM && $(a.d, 'p_wa').value === '081234567890');
+    check('F2: ringkasan mencatat izin lisan foto', /izin lisan/.test($(a.d, 'intake_body').textContent));
+    check('F2: webhook Make.com terisi otomatis dari hub (config.json)', $(a.d, 'cfg_webhook').value === 'https://hook.test/adc', $(a.d, 'cfg_webhook').value);
+    { const wh = $(a.d, 'cfg_webhook'); wh.value = 'https://hook.test/baru'; wh.dispatchEvent(new a.w.Event('change', { bubbles: true }));
+      check('F2: webhook diingat per perangkat (localStorage)', a.w.localStorage.getItem('adc_webhook') === 'https://hook.test/baru'); }
+    check('F2: D4b (penjadwalan perawat) ada di langkah 5 setelah D7', $(a.d, 'schedBody').closest('.step').getAttribute('data-step') === '4' && $(a.d, 'd8_signoff').closest('.step').getAttribute('data-step') === '4' && $(a.d, 'd5_iv').closest('.step').getAttribute('data-step') === '3');
+    check('F2: D1 — Catatan klinis (temuan) di atas Diagnosis', !!($(a.d, 'd2_hasil').compareDocumentPosition($(a.d, 'd2_dx')) & 4));
     check('F2: alergi & dokter terisi dari intake', $(a.d, 'alergi_flag').value === 'Penisilin' && $(a.d, 'd1_dokter').value === 'dr. Uji, Sp.DVE');
     check('F2 pasien baru: kotak isian alergi disembunyikan, alergi tampil di Ringkasan Form 1', $(a.d, 'alergi_box').style.display === 'none' && $(a.d, 'alergi_flag').value === 'Penisilin' && /Penisilin/.test($(a.d, 'intake_body').textContent), { box: $(a.d, 'alergi_box').style.display, al: $(a.d, 'alergi_flag').value });
     check('F2: Ringkasan menampilkan detail keluhan P4 dari Form 1', /Detail keluhan/.test($(a.d, 'intake_body').textContent), a.w._intake && (a.w._intake.seksi || []).map(s => s.kode));
@@ -123,6 +132,9 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
     set(a.d, 'd5_iv', a.d.querySelector('#d5_iv option:nth-child(2)') ? a.d.querySelector('#d5_iv option:nth-child(2)').value : '14');
     set(a.d, 'd5_start', '2026-10-05'); set(a.d, 'd7_remarks', 'Hindari matahari'); set(a.d, 'd8_by', 'Perawat Uji');
     set(a.d, 'd6_hindari', 'Hindari scrub');
+    a.w.updateReq();
+    check('F2: baris skrining obat muncul karena resep memuat Tretinoin', $(a.d, 'lbl_skrining').style.display !== 'none' && /Tretinoin/.test($(a.d, 'skrining_obat').textContent), $(a.d, 'skrining_obat').textContent);
+    chk(a.d, 'd8_consent'); chk(a.d, 'd8_skrining');
     chk(a.d, 'd8_signoff'); set(a.d, 'd8_dokter', 'dr. Uji, Sp.DVE');
     a.w.updateReq();
     const miss = a.w.reqStatus().filter(x => !x.ok).map(x => x.label);
@@ -141,6 +153,9 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
     check('hub: catatan klinis (temuan + penunjang) tersimpan di handoff', h1 && h1.asesmen.hasil === 'Temuan: papul rahang\nPenunjang: panel hormon', h1 && h1.asesmen.hasil);
     check('hub: resep hanya obat yang diisi dokter (baris contoh tidak ikut)', h1 && h1.asesmen.resep.length === 1 && !/Clindamycin|Sunscreen|Isotretinoin/.test(JSON.stringify(h1.asesmen.resep)), h1 && h1.asesmen.resep.map(r => r.obat));
     check('hub: D6 "Yang harus dihindari" tersimpan di handoff', h1 && h1.asesmen.hindari === 'Hindari scrub', h1 && h1.asesmen.hindari);
+    check('hub: penerbitan mencatat consent & skrining + daftar obat berisiko', h1 && h1.penerbitan.consent_tindakan === true && h1.penerbitan.skrining_obat === true && (h1.penerbitan.obat_berisiko || []).includes('Tretinoin 0,025%'), h1 && h1.penerbitan);
+    await until(() => /tersimpan di hub/.test($(a.d, 'd8_status').value));
+    check('F2: status D7 menyebut ✓ tersimpan di hub (RM)', /✓ tersimpan di hub \(RM RM-TEST-001\)/.test($(a.d, 'd8_status').value), $(a.d, 'd8_status').value);
     check('hub: penerbitan sign-off tercatat', h1 && h1.penerbitan.signoff_dokter === true);
 
     /* ===== 3. KONTROL tanpa muat handoff -> harus diblok ===== */
@@ -165,7 +180,7 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
     check('F2: IGA delta=2 & sukses', (() => { const g = b.w.igaData('acne'); return g && g.baseline === 3 && g.kini === 1 && g.delta === 2 && g.sukses === true; })(), b.w.igaData('acne'));
     check('F2: label arah otomatis', /Acne −2/.test($(b.d, 'k1_arah').value), $(b.d, 'k1_arah').value);
     set(b.d, 'k1_patuh', 'Patuh'); set(b.d, 'k1_es', 'Kulit kering ringan');
-    set(b.d, 'd5_iv', '14'); set(b.d, 'd5_start', '2026-10-19'); set(b.d, 'd7_remarks', 'Lanjutkan'); set(b.d, 'd8_by', 'Perawat Uji'); chk(b.d, 'd8_signoff');
+    set(b.d, 'd5_iv', '14'); set(b.d, 'd5_start', '2026-10-19'); set(b.d, 'd7_remarks', 'Lanjutkan'); set(b.d, 'd8_by', 'Perawat Uji'); chk(b.d, 'd8_signoff'); chk(b.d, 'd8_skrining'); chk(b.d, 'd8_consent');
     b.w.updateReq();
     const miss2 = b.w.reqStatus().filter(x => !x.ok).map(x => x.label);
     check('F2 kontrol: bar wajib lengkap', miss2.length === 0, miss2);
@@ -194,7 +209,7 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
     check('F2: handoff #2 dimuat (kunjungan_ke 2)', c.w._prevHandoff && c.w._prevHandoff.kunjungan_ke === 2);
     check('F2: IGA baseline di kunjungan 3 masih 3', c.w.igaData('acne') === null || c.w._igaBaseline('acne') === 3, c.w._igaBaseline('acne'));
     set(c.d, 'k1_dokter', 'dr. Uji, Sp.DVE'); set(c.d, 'k1_hasil', 'Stabil'); c.w.setIGA('ac_iga', '0');
-    set(c.d, 'd5_iv', '14'); set(c.d, 'd5_start', '2026-11-02'); set(c.d, 'd7_remarks', 'Selesai'); chk(c.d, 'd8_signoff');
+    set(c.d, 'd5_iv', '14'); set(c.d, 'd5_start', '2026-11-02'); set(c.d, 'd7_remarks', 'Selesai'); chk(c.d, 'd8_signoff'); chk(c.d, 'd8_skrining'); chk(c.d, 'd8_consent');
     c.w.issueHandoff(); await sleep(500);
     const h3 = disk('handoff_terakhir.json');
     check('hub: handoff #3 = kunjungan_ke 3, riwayat 2 (urut)', h3 && h3.kunjungan_ke === 3 && h3.riwayat.length === 2 && h3.riwayat[0].kunjungan_ke === 1 && h3.riwayat[1].kunjungan_ke === 2, h3 && { k: h3.kunjungan_ke, r: h3.riwayat.map(x => x.kunjungan_ke) });
@@ -322,21 +337,58 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
       xs.w.applyIntake({ doc: 'ADC-INTAKE', pasien: {}, kritis: {}, penugasan: {}, pengukuran: {}, persetujuan: { total: 1, disetujui: 1, tanda_tangan: { pasien: { nama: 'Z', gambar: 'x" onerror="window.__xss=1' } } } });
       check('Keamanan: tanda tangan bukan data:image ditolak (tidak ada <img onerror>)', !xs.d.querySelector('#intake_body img') && !xs.d.querySelector('[onerror]') && !xs.w.__xss); }
 
+    /* ===== 5f. gerbang keamanan D7 ===== */
+    { const gt = await open('ADC_Form2_Asesmen_Umum_Dokter.html');
+      gt.w.applyIntake({ doc: 'ADC-INTAKE', pasien: { nama: 'Bumil', rm: 'RM-GATE' }, kritis: { alergi_nihil: true, hormonal: ['Sedang hamil'], flags: ['SEDANG HAMIL'] }, penugasan: {}, pengukuran: {}, persetujuan: {} });
+      set(gt.d, 'd2_dx', 'Acne'); gt.w.pickStage('acne', 1);
+      const rx = gt.d.querySelectorAll('#ac_block-1 .rx-table tbody tr')[0].querySelectorAll('input'); rx[0].value = 'Isotretinoin 20 mg'; rx[1].value = '1x1';
+      [...gt.d.querySelectorAll('#ac_block-1 label.chk-item')].find(l => /Peeling/.test(l.textContent)).querySelector('input').checked = true;
+      chk(gt.d, 'd8_signoff'); chk(gt.d, 'alergi_none'); gt.w.updateReq();
+      gt.dialogs.length = 0; gt.w.issueHandoff(); await sleep(300);
+      const cf = (gt.dialogs.find(x => x.type === 'confirm') || {}).msg || '';
+      check('Gerbang: Terbitkan memperingatkan obat berisiko + consent tindakan; pasien hamil ditandai PALING ATAS',
+        /Obat berisiko.*Isotretinoin/.test(cf) && /Informed consent tindakan/.test(cf) && /^Belum lengkap[^\n]*\n\n· PASIEN SEDANG HAMIL/.test(cf), cf.slice(0, 260)); }
+
+    /* ===== 5g. Slimming (Sp.GK) & Tracker lewat hub ===== */
+    { const sl = await open('ADC_Form_Asesmen_Slimming_SpGK.html');
+      check('Slimming: hub tersambung & webhook terisi dari hub', sl.w._hubOn === true && $(sl.d, 'cfg_webhook').value === 'https://hook.test/adc', { on: sl.w._hubOn, wh: $(sl.d, 'cfg_webhook').value });
+      muatRM(sl, 'muatIntakeHub', RM); await until(() => sl.w._intake);
+      check('Slimming: Muat Form 1 (RM) mengisi identitas, alergi, BB/TB & ringkasan', $(sl.d, 'nama').value === 'Pasien Uji Coba' && $(sl.d, 'no_rm').value === RM && $(sl.d, 'alergi').value === 'Penisilin' && $(sl.d, 'b_bb').value === '58' && $(sl.d, 'ik_sec').style.display === 'block' && /Penisilin/.test($(sl.d, 'ik_body').textContent), { nama: $(sl.d, 'nama').value, bb: $(sl.d, 'b_bb').value });
+      set(sl.d, 'no_rm', 'RM-SLIM'); sl.dialogs.length = 0; sl.w.issueHandoff();
+      await until(() => fs.existsSync(path.join('data', 'RM-SLIM', 'handoff_terakhir.json')), 4000);
+      const hs = JSON.parse(fs.readFileSync(path.join('data', 'RM-SLIM', 'handoff_terakhir.json'), 'utf8'));
+      check('Slimming: Terbitkan Handoff tersimpan di hub (sumber ADC-SLIMMING-4FAKTOR)', hs.doc === 'ADC-HANDOFF' && hs.sumber === 'ADC-SLIMMING-4FAKTOR' && hs.pasien.rm === 'RM-SLIM', hs.sumber);
+      const tr = await open('ADC_SkinQualityProgram_Journey_Outcome_Tracker.html');
+      muatRM(tr, 'muatHandoffHub', RM); await until(() => tr.w._ho);
+      check('Tracker: Muat handoff terakhir lewat hub (RM) -> kunjungan ke-3', tr.w._ho && tr.w._ho.pasien.rm === RM && tr.w._ho.kunjungan_ke === 3, tr.w._ho && tr.w._ho.kunjungan_ke);
+      check('Hub: halaman depan menautkan 5 halaman (F1, F2, Slimming, Tracker, Panduan)', (fs.readFileSync(path.join('www', 'index.html'), 'utf8').match(/class="card"/g) || []).length === 5); }
+
     /* ===== 6. offline-first: kunci salah / hub mati ===== */
     const bad = await open('ADC_Form2_Asesmen_Umum_Dokter.html', { key: 'salah' });
     muatRM(bad, 'muatIntakeHub', RM); await sleep(500);
     check('F2 kunci salah: tidak crash, dialog tetap terbuka & menyarankan pilih berkas', bad.d.getElementById('mdlg').classList.contains('on') && /tidak ada di hub.*Pilih berkas/.test(bad.d.getElementById('mdlg_msg').textContent), bad.d.getElementById('mdlg_msg').textContent);
+    set(bad.d, 'rm', RM); set(bad.d, 'd2_dx', 'x'); chk(bad.d, 'alergi_none'); chk(bad.d, 'd8_signoff'); bad.dialogs.length = 0; bad.w.issueHandoff();
+    await until(() => bad.dialogs.some(x => x.type === 'alert' && /TIDAK tersimpan di hub/.test(x.msg)), 3000);
+    check('F2 kunci salah: Terbitkan memperingatkan keras + status ✗', bad.dialogs.some(x => x.type === 'alert' && /PERHATIAN: handoff TIDAK tersimpan di hub/.test(x.msg)) && /✗ TIDAK tersimpan di hub/.test($(bad.d, 'd8_status').value), $(bad.d, 'd8_status').value);
     const before = fs.readdirSync(path.join('data', RM)).length;
     const f1b = await open('ADC_Form1_Registrasi_Anamnesis_Pasien.html', { key: 'salah' });
-    set(f1b.d, 'p_nama', 'Offline'); set(f1b.d, 'rm', 'RM-TEST-OFF'); f1b.w.simpanIntake(); await sleep(500);
+    set(f1b.d, 'p_nama', 'Offline'); set(f1b.d, 'rm', 'RM-TEST-OFF'); chk(f1b.d, 'p_foto_ok'); f1b.w.simpanIntake(); await sleep(500);
+    check('F1: foto diambil tanpa izin lisan -> peringatan', f1b.dialogs.some(x => x.type === 'confirm' && /persetujuan lisan/.test(x.msg)));
+    await until(() => f1b.dialogs.some(x => x.type === 'alert' && /GAGAL/.test(x.msg)), 3000);
+    check('F1 kunci salah: pesan ✗ GAGAL menyimpan ke hub (bukan "tersimpan")', f1b.dialogs.some(x => x.type === 'alert' && /✗ GAGAL menyimpan ke hub/.test(x.msg)) && !f1b.dialogs.some(x => x.type === 'alert' && /✓/.test(x.msg)));
     check('F1 kunci salah: berkas unduhan tetap dibuat; hub menolak (tak ada data baru)', f1b.dialogs.some(x => x.type === 'download') && !fs.existsSync(path.join('data', 'RM-TEST-OFF')) && fs.readdirSync(path.join('data', RM)).length === before);
     srv.kill(); await sleep(400);
     const off = await open('ADC_Form2_Asesmen_Umum_Dokter.html');
     check('F2 hub mati: halaman tetap termuat', !!off.w.issueHandoff && off.w._hubOn === false);
     set(off.d, 'p_nama', 'Offline'); set(off.d, 'rm', 'RM-OFF'); set(off.d, 'd2_dx', 'x'); chk(off.d, 'd8_signoff'); chk(off.d, 'alergi_none');
+    chk(off.d, 'd8_consent');
     let threw = null; try { off.w.issueHandoff(); } catch (e) { threw = e; }
     check('F2 hub mati: terbitkan handoff tetap jalan (popup/JSON cadangan)', !threw && off.w.__popup && /Ringkasan Handoff/.test(off.w.__popup.document.html), threw && String(threw));
     let klik = 0; off.w.HTMLInputElement.prototype.click = function () { if (this.id === '_handofffile') klik++; };
+    check('F2 hub mati: status D7 menyebut HUB MATI', /HUB MATI/.test($(off.d, 'd8_status').value), $(off.d, 'd8_status').value);
+    { const f1o = await open('ADC_Form1_Registrasi_Anamnesis_Pasien.html');
+      set(f1o.d, 'p_nama', 'Offline'); set(f1o.d, 'rm', 'RM-OFF'); f1o.w.simpanIntake();
+      check('F1 hub mati: pesan "TIDAK tersambung — hanya berkas"', f1o.dialogs.some(x => x.type === 'alert' && /TIDAK tersambung/.test(x.msg)) && f1o.dialogs.some(x => x.type === 'download')); }
     off.w.muatHandoffHub();
     check('F2 hub mati: "Muat Handoff" jatuh ke pemilih berkas', klik === 1, klik);
   } catch (e) { console.log('ERROR TEST:', e.stack); results.push({ name: 'harness', ok: false, detail: String(e) }); }
