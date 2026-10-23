@@ -477,6 +477,8 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
     { const ra = await open('ADC_Form2_Asesmen_Umum_Dokter.html');
       set(ra.d, 'd2_dx', 'Acne'); ra.w.pickStage('acne', 2);
       const tabs = [...ra.d.querySelectorAll('#ovl_acne .rx-table, #ovl_melasma .rx-table, #hr_rxTable')];
+      { const me = ['P','A','M'].map(k => [...ra.d.querySelectorAll('#me_block-' + k + ' .rx-table')]);
+        check('Melasma: tiap tahap punya tabel Cream + tabel Obat Minum terpisah (Tranexamic di oral, bukan di cream)', me.every(t => t.length === 2 && !/Dosis/.test(t[0].querySelector('thead').textContent) && /Dosis/.test(t[1].querySelector('thead').textContent) && ![...t[0].querySelectorAll('input')].some(i => /Tranexamic/.test(i.placeholder)) && [...t[1].querySelectorAll('input')].some(i => /Tranexamic/.test(i.placeholder)) && !t[1].querySelector('.rxpick-btn') && !!t[0].querySelector('.rxpick-btn')), me.map(t => t.length)); }
       check('Rx: tiap tabel resep (cream, obat minum, hair) punya tombol + Tambah baris', tabs.length > 0 && tabs.every(t => t.nextElementSibling && t.nextElementSibling.classList.contains('rxadd')), tabs.length);
       const oral = [...ra.d.querySelectorAll('#ac_block-2 .rx-table')].find(t => /Dosis/.test(t.querySelector('thead').textContent)), cream = ra.d.querySelector('#ac_block-2 .rx-table');
       const n0 = oral.querySelectorAll('tbody tr').length; oral.nextElementSibling.click(); const trO = oral.querySelector('tbody tr:last-child');
