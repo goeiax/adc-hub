@@ -415,8 +415,8 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
     { const ok = await open('ADC_Form2_Asesmen_Umum_Dokter.html');
       const oral = [...ok.d.querySelectorAll('#ac_block-2 .rx-table')].pop().querySelectorAll('tbody tr td:first-child input');
       const ph = [...oral].map(i => i.placeholder);
-      check('Acne selaras Dr. Oku: isotretinoin low-dose pertama, antibiotik terakhir & jangka pendek, BPO dulu, triase risiko bekas, Panduan §8',
-        /^Isotretinoin low-dose/.test(ph[0]) && /Antibiotik oral — jangka pendek/.test(ph[ph.length - 1]) && /jangan bersama antibiotik tetrasiklin/.test(ok.d.querySelector('#ac_block-2 .warn-box').textContent) &&
+      check('Acne selaras Dr. Oku: isotretinoin low-dose pertama, antibiotik terakhir & jangka pendek, tanpa kotak peringatan, BPO dulu, triase risiko bekas, Panduan §8',
+        /^Isotretinoin low-dose/.test(ph[0]) && /Antibiotik oral — jangka pendek/.test(ph[ph.length - 1]) && !ok.d.querySelector('#ac_block-2 .warn-box') /* kotak peringatan dihapus 2026-10-23 atas permintaan; rinciannya di Panduan §8 */ &&
         [...ok.d.querySelectorAll('#ovl_acne .rx-table input')].some(i => /^BPO 2,5/.test(i.placeholder)) && [...ok.d.querySelectorAll('#ovl_acne .qline .q')].some(q => /Risiko bekas/.test(q.textContent)) &&
         /id="oku"/.test(fs.readFileSync(path.join('www', 'ADC_Panduan_Pengisian_Form.html'), 'utf8')), ph); }
     /* ===== 5h. pemilih produk resep ===== */
