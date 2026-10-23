@@ -1031,6 +1031,28 @@ body.showall .step{display:block;}
 .rxc .rxpick-btn{flex:none;width:36px;min-height:36px;border:1px solid var(--line-strong);border-radius:6px;background:var(--surface);color:var(--accent-deep);font-size:15px;cursor:pointer;padding:0;line-height:1;}
 .rxc .rxpick-btn:hover{border-color:var(--accent);}
 .mdlg.rxp{max-width:760px;}
+/* ICD-10 & lembar consent (D1, D7) */
+.icdwrap{display:flex;gap:6px;align-items:stretch;}
+.icdwrap .in{flex:1;min-width:0;}
+.icdbtn{font:inherit;font-size:12px;font-weight:600;padding:0 11px;min-height:36px;border-radius:var(--r-box,8px);border:1px solid var(--line-strong,#D9CCB7);background:var(--surface,#fff);color:var(--accent-deep,#8E4A33);cursor:pointer;white-space:nowrap;}
+.icdbtn:hover{border-color:var(--accent,#B0603F);}
+.icdchips{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px;min-height:0;}
+.icdchips span{display:inline-flex;align-items:center;font-size:11.5px;padding:3px 9px;border-radius:999px;border:1px solid var(--line-strong,#D9CCB7);background:var(--surface-quiet,#F7F3EC);color:var(--ink-fill,#1F4E9C);}
+.icdchips span b{margin-right:5px;}
+.icdchips span i{cursor:pointer;margin-left:7px;font-style:normal;font-weight:700;color:var(--accent-deep,#8E4A33);}
+.icdq{margin:0 0 8px;}
+.icrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:6px 0 2px 28px;}
+.icno{font-size:12.5px;color:var(--ink-fill,#1F4E9C);}
+.cdlg .cdg{display:grid;grid-template-columns:1fr 1fr;gap:8px 14px;}
+.cdlg .cdf{display:flex;flex-direction:column;gap:3px;}
+.cdlg .cdf.w{grid-column:1 / -1;}
+.cdlg .cdl{font-size:10.5px;font-weight:620;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2,#3A3833);}
+.cdlg .cdl em{font-style:normal;font-weight:400;letter-spacing:0;text-transform:none;color:var(--ink-muted,#6B675E);margin-left:6px;}
+.cdlg textarea,.cdlg input{font:inherit;font-size:13.5px;color:var(--ink-fill,#1F4E9C);padding:7px 9px;border:1px solid var(--line-strong,#D9CCB7);border-radius:var(--r-box,8px);background:#fff;width:100%;box-sizing:border-box;}
+.cdlg textarea{min-height:48px;resize:vertical;}
+.cdlg .cdnote{font-size:12px;color:var(--ink-muted,#6B675E);margin:6px 0 10px;line-height:1.5;}
+.cdlg .cdbody{max-height:62vh;overflow:auto;padding-right:4px;}
+@media print{ .icdbtn,.icrow,.icdchips i{display:none !important;} }
 .rxp-tabs{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 6px;}
 .rxp-tabs button{font:inherit;font-size:12px;padding:6px 11px;border-radius:999px;border:1px solid var(--line-strong);background:var(--surface);color:var(--ink-2);cursor:pointer;min-height:34px;}
 .rxp-tabs button.on{background:var(--ink);border-color:var(--ink);color:var(--canvas);}
@@ -1285,6 +1307,8 @@ textarea.in{height:auto;min-height:138px;resize:vertical;line-height:1.55;paddin
 .hubchip.on{border-color:#7FA37F;color:#A8C8A8;}
 .hubchip.off{border-color:rgba(245,239,230,.25);color:rgba(245,239,230,.45);}
 .hubchip.sync{border-color:#C9A86A;color:#C9A86A;}
+.hubchip.warn{border-color:#E0A860;color:#F3CF9A;}
+.hubchip{white-space:nowrap;max-width:260px;overflow:hidden;text-overflow:ellipsis;}
 @media print{.hubchip{display:none!important;}}
 
 /* Tombol penjadwalan D4b — tombol badan form (bukan .btn bilah atas yang gelap).
@@ -1335,7 +1359,7 @@ body.mode-kontrol #rb2{display:none;}
     <div class="tb-hint">Diisi dokter · sebelum masuk form program khusus · Form 1 (pasien) harus sudah lengkap</div>
   </div>
   <div class="tb-actions">
-    <span class="hubchip off" id="hubchip" onclick="hubSetup()" title="Klik untuk mengatur alamat & kunci hub">HUB &middot; …</span><button class="btn tan" onclick="muatIntakeHub()">Muat Form 1</button>
+    <span class="hubchip off" id="hubchip" onclick="hubMenu()" title="Klik: masuk / ganti pengguna &amp; atur hub">HUB &middot; …</span><button class="btn tan" onclick="muatIntakeHub()">Muat Form 1</button>
     <button class="btn" onclick="muatHandoffHub()">Muat Handoff</button>
     <button class="btn" onclick="issueHandoff()">Terbitkan Handoff</button>
     <button class="btn" onclick="printAll()">Cetak semua program</button>
@@ -1379,9 +1403,10 @@ body.mode-kontrol #rb2{display:none;}
   <!-- Identitas pasien (dulu panel gelap "Khusus staf" di atas wizard) — kini bagian D0.
        Id tetap sama -> applyIntake / applyHandoff / buildHandoff / hub tidak berubah. -->
   <div class="row idrow">
-    <div class="f s4"><label class="lab" for="p_nama">Nama pasien</label><input class="in" id="p_nama" placeholder="Nama pasien"></div>
-    <div class="f s3"><label class="lab" for="rm">No. RM</label><input class="in" id="rm" placeholder="RM-______"></div>
-    <div class="f s3"><label class="lab" for="p_wa">WhatsApp</label><input class="in" id="p_wa" placeholder="08xx xxxx xxxx"></div>
+    <div class="f s3"><label class="lab" for="p_nama">Nama pasien</label><input class="in" id="p_nama" placeholder="Nama pasien"></div>
+    <div class="f s2"><label class="lab" for="rm">No. RM</label><input class="in" id="rm" placeholder="RM-______"></div>
+    <div class="f s3"><label class="lab" for="p_nik">NIK <span class="opt">16 digit</span></label><input class="in" id="p_nik" inputmode="numeric" maxlength="16" placeholder="dari Form 1 / KTP"></div>
+    <div class="f s2"><label class="lab" for="p_wa">WhatsApp</label><input class="in" id="p_wa" placeholder="08xx xxxx xxxx"></div>
     <div class="f s2"><label class="lab" for="tgl">Tanggal</label><input class="in" type="date" id="tgl"></div>
   </div>
   
@@ -1478,7 +1503,9 @@ body.mode-kontrol #rb2{display:none;}
        jadi igaData, metricStatus, _progDetail & buildHandoff tidak berubah. d2_derajat
        (hidden) dirangkum otomatis dari skor ini untuk handoff. -->
   <div class="row">
-    <div class="f w3 s6"><span class="lab">Diagnosis<span class="req">wajib</span></span><input class="in" id="d2_dx" placeholder="mis. Acne vulgaris + PIH; Melasma sentrofasial; AGA; Obesitas grade I"></div>
+    <div class="f w3 s6"><span class="lab">Diagnosis<span class="req">wajib</span> <span class="opt">+ kode ICD-10</span></span>
+      <div class="icdwrap"><input class="in" id="d2_dx" placeholder="mis. Acne vulgaris + PIH; Melasma sentrofasial; AGA; Obesitas grade I"><button type="button" class="icdbtn" onclick="openICD()" title="Pilih kode ICD-10 (wajib di RME)">ICD-10 ▾</button></div>
+      <div class="icdchips" id="d2_icd_chips"></div><input type="hidden" id="d2_icd"></div>
     <div class="f s6 derajat"><span class="lab">Derajat <span class="opt">skala IGA · nilai kondisi hari ini</span></span>
   <input type="hidden" id="d2_derajat">
   <div class="mcard" id="igacard_umum">
@@ -1659,6 +1686,7 @@ body.mode-kontrol #rb2{display:none;}
       <div class="f s12"><span class="lab">Keamanan sebelum terbit</span>
         <div class="opts" style="padding-top:4px">
           <label class="opt"><input type="checkbox" id="d8_consent"> Informed consent tindakan hari ini sudah ditandatangani pasien (bila ada tindakan)</label>
+          <div class="icrow"><button type="button" class="icdbtn" onclick="bukaConsent()">Buat lembar Informed Consent…</button><span class="icno" id="d8_consent_lbl"></span><input type="hidden" id="d8_consent_no"></div>
           <label class="opt" id="lbl_skrining" style="display:none"><input type="checkbox" id="d8_skrining"> Skrining obat berisiko: status hamil/menyusui &amp; KB dikonfirmasi, kontraindikasi dicek <em id="skrining_obat" style="font-style:normal;color:var(--ink-muted)"></em></label>
         </div>
       </div>
@@ -2551,6 +2579,7 @@ function saveSchedToRecord(){
   if(st){ st.textContent='Catatan jadwal tersimpan — berkas diunduh & disalin ke clipboard. Lampirkan ke rekam medis NeoSoft pasien.'; st.style.color='#3D7A5F'; }
 }
 function resetForm(){
+  try{ window._isian={}; var cl=document.getElementById('d8_consent_lbl'); if(cl) cl.textContent=''; setTimeout(_icdChips,0); }catch(e){}
   if(!confirm('Reset semua isian formulir?')) return;
   /* radio juga hanya dilepas centangnya — mengosongkan value-nya membuat Fitzpatrick
      terekam kosong setelah Reset. */
@@ -2661,6 +2690,7 @@ function _bawaKontrol(h){
   /* derajat TIDAK dibawa: kini = skor IGA hari ini, dinilai ulang tiap kunjungan */
   ['diagnosis','alasan_program','rujukan','hindari'].forEach(function(k){
     if(!a[k]&&pa[k]){ a[k]=pa[k]; dibawa.push(k); } });
+  if(!(a.icd||[]).length&&(pa.icd||[]).length){ a.icd=pa.icd; dibawa.push('icd'); }
   /* Hanya ciri yang menetap (tipe kulit, Fitzpatrick). BB/TB/IMT & keadaan umum
      berubah tiap kunjungan — menyalinnya akan menampilkan angka lama seolah
      diukur hari ini. */
@@ -2688,12 +2718,12 @@ function buildHandoff(){
       /* status hormonal (hamil/menyusui/PCOS) & penanda risiko dari Form 1 ikut dirantai,
          supaya gerbang obat di kunjungan kontrol (tanpa Form 1) tetap melihatnya */
       var ik=(window._intake&&window._intake.kritis)||null, pp=(window._prevHandoff&&window._prevHandoff.pasien)||{};
-      return {nama:_hv('p_nama'), rm:_hv('rm'), wa:_hv('p_wa'),
+      return {nama:_hv('p_nama'), rm:_hv('rm'), nik:_hv('p_nik'), wa:_hv('p_wa'),
               hormonal:ik?(ik.hormonal||[]):(pp.hormonal||[]), flags:ik?(ik.flags||[]):(pp.flags||[])};
     })(),
     asesmen:{
       tanggal:_hv('tgl'), dokter:_dokterKini(), program:_hProg(),
-      diagnosis:_hv('d2_dx'), derajat:_hv('d2_derajat'), hasil:_hv('d2_hasil'),
+      diagnosis:_hv('d2_dx'), icd:_icdData(), derajat:_hv('d2_derajat'), hasil:_hv('d2_hasil'),
       /* Pemeriksaan D1 & konteks D2 — sebelumnya diisi dokter tapi TIDAK pernah terekam. */
       pemeriksaan:{ umum:_hv('d1_umum'), tipe_kulit:_hv('d1_tipekulit'),
         fitzpatrick:(function(){var r=document.querySelector('input[name="d1_fitz"]:checked');return r?r.value:'';})(),
@@ -2710,10 +2740,14 @@ function buildHandoff(){
       gis:_gisData(), iga:_igaEval()
     }:null,
     penerbitan:{ oleh:_hv('d8_by'), waktu:new Date().toISOString(),
+                 /* siapa yang masuk ke hub saat terbit + tanda tangan PIN dokter (diisi issueHandoff) + nomor lembar consent */
+                 pengguna_hub:(window._hubUser?{id:window._hubUser.id,nama:window._hubUser.nama,peran:window._hubUser.peran}:null), ttd:null,
+                 consent_no:_hv('d8_consent_no')||undefined,
                  signoff_dokter:_ck('d8_signoff'), dokter_signoff:_hv('d8_dokter'), tgl_signoff:_hv('d8_tgl'),
                  consent_tindakan:_ck('d8_consent'), skrining_obat:_ck('d8_skrining'), obat_berisiko:_obatBerisiko(),
                  /* jejak audit: kontrol yang terbit tanpa handoff sebelumnya */
                  tanpa_handoff_sebelumnya:(_mode==='kontrol' && !window._prevHandoff) || undefined },
+    waktu_isian:_waktuIsian(),
     program_detail:_progDetail(),
     jadwal:(window._schedRows||[]).slice(0,60).map(function(r){
       return {tanggal:_isoD(r.date), jenis:r.jenis, pesan:r.msg};})
@@ -2836,7 +2870,7 @@ function handoffDocHTML(h){
   '<div class="flag"><b>Alergi / kontraindikasi</b>'+_hesc(alergi)+'</div>'+
   ((h.penerbitan&&!h.penerbitan.signoff_dokter)?'<div class="flag"><b>Perhatian</b>Diterbitkan tanpa sign-off dokter — konfirmasi ke dokter pemeriksa sebelum dijadikan acuan.</div>':'')+
   '<h2>Asesmen umum</h2><table>'+
-  r('Program',a.program)+r('Diagnosis',a.diagnosis)+r('Derajat (IGA)',a.derajat)+r('Catatan klinis',a.hasil)+
+  r('Program',a.program)+r('Diagnosis',a.diagnosis)+r('ICD-10',_icdTeks(a.icd))+r('Derajat (IGA)',a.derajat)+r('Catatan klinis',a.hasil)+
   (a.pemeriksaan?(r('Keadaan umum',a.pemeriksaan.umum)+r('Tipe kulit',a.pemeriksaan.tipe_kulit)+
     r('Fitzpatrick',a.pemeriksaan.fitzpatrick)+
     ((a.pemeriksaan.bb||a.pemeriksaan.tb)?r('BB / TB / IMT',[a.pemeriksaan.bb&&(a.pemeriksaan.bb+' kg'),a.pemeriksaan.tb&&(a.pemeriksaan.tb+' cm'),a.pemeriksaan.imt].filter(Boolean).join(' / ')):'')):'')+
@@ -2863,7 +2897,9 @@ function handoffDocHTML(h){
   })(h.evaluasi_kontrol):'')+
   (h.penerbitan?('<h2>Penerbitan</h2><table>'+
     r('Sign-off dokter', h.penerbitan.signoff_dokter?((h.penerbitan.dokter_signoff||'ada')+(h.penerbitan.tgl_signoff?(' · '+h.penerbitan.tgl_signoff):'')):'BELUM')+
-    r('Diterbitkan oleh', h.penerbitan.oleh)+'</table>'):'')+
+    r('Tanda tangan elektronik', h.penerbitan.ttd?(h.penerbitan.ttd.nama+' ('+h.penerbitan.ttd.id+') · '+new Date(h.penerbitan.ttd.waktu).toLocaleString('id-ID')+' · PIN diverifikasi hub'):(h.penerbitan.signoff_dokter?'tidak ada — sign-off tanpa verifikasi PIN':''))+
+    r('Lembar informed consent', h.penerbitan.consent_no)+
+    r('Diterbitkan oleh', h.penerbitan.oleh+(h.penerbitan.pengguna_hub?(' · pengguna hub '+h.penerbitan.pengguna_hub.id):''))+'</table>'):'')+
   (rx?('<h2>Resep berjalan</h2><table class="rx"><tr><th>Obat / produk</th><th>Jadwal</th><th>Cara pakai</th><th>Durasi</th></tr>'+rx+'</table>'):'')+
   (a.remarks?('<h2>Remarks dokter</h2><table>'+r('Catatan',a.remarks)+'</table>'):'')+
   (riw?('<h2>Riwayat perawatan sebelumnya</h2><table class="rx"><tr><th>Kunj.</th><th>Tanggal</th><th>Dokter</th><th>Diagnosis / hasil</th><th>Resep · kontrol · remarks</th></tr>'+riw+'</table>'):'')+
@@ -2896,12 +2932,89 @@ function hubDefault(){ /* disajikan hub sendiri (http) -> pakai origin; dibuka s
 function hubURL(){ try{return (localStorage.getItem('adc_hub_url')||hubDefault()).replace(/\/+$/,'');}catch(e){return hubDefault();} }
 function hubKey(){ try{return localStorage.getItem('adc_hub_key')||'';}catch(e){return '';} }
 var _hubOn=false;
+/* ---- pengguna hub: token sesi + login + tanda tangan PIN (PMK 24/2022 Ps. 16, 30, 31) ---- */
+function hubTok(){ try{return localStorage.getItem('adc_hub_tok')||'';}catch(e){return '';} }
+window._hubUser=null; window._hubLoginReq=false;
+function hubHdr(json){ var h={'X-ADC-Key':hubKey(),'X-ADC-Token':hubTok()}; if(json) h['Content-Type']='application/json'; return h; }
+function _hubSimpanSesi(tok,user){
+  try{ if(tok){ localStorage.setItem('adc_hub_tok',tok); localStorage.setItem('adc_hub_user',JSON.stringify(user||{})); }
+       else { localStorage.removeItem('adc_hub_tok'); localStorage.removeItem('adc_hub_user'); } }catch(e){}
+  window._hubUser=tok?(user||null):null; }
+function _hubChipUser(){ if(!_hubOn){ hubChip('off','mati'); return; } if(!window._hubLoginReq){ hubChip('on','tersambung'); return; }
+  var u=window._hubUser, nm=u?String(u.nama||u.id):''; if(nm.length>18) nm=nm.slice(0,17)+'…';
+  hubChip(u?'on':'warn', u?nm:'klik untuk masuk'); var c=document.getElementById('hubchip'); if(c) c.title=u?('Masuk sebagai '+(u.nama||u.id)+' ('+(u.peran||'')+') — klik untuk keluar / ganti pengguna'):'Klik untuk masuk dengan ID & PIN'; }
+/* setelah ping: hub v2 meminta pengguna -> cek token tersimpan lewat /api/saya */
+function _hubCekSesi(j){
+  window._hubLoginReq=!!(j&&j.login);
+  if(!_hubOn||!window._hubLoginReq){ _hubChipUser(); return; }
+  if(!hubTok()){ window._hubUser=null; _hubChipUser(); return; }
+  try{
+    fetch(hubURL()+'/api/saya',{headers:hubHdr(),cache:'no-store'}).then(function(r){return r.json();})
+    .then(function(s){ if(s&&s.ok){ window._hubUser=s.user; try{localStorage.setItem('adc_hub_user',JSON.stringify(s.user));}catch(e){} } else { _hubSimpanSesi('',null); } _hubChipUser(); })
+    .catch(function(){ _hubChipUser(); });
+  }catch(e){}
+}
+function hubMenu(){ if(!_hubOn) hubSetup(); else hubLogin(); }
+function _ldlgBuat(){
+  var bg=document.getElementById('ldlg'); if(bg) return bg;
+  var st=document.createElement('style');
+  st.textContent='.ldlg-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2100;display:none;align-items:flex-start;justify-content:center;padding:12vh 16px 16px}.ldlg-bg.on{display:flex}.ldlg{background:#fff;border-radius:14px;width:100%;max-width:400px;padding:22px 22px 18px;box-shadow:0 18px 50px rgba(0,0,0,.25);font-family:inherit;color:#1B1A18}.ldlg h3{margin:0 0 4px;font-size:17px;font-weight:620}.ldlg p{margin:0 0 12px;font-size:12.5px;line-height:1.5;color:#6B675E}.ldlg label{display:block;font-size:11px;font-weight:620;letter-spacing:.12em;text-transform:uppercase;color:#3A3833;margin:10px 0 5px}.ldlg input{width:100%;box-sizing:border-box;font:inherit;font-size:16px;color:#1F4E9C;padding:10px 12px;border:1px solid #D9CCB7;border-radius:8px;background:#fff}.ldlg input:focus{outline:none;border-color:#B0603F}.ldlg .msg{min-height:18px;font-size:12.5px;color:#8E4A33;margin:8px 0 6px}.ldlg .b{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.ldlg .b .sp{flex:1}.ldlg button{font:inherit;font-size:14px;font-weight:600;min-height:42px;padding:0 16px;border-radius:999px;cursor:pointer;border:1px solid #D9CCB7;background:#fff;color:#1B1A18}.ldlg button.ok{background:#B0603F;border-color:#B0603F;color:#fff}.ldlg button.lnk{border:none;background:none;color:#8E4A33;text-decoration:underline;padding:0 4px;min-height:32px;font-weight:500;font-size:12.5px}@media print{.ldlg-bg{display:none!important}}';
+  document.head.appendChild(st);
+  bg=document.createElement('div'); bg.id='ldlg'; bg.className='ldlg-bg';
+  bg.innerHTML='<div class="ldlg" role="dialog" aria-modal="true" aria-labelledby="ldlg_t"><h3 id="ldlg_t"></h3><p id="ldlg_p"></p>'+
+    '<label for="ldlg_id">ID pengguna</label><input id="ldlg_id" autocomplete="username" autocapitalize="none" placeholder="mis. dr.ani">'+
+    '<label for="ldlg_pin">PIN</label><input id="ldlg_pin" type="password" inputmode="numeric" autocomplete="current-password" placeholder="4–8 digit">'+
+    '<div class="msg" id="ldlg_msg"></div>'+
+    '<div class="b"><button type="button" class="lnk" id="ldlg_set">Atur alamat / kunci hub…</button><button type="button" class="lnk" id="ldlg_out">Keluar</button><span class="sp"></span>'+
+    '<button type="button" id="ldlg_x">Batal</button><button type="button" class="ok" id="ldlg_ok">Masuk</button></div></div>';
+  document.body.appendChild(bg);
+  return bg;
+}
+/* _ldlg('login',{},cb)  -> cb(true) masuk | cb(false) keluar | cb(null) batal
+   _ldlg('ttd',{rm,id},cb) -> cb(ttdObj) | cb(null) batal */
+function _ldlg(mode,opsi,cb){
+  var bg=_ldlgBuat(), g=function(id){return document.getElementById(id);}, ttd=(mode==='ttd'), u=window._hubUser, selesai=false;
+  var akhir=function(v){ if(selesai) return; selesai=true; bg.classList.remove('on'); document.removeEventListener('keydown',kb,true); cb(v); };
+  var kb=function(e){ if(e.key==='Escape'){ e.stopPropagation(); akhir(null); }
+    else if(e.key==='Enter'&&(document.activeElement===g('ldlg_pin')||document.activeElement===g('ldlg_id'))){ e.preventDefault(); ok(); } };
+  g('ldlg_t').textContent=ttd?'Tanda tangan elektronik dokter':'Masuk ke hub klinik';
+  g('ldlg_p').textContent=ttd?('Dokter mengonfirmasi sign-off'+(opsi.rm?(' RM '+opsi.rm):'')+' dengan ID & PIN pribadinya. Hub mencatat nama, waktu, dan bukti verifikasi ke dalam handoff.')
+                            :'Setiap simpan/muat dicatat atas nama pengguna yang masuk (jejak audit rekam medis). Sesi berakhir setelah 12 jam tidak aktif.';
+  g('ldlg_id').value=ttd?((u&&u.peran==='dokter')?u.id:(opsi.id||'')):((u&&u.id)||'');
+  g('ldlg_pin').value=''; g('ldlg_msg').textContent='';
+  g('ldlg_ok').textContent=ttd?'Tandatangani':'Masuk'; g('ldlg_ok').disabled=false;
+  g('ldlg_out').style.display=(!ttd&&u)?'':'none';
+  g('ldlg_set').onclick=function(){ akhir(null); hubSetup(); };
+  g('ldlg_out').onclick=function(){ try{ fetch(hubURL()+'/api/logout',{method:'POST',headers:hubHdr()}).catch(function(){}); }catch(e){} _hubSimpanSesi('',null); _hubChipUser(); akhir(false); };
+  g('ldlg_x').onclick=function(){ akhir(null); };
+  var ok=function(){
+    var id=(g('ldlg_id').value||'').trim().toLowerCase(), pin=(g('ldlg_pin').value||'').trim();
+    if(!id||!pin){ g('ldlg_msg').textContent='Isi ID dan PIN.'; return; }
+    g('ldlg_msg').textContent='Memeriksa…'; g('ldlg_ok').disabled=true;
+    var url=hubURL()+(ttd?'/api/ttd':'/api/login'), body=ttd?{id:id,pin:pin,rm:opsi.rm||''}:{id:id,pin:pin};
+    fetch(url,{method:'POST',headers:hubHdr(true),body:JSON.stringify(body)})
+    .then(function(r){ return r.json().then(function(j){ j=j||{}; j._status=r.status; return j; }); })
+    .then(function(j){ g('ldlg_ok').disabled=false;
+      if(ttd&&j._status===401&&j.error==='login'){ /* belum ada sesi: masuk dulu, lalu ulangi TTD */
+        akhir(null); hubLogin(function(m){ if(m) hubTTD(opsi.rm,opsi.id,cb); else cb(null); }); return; }
+      if(!j.ok){ g('ldlg_msg').textContent=(j.pesan||j.error||'Gagal.'); g('ldlg_pin').value=''; try{g('ldlg_pin').focus();}catch(e){} return; }
+      if(ttd){ akhir(j.ttd); } else { _hubSimpanSesi(j.token,j.user); _hubChipUser(); akhir(true); } })
+    .catch(function(e){ g('ldlg_ok').disabled=false; g('ldlg_msg').textContent='Hub tidak menjawab: '+e; });
+  };
+  g('ldlg_ok').onclick=ok;
+  bg.onclick=function(e){ if(e.target===bg) akhir(null); };
+  document.addEventListener('keydown',kb,true);
+  bg.classList.add('on'); setTimeout(function(){ try{ (g('ldlg_id').value?g('ldlg_pin'):g('ldlg_id')).focus(); }catch(e){} },0);
+}
+function hubLogin(cb){ _ldlg('login',{},cb||function(){}); }
+function hubTTD(rm,idDokter,cb){ _ldlg('ttd',{rm:rm,id:idDokter||''},cb); }
+
 function hubChip(st,txt){ var c=document.getElementById('hubchip'); if(!c) return;
   c.className='hubchip '+st; c.textContent='HUB · '+txt; }
 function hubPing(){
   try{
     fetch(hubURL()+'/api/ping',{cache:'no-store'}).then(function(r){return r.json();})
-    .then(function(j){ _hubOn=!!(j&&j.ok); hubChip(_hubOn?'on':'off',_hubOn?'tersambung':'mati');
+    .then(function(j){ _hubOn=!!(j&&j.ok); _hubCekSesi(j);
       /* URL webhook Make.com dibagikan hub (config.json) -> tidak perlu ditempel per pasien */
       if(j&&j.webhook){ var wh=document.getElementById('cfg_webhook'); if(wh&&wh.value.trim()!==j.webhook){ wh.value=j.webhook; try{ localStorage.setItem('adc_webhook',j.webhook); }catch(e){} } } })
     .catch(function(){ _hubOn=false; hubChip('off','mati'); });
@@ -2918,19 +3031,25 @@ function hubPost(jenis,obj,cb){
   if(!_hubOn){ if(cb) cb(false,'hub tidak tersambung'); return; }
   try{
     hubChip('sync','mengirim…');
-    fetch(hubURL()+'/api/'+jenis,{method:'POST',
-      headers:{'Content-Type':'application/json','X-ADC-Key':hubKey()},
-      body:JSON.stringify(obj)})
-    .then(function(r){return r.json();})
-    .then(function(j){ hubChip(j.ok?'on':'off', j.ok?(jenis+' tersimpan'):('gagal: '+(j.error||''))); if(cb) cb(!!j.ok,j.error||''); })
+    fetch(hubURL()+'/api/'+jenis,{method:'POST',headers:hubHdr(true),body:JSON.stringify(obj)})
+    .then(function(r){ return r.json().then(function(j){ j=j||{}; j._status=r.status; return j; }); })
+    .then(function(j){
+      if(j._status===401&&j.error==='login'){ /* belum masuk / sesi habis -> minta masuk, lalu kirim ulang */
+        hubChip('warn','klik untuk masuk');
+        hubLogin(function(ok){ if(ok) hubPost(jenis,obj,cb); else if(cb) cb(false,'belum masuk sebagai pengguna hub'); });
+        return; }
+      if(j.ok){ hubChip('on',jenis+' tersimpan'+(window._hubUser?(' · '+window._hubUser.id):'')); } else hubChip('warn','gagal: '+(j.error||''));
+      if(cb) cb(!!j.ok,j.error||'',j); })
     .catch(function(e){ hubChip('off','gagal kirim'); if(cb) cb(false,String(e)); });
   }catch(e){ if(cb) cb(false,String(e)); }
 }
 function hubGetPasien(rm,cb){
   try{
-    fetch(hubURL()+'/api/pasien/'+encodeURIComponent(rm),{headers:{'X-ADC-Key':hubKey()},cache:'no-store'})
-    .then(function(r){return r.json();})
-    .then(function(j){ cb(j&&!j.error?j:null, j&&j.error); })
+    fetch(hubURL()+'/api/pasien/'+encodeURIComponent(rm),{headers:hubHdr(),cache:'no-store'})
+    .then(function(r){ return r.json().then(function(j){ j=j||{}; j._status=r.status; return j; }); })
+    .then(function(j){
+      if(j._status===401&&j.error==='login'){ hubLogin(function(ok){ if(ok) hubGetPasien(rm,cb); else cb(null,'belum masuk sebagai pengguna hub'); }); return; }
+      cb(j&&!j.error?j:null, j&&j.error); })
     .catch(function(e){ cb(null,String(e)); });
   }catch(e){ cb(null,String(e)); }
 }
@@ -2958,7 +3077,7 @@ function _put(id,v){ var e=document.getElementById(id); if(e&&v&&!(e.value||'').
 function applyIntake(o){
   window._intake=o;
   var p=o.pasien||{}, k=o.kritis||{};
-  _put('p_nama',p.nama); _put('rm',p.rm); _put('p_wa',p.wa); _put('tgl',p.tanggal);
+  _put('p_nama',p.nama); _put('rm',p.rm); _put('p_nik',p.nik); _put('p_wa',p.wa); _put('tgl',p.tanggal);
   /* Dokter sudah ditetapkan di registrasi (Form 1) — jadi acuan awal, tetap bisa
      diubah bila di lapangan dokternya berganti. */
   _put('d1_dokter',(o.penugasan||{}).dokter);
@@ -3379,6 +3498,20 @@ function issueHandoff(){
   if(w.length){
     if(!confirm('Belum lengkap ('+w.length+'):\n\n· '+w.join('\n· ')+'\n\nTetap terbitkan handoff sekarang?')) return;
   }
+  /* TANDA TANGAN ELEKTRONIK: hub hidup + dokter sign-off -> dokter memasukkan PIN-nya; hub menerbitkan
+     stempel (nama, waktu, bukti) yang ikut tersimpan di handoff (PMK 24/2022 Ps. 16 ayat 2, Ps. 31). */
+  if(_hubOn && window._hubLoginReq && _ck('d8_signoff') && !h.penerbitan.ttd){
+    hubTTD(h.pasien.rm,'',function(ttd){
+      if(ttd){ h.penerbitan.ttd=ttd;
+        if(!_hv('d8_dokter')){ var dd=document.getElementById('d8_dokter'); if(dd) dd.value=ttd.nama; h.penerbitan.dokter_signoff=ttd.nama; } }
+      else if(!confirm('Tanpa tanda tangan elektronik dokter (PIN).\n\nHandoff akan tercatat "sign-off tanpa verifikasi PIN". Tetap terbitkan?')) return;
+      _issueLanjut(h,a);
+    });
+    return;
+  }
+  _issueLanjut(h,a);
+}
+function _issueLanjut(h,a){
   function set(id,val){var e=document.getElementById(id); if(e&&val&&!e.value) e.value=val;}
   set('h_owner', a.dokter);
   set('h_fase', [a.program,a.derajat].filter(Boolean).join(' — '));
@@ -3422,7 +3555,7 @@ function applyHandoff(h){
         if(af) af.value=(a.alergi||'').trim();
         if(an) an.checked=!!(a.alergi_nihil&&!(a.alergi||'').trim());
       }
-      if(h.pasien){ put('p_nama',h.pasien.nama); put('rm',h.pasien.rm); put('p_wa',h.pasien.wa); }
+      if(h.pasien){ put('p_nama',h.pasien.nama); put('rm',h.pasien.rm); put('p_nik',h.pasien.nik); put('p_wa',h.pasien.wa); }
       window._prevHandoff=h;
       renderPrev(h,false);
       setMode('kontrol');   /* handoff dimuat = ini kunjungan kontrol */
@@ -3500,7 +3633,7 @@ function _dlgMuat(judul, berkasId, onRM){
   bg.classList.add('on'); setTimeout(function(){ try{ inp.focus(); inp.select(); }catch(e){} },0);
   /* saran RM dari daftar pasien di hub */
   try{
-    fetch(hubURL()+'/api/pasien',{headers:{'X-ADC-Key':hubKey()},cache:'no-store'}).then(function(r){return r.json();})
+    fetch(hubURL()+'/api/pasien',{headers:hubHdr(),cache:'no-store'}).then(function(r){return r.json();})
     .then(function(j){ var dl=document.getElementById('mdlg_list'); if(!dl||!j||!j.pasien) return;
       dl.innerHTML=j.pasien.slice(0,200).map(function(p){
         return '<option value="'+_esc(p.rm)+'">'+_esc((p.nama||'')+(p.kunjungan_ke?(' · kunjungan '+p.kunjungan_ke):''))+'</option>'; }).join(''); })
@@ -3524,6 +3657,184 @@ function muatHandoffHub(){
       else selesai('Handoff untuk RM '+rm+' tidak ada di hub'+(err?(' ('+err+')'):'')+'.');
     });
   });
+}
+
+
+/* ===== ICD-10 (PMK 24/2022 Ps. 18: diagnosis diberi kode) =====
+   Subset dermatologi-estetik & metabolik yang dipakai ADC; cari kode/nama, boleh lebih dari satu.
+   Tersimpan di hidden #d2_icd (JSON) -> asesmen.icd; ikut dibawa di kunjungan kontrol. */
+var ICD10=[
+ ['L70.0','Acne vulgaris'],['L70.1','Acne conglobata'],['L70.3','Acne tropica'],['L70.5','Acne excoriée'],['L70.8','Acne lainnya'],['L70.9','Acne, tidak spesifik'],
+ ['L73.0','Acne keloid'],['L71.0','Dermatitis perioral'],['L71.9','Rosacea, tidak spesifik'],['L81.0','Hiperpigmentasi pascainflamasi (PIH)'],['L81.1','Chloasma / melasma'],
+ ['L81.2','Freckles (efelid)'],['L81.4','Hiperpigmentasi melanin lainnya (lentigo)'],['L81.9','Gangguan pigmentasi, tidak spesifik'],['L80','Vitiligo'],
+ ['L64.0','Alopesia androgenik akibat obat'],['L64.8','Alopesia androgenik lainnya'],['L64.9','Alopesia androgenik (AGA), tidak spesifik'],['L65.0','Telogen effluvium'],
+ ['L65.9','Rambut rontok non-sikatrik, tidak spesifik'],['L63.9','Alopesia areata'],['L66.9','Alopesia sikatrik, tidak spesifik'],['L21.0','Dermatitis seboroik kapitis'],
+ ['L21.9','Dermatitis seboroik, tidak spesifik'],['L20.9','Dermatitis atopik, tidak spesifik'],['L23.9','Dermatitis kontak alergi'],['L24.9','Dermatitis kontak iritan'],
+ ['L30.9','Dermatitis, tidak spesifik'],['L57.0','Keratosis aktinik'],['L57.8','Perubahan kulit akibat sinar UV kronis (photoaging)'],['L90.5','Jaringan parut & fibrosis kulit (acne scar)'],
+ ['L91.0','Keloid / parut hipertrofik'],['L90.6','Striae atrophicae'],['L72.0','Kista epidermal'],['L82','Keratosis seboroik'],['D22.9','Nevus melanositik'],
+ ['L85.3','Xerosis cutis'],['L74.5','Hiperhidrosis fokal'],['L29.9','Pruritus, tidak spesifik'],['L98.9','Kelainan kulit & jaringan subkutan, tidak spesifik'],
+ ['E66.0','Obesitas karena kelebihan kalori'],['E66.3','Overweight'],['E66.9','Obesitas, tidak spesifik'],['E28.2','Sindrom ovarium polikistik (PCOS)'],
+ ['E78.5','Hiperlipidemia, tidak spesifik'],['E11.9','Diabetes melitus tipe 2 tanpa komplikasi'],['R63.5','Penambahan berat badan abnormal'],
+ ['Z41.1','Prosedur estetik (penampilan tidak dapat diterima)'],['Z71.3','Konseling & pengawasan diet'],['Z00.0','Pemeriksaan kesehatan umum']];
+function _icdData(){ try{ var v=JSON.parse(_hv('d2_icd')||'[]'); return Array.isArray(v)?v:[]; }catch(e){ return []; } }
+function _icdSet(arr){ var e=document.getElementById('d2_icd'); if(e) e.value=arr.length?JSON.stringify(arr):''; _icdChips(); }
+function _icdTeks(arr){ return (arr||[]).map(function(x){ return x.kode+' '+x.nama; }).join('; '); }
+function _icdChips(){ var c=document.getElementById('d2_icd_chips'); if(!c) return;
+  c.innerHTML=_icdData().map(function(x){ return '<span><b>'+_esc(x.kode)+'</b>'+_esc(x.nama)+'<i onclick="hapusICD(\''+_esc(x.kode)+'\')" title="hapus kode">×</i></span>'; }).join(''); }
+function hapusICD(k){ _icdSet(_icdData().filter(function(x){ return x.kode!==k; })); }
+function pickICD(k){
+  var it=null; ICD10.forEach(function(x){ if(x[0]===k) it=x; }); if(!it) return;
+  var cur=_icdData(); if(!cur.some(function(x){ return x.kode===k; })) cur.push({kode:it[0],nama:it[1]});
+  _icdSet(cur);
+  var dx=document.getElementById('d2_dx'); if(dx&&!dx.value.trim()){ dx.value=it[1]; if(typeof updateReq==='function') updateReq(); }
+  closeICD();
+}
+function closeICD(){ var bg=document.getElementById('icdlg'); if(bg) bg.classList.remove('on'); }
+function _icdRender(q){
+  var ul=document.getElementById('icd_list'); if(!ul) return; q=(q||'').trim().toLowerCase();
+  var rows=ICD10.filter(function(x){ return !q||x[0].toLowerCase().indexOf(q)===0||x[1].toLowerCase().indexOf(q)>=0; });
+  ul.innerHTML=rows.length?rows.map(function(x){ return '<button type="button" class="rxp-it" onclick="pickICD(\''+x[0]+'\')"><b><span class="src">'+_esc(x[0])+'</span>'+_esc(x[1])+'</b></button>'; }).join('')
+    :'<div class="rxp-empty">Tidak ada di daftar ADC — tulis diagnosis di kolom teks; kode lengkap dilengkapi di NeoSoft.</div>';
+}
+function openICD(){
+  var bg=document.getElementById('icdlg');
+  if(!bg){
+    bg=document.createElement('div'); bg.id='icdlg'; bg.className='mdlg-bg';
+    bg.innerHTML='<div class="mdlg rxp" role="dialog" aria-modal="true"><div class="mdlg-t">Kode ICD-10</div>'+
+      '<input class="mdlg-in icdq" id="icd_q" autocomplete="off" placeholder="ketik kode (L70) atau nama (melasma, alopesia…)" oninput="_icdRender(this.value)">'+
+      '<div class="rxp-list" id="icd_list"></div>'+
+      '<div class="mdlg-b" style="margin-top:10px"><span class="mdlg-sp"></span><button type="button" class="mdlg-x" onclick="closeICD()">Tutup</button></div></div>';
+    bg.onclick=function(e){ if(e.target===bg) closeICD(); };
+    document.body.appendChild(bg);
+  }
+  var q=document.getElementById('icd_q'); q.value='';
+  /* saran awal dari program aktif */
+  var ap=(typeof activeProgs==='function')?activeProgs():[];
+  _icdRender(ap.indexOf('acne')>=0?'acne':ap.indexOf('melasma')>=0?'melasma':ap.indexOf('hair')>=0?'alopesia':'');
+  bg.classList.add('on'); setTimeout(function(){ try{ q.focus(); }catch(e){} },0);
+}
+
+/* ===== WAKTU ISIAN per bagian (PMK 24/2022 Ps. 16 ayat 2: tiap entri bernama & berwaktu) =====
+   Direkam otomatis saat field diubah; ikut ke handoff sebagai waktu_isian {bagian:{mulai,terakhir,n,oleh}}. */
+window._isian={};
+var _ISIAN_STEP={'0':'D0','1':'D1','2':'D2','3':'D3-D4','4':'D5-D7 + D4b'};
+function _catatIsian(e){
+  var t=e.target; if(!t||!t.closest||!/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName||'')) return;
+  if(t.closest('.mdlg-bg,.ldlg-bg')) return;
+  var ov=t.closest('.ovl'), st=t.closest('.step');
+  var k=ov?('program:'+(ov.getAttribute('data-prog')||ov.id)):(st?(_ISIAN_STEP[st.getAttribute('data-step')]||('D'+st.getAttribute('data-step'))):'lain');
+  var now=new Date().toISOString(), u=window._hubUser, r=window._isian[k]||(window._isian[k]={mulai:now,n:0});
+  r.terakhir=now; r.n++; if(u) r.oleh=u.nama||u.id;
+}
+document.addEventListener('input',_catatIsian,true); document.addEventListener('change',_catatIsian,true);
+function _waktuIsian(){ var o={}; Object.keys(window._isian).forEach(function(k){ o[k]=window._isian[k]; }); return o; }
+
+/* ===== LEMBAR INFORMED CONSENT TINDAKAN (UU 17/2023 Ps. 293, PP 28/2024, Permenkes 11/2025) =====
+   Satu lembar per rencana tindakan: 7 penjelasan terisi awal dari asesmen, DAPAT DISUNTING dokter,
+   dicetak dan ditandatangani basah oleh pasien/wali, saksi (nakes) dan dokter; lembar kertas masuk
+   berkas RM. Nomor lembar dicatat ke penerbitan.consent_no dan hub (/api/consent). Teks awal adalah
+   DRAF — PJ klinik wajib meninjau redaksinya (Panduan §9). */
+var IC_RISIKO=[
+  [/peel/i,'kemerahan & perih 1–3 hari, pengelupasan 3–7 hari, kulit lebih peka matahari, hiperpigmentasi pascainflamasi (lebih mungkin pada Fitzpatrick IV–VI), iritasi; jarang: infeksi, jaringan parut'],
+  [/laser|ipl|excel|pico|yag|fraction|co2|erbium|q-?switch|rf\b|hifu/i,'kemerahan & bengkak ringan 1–3 hari, rasa panas, krusta/titik gelap yang lepas 5–10 hari, hiper/hipopigmentasi sementara; jarang: lepuh, infeksi, jaringan parut, perubahan pigmen menetap'],
+  [/needl|dermapen|prp|microneed|exosom/i,'kemerahan 1–3 hari, titik perdarahan, bengkak ringan, rasa kencang; jarang: infeksi, hiperpigmentasi pascainflamasi, memar'],
+  [/inject|injeksi|intrales|suntik|mesot|booster|skin ?booster|filler|botox|toxin/i,'nyeri di titik suntik, memar, bengkak; jarang: infeksi, reaksi alergi, atrofi/hipopigmentasi lokal, nodul, asimetri'],
+  [/ekstrak|komedo|facial|cleans|drain/i,'kemerahan, lecet ringan, perih; jarang: hiperpigmentasi pascainflamasi, infeksi'],
+  [/lllt|laser cap|low.?level|hair|rambut|regrow|scalp/i,'kemerahan kulit kepala ringan, gatal; pada awal terapi rambut rontok sementara dapat meningkat (shedding)'],
+  [/led|photo|cahaya|lampu/i,'kemerahan ringan & kulit terasa hangat beberapa jam']];
+var IC_PROGRAM={
+  acne:{tujuan:'mengurangi lesi aktif (komedo, papul, pustul), mengendalikan peradangan, dan mencegah bekas/jaringan parut',tanpa:'lesi dapat bertambah dan meradang, meninggalkan bekas hitam atau parut yang lebih sulit diperbaiki'},
+  melasma:{tujuan:'meratakan warna kulit, memudarkan bercak pigmentasi, dan mencegah perluasan',tanpa:'bercak dapat menetap atau meluas terutama dengan paparan matahari; melasma bersifat kronis dan mudah kambuh'},
+  hair:{tujuan:'mengurangi kerontokan serta mempertahankan dan merangsang pertumbuhan rambut',tanpa:'kerontokan dan penipisan dapat berlanjut; folikel yang lama tidak aktif lebih sulit dipulihkan'}};
+function _icTindakan(){ var t=[]; activeProgs().forEach(function(p){ _psProgram(p).klinik.forEach(function(x){ if(t.indexOf(x)<0) t.push(x); }); });
+  var k=_hv('k1_tindakan'); if(k&&t.indexOf(k)<0) t.push(k); return t; }
+function _icRisiko(list){ return list.map(function(t){ var r=null; IC_RISIKO.forEach(function(x){ if(!r&&x[0].test(t)) r=x[1]; });
+  return '• '+t+': '+(r||'kemerahan, nyeri ringan, iritasi, reaksi alergi; hasil bervariasi antar individu'); }).join('\n'); }
+function _icGabung(key){ var s=[]; activeProgs().forEach(function(p){ if(IC_PROGRAM[p]&&s.indexOf(IC_PROGRAM[p][key])<0) s.push(IC_PROGRAM[p][key]); }); return s.join('; '); }
+function bukaConsent(){
+  var h=buildHandoff(), a=h.asesmen||{}, ps=h.pasien||{}, tind=_icTindakan(), ik=(window._intake&&window._intake.pasien)||{};
+  var bg=document.getElementById('cdlg');
+  if(!bg){
+    bg=document.createElement('div'); bg.id='cdlg'; bg.className='mdlg-bg';
+    var f=function(id,lbl,em,w,ta){ return '<div class="cdf'+(w?' w':'')+'"><span class="cdl">'+lbl+(em?('<em>'+em+'</em>'):'')+'</span>'+(ta?('<textarea id="'+id+'"></textarea>'):('<input id="'+id+'">'))+'</div>'; };
+    bg.innerHTML='<div class="mdlg rxp cdlg" role="dialog" aria-modal="true"><div class="mdlg-t">Lembar Informed Consent tindakan</div>'+
+      '<div class="cdnote">Teks terisi otomatis dari asesmen — <b>periksa & sunting</b> sebelum cetak. Lembar dicetak lalu ditandatangani <b>basah</b> oleh pasien/wali, saksi (perawat), dan dokter, kemudian disimpan di berkas RM. Nomor lembar tercatat di handoff.</div>'+
+      '<div class="cdbody"><div class="cdg">'+
+      f('cd_tind','Tindakan yang direncanakan','satu per baris',true,true)+
+      f('cd_1','1. Diagnosis & dasar diagnosis','',true,true)+
+      f('cd_2','2. Tindakan & tujuannya','',true,true)+
+      f('cd_3','3. Risiko & komplikasi yang mungkin terjadi','',true,true)+
+      f('cd_4','4. Alternatif tindakan','',false,true)+
+      f('cd_5','5. Risiko bila tindakan tidak dilakukan','',false,true)+
+      f('cd_6','6. Prognosis / perkiraan hasil','',false,true)+
+      f('cd_7','7. Perkiraan biaya','diisi perawat / kasir',false,true)+
+      f('cd_dokter','Dokter pemberi penjelasan','',false,false)+
+      f('cd_saksi','Saksi (nakes)','nama perawat',false,false)+
+      '</div></div>'+
+      '<div class="mdlg-b" style="margin-top:12px"><span class="mdlg-sp"></span><button type="button" class="mdlg-x" id="cd_x">Batal</button><button type="button" class="mdlg-ok" id="cd_ok">Cetak lembar &amp; catat nomor</button></div></div>';
+    bg.onclick=function(e){ if(e.target===bg) bg.classList.remove('on'); };
+    document.getElementById && document.body.appendChild(bg);
+    document.getElementById('cd_x').onclick=function(){ bg.classList.remove('on'); };
+  }
+  var g=function(id){ return document.getElementById(id); };
+  g('cd_tind').value=tind.join('\n');
+  g('cd_1').value=[a.diagnosis, a.derajat?('derajat '+a.derajat):'', _icdTeks(a.icd)?('ICD-10: '+_icdTeks(a.icd)):'', a.hasil?('Dasar: '+a.hasil):''].filter(Boolean).join('\n');
+  g('cd_2').value=(tind.length?(tind.join(', ')+' — '):'')+'bertujuan '+(_icGabung('tujuan')||'memperbaiki kondisi kulit sesuai diagnosis')+'. Dikerjakan bertahap sesuai program; jumlah sesi menurut respons.';
+  g('cd_3').value=_icRisiko(tind.length?tind:['Tindakan'])+'\nRisiko umum: ketidaknyamanan selama tindakan, hasil berbeda antar individu, kemungkinan perlu sesi tambahan.';
+  g('cd_4').value='Terapi topikal/oral saja tanpa tindakan; menunda tindakan; atau tidak dilakukan tindakan.';
+  g('cd_5').value=_icGabung('tanpa')||'kondisi dapat menetap atau memburuk; perbaikan di kemudian hari lebih lambat.';
+  g('cd_6').value='Perbaikan bertahap, dievaluasi tiap 4–8 minggu (foto klinis & IGA). Hasil tidak dapat dijamin; perawatan rumahan & perlindungan matahari menentukan hasil.';
+  g('cd_7').value='';
+  g('cd_dokter').value=_hv('d8_dokter')||a.dokter||'';
+  g('cd_saksi').value=_hv('d8_by')||'';
+  g('cd_ok').onclick=function(){
+    var list=g('cd_tind').value.split('\n').map(function(s){ return s.trim(); }).filter(Boolean);
+    if(!list.length){ alert('Isi minimal satu tindakan.'); g('cd_tind').focus(); return; }
+    var now=new Date(), no='IC-'+(ps.rm||'TANPA-RM').replace(/[^A-Za-z0-9_.-]/g,'_')+'-'+now.toISOString().slice(0,10).replace(/-/g,'')+'-'+String(now.getTime()%100000).padStart(5,'0');
+    var c={doc:'ADC-CONSENT', versi:1, sumber:'ADC-FORM2-UMUM', no:no, tanggal:now.toISOString(),
+      pasien:{nama:ps.nama, rm:ps.rm, nik:ps.nik||ik.nik||'', wa:ps.wa, usia:ik.usia||'', kelamin:ik.kelamin||''},
+      dokter:g('cd_dokter').value.trim(), saksi:g('cd_saksi').value.trim(), program:activeProgs(),
+      tindakan:list.map(function(n){ return {nama:n}; }),
+      penjelasan:{diagnosis:g('cd_1').value, tindakan_tujuan:g('cd_2').value, risiko:g('cd_3').value, alternatif:g('cd_4').value,
+                  tanpa_tindakan:g('cd_5').value, prognosis:g('cd_6').value, biaya:g('cd_7').value},
+      ditandatangani:'basah pada lembar cetak', pengguna_hub:window._hubUser?{id:window._hubUser.id,nama:window._hubUser.nama}:null};
+    var noEl=g('d8_consent_no'), lbl=g('d8_consent_lbl'); if(noEl) noEl.value=no; if(lbl) lbl.textContent=no+(_hubOn?' · mencatat ke hub…':' · hub mati — lembar kertas saja');
+    window._consent=c;
+    if(_hubOn) hubPost('consent',c,function(ok,err){ if(lbl) lbl.textContent=no+(ok?' · ✓ tercatat di hub':(' · ✗ tidak tercatat di hub'+(err?(' — '+err):''))); });
+    bg.classList.remove('on');
+    var w=window.open('','_blank','width=900,height=940,scrollbars=yes,resizable=yes');
+    if(!w){ alert('Pop-up diblokir browser. Izinkan pop-up lalu klik lagi "Buat lembar Informed Consent…".'); return; }
+    w.document.open(); w.document.write(consentHTML(c)); w.document.close();
+  };
+  bg.classList.add('on'); setTimeout(function(){ try{ g('cd_tind').focus(); }catch(e){} },0);
+}
+function consentHTML(c){
+  var E=_esc, p=c.pasien||{}, x=c.penjelasan||{}, tgl=new Date(c.tanggal).toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'});
+  function par(n,j,t){ return '<li><b>'+n+'. '+E(j)+'</b><div>'+E(t||'—').replace(/\n/g,'<br>')+'</div></li>'; }
+  return '<!doctype html><html lang="id"><head><meta charset="utf-8"><title>Informed Consent '+E(c.no)+'</title><style>'+
+    '@page{size:A4;margin:14mm 16mm}body{font:11pt/1.45 Georgia,"Times New Roman",serif;color:#111;margin:0;padding:18px;max-width:760px}'+
+    'h1{font-size:15pt;text-align:center;margin:4px 0 2px;letter-spacing:.04em}h2{font-size:11pt;text-transform:uppercase;letter-spacing:.08em;margin:16px 0 6px;border-bottom:1px solid #111;padding-bottom:2px}'+
+    '.hd{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2px solid #111;padding-bottom:6px;margin-bottom:8px;font-size:9.5pt}'+
+    '.hd b{font-size:12pt;display:block}table{border-collapse:collapse;width:100%}td{padding:3px 6px;vertical-align:top;border:1px solid #999;font-size:10pt}td.k{width:28%;background:#f3f3f3}'+
+    'ol{padding-left:18px;margin:4px 0}ol li{margin:0 0 7px}ol li div{margin-top:1px}.st{border:1px solid #111;padding:8px 10px;margin-top:8px;font-size:10.5pt}.st label{display:inline-block;margin-right:18px}'+
+    '.sg{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-top:22px;font-size:9.5pt;text-align:center}.sg div{border-top:1px solid #111;padding-top:4px;margin-top:58px}'+
+    '.ft{margin-top:14px;font-size:8.5pt;color:#444;border-top:1px solid #999;padding-top:4px}.np{position:fixed;top:8px;right:8px}@media print{.np{display:none}}'+
+    '</style></head><body>'+
+    '<button class="np" onclick="window.print()">Cetak</button>'+
+    '<div class="hd"><div><b>Aesthetic Derma Centre</b>Klinik Utama · Jl. Ir. H. Djuanda 88, Bandung</div><div>No. lembar: <b>'+E(c.no)+'</b>'+E(tgl)+'</div></div>'+
+    '<h1>PERSETUJUAN TINDAKAN KEDOKTERAN<br><span style="font-size:10.5pt;font-weight:400">(Informed Consent)</span></h1>'+
+    '<h2>Identitas pasien</h2><table><tr><td class="k">Nama</td><td>'+E(p.nama)+'</td><td class="k">No. RM</td><td>'+E(p.rm)+'</td></tr>'+
+    '<tr><td class="k">NIK</td><td>'+E(p.nik||'—')+'</td><td class="k">Tgl lahir / usia · JK</td><td>'+E([p.usia,p.kelamin].filter(Boolean).join(' · ')||'—')+'</td></tr>'+
+    '<tr><td class="k">Dokter pemberi penjelasan</td><td>'+E(c.dokter||'—')+'</td><td class="k">Program</td><td>'+E((c.program||[]).join(', ')||'—')+'</td></tr></table>'+
+    '<h2>Tindakan yang direncanakan</h2><div>'+(c.tindakan||[]).map(function(t){ return '• '+E(t.nama); }).join('<br>')+'</div>'+
+    '<h2>Penjelasan dokter (UU 17/2023 Ps. 293)</h2><ol style="list-style:none;padding-left:0">'+
+    par(1,'Diagnosis & dasar diagnosis',x.diagnosis)+par(2,'Tindakan & tujuannya',x.tindakan_tujuan)+par(3,'Risiko & komplikasi',x.risiko)+
+    par(4,'Alternatif tindakan',x.alternatif)+par(5,'Risiko bila tindakan tidak dilakukan',x.tanpa_tindakan)+par(6,'Prognosis',x.prognosis)+par(7,'Perkiraan biaya',x.biaya)+'</ol>'+
+    '<div class="st">Saya yang bertanda tangan di bawah ini, pasien / wali dari pasien tersebut di atas, menyatakan telah menerima penjelasan di atas secara lisan dan tertulis, memahaminya, berkesempatan bertanya, dan dengan ini:<br>'+
+    '<label>☐ <b>MENYETUJUI</b></label><label>☐ <b>MENOLAK</b></label> dilakukannya tindakan tersebut. Saya memahami bahwa persetujuan ini dapat saya cabut sebelum tindakan dimulai, dan bahwa kedokteran bukan ilmu pasti sehingga hasil tidak dapat dijamin.</div>'+
+    '<div class="sg"><div>Pasien / wali<br><small>nama jelas & tanda tangan</small></div><div>Saksi: '+E(c.saksi||'________________')+'<br><small>perawat / tenaga kesehatan</small></div><div>Dokter: '+E(c.dokter||'________________')+'<br><small>tanda tangan</small></div></div>'+
+    '<div class="ft">Bandung, '+E(tgl)+' · Lembar ini bagian dari rekam medis (PMK 24/2022) dan disimpan sesuai masa retensi. Dasar: UU 17/2023 Ps. 293, PP 28/2024 Ps. 777–781, Permenkes 11/2025. Dicetak dari ADC Form 2 · '+E(c.no)+'</div>'+
+    '</body></html>';
 }
 
 /* ===== WIZARD 5 KELOMPOK =====
@@ -3650,7 +3961,7 @@ function _lembarCetak(){
       blok('Anamnesis (Form 1)',anam)+
       blok('Pemeriksaan',kv('Fitzpatrick',pm.fitzpatrick)+kv('Tipe kulit',pm.tipe_kulit)+kv('BB · TB · IMT',bt)+
         kv('Foto baseline',(ik.penugasan&&ik.penugasan.foto_baseline)?('sudah'+(ik.penugasan.foto_area?(' · '+ik.penugasan.foto_area):'')):''))+
-      blok('Diagnosis',kv('Diagnosis',a.diagnosis)+(igaDiProgram?'':kv('Derajat (IGA)',a.derajat))+kv('Catatan klinis',a.hasil),'ps-wide')+
+      blok('Diagnosis',kv('Diagnosis',a.diagnosis)+kv('ICD-10',_icdTeks(a.icd))+(igaDiProgram?'':kv('Derajat (IGA)',a.derajat))+kv('Catatan klinis',a.hasil),'ps-wide')+
       blok('Evaluasi kunjungan ini',evHtml,'ps-wide')+
       blok('Program & tindakan',prog,'ps-wide')+
       blok('Resep',rx,'ps-wide')+
@@ -3659,7 +3970,7 @@ function _lembarCetak(){
       blok('Riwayat (3 kunjungan terakhir)',riw,'ps-wide')+
     '</div>'+
     '<footer class="ps-f"><div>Sign-off dokter: <b>'+(pn.signoff_dokter?E(pn.dokter_signoff||a.dokter||'ada'):'BELUM')+'</b>'+
-      (pn.tgl_signoff?(' · '+E(pn.tgl_signoff)):'')+(pn.oleh?(' · diterbitkan oleh '+E(pn.oleh)):'')+(pn.consent_tindakan?' · consent tindakan ✓':'')+
+      (pn.tgl_signoff?(' · '+E(pn.tgl_signoff)):'')+(pn.oleh?(' · diterbitkan oleh '+E(pn.oleh)):'')+(pn.ttd?(' · TTE dokter ✓ '+E(pn.ttd.id)+' '+E(String(pn.ttd.waktu).slice(0,16).replace('T',' '))):'')+(pn.consent_tindakan?' · consent tindakan ✓':'')+(pn.consent_no?(' · '+E(pn.consent_no)):'')+
       (per.total?('<br>Persetujuan pasien: '+E(per.disetujui)+'/'+E(per.total)+' butir'):'')+'</div>'+
       (_isImgData(tt.gambar)?('<div class="ps-sig"><img src="'+E(tt.gambar)+'" alt=""><span>Tanda tangan pasien'+(tt.nama?(' · '+E(tt.nama)):'')+'</span></div>'):'')+
     '</footer>'+

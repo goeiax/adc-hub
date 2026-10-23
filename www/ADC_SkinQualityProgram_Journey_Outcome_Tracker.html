@@ -125,6 +125,8 @@ input::-webkit-input-placeholder, textarea::-webkit-input-placeholder{color:#7E8
 .hubchip.on{border-color:#7FA37F;color:#A8C8A8;}
 .hubchip.off{border-color:rgba(245,239,230,.25);color:rgba(245,239,230,.45);}
 .hubchip.sync{border-color:#C9A86A;color:#C9A86A;}
+.hubchip.warn{border-color:#E0A860;color:#F3CF9A;}
+.hubchip{white-space:nowrap;max-width:260px;overflow:hidden;text-overflow:ellipsis;}
 .mdlg-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2000;display:none;align-items:flex-start;justify-content:center;padding:12vh 16px 16px;}
 .mdlg-bg.on{display:flex;}
 .mdlg{background:var(--surface, #fff);border-radius:var(--r-card, 14px);width:100%;max-width:460px;padding:24px 24px 20px;box-shadow:0 18px 50px rgba(0,0,0,.25);}
@@ -152,7 +154,7 @@ input::-webkit-input-placeholder, textarea::-webkit-input-placeholder{color:#7E8
     <div class="tb-hint">Satu lembar per pasien · diperbarui tiap kunjungan</div>
   </div>
   <div class="tb-actions">
-    <span class="hubchip off" id="hubchip" onclick="hubSetup()" title="Klik untuk mengatur alamat &amp; kunci hub">HUB &middot; …</span>
+    <span class="hubchip off" id="hubchip" onclick="hubMenu()" title="Klik: masuk / ganti pengguna &amp; atur hub">HUB &middot; …</span>
     <button class="btn tan" onclick="muatHandoffHub()">Muat Rekam Medis (Handoff)</button>
     <button class="btn" onclick="cetakJourney()">Ringkasan untuk Pasien</button>
     <button class="btn" onclick="document.getElementById('_wafile').click()">Muat Rangkuman WA</button>
@@ -337,12 +339,89 @@ function hubDefault(){ /* disajikan hub sendiri (http) -> pakai origin; dibuka s
 function hubURL(){ try{return (localStorage.getItem('adc_hub_url')||hubDefault()).replace(/\/+$/,'');}catch(e){return hubDefault();} }
 function hubKey(){ try{return localStorage.getItem('adc_hub_key')||'';}catch(e){return '';} }
 var _hubOn=false;
+/* ---- pengguna hub: token sesi + login + tanda tangan PIN (PMK 24/2022 Ps. 16, 30, 31) ---- */
+function hubTok(){ try{return localStorage.getItem('adc_hub_tok')||'';}catch(e){return '';} }
+window._hubUser=null; window._hubLoginReq=false;
+function hubHdr(json){ var h={'X-ADC-Key':hubKey(),'X-ADC-Token':hubTok()}; if(json) h['Content-Type']='application/json'; return h; }
+function _hubSimpanSesi(tok,user){
+  try{ if(tok){ localStorage.setItem('adc_hub_tok',tok); localStorage.setItem('adc_hub_user',JSON.stringify(user||{})); }
+       else { localStorage.removeItem('adc_hub_tok'); localStorage.removeItem('adc_hub_user'); } }catch(e){}
+  window._hubUser=tok?(user||null):null; }
+function _hubChipUser(){ if(!_hubOn){ hubChip('off','mati'); return; } if(!window._hubLoginReq){ hubChip('on','tersambung'); return; }
+  var u=window._hubUser, nm=u?String(u.nama||u.id):''; if(nm.length>18) nm=nm.slice(0,17)+'…';
+  hubChip(u?'on':'warn', u?nm:'klik untuk masuk'); var c=document.getElementById('hubchip'); if(c) c.title=u?('Masuk sebagai '+(u.nama||u.id)+' ('+(u.peran||'')+') — klik untuk keluar / ganti pengguna'):'Klik untuk masuk dengan ID & PIN'; }
+/* setelah ping: hub v2 meminta pengguna -> cek token tersimpan lewat /api/saya */
+function _hubCekSesi(j){
+  window._hubLoginReq=!!(j&&j.login);
+  if(!_hubOn||!window._hubLoginReq){ _hubChipUser(); return; }
+  if(!hubTok()){ window._hubUser=null; _hubChipUser(); return; }
+  try{
+    fetch(hubURL()+'/api/saya',{headers:hubHdr(),cache:'no-store'}).then(function(r){return r.json();})
+    .then(function(s){ if(s&&s.ok){ window._hubUser=s.user; try{localStorage.setItem('adc_hub_user',JSON.stringify(s.user));}catch(e){} } else { _hubSimpanSesi('',null); } _hubChipUser(); })
+    .catch(function(){ _hubChipUser(); });
+  }catch(e){}
+}
+function hubMenu(){ if(!_hubOn) hubSetup(); else hubLogin(); }
+function _ldlgBuat(){
+  var bg=document.getElementById('ldlg'); if(bg) return bg;
+  var st=document.createElement('style');
+  st.textContent='.ldlg-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2100;display:none;align-items:flex-start;justify-content:center;padding:12vh 16px 16px}.ldlg-bg.on{display:flex}.ldlg{background:#fff;border-radius:14px;width:100%;max-width:400px;padding:22px 22px 18px;box-shadow:0 18px 50px rgba(0,0,0,.25);font-family:inherit;color:#1B1A18}.ldlg h3{margin:0 0 4px;font-size:17px;font-weight:620}.ldlg p{margin:0 0 12px;font-size:12.5px;line-height:1.5;color:#6B675E}.ldlg label{display:block;font-size:11px;font-weight:620;letter-spacing:.12em;text-transform:uppercase;color:#3A3833;margin:10px 0 5px}.ldlg input{width:100%;box-sizing:border-box;font:inherit;font-size:16px;color:#1F4E9C;padding:10px 12px;border:1px solid #D9CCB7;border-radius:8px;background:#fff}.ldlg input:focus{outline:none;border-color:#B0603F}.ldlg .msg{min-height:18px;font-size:12.5px;color:#8E4A33;margin:8px 0 6px}.ldlg .b{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.ldlg .b .sp{flex:1}.ldlg button{font:inherit;font-size:14px;font-weight:600;min-height:42px;padding:0 16px;border-radius:999px;cursor:pointer;border:1px solid #D9CCB7;background:#fff;color:#1B1A18}.ldlg button.ok{background:#B0603F;border-color:#B0603F;color:#fff}.ldlg button.lnk{border:none;background:none;color:#8E4A33;text-decoration:underline;padding:0 4px;min-height:32px;font-weight:500;font-size:12.5px}@media print{.ldlg-bg{display:none!important}}';
+  document.head.appendChild(st);
+  bg=document.createElement('div'); bg.id='ldlg'; bg.className='ldlg-bg';
+  bg.innerHTML='<div class="ldlg" role="dialog" aria-modal="true" aria-labelledby="ldlg_t"><h3 id="ldlg_t"></h3><p id="ldlg_p"></p>'+
+    '<label for="ldlg_id">ID pengguna</label><input id="ldlg_id" autocomplete="username" autocapitalize="none" placeholder="mis. dr.ani">'+
+    '<label for="ldlg_pin">PIN</label><input id="ldlg_pin" type="password" inputmode="numeric" autocomplete="current-password" placeholder="4–8 digit">'+
+    '<div class="msg" id="ldlg_msg"></div>'+
+    '<div class="b"><button type="button" class="lnk" id="ldlg_set">Atur alamat / kunci hub…</button><button type="button" class="lnk" id="ldlg_out">Keluar</button><span class="sp"></span>'+
+    '<button type="button" id="ldlg_x">Batal</button><button type="button" class="ok" id="ldlg_ok">Masuk</button></div></div>';
+  document.body.appendChild(bg);
+  return bg;
+}
+/* _ldlg('login',{},cb)  -> cb(true) masuk | cb(false) keluar | cb(null) batal
+   _ldlg('ttd',{rm,id},cb) -> cb(ttdObj) | cb(null) batal */
+function _ldlg(mode,opsi,cb){
+  var bg=_ldlgBuat(), g=function(id){return document.getElementById(id);}, ttd=(mode==='ttd'), u=window._hubUser, selesai=false;
+  var akhir=function(v){ if(selesai) return; selesai=true; bg.classList.remove('on'); document.removeEventListener('keydown',kb,true); cb(v); };
+  var kb=function(e){ if(e.key==='Escape'){ e.stopPropagation(); akhir(null); }
+    else if(e.key==='Enter'&&(document.activeElement===g('ldlg_pin')||document.activeElement===g('ldlg_id'))){ e.preventDefault(); ok(); } };
+  g('ldlg_t').textContent=ttd?'Tanda tangan elektronik dokter':'Masuk ke hub klinik';
+  g('ldlg_p').textContent=ttd?('Dokter mengonfirmasi sign-off'+(opsi.rm?(' RM '+opsi.rm):'')+' dengan ID & PIN pribadinya. Hub mencatat nama, waktu, dan bukti verifikasi ke dalam handoff.')
+                            :'Setiap simpan/muat dicatat atas nama pengguna yang masuk (jejak audit rekam medis). Sesi berakhir setelah 12 jam tidak aktif.';
+  g('ldlg_id').value=ttd?((u&&u.peran==='dokter')?u.id:(opsi.id||'')):((u&&u.id)||'');
+  g('ldlg_pin').value=''; g('ldlg_msg').textContent='';
+  g('ldlg_ok').textContent=ttd?'Tandatangani':'Masuk'; g('ldlg_ok').disabled=false;
+  g('ldlg_out').style.display=(!ttd&&u)?'':'none';
+  g('ldlg_set').onclick=function(){ akhir(null); hubSetup(); };
+  g('ldlg_out').onclick=function(){ try{ fetch(hubURL()+'/api/logout',{method:'POST',headers:hubHdr()}).catch(function(){}); }catch(e){} _hubSimpanSesi('',null); _hubChipUser(); akhir(false); };
+  g('ldlg_x').onclick=function(){ akhir(null); };
+  var ok=function(){
+    var id=(g('ldlg_id').value||'').trim().toLowerCase(), pin=(g('ldlg_pin').value||'').trim();
+    if(!id||!pin){ g('ldlg_msg').textContent='Isi ID dan PIN.'; return; }
+    g('ldlg_msg').textContent='Memeriksa…'; g('ldlg_ok').disabled=true;
+    var url=hubURL()+(ttd?'/api/ttd':'/api/login'), body=ttd?{id:id,pin:pin,rm:opsi.rm||''}:{id:id,pin:pin};
+    fetch(url,{method:'POST',headers:hubHdr(true),body:JSON.stringify(body)})
+    .then(function(r){ return r.json().then(function(j){ j=j||{}; j._status=r.status; return j; }); })
+    .then(function(j){ g('ldlg_ok').disabled=false;
+      if(ttd&&j._status===401&&j.error==='login'){ /* belum ada sesi: masuk dulu, lalu ulangi TTD */
+        akhir(null); hubLogin(function(m){ if(m) hubTTD(opsi.rm,opsi.id,cb); else cb(null); }); return; }
+      if(!j.ok){ g('ldlg_msg').textContent=(j.pesan||j.error||'Gagal.'); g('ldlg_pin').value=''; try{g('ldlg_pin').focus();}catch(e){} return; }
+      if(ttd){ akhir(j.ttd); } else { _hubSimpanSesi(j.token,j.user); _hubChipUser(); akhir(true); } })
+    .catch(function(e){ g('ldlg_ok').disabled=false; g('ldlg_msg').textContent='Hub tidak menjawab: '+e; });
+  };
+  g('ldlg_ok').onclick=ok;
+  bg.onclick=function(e){ if(e.target===bg) akhir(null); };
+  document.addEventListener('keydown',kb,true);
+  bg.classList.add('on'); setTimeout(function(){ try{ (g('ldlg_id').value?g('ldlg_pin'):g('ldlg_id')).focus(); }catch(e){} },0);
+}
+function hubLogin(cb){ _ldlg('login',{},cb||function(){}); }
+function hubTTD(rm,idDokter,cb){ _ldlg('ttd',{rm:rm,id:idDokter||''},cb); }
+
 function hubChip(st,txt){ var c=document.getElementById('hubchip'); if(!c) return;
   c.className='hubchip '+st; c.textContent='HUB · '+txt; }
 function hubPing(){
   try{
     fetch(hubURL()+'/api/ping',{cache:'no-store'}).then(function(r){return r.json();})
-    .then(function(j){ _hubOn=!!(j&&j.ok); hubChip(_hubOn?'on':'off',_hubOn?'tersambung':'mati');
+    .then(function(j){ _hubOn=!!(j&&j.ok); _hubCekSesi(j);
       /* URL webhook Make.com dibagikan hub (config.json) -> tidak perlu ditempel per pasien */
       if(j&&j.webhook){ var wh=document.getElementById('cfg_webhook'); if(wh&&!wh.value.trim()) wh.value=j.webhook; } })
     .catch(function(){ _hubOn=false; hubChip('off','mati'); });
@@ -359,19 +438,25 @@ function hubPost(jenis,obj,cb){
   if(!_hubOn){ if(cb) cb(false,'hub tidak tersambung'); return; }
   try{
     hubChip('sync','mengirim…');
-    fetch(hubURL()+'/api/'+jenis,{method:'POST',
-      headers:{'Content-Type':'application/json','X-ADC-Key':hubKey()},
-      body:JSON.stringify(obj)})
-    .then(function(r){return r.json();})
-    .then(function(j){ hubChip(j.ok?'on':'off', j.ok?(jenis+' tersimpan'):('gagal: '+(j.error||''))); if(cb) cb(!!j.ok,j.error||''); })
+    fetch(hubURL()+'/api/'+jenis,{method:'POST',headers:hubHdr(true),body:JSON.stringify(obj)})
+    .then(function(r){ return r.json().then(function(j){ j=j||{}; j._status=r.status; return j; }); })
+    .then(function(j){
+      if(j._status===401&&j.error==='login'){ /* belum masuk / sesi habis -> minta masuk, lalu kirim ulang */
+        hubChip('warn','klik untuk masuk');
+        hubLogin(function(ok){ if(ok) hubPost(jenis,obj,cb); else if(cb) cb(false,'belum masuk sebagai pengguna hub'); });
+        return; }
+      if(j.ok){ hubChip('on',jenis+' tersimpan'+(window._hubUser?(' · '+window._hubUser.id):'')); } else hubChip('warn','gagal: '+(j.error||''));
+      if(cb) cb(!!j.ok,j.error||'',j); })
     .catch(function(e){ hubChip('off','gagal kirim'); if(cb) cb(false,String(e)); });
   }catch(e){ if(cb) cb(false,String(e)); }
 }
 function hubGetPasien(rm,cb){
   try{
-    fetch(hubURL()+'/api/pasien/'+encodeURIComponent(rm),{headers:{'X-ADC-Key':hubKey()},cache:'no-store'})
-    .then(function(r){return r.json();})
-    .then(function(j){ cb(j&&!j.error?j:null, j&&j.error); })
+    fetch(hubURL()+'/api/pasien/'+encodeURIComponent(rm),{headers:hubHdr(),cache:'no-store'})
+    .then(function(r){ return r.json().then(function(j){ j=j||{}; j._status=r.status; return j; }); })
+    .then(function(j){
+      if(j._status===401&&j.error==='login'){ hubLogin(function(ok){ if(ok) hubGetPasien(rm,cb); else cb(null,'belum masuk sebagai pengguna hub'); }); return; }
+      cb(j&&!j.error?j:null, j&&j.error); })
     .catch(function(e){ cb(null,String(e)); });
   }catch(e){ cb(null,String(e)); }
 }
@@ -431,7 +516,7 @@ function _dlgMuat(judul, berkasId, onRM){
   bg.classList.add('on'); setTimeout(function(){ try{ inp.focus(); inp.select(); }catch(e){} },0);
   /* saran RM dari daftar pasien di hub */
   try{
-    fetch(hubURL()+'/api/pasien',{headers:{'X-ADC-Key':hubKey()},cache:'no-store'}).then(function(r){return r.json();})
+    fetch(hubURL()+'/api/pasien',{headers:hubHdr(),cache:'no-store'}).then(function(r){return r.json();})
     .then(function(j){ var dl=document.getElementById('mdlg_list'); if(!dl||!j||!j.pasien) return;
       dl.innerHTML=j.pasien.slice(0,200).map(function(p){
         return '<option value="'+_dEsc(p.rm)+'">'+_dEsc((p.nama||'')+(p.kunjungan_ke?(' · kunjungan '+p.kunjungan_ke):''))+'</option>'; }).join(''); })

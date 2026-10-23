@@ -124,6 +124,11 @@ input[type=checkbox],input[type=radio]{accent-color:var(--accent);width:17px;hei
   padding:14px 18px;border:1px solid var(--line);border-radius:var(--r-box);background:var(--surface);cursor:pointer;}
 .ack:has(input:checked){border-color:var(--accent);background:var(--surface-quiet);}
 .ack input{margin-top:2px;}
+.hk{display:grid;grid-template-columns:1fr 1fr;gap:10px 22px;margin:12px 0 14px;padding:14px 16px;border:1px solid var(--line-strong,#D9CCB7);border-radius:var(--r-box,10px);background:var(--surface-quiet,#F7F3EC);font-size:13px;line-height:1.55;color:var(--ink-2,#3A3833);}
+.hk h4{margin:0 0 6px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink,#1B1A18);}
+.hk ol{margin:0;padding-left:18px;}
+.hk li{margin:0 0 3px;}
+@media (max-width:640px){.hk{grid-template-columns:1fr;}}
 .sigs{display:flex;gap:24px;margin-top:20px;flex-wrap:wrap;}
 .sig{flex:1;min-width:180px;}
 .sig .lab{margin-bottom:34px;}
@@ -526,6 +531,8 @@ body.past0 #staff_mini{display:flex !important;}
 .hubchip.on{border-color:#7FA37F;color:#A8C8A8;}
 .hubchip.off{border-color:rgba(245,239,230,.25);color:rgba(245,239,230,.45);}
 .hubchip.sync{border-color:#C9A86A;color:#C9A86A;}
+.hubchip.warn{border-color:#E0A860;color:#F3CF9A;}
+.hubchip{white-space:nowrap;max-width:260px;overflow:hidden;text-overflow:ellipsis;}
 @media print{.hubchip{display:none!important;}}
 </style>
 </head>
@@ -537,7 +544,7 @@ body.past0 #staff_mini{display:flex !important;}
     <div class="tb-hint">Diisi pasien · boleh dibantu perawat · sebelum masuk ruang konsultasi</div>
   </div>
   <div class="tb-actions">
-    <span class="hubchip off" id="hubchip" onclick="hubSetup()" title="Klik untuk mengatur alamat & kunci hub">HUB &middot; …</span><button class="btn" onclick="resetForm()">Reset</button>
+    <span class="hubchip off" id="hubchip" onclick="hubMenu()" title="Klik: masuk / ganti pengguna &amp; atur hub">HUB &middot; …</span><button class="btn" onclick="resetForm()">Reset</button>
     <button class="btn" onclick="cetakSemua()">Cetak / Simpan PDF</button>
     <button class="btn tan" onclick="simpanIntake()">Simpan Data Pasien</button>
   </div>
@@ -558,6 +565,7 @@ body.past0 #staff_mini{display:flex !important;}
     <div class="staff-h"><span class="eg">Khusus staf</span><span class="ss">Diisi pendaftaran sebelum pasien mulai</span></div>
     <div class="staff-grid">
       <div class="sf k3"><label class="slab" for="rm">No. RM</label><input class="sin" id="rm" placeholder="RM-______"></div>
+      <div class="sf k3"><label class="slab" for="p_nik">NIK <span class="sreq">16 digit — identitas RME</span></label><input class="sin" id="p_nik" inputmode="numeric" maxlength="16" placeholder="16 digit KTP" oninput="cekNIK(this)"></div>
       <div class="sf k3"><label class="slab" for="tgl">Tanggal</label><input class="sin" type="date" id="tgl"></div>
       <div class="sf k3"><span class="slab">Status pasien</span>
         <div class="spills" id="p_status"><label class="opt spill"><input type="checkbox"> Baru</label><label class="opt spill"><input type="checkbox"> Lama</label></div>
@@ -816,6 +824,22 @@ body.past0 #staff_mini{display:flex !important;}
   <!-- P6 -->
   <div class="stepnav no-print"><button type="button" class="nb" onclick="goStep(2)">&lsaquo; Kembali</button><button type="button" class="nb nb-p" onclick="goStep(4)">Lanjut &rsaquo;</button></div></section>
   <section class="step" data-step="4"><div class="sec"><span class="n">P6</span>Pemahaman &amp; persetujuan</div>
+  <!-- Hak & kewajiban pasien (KMK 1983/2022 PKP; UU 17/2023) — ditampilkan, bukan hanya dicentang -->
+  <div class="hk">
+    <div><h4>Hak Anda sebagai pasien</h4><ol>
+      <li>Mendapat penjelasan tentang kondisi, tindakan, risiko, alternatif, dan perkiraan biaya.</li>
+      <li>Menyetujui atau menolak tindakan setelah mendapat penjelasan, dan meminta pendapat dokter lain.</li>
+      <li>Kerahasiaan data kesehatan Anda; isi ringkasan rekam medis dapat Anda minta.</li>
+      <li>Menyampaikan keluhan atas pelayanan kepada klinik.</li></ol></div>
+    <div><h4>Kewajiban Anda</h4><ol>
+      <li>Memberi informasi yang jujur dan lengkap tentang kesehatan, obat, dan alergi Anda.</li>
+      <li>Mematuhi anjuran dokter, aturan pakai obat, dan jadwal kontrol.</li>
+      <li>Memberitahu bila ada perubahan kondisi, kehamilan, atau obat baru.</li>
+      <li>Menghormati tata tertib klinik dan menyelesaikan biaya pelayanan.</li></ol></div>
+  </div>
+  <label class="ack" data-k="hak"><input type="checkbox"> Saya telah membaca / dijelaskan hak dan kewajiban saya sebagai pasien di atas dan memahaminya.</label>
+  <label class="ack" data-k="umum"><input type="checkbox"> Saya menyetujui dilakukan pemeriksaan, konsultasi, dan perawatan medis dasar oleh dokter dan tim ADC sesuai kebutuhan <i>(persetujuan umum)</i>. Untuk tindakan khusus, klinik akan meminta persetujuan tertulis terpisah setelah penjelasan dokter.</label>
+  <label class="ack" data-k="pdp"><input type="checkbox"> Saya menyetujui data pribadi dan data kesehatan saya diproses dan disimpan oleh ADC untuk pelayanan, rekam medis, pengingat kontrol, dan kewajiban hukum, sesuai UU No. 27 Tahun 2022 tentang Pelindungan Data Pribadi. Saya dapat meminta akses atau perbaikan data melalui klinik.</label>
   <label class="ack"><input type="checkbox"> Saya memahami bahwa hasil perawatan bertahap (dihitung dalam bulan, bukan instan) dan membutuhkan kepatuhan terhadap obat dan jadwal kontrol.</label>
   <label class="ack"><input type="checkbox"> Saya bersedia dihubungi tim ADC via WhatsApp untuk pengingat kontrol dan follow-up perawatan.</label>
   <label class="ack"><input type="checkbox"> Saya menyetujui pengambilan foto klinis untuk evaluasi medis (foto disimpan rahasia; penggunaan untuk keperluan lain meminta izin terpisah).</label>
@@ -1007,9 +1031,10 @@ function buildIntake(){
     program:_program(), belum_yakin:!!(belumYakin&&belumYakin.checked)
   };
   k.flags=_flags(k);
-  var ack=document.querySelectorAll('label.ack'), setuju=0, belum=[];
-  ack.forEach(function(l){ var c=l.querySelector('input');
-    if(c&&c.checked) setuju++; else belum.push(_t(l).slice(0,60)+'…'); });
+  var ack=document.querySelectorAll('label.ack'), setuju=0, belum=[], butir=[];
+  ack.forEach(function(l){ var c=l.querySelector('input'), ok=!!(c&&c.checked), jenis=l.getAttribute('data-k')||'';
+    butir.push({k:jenis, teks:_t(l).slice(0,100), setuju:ok});
+    if(ok) setuju++; else belum.push(_t(l).slice(0,60)+'…'); });
   return {
     doc:'ADC-INTAKE', versi:1, sumber:'ADC-FORM1', diterbitkan:new Date().toISOString(),
     /* Dokter ditetapkan sejak registrasi → jadi acuan awal di Form 2 (d1_dokter).
@@ -1019,7 +1044,7 @@ function buildIntake(){
                 foto_izin:!!(document.getElementById('p_foto_izin')||{}).checked,
                 foto_area:_v('p_foto_area') },
     pengukuran:{ bb:_v('p_bb'), tb:_v('p_tb'), imt:_v('p_imt') },
-    pasien:{ nama:_v('p_nama'), rm:_v('rm'), wa:_v('p_wa'), tanggal:_v('tgl'),
+    pasien:{ nama:_v('p_nama'), rm:_v('rm'), nik:_v('p_nik'), wa:_v('p_wa'), tanggal:_v('tgl'),
              usia:_labeled('Tanggal lahir'), kelamin:_labeled('Jenis kelamin'),
              kota:_labeled('Kota domisili'), status:status.join('/') },
     kritis:k,
@@ -1027,7 +1052,9 @@ function buildIntake(){
                  tidur:_labeled('Tidur'), stres:_labeled('Tingkat stres'),
                  pola_makan:_labeled('Pola makan'), aktivitas:_labeled('Aktivitas fisik') },
     seksi:_seksi(),
-    persetujuan:{ total:ack.length, disetujui:setuju, belum:belum,
+    persetujuan:{ total:ack.length, disetujui:setuju, belum:belum, butir:butir,
+      /* ringkas per jenis (UU PDP & general consent) agar mudah dibaca Form 2 / hub */
+      umum:butir.some(function(b){return b.k==='umum'&&b.setuju;}), data_pribadi:butir.some(function(b){return b.k==='pdp'&&b.setuju;}), hak_kewajiban:butir.some(function(b){return b.k==='hak'&&b.setuju;}),
       tanda_tangan:{
         pasien :{ nama:_v('ttd_pasien_nama'), tanggal:_v('ttd_pasien_tgl'), gambar:padData('ttd_pasien') },
         wali   :{ nama:_v('ttd_wali_nama'), hubungan:_v('ttd_wali_hub'), gambar:padData('ttd_wali') },
@@ -1045,12 +1072,89 @@ function hubDefault(){ /* disajikan hub sendiri (http) -> pakai origin; dibuka s
 function hubURL(){ try{return (localStorage.getItem('adc_hub_url')||hubDefault()).replace(/\/+$/,'');}catch(e){return hubDefault();} }
 function hubKey(){ try{return localStorage.getItem('adc_hub_key')||'';}catch(e){return '';} }
 var _hubOn=false;
+/* ---- pengguna hub: token sesi + login + tanda tangan PIN (PMK 24/2022 Ps. 16, 30, 31) ---- */
+function hubTok(){ try{return localStorage.getItem('adc_hub_tok')||'';}catch(e){return '';} }
+window._hubUser=null; window._hubLoginReq=false;
+function hubHdr(json){ var h={'X-ADC-Key':hubKey(),'X-ADC-Token':hubTok()}; if(json) h['Content-Type']='application/json'; return h; }
+function _hubSimpanSesi(tok,user){
+  try{ if(tok){ localStorage.setItem('adc_hub_tok',tok); localStorage.setItem('adc_hub_user',JSON.stringify(user||{})); }
+       else { localStorage.removeItem('adc_hub_tok'); localStorage.removeItem('adc_hub_user'); } }catch(e){}
+  window._hubUser=tok?(user||null):null; }
+function _hubChipUser(){ if(!_hubOn){ hubChip('off','mati'); return; } if(!window._hubLoginReq){ hubChip('on','tersambung'); return; }
+  var u=window._hubUser, nm=u?String(u.nama||u.id):''; if(nm.length>18) nm=nm.slice(0,17)+'…';
+  hubChip(u?'on':'warn', u?nm:'klik untuk masuk'); var c=document.getElementById('hubchip'); if(c) c.title=u?('Masuk sebagai '+(u.nama||u.id)+' ('+(u.peran||'')+') — klik untuk keluar / ganti pengguna'):'Klik untuk masuk dengan ID & PIN'; }
+/* setelah ping: hub v2 meminta pengguna -> cek token tersimpan lewat /api/saya */
+function _hubCekSesi(j){
+  window._hubLoginReq=!!(j&&j.login);
+  if(!_hubOn||!window._hubLoginReq){ _hubChipUser(); return; }
+  if(!hubTok()){ window._hubUser=null; _hubChipUser(); return; }
+  try{
+    fetch(hubURL()+'/api/saya',{headers:hubHdr(),cache:'no-store'}).then(function(r){return r.json();})
+    .then(function(s){ if(s&&s.ok){ window._hubUser=s.user; try{localStorage.setItem('adc_hub_user',JSON.stringify(s.user));}catch(e){} } else { _hubSimpanSesi('',null); } _hubChipUser(); })
+    .catch(function(){ _hubChipUser(); });
+  }catch(e){}
+}
+function hubMenu(){ if(!_hubOn) hubSetup(); else hubLogin(); }
+function _ldlgBuat(){
+  var bg=document.getElementById('ldlg'); if(bg) return bg;
+  var st=document.createElement('style');
+  st.textContent='.ldlg-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2100;display:none;align-items:flex-start;justify-content:center;padding:12vh 16px 16px}.ldlg-bg.on{display:flex}.ldlg{background:#fff;border-radius:14px;width:100%;max-width:400px;padding:22px 22px 18px;box-shadow:0 18px 50px rgba(0,0,0,.25);font-family:inherit;color:#1B1A18}.ldlg h3{margin:0 0 4px;font-size:17px;font-weight:620}.ldlg p{margin:0 0 12px;font-size:12.5px;line-height:1.5;color:#6B675E}.ldlg label{display:block;font-size:11px;font-weight:620;letter-spacing:.12em;text-transform:uppercase;color:#3A3833;margin:10px 0 5px}.ldlg input{width:100%;box-sizing:border-box;font:inherit;font-size:16px;color:#1F4E9C;padding:10px 12px;border:1px solid #D9CCB7;border-radius:8px;background:#fff}.ldlg input:focus{outline:none;border-color:#B0603F}.ldlg .msg{min-height:18px;font-size:12.5px;color:#8E4A33;margin:8px 0 6px}.ldlg .b{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.ldlg .b .sp{flex:1}.ldlg button{font:inherit;font-size:14px;font-weight:600;min-height:42px;padding:0 16px;border-radius:999px;cursor:pointer;border:1px solid #D9CCB7;background:#fff;color:#1B1A18}.ldlg button.ok{background:#B0603F;border-color:#B0603F;color:#fff}.ldlg button.lnk{border:none;background:none;color:#8E4A33;text-decoration:underline;padding:0 4px;min-height:32px;font-weight:500;font-size:12.5px}@media print{.ldlg-bg{display:none!important}}';
+  document.head.appendChild(st);
+  bg=document.createElement('div'); bg.id='ldlg'; bg.className='ldlg-bg';
+  bg.innerHTML='<div class="ldlg" role="dialog" aria-modal="true" aria-labelledby="ldlg_t"><h3 id="ldlg_t"></h3><p id="ldlg_p"></p>'+
+    '<label for="ldlg_id">ID pengguna</label><input id="ldlg_id" autocomplete="username" autocapitalize="none" placeholder="mis. dr.ani">'+
+    '<label for="ldlg_pin">PIN</label><input id="ldlg_pin" type="password" inputmode="numeric" autocomplete="current-password" placeholder="4–8 digit">'+
+    '<div class="msg" id="ldlg_msg"></div>'+
+    '<div class="b"><button type="button" class="lnk" id="ldlg_set">Atur alamat / kunci hub…</button><button type="button" class="lnk" id="ldlg_out">Keluar</button><span class="sp"></span>'+
+    '<button type="button" id="ldlg_x">Batal</button><button type="button" class="ok" id="ldlg_ok">Masuk</button></div></div>';
+  document.body.appendChild(bg);
+  return bg;
+}
+/* _ldlg('login',{},cb)  -> cb(true) masuk | cb(false) keluar | cb(null) batal
+   _ldlg('ttd',{rm,id},cb) -> cb(ttdObj) | cb(null) batal */
+function _ldlg(mode,opsi,cb){
+  var bg=_ldlgBuat(), g=function(id){return document.getElementById(id);}, ttd=(mode==='ttd'), u=window._hubUser, selesai=false;
+  var akhir=function(v){ if(selesai) return; selesai=true; bg.classList.remove('on'); document.removeEventListener('keydown',kb,true); cb(v); };
+  var kb=function(e){ if(e.key==='Escape'){ e.stopPropagation(); akhir(null); }
+    else if(e.key==='Enter'&&(document.activeElement===g('ldlg_pin')||document.activeElement===g('ldlg_id'))){ e.preventDefault(); ok(); } };
+  g('ldlg_t').textContent=ttd?'Tanda tangan elektronik dokter':'Masuk ke hub klinik';
+  g('ldlg_p').textContent=ttd?('Dokter mengonfirmasi sign-off'+(opsi.rm?(' RM '+opsi.rm):'')+' dengan ID & PIN pribadinya. Hub mencatat nama, waktu, dan bukti verifikasi ke dalam handoff.')
+                            :'Setiap simpan/muat dicatat atas nama pengguna yang masuk (jejak audit rekam medis). Sesi berakhir setelah 12 jam tidak aktif.';
+  g('ldlg_id').value=ttd?((u&&u.peran==='dokter')?u.id:(opsi.id||'')):((u&&u.id)||'');
+  g('ldlg_pin').value=''; g('ldlg_msg').textContent='';
+  g('ldlg_ok').textContent=ttd?'Tandatangani':'Masuk'; g('ldlg_ok').disabled=false;
+  g('ldlg_out').style.display=(!ttd&&u)?'':'none';
+  g('ldlg_set').onclick=function(){ akhir(null); hubSetup(); };
+  g('ldlg_out').onclick=function(){ try{ fetch(hubURL()+'/api/logout',{method:'POST',headers:hubHdr()}).catch(function(){}); }catch(e){} _hubSimpanSesi('',null); _hubChipUser(); akhir(false); };
+  g('ldlg_x').onclick=function(){ akhir(null); };
+  var ok=function(){
+    var id=(g('ldlg_id').value||'').trim().toLowerCase(), pin=(g('ldlg_pin').value||'').trim();
+    if(!id||!pin){ g('ldlg_msg').textContent='Isi ID dan PIN.'; return; }
+    g('ldlg_msg').textContent='Memeriksa…'; g('ldlg_ok').disabled=true;
+    var url=hubURL()+(ttd?'/api/ttd':'/api/login'), body=ttd?{id:id,pin:pin,rm:opsi.rm||''}:{id:id,pin:pin};
+    fetch(url,{method:'POST',headers:hubHdr(true),body:JSON.stringify(body)})
+    .then(function(r){ return r.json().then(function(j){ j=j||{}; j._status=r.status; return j; }); })
+    .then(function(j){ g('ldlg_ok').disabled=false;
+      if(ttd&&j._status===401&&j.error==='login'){ /* belum ada sesi: masuk dulu, lalu ulangi TTD */
+        akhir(null); hubLogin(function(m){ if(m) hubTTD(opsi.rm,opsi.id,cb); else cb(null); }); return; }
+      if(!j.ok){ g('ldlg_msg').textContent=(j.pesan||j.error||'Gagal.'); g('ldlg_pin').value=''; try{g('ldlg_pin').focus();}catch(e){} return; }
+      if(ttd){ akhir(j.ttd); } else { _hubSimpanSesi(j.token,j.user); _hubChipUser(); akhir(true); } })
+    .catch(function(e){ g('ldlg_ok').disabled=false; g('ldlg_msg').textContent='Hub tidak menjawab: '+e; });
+  };
+  g('ldlg_ok').onclick=ok;
+  bg.onclick=function(e){ if(e.target===bg) akhir(null); };
+  document.addEventListener('keydown',kb,true);
+  bg.classList.add('on'); setTimeout(function(){ try{ (g('ldlg_id').value?g('ldlg_pin'):g('ldlg_id')).focus(); }catch(e){} },0);
+}
+function hubLogin(cb){ _ldlg('login',{},cb||function(){}); }
+function hubTTD(rm,idDokter,cb){ _ldlg('ttd',{rm:rm,id:idDokter||''},cb); }
+
 function hubChip(st,txt){ var c=document.getElementById('hubchip'); if(!c) return;
   c.className='hubchip '+st; c.textContent='HUB · '+txt; }
 function hubPing(){
   try{
     fetch(hubURL()+'/api/ping',{cache:'no-store'}).then(function(r){return r.json();})
-    .then(function(j){ _hubOn=!!(j&&j.ok); hubChip(_hubOn?'on':'off',_hubOn?'tersambung':'mati'); })
+    .then(function(j){ _hubOn=!!(j&&j.ok); _hubCekSesi(j); })
     .catch(function(){ _hubOn=false; hubChip('off','mati'); });
   }catch(e){ _hubOn=false; }
 }
@@ -1065,24 +1169,31 @@ function hubPost(jenis,obj,cb){
   if(!_hubOn){ if(cb) cb(false,'hub tidak tersambung'); return; }
   try{
     hubChip('sync','mengirim…');
-    fetch(hubURL()+'/api/'+jenis,{method:'POST',
-      headers:{'Content-Type':'application/json','X-ADC-Key':hubKey()},
-      body:JSON.stringify(obj)})
-    .then(function(r){return r.json();})
-    .then(function(j){ hubChip(j.ok?'on':'off', j.ok?(jenis+' tersimpan'):('gagal: '+(j.error||''))); if(cb) cb(!!j.ok,j.error||''); })
+    fetch(hubURL()+'/api/'+jenis,{method:'POST',headers:hubHdr(true),body:JSON.stringify(obj)})
+    .then(function(r){ return r.json().then(function(j){ j=j||{}; j._status=r.status; return j; }); })
+    .then(function(j){
+      if(j._status===401&&j.error==='login'){ /* belum masuk / sesi habis -> minta masuk, lalu kirim ulang */
+        hubChip('warn','klik untuk masuk');
+        hubLogin(function(ok){ if(ok) hubPost(jenis,obj,cb); else if(cb) cb(false,'belum masuk sebagai pengguna hub'); });
+        return; }
+      if(j.ok){ hubChip('on',jenis+' tersimpan'+(window._hubUser?(' · '+window._hubUser.id):'')); } else hubChip('warn','gagal: '+(j.error||''));
+      if(cb) cb(!!j.ok,j.error||'',j); })
     .catch(function(e){ hubChip('off','gagal kirim'); if(cb) cb(false,String(e)); });
   }catch(e){ if(cb) cb(false,String(e)); }
 }
 function hubGetPasien(rm,cb){
   try{
-    fetch(hubURL()+'/api/pasien/'+encodeURIComponent(rm),{headers:{'X-ADC-Key':hubKey()},cache:'no-store'})
-    .then(function(r){return r.json();})
-    .then(function(j){ cb(j&&!j.error?j:null, j&&j.error); })
+    fetch(hubURL()+'/api/pasien/'+encodeURIComponent(rm),{headers:hubHdr(),cache:'no-store'})
+    .then(function(r){ return r.json().then(function(j){ j=j||{}; j._status=r.status; return j; }); })
+    .then(function(j){
+      if(j._status===401&&j.error==='login'){ hubLogin(function(ok){ if(ok) hubGetPasien(rm,cb); else cb(null,'belum masuk sebagai pengguna hub'); }); return; }
+      cb(j&&!j.error?j:null, j&&j.error); })
     .catch(function(e){ cb(null,String(e)); });
   }catch(e){ cb(null,String(e)); }
 }
 window.addEventListener('load',function(){ hubPing(); setInterval(hubPing,30000); });
 
+function cekNIK(el){ el.value=el.value.replace(/\D/g,'').slice(0,16); el.style.borderColor=(el.value&&el.value.length!==16)?'#C0392B':''; }
 function simpanIntake(){
   var d=buildIntake();
   /* Semua pemeriksaan dikumpulkan jadi SATU dialog. Empat konfirmasi beruntun
@@ -1090,6 +1201,8 @@ function simpanIntake(){
      di issueHandoff() Form 2. */
   var w=[];
   if(!d.pasien.nama && !d.pasien.rm) w.push('Nama dan No. RM masih kosong.');
+  if(!d.pasien.nik) w.push('NIK belum diisi — identitas minimal rekam medis elektronik (PMK 24/2022 Ps. 14).');
+  else if(!/^\d{16}$/.test(d.pasien.nik)) w.push('NIK harus 16 digit angka (sekarang '+d.pasien.nik.length+' karakter).');
   if(!d.penugasan.dokter) w.push('Dokter pemeriksa belum ditentukan — nama ini jadi acuan awal di Form 2.');
   if(d.penugasan.foto_baseline && !d.penugasan.foto_izin) w.push('Foto baseline diambil tetapi persetujuan lisan pasien belum dicentang — minta izin SEBELUM memotret (persetujuan tertulis menyusul di langkah 5).');
   if(!d.penugasan.foto_baseline) w.push('Foto klinis baseline belum ditandai. Foto ini TITIK PEMBANDING seluruh evaluasi hasil; tanpa itu perbandingan di kunjungan berikutnya tidak punya titik awal.');

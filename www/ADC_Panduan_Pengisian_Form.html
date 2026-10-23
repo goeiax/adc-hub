@@ -110,13 +110,13 @@ td.v{font-weight:620;color:var(--accent-deep);white-space:nowrap;}
 
 <div class="sec" id="f1"><span class="n">2</span><h2>Form 1 — Registrasi &amp; anamnesis</h2></div>
 <ul>
-  <li><b>Panel gelap "Khusus staf"</b> diisi pendaftaran sebelum pasien mulai. Field <b>Dokter pemeriksa</b> menjadi acuan awal di Form 2 (masih bisa diubah dokter).</li>
+  <li><b>Panel gelap "Khusus staf"</b> diisi pendaftaran sebelum pasien mulai. Field <b>Dokter pemeriksa</b> menjadi acuan awal di Form 2 (masih bisa diubah dokter). <b>NIK</b> (16 digit KTP) wajib — identitas minimal rekam medis elektronik (PMK 24/2022 Ps. 14); tombol Simpan memperingatkan bila kosong atau bukan 16 digit.</li>
   <li><b>Foto klinis baseline</b>: <b>minta izin lisan dulu</b> (centang "Pasien setuju difoto"), lalu ambil foto dengan pencahayaan &amp; sudut standar, centang "Sudah diambil", tulis area yang difoto. Persetujuan tertulis pasien menyusul di langkah 5. Tanpa ini tombol Simpan akan memperingatkan — evaluasi IGA di kunjungan berikutnya tidak punya titik awal.</li>
   <li><b>Berat &amp; tinggi badan</b> diukur perawat dan diisi di panel staf — IMT terhitung otomatis. Nilainya ikut terbawa ke Form 2 dan tersimpan di handoff; dokter tinggal membaca.</li>
   <li>Pasien mengisi 5 langkah; navigasi lewat rel di atas atau tombol Lanjut/Kembali. Field boleh dikosongkan bila pasien tidak tahu — tidak ada yang memblokir.</li>
   <li><b>Langkah 1 = data diri + riwayat kesehatan</b> (alergi, obat yang dipakai, kondisi medis, hormonal, haid) — sengaja digabung supaya seluruhnya bisa ditanyakan perawat sekali duduk, lalu dokter tinggal me-review hasilnya di Ringkasan Anamnesis Form 2.</li>
   <li>Memilih program di langkah 2 otomatis memunculkan blok detail terkait di langkah 3.</li>
-  <li>Langkah 6: pasien mencentang butir persetujuan lalu <b>tanda tangan langsung di kotak</b> (jari di tablet / mouse). Tombol Hapus untuk mengulang. Tanda tangan ikut tersimpan ke berkas.</li>
+  <li>Langkah 6: pasien membaca kotak <b>Hak &amp; kewajiban pasien</b>, mencentang 7 butir persetujuan — termasuk <b>persetujuan umum</b> (pemeriksaan &amp; perawatan dasar), <b>persetujuan pemrosesan data pribadi</b> (UU PDP 27/2022), dan pernyataan hak-kewajiban — lalu <b>tanda tangan langsung di kotak</b> (jari di tablet / mouse). Tombol Hapus untuk mengulang. Tanda tangan ikut tersimpan ke berkas. Persetujuan umum <b>bukan</b> pengganti informed consent tindakan (dibuat per tindakan di Form 2 D7).</li>
   <li><b>Simpan Data Pasien</b> (tombol di atas, juga di akhir langkah 5) memeriksa kelengkapan (nama/RM, dokter, foto, alergi, tanda tangan, persetujuan) dan menampilkan satu daftar kekurangan — boleh tetap disimpan, tetapi lengkapi bila memungkinkan.</li>
   <li>Setelah lengkap, serahkan ke dokter bersama Form 2. Pertanyaan di form ini <b>tidak diulang</b> di form dokter maupun form program.</li>
 </ul>
@@ -204,7 +204,7 @@ Gerbang kehadirannya dipasang di skenario Make.com — jangan dikirim tanpa syar
 <h3>ADC Hub — berbagi data lewat jaringan klinik (opsional, dianjurkan)</h3>
 <p>Bila server <b>ADC Hub</b> dijalankan di satu PC klinik (folder <span class="file">adc-hub</span>, klik dua kali <span class="file">start.bat</span>), form berbagi data otomatis dengan <b>No. RM</b> sebagai kunci — tidak perlu lagi memindahkan berkas dengan tangan:</p>
 <ul>
-  <li>Chip <b>HUB</b> di bilah atas form menunjukkan status: hijau = tersambung. Klik chip untuk mengisi alamat (<span class="file">http://IP-PC-hub:3777</span>) dan kunci (tampil di jendela server) — cukup sekali per perangkat.</li>
+  <li>Chip <b>HUB</b> di bilah atas form menunjukkan status: hijau + nama = tersambung &amp; sudah masuk; <b>kuning "klik untuk masuk"</b> = hub hidup tetapi belum ada pengguna. Klik chip untuk <b>masuk dengan ID &amp; PIN pribadi</b> (atau Keluar / ganti pengguna); tautan "Atur alamat / kunci hub" di dialog yang sama untuk alamat (<span class="file">http://IP-PC-hub:3777</span>) dan kunci perangkat — cukup sekali per perangkat. Setiap simpan/muat dicatat atas nama pengguna yang masuk (bagian 9).</li>
   <li><b>Simpan Data Pasien</b> dan <b>Terbitkan Handoff</b> otomatis ikut terkirim ke hub. Berkas unduhan <b>tetap dibuat</b> — itu cadangan resmi; tetap lampirkan ke rekam medis.</li>
   <li><b>Muat Form 1</b> / <b>Muat Handoff</b> cukup mengetik No. RM. Bila pasien tidak ada di hub, form otomatis menawarkan pemilih berkas seperti biasa.</li>
   <li>Hub mati bukan masalah: semua tombol kembali ke perilaku berkas. NeoSoft Cube tetap sumber kebenaran untuk jadwal, kasir, dan rekam medis resmi.</li>
@@ -249,9 +249,24 @@ Catatan: skor riset baku melasma adalah mMASI; IGA di sini versi ringkas untuk o
 </table>
 <p>Di Form 2: tabel <b>C</b> = pemicu &amp; padanan ADC per faktor; tahap <b>D</b> = paket prosedur + resep (placeholder mengikuti dosis di atas, antibiotik di urutan terakhir); baris <b>Risiko bekas</b> di B memicu jalur isotretinoin bila sedang/tinggi; gerbang <b>Skrining obat berisiko</b> di D7 menagih status hamil/KB sebelum handoff terbit.</p>
 
+<div class="sec" id="patuh"><span class="n">9</span><h2>Kepatuhan rekam medis — pengguna, tanda tangan, consent, cadangan</h2></div>
+<p>Hub dan form mengikuti PMK 24/2022 (rekam medis elektronik), PP 28/2024 &amp; UU 17/2023 (persetujuan tindakan), KMK 1983/2022 (standar akreditasi klinik, PKP 12) dan UU 27/2022 (pelindungan data pribadi). Yang perlu dilakukan staf:</p>
+<table>
+  <tr><th style="width:30%">Hal</th><th>Cara kerja &amp; tugas</th></tr>
+  <tr><td class="v">Pengguna &amp; PIN</td><td>Setiap orang punya <b>ID + PIN</b> sendiri (peran: dokter, perawat, admin, CS). Admin membuat/menonaktifkan pengguna di PC hub: <span class="file">node tools/pengguna.js tambah dr.ani "dr. Ani, Sp.DVE" dokter 123456</span>. PIN jangan dibagi — semua jejak audit tercatat atas nama pemilik PIN. Sesi berakhir setelah 12 jam tidak aktif; klik chip HUB → <b>Keluar</b> saat berganti orang di satu tablet. CS hanya dapat melihat, tidak menyimpan.</td></tr>
+  <tr><td class="v">Tanda tangan dokter</td><td>Saat <b>Terbitkan Handoff</b> dengan "Asesmen selesai" dicentang, muncul dialog <b>Tanda tangan elektronik dokter</b>: dokter memasukkan ID &amp; PIN-nya sendiri (walau tablet sedang dipakai perawat). Hub mencatat nama, waktu, dan bukti verifikasi ke handoff ("TTE dokter ✓" di lembar cetak). Tanpa PIN handoff tetap bisa terbit, tetapi tercatat "sign-off tanpa verifikasi PIN".</td></tr>
+  <tr><td class="v">Informed consent tindakan</td><td>Di D7 klik <b>Buat lembar Informed Consent…</b>: 7 penjelasan (diagnosis, tindakan &amp; tujuan, risiko, alternatif, risiko bila tidak, prognosis, biaya) terisi dari asesmen — <b>dokter wajib membaca &amp; menyunting</b>, perawat mengisi biaya. Cetak, pasien/wali + saksi (perawat) + dokter tanda tangan basah, lembar masuk berkas RM, lalu centang "Informed consent tindakan … sudah ditandatangani". Nomor lembar (IC-RM-tanggal-…) ikut ke handoff dan hub. <b>Teks awal adalah draf</b>: penanggung jawab klinik wajib meninjau redaksi risiko per tindakan sebelum dipakai rutin.</td></tr>
+  <tr><td class="v">Kode ICD-10</td><td>Di D1, tombol <b>ICD-10 ▾</b> di samping Diagnosis: pilih satu atau lebih kode (daftar derm-estetik &amp; metabolik ADC). Kode ikut ke handoff, lembar cetak, dan dibawa ke kunjungan kontrol. Diagnosis yang tidak ada di daftar tetap ditulis sebagai teks; kode lengkap dilengkapi di NeoSoft.</td></tr>
+  <tr><td class="v">Koreksi Form 1</td><td>Form 1 yang sudah tersimpan boleh disimpan ulang (dikoreksi) oleh perawat/dokter <b>dalam 2×24 jam</b>; versi lama tetap diarsipkan. Lewat itu hub menolak — perbaikan harus oleh <b>admin</b> (PMK 24/2022 Ps. 30). Waktu tiap bagian Form 2 diisi juga terekam otomatis di handoff (<i>waktu_isian</i>).</td></tr>
+  <tr><td class="v">Jejak audit</td><td>Hub mencatat siapa, kapan, dari perangkat mana: masuk/keluar, melihat pasien, simpan Form 1, terbit handoff, consent, penolakan akses, cadangan (<span class="file">data/_audit.log</span>, terenkripsi). Admin dapat membacanya lewat <span class="file">/api/audit</span> dengan sesi admin.</td></tr>
+  <tr><td class="v">Penyimpanan &amp; cadangan</td><td>Semua berkas di <span class="file">data/</span> <b>terenkripsi</b> (AES-256-GCM) dengan kunci di <span class="file">config.json</span> — simpan salinan config.json di tempat terpisah &amp; aman; tanpa itu cadangan tidak terbaca. Isi <span class="file">backup_dir</span> di config.json (folder di PC lain / drive jaringan / disk eksternal): hub menyalin <span class="file">data/</span> saat mulai dan tiap <i>backup_jam</i> jam, menyimpan 14 salinan terakhir; <span class="file">backup.bat</span> untuk cadangan manual. <b>SOP</b>: admin memeriksa folder cadangan tiap Senin (ada folder adc-data-… bertanggal minggu ini) dan sekali per kuartal mencoba memulihkan satu RM ke hub uji. Rekam medis elektronik disimpan minimal 25 tahun (Ps. 39).</td></tr>
+  <tr><td class="v">HTTPS di jaringan klinik</td><td>Jalankan sekali di PC hub (PowerShell admin): <span class="file">tools\buat-sertifikat.ps1 -IP 192.168.x.x</span> → hub otomatis jalan di <b>https://</b>; pasang <span class="file">hub.cer</span> di tiap tablet (atau terima peringatan sekali). Ganti alamat di chip HUB menjadi https://…</td></tr>
+  <tr><td class="v">Yang masih manual</td><td>Hub bukan RME terdaftar: handoff &amp; lembar cetak tetap dilampirkan ke <b>NeoSoft</b> (rekam medis resmi) dan pelaporan SATUSEHAT berjalan dari NeoSoft. Keputusan integrasi NeoSoft / pendaftaran RME ada di manajemen.</td></tr>
+</table>
+
 <p style="margin-top:40px;font-size:13px;color:var(--ink-faint);border-top:1px solid var(--line);padding-top:14px;">
 Aesthetic Derma Centre · Jl. Ir. H. Djuanda 88, Bandung · Dokumen internal — panduan bagi dokter &amp; perawat, bukan materi pasien.
-Pertanyaan teknis form: hubungi admin. Versi Agustus 2026.</p>
+Pertanyaan teknis form: hubungi admin. Versi Oktober 2026.</p>
 
 </div>
 </body>

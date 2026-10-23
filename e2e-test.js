@@ -16,16 +16,28 @@ if (!fs.existsSync(path.join(JS_DIR, 'node_modules', 'jsdom'))) {
 const { JSDOM, VirtualConsole } = require(path.join(JS_DIR, 'node_modules', 'jsdom'));
 fs.copyFileSync(path.join(SRC, 'server.js'), path.join(WORK, 'server.js'));
 fs.cpSync(path.join(SRC, 'www'), path.join(WORK, 'www'), { recursive: true });
-fs.writeFileSync(path.join(WORK, 'config.json'), JSON.stringify({ port: 3791, key: 'adc-test', webhook: 'https://hook.test/adc' }));
+fs.writeFileSync(path.join(WORK, 'config.json'), JSON.stringify({ port: 3791, key: 'adc-test', webhook: 'https://hook.test/adc', backup_dir: path.join(WORK, 'backup'), backup_jam: 1 }));
+/* pengguna uji (users.json dibaca server saat start; PIN di-hash scrypt seperti tools/pengguna.js) */
+const crypto = require('crypto');
+const PIN = { admin: '111111', dokter: '222222', perawat: '333333', cs: '444444' };
+fs.writeFileSync(path.join(WORK, 'users.json'), JSON.stringify({ users: Object.keys(PIN).map(id => { const salt = crypto.randomBytes(8).toString('hex');
+  return { id, nama: { admin: 'Pimpinan Uji', dokter: 'dr. Uji, Sp.DVE', perawat: 'Perawat Uji', cs: 'CS Uji' }[id], peran: id, salt, hash: crypto.scryptSync(PIN[id], salt, 32).toString('hex'), aktif: true }; }) }));
 process.chdir(WORK);
 
 const BASE = 'http://localhost:3791', KEY = 'adc-test', RM = 'RM-TEST-001';
+const TOK = {}, USER = {};
+const Hd = (u, json) => Object.assign({ 'X-ADC-Key': KEY }, u ? { 'X-ADC-Token': TOK[u] } : {}, json ? { 'Content-Type': 'application/json' } : {});
+async function login(id) { const r = await fetch(BASE + '/api/login', { method: 'POST', headers: Hd(null, true), body: JSON.stringify({ id, pin: PIN[id] }) }); const j = await r.json(); if (j.ok) { TOK[id] = j.token; USER[id] = j.user; } return j; }
+/* data/ terenkripsi (AES-256-GCM, kunci data_key di config.json yang dilengkapi server) */
+function dataKey() { return Buffer.from(JSON.parse(fs.readFileSync(path.join(WORK, 'config.json'), 'utf8')).data_key, 'hex'); }
+function dekrip(txt) { const env = JSON.parse(txt); if (!env || env.enc !== 'aes-256-gcm') return env; const d = crypto.createDecipheriv('aes-256-gcm', dataKey(), Buffer.from(env.iv, 'base64')); d.setAuthTag(Buffer.from(env.tag, 'base64')); return JSON.parse(Buffer.concat([d.update(Buffer.from(env.ct, 'base64')), d.final()]).toString('utf8')); }
+function enkrip(obj) { const iv = crypto.randomBytes(12), c = crypto.createCipheriv('aes-256-gcm', dataKey(), iv); const ct = Buffer.concat([c.update(JSON.stringify(obj), 'utf8'), c.final()]); return JSON.stringify({ enc: 'aes-256-gcm', iv: iv.toString('base64'), tag: c.getAuthTag().toString('base64'), ct: ct.toString('base64') }); }
 const results = [];
 function check(name, ok, detail) { results.push({ name, ok: !!ok, detail }); console.log((ok ? 'PASS ' : 'FAIL ') + name + (ok ? '' : '  -> ' + (detail === undefined ? '' : JSON.stringify(detail)))); }
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 async function until(fn, ms = 4000) { const t = Date.now(); while (Date.now() - t < ms) { if (fn()) return true; await sleep(50); } return false; }
 
-async function open(file, { key = KEY, log } = {}) {
+async function open(file, { key = KEY, user = (/Form2/.test(file) ? 'dokter' : 'perawat'), log } = {}) {
   const dialogs = [];
   const vc = new VirtualConsole();
   vc.on('jsdomError', e => dialogs.push({ type: 'jsdomError', msg: String(e.message).slice(0, 200) }));
@@ -40,16 +52,24 @@ async function open(file, { key = KEY, log } = {}) {
       w.scrollTo = () => {}; w.Element.prototype.scrollIntoView = () => {};
       w.__popup = null;
       w.open = () => { const d = { html: '', open() {}, write(h) { d.html += h; }, close() {} }; w.__popup = { document: d }; return w.__popup; };
-      try { w.localStorage.setItem('adc_hub_key', key); } catch (e) {}
+      try { w.localStorage.setItem('adc_hub_key', key); if (user && TOK[user]) { w.localStorage.setItem('adc_hub_tok', TOK[user]); w.localStorage.setItem('adc_hub_user', JSON.stringify(USER[user])); } } catch (e) {}
     } });
   const w = dom.window;
-  await until(() => typeof w.hubPing === 'function' && w._hubOn === true, 4000).catch(() => {});
+  await until(() => typeof w.hubPing === 'function' && w._hubOn === true && (!user || key !== KEY || w._hubUser), 4000).catch(() => {});
   return { w, d: w.document, dialogs, dom };
 }
 const $ = (d, id) => d.getElementById(id);
 function set(d, id, v) { const e = $(d, id); if (!e) throw new Error('id tidak ada: ' + id); e.value = v; e.dispatchEvent(new e.ownerDocument.defaultView.Event('input', { bubbles: true })); }
 function chk(d, id, v = true) { const e = $(d, id); if (!e) throw new Error('id tidak ada: ' + id); e.checked = v; e.dispatchEvent(new e.ownerDocument.defaultView.Event('change', { bubbles: true })); }
-function disk(p) { try { return JSON.parse(fs.readFileSync(path.join('data', RM, p), 'utf8')); } catch (e) { return null; } }
+function disk(p, rm = RM) { try { return dekrip(fs.readFileSync(path.join('data', rm, p), 'utf8')); } catch (e) { return null; } }
+/* Terbitkan Handoff: bila dialog TTD (PIN dokter) muncul, isi PIN (atau Batal), lalu tunggu hasil hub di d8_status */
+async function terbit(x, { pin = PIN.dokter, batal = false } = {}) {
+  x.w.issueHandoff();
+  const dlg = await until(() => { const b = x.d.getElementById('ldlg'); return b && b.classList.contains('on'); }, 1200);
+  if (dlg) { if (batal) x.d.getElementById('ldlg_x').click(); else { x.d.getElementById('ldlg_pin').value = pin; x.d.getElementById('ldlg_ok').click(); } }
+  await until(() => /✓|✗/.test(x.d.getElementById('d8_status').value), 4000);
+  return dlg;
+}
 function muatRM(x, fn, rm) { x.w[fn](); const i = x.d.getElementById('mdlg_rm'); i.value = rm; x.d.getElementById('mdlg_ok').click(); }
 const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0];
 
@@ -63,12 +83,31 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
     check('hub: /api/ping', ping.ok === true);
     check('hub: tanpa kunci -> 401', (await fetch(BASE + '/api/pasien')).status === 401);
     check('hub: path traversal ditolak', [403, 404].includes((await fetch(BASE + '/..%2f..%2fserver.js')).status));
-    check('hub: RM tak dikenal -> 404', (await fetch(BASE + '/api/pasien/NOPE', { headers: { 'X-ADC-Key': KEY } })).status === 404);
+    check('hub: ping mengumumkan login wajib (versi 2)', ping.login === true && ping.versi === 2, ping);
+    { const r = await fetch(BASE + '/api/pasien', { headers: Hd() }); const j = await r.json();
+      check('hub: kunci benar tanpa token -> 401 error "login"', r.status === 401 && j.error === 'login', j); }
+    check('hub: PIN salah -> 401', (await fetch(BASE + '/api/login', { method: 'POST', headers: Hd(null, true), body: JSON.stringify({ id: 'dokter', pin: '000000' }) })).status === 401);
+    for (const u of Object.keys(PIN)) await login(u);
+    check('hub: login 4 peran berhasil (token + user)', Object.keys(TOK).length === 4 && USER.dokter.peran === 'dokter' && USER.dokter.nama === 'dr. Uji, Sp.DVE', USER);
+    check('hub: /api/saya mengenali sesi', (await (await fetch(BASE + '/api/saya', { headers: Hd('perawat') })).json()).user.id === 'perawat');
+    check('hub: RM tak dikenal -> 404', (await fetch(BASE + '/api/pasien/NOPE', { headers: Hd('perawat') })).status === 404);
+    check('hub: CS boleh lihat daftar, TIDAK boleh simpan intake (403)', (await fetch(BASE + '/api/pasien', { headers: Hd('cs') })).status === 200 &&
+      (await fetch(BASE + '/api/intake', { method: 'POST', headers: Hd('cs', true), body: JSON.stringify({ doc: 'ADC-INTAKE', pasien: { rm: 'RM-CS' } }) })).status === 403);
+    check('hub: audit hanya admin (cs 403, admin 200)', (await fetch(BASE + '/api/audit', { headers: Hd('cs') })).status === 403 && (await fetch(BASE + '/api/audit', { headers: Hd('admin') })).status === 200);
+    check('hub: cadangan ke backup_dir saat mulai (folder bertanggal + BACA-SAYA)', fs.existsSync(path.join(WORK, 'backup', 'BACA-SAYA.txt')) && fs.readdirSync(path.join(WORK, 'backup')).some(f => /^adc-data-\d{4}-/.test(f)), fs.existsSync(path.join(WORK, 'backup')) ? fs.readdirSync(path.join(WORK, 'backup')) : null);
+    { const r = await fetch(BASE + '/api/users', { method: 'POST', headers: Hd('admin', true), body: JSON.stringify({ id: 'dr.baru', nama: 'dr. Baru', peran: 'dokter', pin: '555555' }) });
+      const l = await (await fetch(BASE + '/api/login', { method: 'POST', headers: Hd(null, true), body: JSON.stringify({ id: 'dr.baru', pin: '555555' }) })).json();
+      const c = await fetch(BASE + '/api/users', { method: 'POST', headers: Hd('cs', true), body: JSON.stringify({ id: 'x', nama: 'x', peran: 'cs', pin: '1234' }) });
+      check('hub: admin menambah pengguna lewat API & pengguna baru bisa masuk; cs ditolak', r.status === 200 && l.ok === true && l.user.peran === 'dokter' && c.status === 403, { r: r.status, l, c: c.status }); }
 
     /* ===== 1. FORM 1: isi + simpan intake ===== */
     const f1 = await open('ADC_Form1_Registrasi_Anamnesis_Pasien.html');
     check('F1: halaman termuat & hub tersambung', f1.w._hubOn === true, f1.dialogs.filter(x => x.type === 'jsdomError'));
     set(f1.d, 'p_nama', 'Pasien Uji Coba'); set(f1.d, 'rm', RM); set(f1.d, 'p_wa', '081234567890');
+    check('F1: chip HUB menampilkan pengguna yang masuk', /Perawat Uji/.test($(f1.d, 'hubchip').textContent) && $(f1.d, 'hubchip').classList.contains('on'), $(f1.d, 'hubchip').textContent);
+    { const nik = $(f1.d, 'p_nik'); nik.value = '3273-0123'; f1.w.cekNIK(nik); check('F1: NIK hanya angka & ditandai merah bila bukan 16 digit', nik.value === '32730123' && nik.style.borderColor !== '', { v: nik.value, b: nik.style.borderColor }); }
+    set(f1.d, 'p_nik', '3273012345678901'); f1.w.cekNIK($(f1.d, 'p_nik'));
+    check('F1 P6: kotak hak & kewajiban + 7 butir persetujuan (hak, umum, PDP)', !!f1.d.querySelector('.hk') && f1.d.querySelectorAll('label.ack').length === 7 && ['hak', 'umum', 'pdp'].every(k => f1.d.querySelector('label.ack[data-k="' + k + '"]')), f1.d.querySelectorAll('label.ack').length);
     set(f1.d, 'p_dokter', 'dr. Uji, Sp.DVE'); chk(f1.d, 'p_foto_ok'); chk(f1.d, 'p_foto_izin'); set(f1.d, 'p_foto_area', 'Wajah');
     set(f1.d, 'p_bb', '58'); set(f1.d, 'p_tb', '160'); set(f1.d, 'alergi', 'Penisilin');
     f1.d.querySelectorAll('label.ack input').forEach(c => { c.checked = true; });
@@ -90,6 +129,10 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
     check('hub: intake.json tersimpan per RM', ik && ik.doc === 'ADC-INTAKE' && ik.pasien.rm === RM);
     check('hub: field intake benar (nama, alergi, dokter, BB/TB)', ik && ik.pasien.nama === 'Pasien Uji Coba' && ik.kritis.alergi === 'Penisilin' && ik.penugasan.dokter === 'dr. Uji, Sp.DVE' && ik.pengukuran.bb === '58', ik && { p: ik.pasien, k: ik.kritis.alergi, pg: ik.pengukuran });
     check('F1: IMT terhitung', ik && ik.pengukuran.imt, ik && ik.pengukuran);
+    check('F1: NIK & persetujuan (umum, data pribadi, hak-kewajiban) masuk ke intake', ik && ik.pasien.nik === '3273012345678901' && ik.persetujuan.total === 7 && ik.persetujuan.umum === true && ik.persetujuan.data_pribadi === true && ik.persetujuan.hak_kewajiban === true && ik.persetujuan.butir.length === 7, ik && ik.persetujuan);
+    check('hub: stempel server _audit (siapa/kapan) di intake = perawat', ik && ik._audit && ik._audit.oleh === 'perawat' && ik._audit.peran === 'perawat' && /^\d{4}-/.test(ik._audit.waktu), ik && ik._audit);
+    { const raw = fs.readFileSync(path.join('data', RM, 'intake.json'), 'utf8');
+      check('hub: berkas di disk TERENKRIPSI (amplop aes-256-gcm, nama pasien tidak terbaca)', /"enc":"aes-256-gcm"/.test(raw) && !/Pasien Uji Coba/.test(raw)); }
 
     /* simpan ulang -> versi lama diarsipkan */
     f1.w.simpanIntake(); await sleep(400);
@@ -105,7 +148,7 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
     muatRM(a, 'muatIntakeHub', RM);
     await until(() => a.w._intake);
     check('F2: intake termuat dari hub', a.w._intake && a.w._intake.pasien.rm === RM, a.dialogs.slice(-2));
-    check('F2: identitas terisi otomatis', $(a.d, 'p_nama').value === 'Pasien Uji Coba' && $(a.d, 'rm').value === RM && $(a.d, 'p_wa').value === '081234567890');
+    check('F2: identitas terisi otomatis (termasuk NIK)', $(a.d, 'p_nama').value === 'Pasien Uji Coba' && $(a.d, 'rm').value === RM && $(a.d, 'p_wa').value === '081234567890' && $(a.d, 'p_nik').value === '3273012345678901', $(a.d, 'p_nik').value);
     check('F2: ringkasan mencatat izin lisan foto', /izin lisan/.test($(a.d, 'intake_body').textContent));
     check('F2: webhook Make.com terisi otomatis dari hub (config.json)', $(a.d, 'cfg_webhook').value === 'https://hook.test/adc', $(a.d, 'cfg_webhook').value);
     { const wh = $(a.d, 'cfg_webhook'); wh.value = 'https://hook.test/baru'; wh.dispatchEvent(new a.w.Event('change', { bubbles: true }));
@@ -134,6 +177,28 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
     set(a.d, 'd6_hindari', 'Hindari scrub');
     a.w.updateReq();
     check('F2: baris skrining obat muncul karena resep memuat Tretinoin', $(a.d, 'lbl_skrining').style.display !== 'none' && /Tretinoin/.test($(a.d, 'skrining_obat').textContent), $(a.d, 'skrining_obat').textContent);
+    /* ICD-10 */
+    a.w.openICD(); a.w._icdRender('melasma');
+    check('F2: pemilih ICD-10 terbuka & pencarian "melasma" -> L81.1', $(a.d, 'icdlg').classList.contains('on') && /L81\.1/.test($(a.d, 'icd_list').textContent) && !/L70\.0/.test($(a.d, 'icd_list').textContent), $(a.d, 'icd_list').textContent.slice(0, 80));
+    a.w.pickICD('L70.0'); a.w.pickICD('L81.0'); a.w.pickICD('L70.0');
+    check('F2: dua kode ICD terpilih (tanpa dobel), chip tampil, dialog tertutup', a.w._icdData().map(x => x.kode).join(',') === 'L70.0,L81.0' && $(a.d, 'd2_icd_chips').querySelectorAll('span').length === 2 && !$(a.d, 'icdlg').classList.contains('on'), a.w._icdData());
+    a.w.hapusICD('L81.0');
+    check('F2: hapus satu kode ICD', a.w._icdData().length === 1 && a.w._icdData()[0].kode === 'L70.0');
+    /* lembar informed consent */
+    a.dialogs.length = 0; a.w.__popup = null; a.w.bukaConsent();
+    check('F2 D7: dialog consent terisi dari asesmen (diagnosis, ICD, tujuan acne, prognosis)', $(a.d, 'cdlg').classList.contains('on') && /Acne vulgaris grade sedang/.test($(a.d, 'cd_1').value) && /L70\.0/.test($(a.d, 'cd_1').value) && /lesi aktif/.test($(a.d, 'cd_2').value) && /4–8 minggu/.test($(a.d, 'cd_6').value) && $(a.d, 'cd_dokter').value === 'dr. Uji, Sp.DVE', { c1: $(a.d, 'cd_1').value, c2: $(a.d, 'cd_2').value.slice(0, 60) });
+    $(a.d, 'cd_ok').click();
+    check('F2 D7: consent tanpa tindakan ditolak', a.dialogs.some(x => x.type === 'alert' && /minimal satu tindakan/.test(x.msg)) && $(a.d, 'cdlg').classList.contains('on'));
+    $(a.d, 'cd_tind').value = 'Chemical peeling'; $(a.d, 'cd_7').value = 'Rp 750.000 / sesi'; $(a.d, 'cd_saksi').value = 'Perawat Uji';
+    check('F2 D7: risiko peeling dari pustaka risiko', /pengelupasan/.test(a.w._icRisiko(['Chemical peeling'])));
+    $(a.d, 'cd_ok').click();
+    await until(() => /tercatat di hub/.test($(a.d, 'd8_consent_lbl').textContent), 3000);
+    const icNo = $(a.d, 'd8_consent_no').value;
+    check('F2 D7: nomor lembar IC-RM-tanggal tercatat & ✓ hub; pop-up lembar cetak dibuat', /^IC-RM-TEST-001-\d{8}-\d{5}$/.test(icNo) && /✓ tercatat di hub/.test($(a.d, 'd8_consent_lbl').textContent) && a.w.__popup && /PERSETUJUAN TINDAKAN KEDOKTERAN/.test(a.w.__popup.document.html) && a.w.__popup.document.html.includes(icNo) && /MENYETUJUI/.test(a.w.__popup.document.html) && /Chemical peeling/.test(a.w.__popup.document.html), { icNo, lbl: $(a.d, 'd8_consent_lbl').textContent });
+    { const cf = disk('consent_' + icNo + '.json');
+      check('hub: consent_<no>.json tersimpan (7 penjelasan, NIK, biaya, stempel audit)', cf && cf.doc === 'ADC-CONSENT' && cf.pasien.nik === '3273012345678901' && cf.penjelasan.biaya === 'Rp 750.000 / sesi' && cf.tindakan[0].nama === 'Chemical peeling' && cf._audit.oleh === 'dokter', cf && Object.keys(cf));
+      const pk = await (await fetch(BASE + '/api/pasien/' + RM, { headers: Hd('dokter') })).json();
+      check('hub: /api/pasien/:rm mendaftar lembar consent', pk.consent && pk.consent.length === 1 && pk.consent[0].no === icNo && /Chemical/.test(pk.consent[0].tindakan), pk.consent); }
     chk(a.d, 'd8_consent'); chk(a.d, 'd8_skrining');
     chk(a.d, 'd8_signoff'); set(a.d, 'd8_dokter', 'dr. Uji, Sp.DVE');
     a.w.updateReq();
@@ -142,8 +207,8 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
     a.w.generateSchedule();
     check('F2: jadwal ter-generate', (a.w._schedRows || []).length > 0, a.w.buildSchedule && a.w.buildSchedule());
     a.dialogs.length = 0;
-    a.w.issueHandoff(); await sleep(500);
-    check('F2: tidak ada dialog peringatan di handoff #1', !a.dialogs.some(x => x.type === 'confirm'), a.dialogs.filter(x => x.type === 'confirm'));
+    const ttdDlg = await terbit(a);
+    check('F2: Terbitkan membuka dialog TTD dokter (ID terisi dari sesi dokter) & tidak ada dialog peringatan', ttdDlg === true && !a.dialogs.some(x => x.type === 'confirm'), a.dialogs.filter(x => x.type === 'confirm'));
     check('F2: popup ringkasan handoff dibuat', a.w.__popup && /Ringkasan Handoff/.test(a.w.__popup.document.html));
     const h1 = disk('handoff_terakhir.json');
     check('hub: handoff #1 tersimpan', h1 && h1.doc === 'ADC-HANDOFF' && h1.kunjungan_ke === 1 && h1.riwayat.length === 0, h1 && { k: h1.kunjungan_ke });
@@ -157,6 +222,9 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
     await until(() => /tersimpan di hub/.test($(a.d, 'd8_status').value));
     check('F2: status D7 menyebut ✓ tersimpan di hub (RM)', /✓ tersimpan di hub \(RM RM-TEST-001\)/.test($(a.d, 'd8_status').value), $(a.d, 'd8_status').value);
     check('hub: penerbitan sign-off tercatat', h1 && h1.penerbitan.signoff_dokter === true);
+    check('hub: tanda tangan elektronik dokter di handoff (id, nama, waktu, sig) & divalidasi server', h1 && h1.penerbitan.ttd && h1.penerbitan.ttd.id === 'dokter' && h1.penerbitan.ttd.nama === 'dr. Uji, Sp.DVE' && /^[0-9a-f]{64}$/.test(h1.penerbitan.ttd.sig) && h1._audit.ttd_valid === true && h1._audit.oleh === 'dokter', h1 && { ttd: h1.penerbitan.ttd, au: h1._audit });
+    check('hub: handoff memuat ICD-10, NIK, pengguna hub, nomor consent & waktu isian per bagian', h1 && h1.asesmen.icd[0].kode === 'L70.0' && h1.pasien.nik === '3273012345678901' && h1.penerbitan.pengguna_hub.id === 'dokter' && h1.penerbitan.consent_no === icNo && h1.waktu_isian && h1.waktu_isian.D1 && h1.waktu_isian.D1.n > 0 && h1.waktu_isian.D1.oleh === 'dr. Uji, Sp.DVE', h1 && { icd: h1.asesmen.icd, wi: h1.waktu_isian });
+    check('F2: pop-up handoff & status D7 menyebut TTE / PIN', /PIN diverifikasi hub/.test(a.w.__popup.document.html) && /ICD-10/.test(a.w.__popup.document.html) && /✓ tersimpan di hub/.test($(a.d, 'd8_status').value), $(a.d, 'd8_status').value);
 
     /* ===== 3. KONTROL tanpa muat handoff -> harus diblok ===== */
     const b0 = await open('ADC_Form2_Asesmen_Umum_Dokter.html');
@@ -186,8 +254,9 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
     b.w.updateReq();
     const miss2 = b.w.reqStatus().filter(x => !x.ok).map(x => x.label);
     check('F2 kontrol: bar wajib lengkap', miss2.length === 0, miss2);
-    b.dialogs.length = 0; b.w.issueHandoff(); await sleep(500);
+    b.dialogs.length = 0; await terbit(b);
     const h2 = fs.existsSync(path.join('data', RM)) ? disk('handoff_terakhir.json') : null;
+    check('hub: kontrol membawa kode ICD dari handoff sebelumnya (dibawa: icd)', h2 && h2.asesmen.icd && h2.asesmen.icd[0].kode === 'L70.0' && (h2.asesmen.dibawa || []).includes('icd'), h2 && h2.asesmen.dibawa);
     check('hub: handoff #2 = kunjungan_ke 2, riwayat 1', h2 && h2.kunjungan_ke === 2 && h2.riwayat.length === 1, h2 && { k: h2.kunjungan_ke, r: h2.riwayat.length });
     check('hub: riwayat membawa kunjungan 1 (diagnosis, resep, temuan)', h2 && h2.riwayat[0] && h2.riwayat[0].kunjungan_ke === 1 && /Acne/.test(h2.riwayat[0].diagnosis || '') && /Tretinoin/.test(h2.riwayat[0].resep || '') && /tahap 1/.test(h2.riwayat[0].temuan_program || ''), h2 && h2.riwayat[0]);
     check('hub: evaluasi_kontrol.iga acne baseline 3 -> 1 sukses', h2 && h2.evaluasi_kontrol && h2.evaluasi_kontrol.iga && h2.evaluasi_kontrol.iga.acne && h2.evaluasi_kontrol.iga.acne.sukses === true && h2.evaluasi_kontrol.iga.acne.baseline === 3, h2 && h2.evaluasi_kontrol);
@@ -212,14 +281,15 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
     check('F2: IGA baseline di kunjungan 3 masih 3', c.w.igaData('acne') === null || c.w._igaBaseline('acne') === 3, c.w._igaBaseline('acne'));
     set(c.d, 'k1_dokter', 'dr. Uji, Sp.DVE'); set(c.d, 'k1_hasil', 'Stabil'); c.w.setIGA('ac_iga', '0');
     set(c.d, 'd5_iv', '14'); set(c.d, 'd5_start', '2026-11-02'); set(c.d, 'd7_remarks', 'Selesai'); chk(c.d, 'd8_signoff'); chk(c.d, 'd8_skrining'); chk(c.d, 'd8_consent');
-    c.w.issueHandoff(); await sleep(500);
+    await terbit(c, { batal: true });
     const h3 = disk('handoff_terakhir.json');
+    check('F2: Batal pada dialog TTD -> konfirmasi lalu tetap terbit TANPA ttd (tercatat)', h3 && h3.penerbitan.ttd === null && c.dialogs.some(x => x.type === 'confirm' && /Tanpa tanda tangan elektronik/.test(x.msg)) && /tanpa verifikasi PIN/.test(c.w.__popup.document.html), h3 && h3.penerbitan.ttd);
     check('hub: handoff #3 = kunjungan_ke 3, riwayat 2 (urut)', h3 && h3.kunjungan_ke === 3 && h3.riwayat.length === 2 && h3.riwayat[0].kunjungan_ke === 1 && h3.riwayat[1].kunjungan_ke === 2, h3 && { k: h3.kunjungan_ke, r: h3.riwayat.map(x => x.kunjungan_ke) });
     check('hub: riwayat kunjungan 2 membawa evaluasi (IGA) agar tren tak hilang', h3 && h3.riwayat[1] && h3.riwayat[1].evaluasi && h3.riwayat[1].evaluasi.iga, h3 && h3.riwayat[1]);
     check('hub: riwayat kunjungan 2 membawa diagnosis & resep (rantai utuh)', h3 && /Acne/.test(h3.riwayat[1].diagnosis || '') && /Tretinoin/.test(h3.riwayat[1].resep || ''), h3 && h3.riwayat[1]);
     check('hub: baseline tetap 3 di kunjungan 3', h3 && h3.program_detail.acne.iga_baseline === 3 && h3.program_detail.acne.iga === 0 && h3.program_detail.acne.iga_delta === 3, h3 && h3.program_detail.acne);
     check('hub: 3 berkas handoff berstempel + 1 terakhir', fs.readdirSync(path.join('data', RM)).filter(f => /^handoff_\d/.test(f)).length === 3);
-    const lst = await (await fetch(BASE + '/api/pasien', { headers: { 'X-ADC-Key': KEY } })).json();
+    const lst = await (await fetch(BASE + '/api/pasien', { headers: Hd('cs') })).json();
     check('hub: daftar pasien menampilkan RM, nama, kunjungan 3, program', lst.pasien[0] && lst.pasien[0].rm === RM && lst.pasien[0].kunjungan_ke === 3 && /Acne/.test(lst.pasien[0].program), lst.pasien);
 
     /* ===== 5b. melasma & hair: isian hanya dari tahap terpilih, penilaian di luar blok tetap terekam ===== */
@@ -390,8 +460,8 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
       check('Slimming: Muat Form 1 (RM) mengisi identitas, alergi, BB/TB & ringkasan', $(sl.d, 'nama').value === 'Pasien Uji Coba' && $(sl.d, 'no_rm').value === RM && $(sl.d, 'alergi').value === 'Penisilin' && $(sl.d, 'b_bb').value === '58' && $(sl.d, 'ik_sec').style.display === 'block' && /Penisilin/.test($(sl.d, 'ik_body').textContent), { nama: $(sl.d, 'nama').value, bb: $(sl.d, 'b_bb').value });
       sl.dialogs.length = 0; sl.w.issueHandoff();
       await until(() => fs.existsSync(path.join('data', RM, 'handoff_terakhir_slimming.json')), 4000);
-      const hs = JSON.parse(fs.readFileSync(path.join('data', RM, 'handoff_terakhir_slimming.json'), 'utf8'));
-      const hk = JSON.parse(fs.readFileSync(path.join('data', RM, 'handoff_terakhir.json'), 'utf8'));
+      const hs = disk('handoff_terakhir_slimming.json');
+      const hk = disk('handoff_terakhir.json');
       check('Slimming: handoff tersimpan di rantai sendiri; handoff Skin Quality RM yang sama TIDAK tertimpa', hs.sumber === 'ADC-SLIMMING-4FAKTOR' && hs.pasien.rm === RM && hk.sumber === 'ADC-FORM2-UMUM' && hk.kunjungan_ke === 3, { slim: hs.sumber, skin: hk.sumber });
       await until(() => sl.dialogs.some(x => x.type === 'alert' && /tersimpan di hub/.test(x.msg)), 3000);
       check('Slimming: Terbitkan memberi pesan ✓ tersimpan di hub', sl.dialogs.some(x => x.type === 'alert' && /✓ Handoff Slimming tersimpan di hub/.test(x.msg)));
@@ -404,11 +474,49 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
       check('Tracker: Muat handoff terakhir lewat hub (RM) -> kunjungan ke-3', tr.w._ho && tr.w._ho.pasien.rm === RM && tr.w._ho.kunjungan_ke === 3, tr.w._ho && tr.w._ho.kunjungan_ke);
       check('Hub: halaman depan menautkan 5 halaman (F1, F2, Slimming, Tracker, Panduan)', (fs.readFileSync(path.join('www', 'index.html'), 'utf8').match(/class="card"/g) || []).length === 5); }
 
+    /* ===== 5h. jejak audit, koreksi 2x24 jam, TTD palsu, login dari form ===== */
+    { const au = (await (await fetch(BASE + '/api/audit?n=500', { headers: Hd('admin') })).json()).audit;
+      const aksi = au.map(x => x.aksi);
+      check('hub: jejak audit mencatat login, intake (perawat), lihat, handoff (dokter), consent, tolak', ['login', 'intake', 'intake_koreksi', 'lihat', 'handoff', 'consent', 'tolak', 'backup'].every(k => aksi.includes(k)) &&
+        au.some(x => x.aksi === 'intake' && x.user === 'perawat' && x.rm === RM) && au.some(x => x.aksi === 'handoff' && x.user === 'dokter' && /ttd dokter/.test(x.detail)) && au.every(x => x.t && (x.ip !== undefined || /backup/.test(x.aksi))), [...new Set(aksi)]);
+      const auRM = (await (await fetch(BASE + '/api/audit?rm=' + RM, { headers: Hd('admin') })).json()).audit;
+      check('hub: audit bisa difilter per RM', auRM.length > 0 && auRM.every(x => x.rm === RM));
+      /* koreksi >2x24 jam: perawat ditolak, admin boleh */
+      const ikNow = disk('intake.json'); ikNow._audit.waktu = new Date(Date.now() - 3 * 86400000).toISOString();
+      fs.writeFileSync(path.join('data', RM, 'intake.json'), enkrip(ikNow));
+      const body = JSON.stringify(Object.assign({}, ikNow, { _audit: undefined }));
+      const r1 = await fetch(BASE + '/api/intake', { method: 'POST', headers: Hd('perawat', true), body }); const j1 = await r1.json();
+      const r2 = await fetch(BASE + '/api/intake', { method: 'POST', headers: Hd('admin', true), body });
+      const ikA = disk('intake.json');
+      check('hub: koreksi Form 1 >2x24 jam ditolak untuk perawat (403, pesan jelas) & diterima admin; versi lama diarsipkan', r1.status === 403 && /2x24 jam/.test(j1.error) && r2.status === 200 && ikA._audit.oleh === 'admin' && ikA._audit.koreksi_dari && ikA._audit.koreksi_dari.oleh === 'perawat', { r1: r1.status, j1, r2: r2.status });
+      /* TTD: hanya dokter, PIN benar; stempel palsu ditandai */
+      check('hub: /api/ttd menolak PIN salah (401) dan peran perawat (403)', (await fetch(BASE + '/api/ttd', { method: 'POST', headers: Hd('perawat', true), body: JSON.stringify({ id: 'dokter', pin: '999999' }) })).status === 401 &&
+        (await fetch(BASE + '/api/ttd', { method: 'POST', headers: Hd('perawat', true), body: JSON.stringify({ id: 'perawat', pin: PIN.perawat }) })).status === 403);
+      const tt = await (await fetch(BASE + '/api/ttd', { method: 'POST', headers: Hd('perawat', true), body: JSON.stringify({ id: 'dokter', pin: PIN.dokter, rm: 'RM-FORGE' }) })).json();
+      check('hub: perawat yang masuk bisa meminta TTD atas PIN dokter (dokter tanda tangan di tablet perawat)', tt.ok && tt.ttd.id === 'dokter' && tt.ttd.sig);
+      const palsu = Object.assign({}, tt.ttd, { nama: 'dr. Palsu' });
+      await fetch(BASE + '/api/handoff', { method: 'POST', headers: Hd('perawat', true), body: JSON.stringify({ doc: 'ADC-HANDOFF', pasien: { rm: 'RM-FORGE', nama: 'Forge' }, asesmen: {}, penerbitan: { signoff_dokter: true, ttd: palsu } }) });
+      const hf = disk('handoff_terakhir.json', 'RM-FORGE');
+      check('hub: stempel TTD yang diubah ditandai ttd_valid=false & tercatat di audit', hf && hf._audit.ttd_valid === false && (await (await fetch(BASE + '/api/audit?rm=RM-FORGE', { headers: Hd('admin') })).json()).audit.some(x => /TTD-TIDAK-VALID/.test(x.detail || '')), hf && hf._audit); }
+    { const lg = await open('ADC_Form2_Asesmen_Umum_Dokter.html', { user: null });
+      check('F2 tanpa sesi: chip kuning "klik untuk masuk"', $(lg.d, 'hubchip').classList.contains('warn') && /klik untuk masuk/i.test($(lg.d, 'hubchip').textContent), $(lg.d, 'hubchip').textContent);
+      muatRM(lg, 'muatIntakeHub', RM);
+      const dl = await until(() => $(lg.d, 'ldlg') && $(lg.d, 'ldlg').classList.contains('on'), 2000);
+      check('F2 tanpa sesi: Muat Form 1 memunculkan dialog Masuk', dl === true);
+      $(lg.d, 'ldlg_id').value = 'dokter'; $(lg.d, 'ldlg_pin').value = '000000'; $(lg.d, 'ldlg_ok').click();
+      await until(() => /salah/i.test($(lg.d, 'ldlg_msg').textContent), 2000);
+      check('F2 login: PIN salah -> pesan di dialog, tetap terbuka', /ID atau PIN salah/.test($(lg.d, 'ldlg_msg').textContent) && $(lg.d, 'ldlg').classList.contains('on'), $(lg.d, 'ldlg_msg').textContent);
+      $(lg.d, 'ldlg_pin').value = PIN.dokter; $(lg.d, 'ldlg_ok').click();
+      await until(() => lg.w._intake, 3000);
+      check('F2 login: PIN benar -> masuk, permintaan diulang otomatis, Form 1 termuat, chip = nama dokter', lg.w._intake && lg.w._intake.pasien.rm === RM && lg.w._hubUser && lg.w._hubUser.id === 'dokter' && /dr\. Uji/.test($(lg.d, 'hubchip').textContent) && lg.w.localStorage.getItem('adc_hub_tok'), { u: lg.w._hubUser, chip: $(lg.d, 'hubchip').textContent });
+      lg.w.hubLogin(); $(lg.d, 'ldlg_out').click(); await sleep(200);
+      check('F2: Keluar menghapus token & chip kembali "klik untuk masuk"', !lg.w.localStorage.getItem('adc_hub_tok') && !lg.w._hubUser && $(lg.d, 'hubchip').classList.contains('warn'), $(lg.d, 'hubchip').textContent); }
+
     /* ===== 6. offline-first: kunci salah / hub mati ===== */
     const bad = await open('ADC_Form2_Asesmen_Umum_Dokter.html', { key: 'salah' });
     muatRM(bad, 'muatIntakeHub', RM); await sleep(500);
     check('F2 kunci salah: tidak crash, dialog tetap terbuka & menyarankan pilih berkas', bad.d.getElementById('mdlg').classList.contains('on') && /tidak ada di hub.*Pilih berkas/.test(bad.d.getElementById('mdlg_msg').textContent), bad.d.getElementById('mdlg_msg').textContent);
-    set(bad.d, 'rm', RM); set(bad.d, 'd2_dx', 'x'); chk(bad.d, 'alergi_none'); chk(bad.d, 'd8_signoff'); bad.dialogs.length = 0; bad.w.issueHandoff();
+    set(bad.d, 'rm', RM); set(bad.d, 'd2_dx', 'x'); chk(bad.d, 'alergi_none'); chk(bad.d, 'd8_signoff'); bad.dialogs.length = 0; await terbit(bad, { batal: true });
     await until(() => bad.dialogs.some(x => x.type === 'alert' && /TIDAK tersimpan di hub/.test(x.msg)), 3000);
     check('F2 kunci salah: Terbitkan memperingatkan keras + status ✗', bad.dialogs.some(x => x.type === 'alert' && /PERHATIAN: handoff TIDAK tersimpan di hub/.test(x.msg)) && /✗ TIDAK tersimpan di hub/.test($(bad.d, 'd8_status').value), $(bad.d, 'd8_status').value);
     const before = fs.readdirSync(path.join('data', RM)).length;
