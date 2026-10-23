@@ -532,7 +532,9 @@ body.past0 #staff_mini{display:flex !important;}
 .hubchip.off{border-color:rgba(245,239,230,.25);color:rgba(245,239,230,.45);}
 .hubchip.sync{border-color:#C9A86A;color:#C9A86A;}
 .hubchip.warn{border-color:#E0A860;color:#F3CF9A;}
-.hubchip{white-space:nowrap;max-width:260px;overflow:hidden;text-overflow:ellipsis;}
+.hubchip{flex-direction:column;align-items:center;justify-content:center;text-align:center;line-height:1.2;max-width:190px;padding:5px 14px;white-space:normal;}
+.hubchip b{font-weight:700;letter-spacing:.16em;}
+.hubchip span{display:block;font-size:9.5px;font-weight:600;letter-spacing:.05em;text-transform:none;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 @media print{.hubchip{display:none!important;}}
 </style>
 </head>
@@ -1150,7 +1152,7 @@ function hubLogin(cb){ _ldlg('login',{},cb||function(){}); }
 function hubTTD(rm,idDokter,cb){ _ldlg('ttd',{rm:rm,id:idDokter||''},cb); }
 
 function hubChip(st,txt){ var c=document.getElementById('hubchip'); if(!c) return;
-  c.className='hubchip '+st; c.textContent='HUB · '+txt; }
+  c.className='hubchip '+st; c.textContent=''; var b=document.createElement('b'); b.textContent='HUB'; var t=document.createElement('span'); t.textContent=txt; t.title=txt; c.appendChild(b); c.appendChild(t); }
 function hubPing(){
   try{
     fetch(hubURL()+'/api/ping',{cache:'no-store'}).then(function(r){return r.json();})
