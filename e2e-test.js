@@ -474,6 +474,21 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
       check('Tracker: Muat handoff terakhir lewat hub (RM) -> kunjungan ke-3', tr.w._ho && tr.w._ho.pasien.rm === RM && tr.w._ho.kunjungan_ke === 3, tr.w._ho && tr.w._ho.kunjungan_ke);
       check('Hub: halaman depan menautkan 5 halaman (F1, F2, Slimming, Tracker, Panduan)', (fs.readFileSync(path.join('www', 'index.html'), 'utf8').match(/class="card"/g) || []).length === 5); }
 
+    { const ra = await open('ADC_Form2_Asesmen_Umum_Dokter.html');
+      set(ra.d, 'd2_dx', 'Acne'); ra.w.pickStage('acne', 2);
+      const tabs = [...ra.d.querySelectorAll('#ovl_acne .rx-table, #ovl_melasma .rx-table, #hr_rxTable')];
+      check('Rx: tiap tabel resep (cream, obat minum, hair) punya tombol + Tambah baris', tabs.length > 0 && tabs.every(t => t.nextElementSibling && t.nextElementSibling.classList.contains('rxadd')), tabs.length);
+      const oral = [...ra.d.querySelectorAll('#ac_block-2 .rx-table')].find(t => /Dosis/.test(t.querySelector('thead').textContent)), cream = ra.d.querySelector('#ac_block-2 .rx-table');
+      const n0 = oral.querySelectorAll('tbody tr').length; oral.nextElementSibling.click(); const trO = oral.querySelector('tbody tr:last-child');
+      cream.nextElementSibling.click(); const trC = cream.querySelector('tbody tr:last-child');
+      check('Rx: baris baru kosong (4 input, tanpa placeholder), oral tanpa ▾, cream dengan ▾, ada tombol hapus', oral.querySelectorAll('tbody tr').length === n0 + 1 && trO.querySelectorAll('input').length === 4 && [...trO.querySelectorAll('input')].every(i => i.value === '' && i.placeholder === '') && !trO.querySelector('.rxpick-btn') && !!trC.querySelector('.rxpick-btn') && !!trO.querySelector('.rxdel'), { o: trO.innerHTML.slice(0, 120) });
+      const oi = trO.querySelectorAll('input'); oi[0].value = 'Azithromycin 500 mg'; oi[1].value = '1x1 3 hari'; oi[3].value = '1 minggu';
+      const ci = trC.querySelectorAll('input'); ci[0].value = 'Krim racik'; ci[1].value = 'Malam';
+      const rx = ra.w.collectRx();
+      check('Rx: baris tambahan terbaca collectRx & isian program', rx.some(r => r.obat === 'Azithromycin 500 mg' && r.jadwal === '1x1 3 hari') && rx.some(r => r.obat === 'Krim racik') && ra.w._progDetail().acne.isian.some(x => /Azithromycin/.test(x)), rx);
+      trO.querySelector('.rxdel').click();
+      check('Rx: hapus baris tambahan', oral.querySelectorAll('tbody tr').length === n0 && !ra.w.collectRx().some(r => /Azithromycin/.test(r.obat))); }
+
     /* ===== 5h. jejak audit, koreksi 2x24 jam, TTD palsu, login dari form ===== */
     { const au = (await (await fetch(BASE + '/api/audit?n=500', { headers: Hd('admin') })).json()).audit;
       const aksi = au.map(x => x.aksi);
