@@ -217,6 +217,9 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
     a.w.updateReq();
     const miss = a.w.reqStatus().filter(x => !x.ok).map(x => x.label);
     check('F2 awal: bar wajib lengkap kecuali yang memang tak diisi', miss.length === 0, miss);
+    check('Bar WAJIB lengkap: hitungan "— lengkap", tidak ada chip belum, tombol "lihat rincian"', /lengkap/.test($(a.d, 'reqcnt').textContent) && a.d.querySelectorAll('#reqlst .it.no').length === 0 && /lihat rincian/.test(($(a.d, 'reqlst').querySelector('.tg') || {}).textContent || ''), $(a.d, 'reqlst').textContent);
+    { a.w.toggleReqSemua(); const t1 = $(a.d, 'reqbar').classList.contains('semua') && /sembunyikan/.test($(a.d, 'reqlst').querySelector('.tg').textContent) && a.d.querySelectorAll('#reqlst .it.ok').length === a.w.reqStatus().length; a.w.toggleReqSemua();
+      check('Bar WAJIB: "lihat semua" membuka butir OK lalu menutupnya lagi', t1 && !$(a.d, 'reqbar').classList.contains('semua')); }
     a.w.generateSchedule();
     check('F2: jadwal ter-generate', (a.w._schedRows || []).length > 0, a.w.buildSchedule && a.w.buildSchedule());
     a.dialogs.length = 0;
@@ -246,6 +249,7 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
     check('F2 kontrol tanpa handoff: penerbitan DIBLOK', /Tidak bisa diterbitkan/.test((lastDlg(b0, 'alert') || {}).msg || '') && !disk('handoff_terakhir.json').asesmen.__x && fs.readdirSync(path.join('data', RM)).filter(f => /^handoff_\d/.test(f)).length === 1);
     check('F2 tanpa Form 1: kotak alergi tampil & bisa diisi', $(b0.d, 'alergi_box').style.display !== 'none' && $(b0.d, 'alergi_flag').type !== 'hidden' && !$(b0.d, 'alergi_flag').readOnly);
     check('F2 kontrol: bar wajib menandai "Handoff dimuat" belum', b0.w.reqStatus().some(x => x.label === 'Handoff dimuat' && !x.ok));
+    check('Bar WAJIB belum lengkap: chip belum = jumlah butir belum, chip Handoff dimuat bisa diklik, tombol "lihat semua N"', b0.d.querySelectorAll('#reqlst .it.no').length === b0.w.reqStatus().filter(x => !x.ok).length && !!b0.d.querySelector('#reqlst .it.no[data-go="hobar"]') && new RegExp('lihat semua ' + b0.w.reqStatus().length).test($(b0.d, 'reqlst').querySelector('.tg').textContent), $(b0.d, 'reqlst').textContent);
 
     /* ===== 4. KONTROL #2: muat handoff via hub, IGA 1 (turun 2 = sukses) ===== */
     const b = await open('ADC_Form2_Asesmen_Umum_Dokter.html');

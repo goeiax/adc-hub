@@ -36,6 +36,7 @@ Indonesia (all form/patient text). Code comments: Indonesian is fine.
 
 ## Form 2 structure (current)
 Steps (6, since 2026-10-24 layout pass): 0 Handoff & riwayat (D0 incl. patient identity) · 1 Pemeriksaan & diagnosis (D1 + IGA panel; K1 in kontrol mode) · 2 Program (D2, hidden & skipped in kontrol mode) · 3 Resep, ritme & rencana (D3, D4, D5) · 4 Sign-off dokter (D6, D7; ends with "Serahkan ke perawat") · 5 Penjadwalan & terbit (D4b, D8 = d8_by/d8_status, primary **Terbitkan Handoff** button in the stepnav). Toolbar = HUB chip, Muat Form 1, Muat Handoff, Cetak/Simpan PDF + "Lainnya" menu (`tbMenu()`: Terbitkan copy, Cetak semua program, Reset).
+WAJIB strip (`#reqbar`, rendered by `updateReq()`) shows only unmet chips plus the count; `.it.ok` are hidden unless `.semua` (toggle `toggleReqSemua()`); the `.ctlbar` wraps instead of scrolling horizontally.
 Kontrol mode = `body.mode-kontrol` (`.vis-awal` hidden, `.vis-kontrol` shown); issuing a handoff is blocked until the previous handoff is loaded (`hoBelumDimuat()`), unless `ho_absen` is checked (audit-flagged).
 
 ## Known gotchas (each bit us before)

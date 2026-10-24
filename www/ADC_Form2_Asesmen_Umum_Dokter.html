@@ -1365,16 +1365,21 @@ body.mode-kontrol #rb2{display:none;}
 .dxblk{margin-top:26px;}
 
 /* ==== Bar kontrol satu baris: jenis kunjungan + status wajib (permintaan Alex 23 Sep) ==== */
-.ctlbar{position:sticky;top:0;z-index:9;display:flex;align-items:center;gap:14px;flex-wrap:nowrap;
-  padding:7px 28px;background:var(--surface-quiet);border-bottom:1px solid var(--line);overflow-x:auto;scrollbar-width:thin;}
+.ctlbar{position:sticky;top:0;z-index:9;display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+  padding:7px 28px;background:var(--surface-quiet);border-bottom:1px solid var(--line);}
 .ctlbar .modebar,.ctlbar .reqbar{position:static;display:flex !important;flex-wrap:nowrap;align-items:center;
   padding:0 !important;border:none !important;background:none !important;gap:6px;white-space:nowrap;flex:0 0 auto;}
-.ctlbar .reqbar{flex:1 1 auto;padding-left:14px !important;border-left:1px solid var(--line-strong) !important;}
+.ctlbar .reqbar{flex:1 1 320px;min-width:0;flex-wrap:wrap;padding-left:14px !important;border-left:1px solid var(--line-strong) !important;}
+/* hanya butir yang belum lengkap yang tampil; "lihat semua" membuka butir yang sudah OK */
+.reqbar .it.ok{display:none;}
+.reqbar.semua .it.ok{display:inline-block;}
+.reqbar .tg{font:inherit;font-size:12px;color:var(--ink-muted);background:none;border:none;text-decoration:underline;text-underline-offset:2px;cursor:pointer;padding:4px 6px;min-height:32px;white-space:nowrap;}
+.reqbar .tg:hover{color:var(--accent-deep);}
 .ctlbar .modebar .lb{font-size:10px;letter-spacing:.12em;margin-right:2px;}
 .ctlbar .modebar button{padding:5px 12px !important;font-size:12px !important;}
 .ctlbar .modebar .ket{display:none !important;}
 .ctlbar .reqbar .cnt{font-size:10px !important;padding:4px 9px !important;border-radius:999px;}
-.ctlbar .reqbar .lst{flex-wrap:nowrap !important;gap:5px;}
+.ctlbar .reqbar .lst{flex-wrap:wrap !important;gap:5px;align-items:center;}
 .ctlbar .reqbar .it{padding:4px 10px !important;font-size:12px !important;white-space:nowrap;}
 @media print{.ctlbar{display:none !important;}}
 </style>
@@ -3536,13 +3541,18 @@ function updateReq(){
   if(!bar) return;
   bar.classList.toggle('done', done===st.length);
   cnt.textContent = done===st.length ? ('Wajib '+done+'/'+st.length+' — lengkap') : ('Wajib '+done+'/'+st.length);
+  /* Bar hanya menampilkan yang BELUM lengkap (itulah yang perlu diklik); butir OK disembunyikan
+     supaya bar tidak terpotong di lebar tablet. "lihat semua" membuka rinciannya. */
+  var semua=bar.classList.contains('semua'), sisa=st.length-done;
   lst.innerHTML = st.map(function(x,i){
     return '<span class="it '+(x.ok?'ok':'no')+'" data-go="'+x.go+'">'+_hesc(x.label)+'</span>';
-  }).join('');
+  }).join('') + (st.length?('<button type="button" class="tg" onclick="toggleReqSemua()" aria-pressed="'+(semua?'true':'false')+'">'+
+    (semua?'sembunyikan yang selesai':(sisa?('lihat semua '+st.length):'lihat rincian'))+'</button>'):'');
   lst.querySelectorAll('.it.no').forEach(function(el){
     el.onclick=function(){ goTo(el.getAttribute('data-go')); };
   });
 }
+function toggleReqSemua(){ var b=document.getElementById('reqbar'); if(!b) return; b.classList.toggle('semua'); updateReq(); }
 function metricWarnings(){
   var w=[];
   /* IGA dinilai ULANG tiap kunjungan (termasuk kontrol) — tanpa itu delta tak bisa dihitung.
