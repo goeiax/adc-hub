@@ -62,6 +62,13 @@ const $ = (d, id) => d.getElementById(id);
 function set(d, id, v) { const e = $(d, id); if (!e) throw new Error('id tidak ada: ' + id); e.value = v; e.dispatchEvent(new e.ownerDocument.defaultView.Event('input', { bubbles: true })); }
 function chk(d, id, v = true) { const e = $(d, id); if (!e) throw new Error('id tidak ada: ' + id); e.checked = v; e.dispatchEvent(new e.ownerDocument.defaultView.Event('change', { bubbles: true })); }
 function disk(p, rm = RM) { try { return dekrip(fs.readFileSync(path.join('data', rm, p), 'utf8')); } catch (e) { return null; } }
+/* Sign-off dokter: mencentang d8_signoff membuka dialog TTD (PIN) bila hub hidup; isi PIN atau Batal */
+async function signoff(x, { pin = PIN.dokter, batal = false } = {}) {
+  chk(x.d, 'd8_signoff');
+  const dlg = await until(() => { const b = x.d.getElementById('ldlg'); return b && b.classList.contains('on'); }, 1200);
+  if (dlg) { if (batal) x.d.getElementById('ldlg_x').click(); else { x.d.getElementById('ldlg_pin').value = pin; x.d.getElementById('ldlg_ok').click(); await until(() => x.w._ttd, 3000); } }
+  return dlg;
+}
 /* Terbitkan Handoff: bila dialog TTD (PIN dokter) muncul, isi PIN (atau Batal), lalu tunggu hasil hub di d8_status */
 async function terbit(x, { pin = PIN.dokter, batal = false } = {}) {
   x.w.issueHandoff();
@@ -202,7 +209,11 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
       const pk = await (await fetch(BASE + '/api/pasien/' + RM, { headers: Hd('dokter') })).json();
       check('hub: /api/pasien/:rm mendaftar lembar consent', pk.consent && pk.consent.length === 1 && pk.consent[0].no === icNo && /Chemical/.test(pk.consent[0].tindakan), pk.consent); }
     chk(a.d, 'd8_consent'); chk(a.d, 'd8_skrining');
-    chk(a.d, 'd8_signoff'); set(a.d, 'd8_dokter', 'dr. Uji, Sp.DVE');
+    { const sd = await signoff(a);
+      check('F2 D7: mencentang "Asesmen selesai" langsung membuka dialog PIN dokter; stempel tersimpan, status "Ditandatangani", tanggal sign-off terisi', sd === true && a.w._ttd && a.w._ttd.id === 'dokter' && /Ditandatangani · dr\. Uji/.test($(a.d, 'd8_ttd').textContent) && $(a.d, 'd8_ttd').classList.contains('ok') && $(a.d, 'd8_tgl').value === new Date().toISOString().slice(0, 10) && $(a.d, 'd8_dokter').value === 'dr. Uji, Sp.DVE', { t: $(a.d, 'd8_ttd').textContent, tgl: $(a.d, 'd8_tgl').value });
+      chk(a.d, 'd8_signoff', false); check('F2 D7: mencabut centang membatalkan stempel', a.w._ttd === null && $(a.d, 'd8_ttd').textContent === '');
+      await signoff(a); }
+    set(a.d, 'd8_dokter', 'dr. Uji, Sp.DVE');
     a.w.updateReq();
     const miss = a.w.reqStatus().filter(x => !x.ok).map(x => x.label);
     check('F2 awal: bar wajib lengkap kecuali yang memang tak diisi', miss.length === 0, miss);
@@ -210,7 +221,7 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
     check('F2: jadwal ter-generate', (a.w._schedRows || []).length > 0, a.w.buildSchedule && a.w.buildSchedule());
     a.dialogs.length = 0;
     const ttdDlg = await terbit(a);
-    check('F2: Terbitkan membuka dialog TTD dokter (ID terisi dari sesi dokter) & tidak ada dialog peringatan', ttdDlg === true && !a.dialogs.some(x => x.type === 'confirm'), a.dialogs.filter(x => x.type === 'confirm'));
+    check('F2: Terbitkan TIDAK meminta PIN lagi (sudah ditandatangani saat sign-off) & tidak ada dialog peringatan', ttdDlg === false && !a.dialogs.some(x => x.type === 'confirm'), a.dialogs.filter(x => x.type === 'confirm'));
     check('F2: popup ringkasan handoff dibuat', a.w.__popup && /Ringkasan Handoff/.test(a.w.__popup.document.html));
     const h1 = disk('handoff_terakhir.json');
     check('hub: handoff #1 tersimpan', h1 && h1.doc === 'ADC-HANDOFF' && h1.kunjungan_ke === 1 && h1.riwayat.length === 0, h1 && { k: h1.kunjungan_ke });
@@ -252,7 +263,7 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
     check('F2: IGA delta=2 & sukses', (() => { const g = b.w.igaData('acne'); return g && g.baseline === 3 && g.kini === 1 && g.delta === 2 && g.sukses === true; })(), b.w.igaData('acne'));
     check('F2: label arah otomatis', /Acne −2/.test($(b.d, 'k1_arah').value), $(b.d, 'k1_arah').value);
     set(b.d, 'k1_patuh', 'Patuh'); set(b.d, 'k1_es', 'Kulit kering ringan');
-    set(b.d, 'd5_iv', '14'); set(b.d, 'd5_start', '2026-10-19'); set(b.d, 'd7_remarks', 'Lanjutkan'); set(b.d, 'd8_by', 'Perawat Uji'); chk(b.d, 'd8_signoff'); chk(b.d, 'd8_skrining'); chk(b.d, 'd8_consent');
+    set(b.d, 'd5_iv', '14'); set(b.d, 'd5_start', '2026-10-19'); set(b.d, 'd7_remarks', 'Lanjutkan'); set(b.d, 'd8_by', 'Perawat Uji'); await signoff(b); chk(b.d, 'd8_skrining'); chk(b.d, 'd8_consent');
     b.w.updateReq();
     const miss2 = b.w.reqStatus().filter(x => !x.ok).map(x => x.label);
     check('F2 kontrol: bar wajib lengkap', miss2.length === 0, miss2);
@@ -282,10 +293,12 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
     check('F2: handoff #2 dimuat (kunjungan_ke 2)', c.w._prevHandoff && c.w._prevHandoff.kunjungan_ke === 2);
     check('F2: IGA baseline di kunjungan 3 masih 3', c.w.igaData('acne') === null || c.w._igaBaseline('acne') === 3, c.w._igaBaseline('acne'));
     set(c.d, 'k1_dokter', 'dr. Uji, Sp.DVE'); set(c.d, 'k1_hasil', 'Stabil'); c.w.setIGA('ac_iga', '0');
-    set(c.d, 'd5_iv', '14'); set(c.d, 'd5_start', '2026-11-02'); set(c.d, 'd7_remarks', 'Selesai'); chk(c.d, 'd8_signoff'); chk(c.d, 'd8_skrining'); chk(c.d, 'd8_consent');
+    set(c.d, 'd5_iv', '14'); set(c.d, 'd5_start', '2026-11-02'); set(c.d, 'd7_remarks', 'Selesai'); await signoff(c, { batal: true });
+    check('F2 D7: Batal pada PIN saat sign-off -> status "Belum ditandatangani", centang tetap', /Belum ditandatangani PIN/.test($(c.d, 'd8_ttd').textContent) && $(c.d, 'd8_signoff').checked && !c.w._ttd, $(c.d, 'd8_ttd').textContent);
+    chk(c.d, 'd8_skrining'); chk(c.d, 'd8_consent');
     await terbit(c, { batal: true });
     const h3 = disk('handoff_terakhir.json');
-    check('F2: Batal pada dialog TTD -> konfirmasi lalu tetap terbit TANPA ttd (tercatat)', h3 && h3.penerbitan.ttd === null && c.dialogs.some(x => x.type === 'confirm' && /Tanpa tanda tangan elektronik/.test(x.msg)) && /tanpa verifikasi PIN/.test(c.w.__popup.document.html), h3 && h3.penerbitan.ttd);
+    check('F2: Batal lagi pada dialog TTD saat Terbitkan -> konfirmasi lalu tetap terbit TANPA ttd (tercatat)', h3 && h3.penerbitan.ttd === null && c.dialogs.some(x => x.type === 'confirm' && /Tanpa tanda tangan elektronik/.test(x.msg)) && /tanpa verifikasi PIN/.test(c.w.__popup.document.html), h3 && h3.penerbitan.ttd);
     check('hub: handoff #3 = kunjungan_ke 3, riwayat 2 (urut)', h3 && h3.kunjungan_ke === 3 && h3.riwayat.length === 2 && h3.riwayat[0].kunjungan_ke === 1 && h3.riwayat[1].kunjungan_ke === 2, h3 && { k: h3.kunjungan_ke, r: h3.riwayat.map(x => x.kunjungan_ke) });
     check('hub: riwayat kunjungan 2 membawa evaluasi (IGA) agar tren tak hilang', h3 && h3.riwayat[1] && h3.riwayat[1].evaluasi && h3.riwayat[1].evaluasi.iga, h3 && h3.riwayat[1]);
     check('hub: riwayat kunjungan 2 membawa diagnosis & resep (rantai utuh)', h3 && /Acne/.test(h3.riwayat[1].diagnosis || '') && /Tretinoin/.test(h3.riwayat[1].resep || ''), h3 && h3.riwayat[1]);
@@ -447,7 +460,7 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
       set(gt.d, 'd2_dx', 'Acne'); gt.w.pickStage('acne', 1);
       const rx = gt.d.querySelectorAll('#ac_block-1 .rx-table tbody tr')[0].querySelectorAll('input'); rx[0].value = 'Isotretinoin 20 mg'; rx[1].value = '1x1';
       [...gt.d.querySelectorAll('#ac_block-1 label.chk-item')].find(l => /Peeling/.test(l.textContent)).querySelector('input').checked = true;
-      chk(gt.d, 'd8_signoff'); chk(gt.d, 'alergi_none'); gt.w.updateReq();
+      await signoff(gt, { batal: true }); chk(gt.d, 'alergi_none'); gt.w.updateReq();
       gt.dialogs.length = 0; gt.w.issueHandoff(); await sleep(300);
       const cf = (gt.dialogs.find(x => x.type === 'confirm') || {}).msg || '';
       check('Gerbang: Terbitkan memperingatkan obat berisiko + consent tindakan; pasien hamil ditandai PALING ATAS',
@@ -535,7 +548,7 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
     const bad = await open('ADC_Form2_Asesmen_Umum_Dokter.html', { key: 'salah' });
     muatRM(bad, 'muatIntakeHub', RM); await sleep(500);
     check('F2 kunci salah: tidak crash, dialog tetap terbuka & menyarankan pilih berkas', bad.d.getElementById('mdlg').classList.contains('on') && /tidak ada di hub.*Pilih berkas/.test(bad.d.getElementById('mdlg_msg').textContent), bad.d.getElementById('mdlg_msg').textContent);
-    set(bad.d, 'rm', RM); set(bad.d, 'd2_dx', 'x'); chk(bad.d, 'alergi_none'); chk(bad.d, 'd8_signoff'); bad.dialogs.length = 0; await terbit(bad, { batal: true });
+    set(bad.d, 'rm', RM); set(bad.d, 'd2_dx', 'x'); chk(bad.d, 'alergi_none'); await signoff(bad, { batal: true }); bad.dialogs.length = 0; await terbit(bad, { batal: true });
     await until(() => bad.dialogs.some(x => x.type === 'alert' && /TIDAK tersimpan di hub/.test(x.msg)), 3000);
     check('F2 kunci salah: Terbitkan memperingatkan keras + status ✗', bad.dialogs.some(x => x.type === 'alert' && /PERHATIAN: handoff TIDAK tersimpan di hub/.test(x.msg)) && /✗ TIDAK tersimpan di hub/.test($(bad.d, 'd8_status').value), $(bad.d, 'd8_status').value);
     const before = fs.readdirSync(path.join('data', RM)).length;
@@ -549,6 +562,7 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
     const off = await open('ADC_Form2_Asesmen_Umum_Dokter.html');
     check('F2 hub mati: halaman tetap termuat', !!off.w.issueHandoff && off.w._hubOn === false);
     set(off.d, 'p_nama', 'Offline'); set(off.d, 'rm', 'RM-OFF'); set(off.d, 'd2_dx', 'x'); chk(off.d, 'd8_signoff'); chk(off.d, 'alergi_none');
+    check('F2 hub mati: sign-off menampilkan "Hub mati — tanpa tanda tangan elektronik" tanpa dialog', /Hub mati/.test($(off.d, 'd8_ttd').textContent) && !$(off.d, 'ldlg'), $(off.d, 'd8_ttd').textContent);
     chk(off.d, 'd8_consent');
     let threw = null; try { off.w.issueHandoff(); } catch (e) { threw = e; }
     check('F2 hub mati: terbitkan handoff tetap jalan (popup/JSON cadangan)', !threw && off.w.__popup && /Ringkasan Handoff/.test(off.w.__popup.document.html), threw && String(threw));

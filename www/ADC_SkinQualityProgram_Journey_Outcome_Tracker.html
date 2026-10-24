@@ -383,7 +383,9 @@ function _ldlgBuat(){
    _ldlg('ttd',{rm,id},cb) -> cb(ttdObj) | cb(null) batal */
 function _ldlg(mode,opsi,cb){
   var bg=_ldlgBuat(), g=function(id){return document.getElementById(id);}, ttd=(mode==='ttd'), u=window._hubUser, selesai=false;
-  var akhir=function(v){ if(selesai) return; selesai=true; bg.classList.remove('on'); document.removeEventListener('keydown',kb,true); cb(v); };
+  if(window._ldlgAkhir){ var sebelumnya=window._ldlgAkhir; window._ldlgAkhir=null; sebelumnya(null); }  /* dialog lama ditutup dulu — tidak ada callback yatim */
+  var akhir=function(v){ if(selesai) return; selesai=true; window._ldlgAkhir=null; bg.classList.remove('on'); document.removeEventListener('keydown',kb,true); cb(v); };
+  window._ldlgAkhir=akhir;
   var kb=function(e){ if(e.key==='Escape'){ e.stopPropagation(); akhir(null); }
     else if(e.key==='Enter'&&(document.activeElement===g('ldlg_pin')||document.activeElement===g('ldlg_id'))){ e.preventDefault(); ok(); } };
   g('ldlg_t').textContent=ttd?'Tanda tangan elektronik dokter':'Masuk ke hub klinik';

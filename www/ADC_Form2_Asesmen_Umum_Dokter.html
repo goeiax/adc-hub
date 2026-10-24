@@ -923,6 +923,11 @@ body.showall .step{display:block;}
 .stepnav .nb-p{background:var(--accent-act);border-color:var(--accent-act);color:#fff;}
 .stepnav .nb-p:hover{background:var(--accent-deep);border-color:var(--accent-deep);color:#fff;}
 .stepnav .donehint{font-size:14px;color:var(--ink-muted);}
+/* status tanda tangan elektronik di bawah centang sign-off */
+.ttdst{flex-basis:100%;font-size:12.5px;color:var(--ink-muted);min-height:0;}
+.ttdst:empty{display:none;}
+.ttdst.ok{color:var(--green-a,#6E7C5E);font-weight:600;}
+.ttdst.warn{color:var(--accent-deep,#8E4A33);}
 /* aksi penutup alur: Terbitkan di akhir langkah 6, lebih berat dari Lanjut biasa */
 .stepnav .nb-terbit{background:var(--ink);border-color:var(--ink);color:var(--canvas);font-weight:620;padding:13px 28px;}
 .stepnav .nb-terbit:hover{background:var(--accent-deep);border-color:var(--accent-deep);color:#fff;}
@@ -1698,7 +1703,8 @@ body.mode-kontrol #rb2{display:none;}
   <div class="zone dr">
     <div class="flag" style="border-color:var(--accent-deep);flex-wrap:wrap;gap:8px 12px">
       <span class="badge" style="background:var(--accent-deep)">Sign-off dokter</span><span class="req">wajib</span>
-      <label class="none" style="font-size:13.5px"><input type="checkbox" id="d8_signoff"> <b>Asesmen selesai — siap diterbitkan</b></label>
+      <label class="none" style="font-size:13.5px"><input type="checkbox" id="d8_signoff" onchange="signoffTTD()"> <b>Asesmen selesai — siap diterbitkan</b></label>
+      <span class="ttdst" id="d8_ttd" aria-live="polite"></span>
     </div>
     <div class="row" style="margin-top:8px">
       <div class="f w2 s8"><span class="lab">Nama dokter yang menandatangani</span><input class="in" id="d8_dokter" placeholder="dr. ……, Sp.DVE"></div>
@@ -2616,7 +2622,7 @@ function saveSchedToRecord(){
   if(st){ st.textContent='Catatan jadwal tersimpan — berkas diunduh & disalin ke clipboard. Lampirkan ke rekam medis NeoSoft pasien.'; st.style.color='#3D7A5F'; }
 }
 function resetForm(){
-  try{ window._isian={}; var cl=document.getElementById('d8_consent_lbl'); if(cl) cl.textContent=''; setTimeout(_icdChips,0); }catch(e){}
+  try{ window._ttd=null; _ttdStatus(''); window._isian={}; var cl=document.getElementById('d8_consent_lbl'); if(cl) cl.textContent=''; setTimeout(_icdChips,0); }catch(e){}
   if(!confirm('Reset semua isian formulir?')) return;
   /* radio juga hanya dilepas centangnya — mengosongkan value-nya membuat Fitzpatrick
      terekam kosong setelah Reset. */
@@ -2779,7 +2785,7 @@ function buildHandoff(){
     }:null,
     penerbitan:{ oleh:_hv('d8_by'), waktu:new Date().toISOString(),
                  /* siapa yang masuk ke hub saat terbit + tanda tangan PIN dokter (diisi issueHandoff) + nomor lembar consent */
-                 pengguna_hub:(window._hubUser?{id:window._hubUser.id,nama:window._hubUser.nama,peran:window._hubUser.peran}:null), ttd:null,
+                 pengguna_hub:(window._hubUser?{id:window._hubUser.id,nama:window._hubUser.nama,peran:window._hubUser.peran}:null), ttd:window._ttd||null,
                  consent_no:_hv('d8_consent_no')||undefined,
                  signoff_dokter:_ck('d8_signoff'), dokter_signoff:_hv('d8_dokter'), tgl_signoff:_hv('d8_tgl'),
                  consent_tindakan:_ck('d8_consent'), skrining_obat:_ck('d8_skrining'), obat_berisiko:_obatBerisiko(),
@@ -3012,7 +3018,9 @@ function _ldlgBuat(){
    _ldlg('ttd',{rm,id},cb) -> cb(ttdObj) | cb(null) batal */
 function _ldlg(mode,opsi,cb){
   var bg=_ldlgBuat(), g=function(id){return document.getElementById(id);}, ttd=(mode==='ttd'), u=window._hubUser, selesai=false;
-  var akhir=function(v){ if(selesai) return; selesai=true; bg.classList.remove('on'); document.removeEventListener('keydown',kb,true); cb(v); };
+  if(window._ldlgAkhir){ var sebelumnya=window._ldlgAkhir; window._ldlgAkhir=null; sebelumnya(null); }  /* dialog lama ditutup dulu — tidak ada callback yatim */
+  var akhir=function(v){ if(selesai) return; selesai=true; window._ldlgAkhir=null; bg.classList.remove('on'); document.removeEventListener('keydown',kb,true); cb(v); };
+  window._ldlgAkhir=akhir;
   var kb=function(e){ if(e.key==='Escape'){ e.stopPropagation(); akhir(null); }
     else if(e.key==='Enter'&&(document.activeElement===g('ldlg_pin')||document.activeElement===g('ldlg_id'))){ e.preventDefault(); ok(); } };
   g('ldlg_t').textContent=ttd?'Tanda tangan elektronik dokter':'Masuk ke hub klinik';
@@ -3564,7 +3572,7 @@ function issueHandoff(){
      stempel (nama, waktu, bukti) yang ikut tersimpan di handoff (PMK 24/2022 Ps. 16 ayat 2, Ps. 31). */
   if(_hubOn && window._hubLoginReq && _ck('d8_signoff') && !h.penerbitan.ttd){
     hubTTD(h.pasien.rm,'',function(ttd){
-      if(ttd){ h.penerbitan.ttd=ttd;
+      if(ttd){ h.penerbitan.ttd=ttd; window._ttd=ttd; _ttdStatus('Ditandatangani · '+ttd.nama+' · '+_ttdJam(ttd.waktu)+' · PIN diverifikasi hub','ok');
         if(!_hv('d8_dokter')){ var dd=document.getElementById('d8_dokter'); if(dd) dd.value=ttd.nama; h.penerbitan.dokter_signoff=ttd.nama; } }
       else if(!confirm('Tanpa tanda tangan elektronik dokter (PIN).\n\nHandoff akan tercatat "sign-off tanpa verifikasi PIN". Tetap terbitkan?')) return;
       _issueLanjut(h,a);
@@ -3721,6 +3729,28 @@ function muatHandoffHub(){
   });
 }
 
+
+/* ===== TANDA TANGAN ELEKTRONIK SAAT SIGN-OFF =====
+   PIN dokter diminta begitu dokter mencentang "Asesmen selesai" — perangkat masih di tangan dokter.
+   Stempel disimpan di window._ttd dan dipakai buildHandoff/issueHandoff; dialog saat Terbitkan hanya
+   muncul bila belum ada (dibatalkan tadi, atau hub baru hidup). Mencabut centang membatalkan stempel. */
+window._ttd=null;
+function _ttdJam(w){ try{ return new Date(w).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}); }catch(e){ return ''; } }
+function _ttdStatus(t,cls){ var el=document.getElementById('d8_ttd'); if(!el) return; el.textContent=t||''; el.className='ttdst'+(cls?(' '+cls):''); }
+function signoffTTD(){
+  var cb=document.getElementById('d8_signoff'); if(!cb) return;
+  if(!cb.checked){ window._ttd=null; _ttdStatus(''); return; }
+  var tg=document.getElementById('d8_tgl'); if(tg&&!tg.value) tg.value=new Date().toISOString().slice(0,10);
+  if(window._ttd){ _ttdStatus('Ditandatangani · '+window._ttd.nama+' · '+_ttdJam(window._ttd.waktu)+' · PIN diverifikasi hub','ok'); return; }
+  if(!_hubOn){ _ttdStatus('Hub mati — sign-off tercatat tanpa tanda tangan elektronik (PIN).','warn'); return; }
+  if(!window._hubLoginReq){ _ttdStatus(''); return; }
+  _ttdStatus('Menunggu PIN dokter…');
+  hubTTD(_hv('rm'),'',function(ttd){
+    if(ttd){ window._ttd=ttd; var dd=document.getElementById('d8_dokter'); if(dd&&!dd.value.trim()) dd.value=ttd.nama;
+      _ttdStatus('Ditandatangani · '+ttd.nama+' · '+_ttdJam(ttd.waktu)+' · PIN diverifikasi hub','ok'); }
+    else _ttdStatus('Belum ditandatangani PIN — klik centang lagi, atau akan diminta saat Terbitkan Handoff.','warn');
+  });
+}
 
 /* ===== ICD-10 (PMK 24/2022 Ps. 18: diagnosis diberi kode) =====
    Subset dermatologi-estetik & metabolik yang dipakai ADC; cari kode/nama, boleh lebih dari satu.
