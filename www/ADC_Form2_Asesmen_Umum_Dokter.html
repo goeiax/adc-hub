@@ -81,6 +81,13 @@ table.tbl td{padding:4px 8px;border:1px solid var(--line);vertical-align:middle;
 .flag .alg-v{flex:1;font-size:15px;font-weight:600;color:var(--ink-fill);}
 .flag .alg-v.kosong{color:var(--accent-deep,#8E4A33);font-weight:600;}
 .flag .alg-src{font-size:11.5px;color:var(--ink-2);white-space:nowrap;}
+/* bendera hamil/menyusui + baris resep berisiko + baris skrining D7 */
+.flag.hamil{border-color:var(--accent-deep,#8E4A33) !important;background:#FBEDE8 !important;}
+.flag.hamil .badge{background:var(--accent-deep,#8E4A33);}
+.flag.hamil .alg-v{color:var(--accent-deep,#8E4A33);}
+tr.rx-risk td{background:#FBEDE8;color:#6E2A1C;}
+tr.rx-risk .rk{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;border:1px solid var(--accent-deep,#8E4A33);border-radius:4px;padding:1px 6px;margin-right:7px;color:var(--accent-deep,#8E4A33);vertical-align:middle;}
+label.opt.lbl-hamil{border:1.5px solid var(--accent-deep,#8E4A33);background:#FBEDE8;border-radius:8px;padding:8px 10px;}
 .handoff{border:1px solid var(--accent-deep);border-top:3px solid var(--accent-deep);margin:6px 0;}
 .handoff .hh{background:var(--surface-quiet);border-bottom:1px solid var(--line);padding:5px 12px;display:flex;justify-content:space-between;align-items:baseline;}
 .handoff .hh .t{font-family:var(--ff-head);font-size:12.5px;font-weight:600;}
@@ -1446,6 +1453,11 @@ body.mode-kontrol #rb2{display:none;}
     <input class="fin" id="alergi_flag" placeholder="konfirmasi ulang ke pasien — bahan/obat yang WAJIB dihindari">
     <label class="none"><input type="checkbox" id="alergi_none"> Nihil (dikonfirmasi)</label>
   </div>
+  <!-- Hamil / menyusui (Form 1, dibawa ke kontrol lewat handoff): bendera yang terlihat selama
+       kunjungan — tidak hanya muncul di dialog konfirmasi saat Terbitkan. -->
+  <div class="flag hamil" id="hamil_box" style="display:none" role="status">
+    <span class="badge">Hamil / menyusui</span><span class="alg-v" id="hamil_v"></span><span class="alg-src">dari Form 1 — hindari obat berisiko</span>
+  </div>
 
   <!-- Ringkasan Form 1 — dibaca dokter dalam <10 detik, tersusun menurut kepentingan klinis -->
   <div id="intake_box" class="intake" style="display:none">
@@ -1642,6 +1654,9 @@ body.mode-kontrol #rb2{display:none;}
   
   <div class="stepnav no-print"><button type="button" class="nb" onclick="goStep(1)">&lsaquo; Kembali</button><button type="button" class="nb nb-p" onclick="goStep(3)">Lanjut &rsaquo;</button></div></section>
   <section class="step" data-step="3"><div class="sec"><span class="n">D3</span>Resep berjalan <span class="opt">cermin dari form program — hanya baca</span></div>
+  <div class="flag hamil" id="hamil_box_rx" style="display:none" role="status">
+    <span class="badge">Hamil / menyusui</span><span class="alg-v" id="hamil_rx_v"></span>
+  </div>
   
   <table class="tbl">
     <thead><tr><th style="width:8%">Program</th><th style="width:28%">Obat / produk</th><th style="width:16%">Jadwal</th><th style="width:28%">Cara pakai</th><th style="width:20%">Durasi</th></tr></thead>
@@ -2690,9 +2705,10 @@ function collectRx(){
 }
 function renderRxMirror(){
   var tb=document.getElementById('d4_rx'); if(!tb) return;
-  var rx=collectRx();
+  var rx=collectRx(), hm=_pasienHamilMenyusui();
   tb.innerHTML = rx.length ? rx.map(function(r){
-    return '<tr><td>'+_hesc(r.program)+'</td><td>'+_hesc(r.obat)+'</td><td>'+_hesc(r.jadwal)+
+    var pr=_produkByName(r.obat), risk=hm&&(OBAT_RISIKO.test(r.obat)||(pr&&OBAT_RISIKO.test(pr.b||'')));
+    return '<tr'+(risk?' class="rx-risk"':'')+'><td>'+_hesc(r.program)+'</td><td>'+(risk?'<span class="rk" title="obat berisiko pada kehamilan / menyusui">⚠ berisiko</span>':'')+_hesc(r.obat)+'</td><td>'+_hesc(r.jadwal)+
            '</td><td>'+_hesc(r.cara)+'</td><td>'+_hesc(r.durasi)+'</td></tr>';
   }).join('') : '<tr><td colspan="5" style="color:var(--ink-muted)">Belum ada resep — tulis di form program (D2).</td></tr>';
 }
@@ -3496,9 +3512,20 @@ function _pasienHamilMenyusui(){
 }
 function renderSkrining(){
   var l=document.getElementById('lbl_skrining'), e=document.getElementById('skrining_obat'); if(!l) return;
-  var ob=_obatBerisiko();
+  var ob=_obatBerisiko(), hm=_pasienHamilMenyusui();
   l.style.display=ob.length?'':'none';
-  if(e) e.textContent=ob.length?('— '+ob.join(', ')):'';
+  l.classList.toggle('lbl-hamil', !!(ob.length&&hm));
+  if(e) e.textContent=ob.length?('— '+ob.join(', ')+(hm?(' · PASIEN '+hm.toUpperCase()):'')):'';
+  renderHamil(ob);
+}
+/* Bendera hamil/menyusui di D0 dan di atas cermin resep D3 — terlihat selama kunjungan,
+   bukan hanya di dialog konfirmasi Terbitkan. */
+function renderHamil(ob){
+  var hm=_pasienHamilMenyusui(), b0=document.getElementById('hamil_box'), b3=document.getElementById('hamil_box_rx');
+  if(ob===undefined) ob=_obatBerisiko();
+  if(b0){ b0.style.display=hm?'':'none'; var v=document.getElementById('hamil_v'); if(v) v.textContent=hm?hm.toUpperCase():''; }
+  if(b3){ b3.style.display=hm?'':'none'; var v3=document.getElementById('hamil_rx_v');
+    if(v3) v3.textContent=hm?(hm.toUpperCase()+(ob.length?(' — obat berisiko dalam resep: '+ob.join(', ')):' — belum ada obat berisiko dalam resep')):''; }
 }
 function updateReq(){
   renderAlergi(); renderSkrining();
@@ -3629,6 +3656,7 @@ function applyHandoff(h){
       window._prevHandoff=h;
       renderPrev(h,false);
       setMode('kontrol');   /* handoff dimuat = ini kunjungan kontrol */
+      if(typeof updateReq==='function') updateReq();   /* bendera hamil & gerbang obat membaca pasien.hormonal dari handoff */
       alert('Handoff kunjungan sebelumnya dimuat'+(h.kunjungan_ke?(' (kunjungan ke-'+h.kunjungan_ke+')'):'')+
         '.\nSaat kamu Terbitkan Handoff nanti, riwayat ini ikut terbawa.');
 }

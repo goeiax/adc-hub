@@ -461,12 +461,18 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
       const rx = gt.d.querySelectorAll('#ac_block-1 .rx-table tbody tr')[0].querySelectorAll('input'); rx[0].value = 'Isotretinoin 20 mg'; rx[1].value = '1x1';
       [...gt.d.querySelectorAll('#ac_block-1 label.chk-item')].find(l => /Peeling/.test(l.textContent)).querySelector('input').checked = true;
       await signoff(gt, { batal: true }); chk(gt.d, 'alergi_none'); gt.w.updateReq();
+      check('Gerbang: bendera HAMIL tampil di D0 dan di atas cermin resep D3 (menyebut obat berisiko), baris Isotretinoin ditandai ⚠, baris skrining berbingkai merah',
+        $(gt.d, 'hamil_box').style.display !== 'none' && /SEDANG HAMIL/.test($(gt.d, 'hamil_v').textContent) && $(gt.d, 'hamil_box_rx').style.display !== 'none' && /Isotretinoin/.test($(gt.d, 'hamil_rx_v').textContent) &&
+        !!gt.d.querySelector('#d4_rx tr.rx-risk .rk') && /Isotretinoin/.test(gt.d.querySelector('#d4_rx tr.rx-risk').textContent) && $(gt.d, 'lbl_skrining').classList.contains('lbl-hamil') && /PASIEN SEDANG HAMIL/.test($(gt.d, 'skrining_obat').textContent),
+        { v: $(gt.d, 'hamil_rx_v').textContent, sk: $(gt.d, 'skrining_obat').textContent });
+      check('Gerbang: pasien tidak hamil -> bendera tersembunyi, baris resep tidak ditandai', $(a.d, 'hamil_box').style.display === 'none' && !a.d.querySelector('#d4_rx tr.rx-risk'));
       gt.dialogs.length = 0; gt.w.issueHandoff(); await sleep(300);
       const cf = (gt.dialogs.find(x => x.type === 'confirm') || {}).msg || '';
       check('Gerbang: Terbitkan memperingatkan obat berisiko + consent tindakan; pasien hamil ditandai PALING ATAS',
         /Obat berisiko.*Isotretinoin/.test(cf) && /Informed consent tindakan/.test(cf) && /^Belum lengkap[^\n]*\n\n· PASIEN SEDANG HAMIL/.test(cf), cf.slice(0, 260));
       const hg = gt.w.buildHandoff(); const k2 = await open('ADC_Form2_Asesmen_Umum_Dokter.html'); k2.w.applyHandoff(hg);
-      check('Gerbang kontrol: status hamil dirantai lewat handoff (tanpa Form 1) & obat dari isian lalu tetap terdeteksi', k2.w._pasienHamilMenyusui() === 'Sedang hamil' && k2.w._obatBerisiko().some(x => /Isotretinoin/.test(x)), { hm: k2.w._pasienHamilMenyusui(), ob: k2.w._obatBerisiko() }); }
+      check('Gerbang kontrol: status hamil dirantai lewat handoff (tanpa Form 1) & obat dari isian lalu tetap terdeteksi', k2.w._pasienHamilMenyusui() === 'Sedang hamil' && k2.w._obatBerisiko().some(x => /Isotretinoin/.test(x)), { hm: k2.w._pasienHamilMenyusui(), ob: k2.w._obatBerisiko() });
+      check('Gerbang kontrol: bendera HAMIL langsung tampil setelah Muat Handoff, dengan obat yang dibawa', $(k2.d, 'hamil_box').style.display !== 'none' && /Isotretinoin/.test($(k2.d, 'hamil_rx_v').textContent), $(k2.d, 'hamil_rx_v').textContent); }
 
     /* ===== 5g. Slimming (Sp.GK) & Tracker lewat hub ===== */
     { const sl = await open('ADC_Form_Asesmen_Slimming_SpGK.html');
