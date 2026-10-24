@@ -923,6 +923,18 @@ body.showall .step{display:block;}
 .stepnav .nb-p{background:var(--accent-act);border-color:var(--accent-act);color:#fff;}
 .stepnav .nb-p:hover{background:var(--accent-deep);border-color:var(--accent-deep);color:#fff;}
 .stepnav .donehint{font-size:14px;color:var(--ink-muted);}
+/* aksi penutup alur: Terbitkan di akhir langkah 6, lebih berat dari Lanjut biasa */
+.stepnav .nb-terbit{background:var(--ink);border-color:var(--ink);color:var(--canvas);font-weight:620;padding:13px 28px;}
+.stepnav .nb-terbit:hover{background:var(--accent-deep);border-color:var(--accent-deep);color:#fff;}
+/* menu "Lainnya" di toolbar (utilitas yang jarang dipakai: cetak semua, reset) */
+.tb-more{position:relative;}
+.tbmenu{display:none;position:absolute;right:0;top:calc(100% + 8px);min-width:250px;padding:6px;background:var(--surface,#fff);color:var(--ink);border:1px solid var(--line-strong,#D9CCB7);border-radius:12px;box-shadow:0 14px 36px rgba(27,26,24,.22);z-index:30;}
+.tbmenu.on{display:block;}
+.tbmenu button{display:block;width:100%;text-align:left;font:inherit;font-size:14px;font-weight:540;letter-spacing:0;text-transform:none;min-height:44px;padding:9px 12px;border:none;border-radius:8px;background:none;color:var(--ink);cursor:pointer;}
+.tbmenu button small{display:block;font-size:12px;font-weight:400;color:var(--ink-muted);}
+.tbmenu button:hover,.tbmenu button:focus-visible{background:var(--surface-quiet,#F7F3EC);outline:none;}
+.tbmenu button.danger{color:#9A3B2E;}
+@media print{.tb-more{display:none !important;}}
 
 @media print{
   .rail,.stepnav,.no-print{display:none !important;}
@@ -1368,10 +1380,13 @@ body.mode-kontrol #rb2{display:none;}
   <div class="tb-actions">
     <span class="hubchip off" id="hubchip" onclick="hubMenu()" title="Klik: masuk / ganti pengguna &amp; atur hub">HUB &middot; …</span><button class="btn tan" onclick="muatIntakeHub()">Muat Form 1</button>
     <button class="btn" onclick="muatHandoffHub()">Muat Handoff</button>
-    <button class="btn" onclick="issueHandoff()">Terbitkan Handoff</button>
-    <button class="btn" onclick="printAll()">Cetak semua program</button>
-    <button class="btn" onclick="resetForm()">Reset</button>
     <button class="btn tan" onclick="cetakSemua()">Cetak / Simpan PDF</button>
+    <div class="tb-more"><button type="button" class="btn" id="tb_more" aria-haspopup="menu" aria-expanded="false" aria-controls="tbmenu" onclick="tbMenu()">Lainnya &#9662;</button>
+      <div class="tbmenu" id="tbmenu" role="menu" aria-label="Aksi lain">
+        <button type="button" role="menuitem" onclick="tbMenu(false);issueHandoff()">Terbitkan Handoff <small>juga di akhir langkah 6</small></button>
+        <button type="button" role="menuitem" onclick="tbMenu(false);printAll()">Cetak semua form program</button>
+        <button type="button" role="menuitem" class="danger" onclick="tbMenu(false);resetForm()">Reset form&hellip;</button>
+      </div></div>
   </div>
 </div>
 
@@ -1657,8 +1672,8 @@ body.mode-kontrol #rb2{display:none;}
   </div>
 
   
-  <div class="stepnav no-print"><button type="button" class="nb" onclick="goStep(2)">&lsaquo; Kembali</button><button type="button" class="nb nb-p" onclick="goStep(4)">Lanjut &rsaquo;</button></div></section>
-  <section class="step" data-step="4"><div class="sec"><span class="n">D5</span>Rekomendasi bertahap<span class="opt">opsional — isi bila pasien menanyakan langkah lanjutan</span> &nbsp;<span style="font-weight:600;color:var(--ink-muted);letter-spacing:.04em;text-transform:none">— catatan pegangan pasien (case-by-case)</span></div>
+  <!-- D5 (opsional) ikut langkah rencana, bukan langkah sign-off -->
+  <div class="sec"><span class="n">D5</span>Rekomendasi bertahap<span class="opt">opsional — isi bila pasien menanyakan langkah lanjutan</span> &nbsp;<span style="font-weight:600;color:var(--ink-muted);letter-spacing:.04em;text-transform:none">— catatan pegangan pasien (case-by-case)</span></div>
   <p class="note">Bersifat bertahap sesuai kondisi pasien — <b>bukan janji hasil</b>. Pasien membawa pulang catatan ini agar tahu langkah berikutnya; harga ditanyakan ke bagian depan.</p>
   <table class="tbl">
     <thead><tr><th style="width:12%">Tahap</th><th style="width:36%">Yang direkomendasikan</th><th style="width:28%">Tujuan / kondisi sasaran</th><th style="width:24%">Perkiraan waktu</th></tr></thead>
@@ -1669,6 +1684,8 @@ body.mode-kontrol #rb2{display:none;}
     </tbody>
   </table>
 
+  <div class="stepnav no-print"><button type="button" class="nb" onclick="goStep(2)">&lsaquo; Kembali</button><button type="button" class="nb nb-p" onclick="goStep(4)">Lanjut &rsaquo;</button></div></section>
+  <section class="step" data-step="4">
   <!-- D6 -->
   
   <div class="sec"><span class="n">D6</span>Catatan dokter &amp; pantangan</div>
@@ -1700,13 +1717,6 @@ body.mode-kontrol #rb2{display:none;}
     </div>
   </div>
   
-  <div class="zone nr">
-    <div class="row">
-      <div class="f s4"><span class="lab">Diterbitkan oleh</span><input class="in" id="d8_by" placeholder="nama perawat / dokter"></div>
-      <div class="f w2 s8"><span class="lab">Status</span><input class="in" id="d8_status" placeholder="belum diterbitkan" readonly></div>
-    </div>
-  </div>
-
   <div class="sigs">
     <div class="sig"><span class="lab">Tanda tangan dokter</span><div class="line"></div><div class="who2">dr. ________________________________ &nbsp; Tanggal: ____________</div></div>
     <div class="stamp">Cap<br>klinik</div>
@@ -1714,6 +1724,14 @@ body.mode-kontrol #rb2{display:none;}
 
   
 
+  <!-- D5 -->
+  
+
+  <div class="stepnav no-print"><button type="button" class="nb" onclick="goStep(3)">&lsaquo; Kembali</button><button type="button" class="nb nb-p" onclick="goStep(5)">Serahkan ke perawat &rsaquo;</button></div></section>
+
+  <!-- LANGKAH 6 — PERAWAT: penjadwalan (D4b) lalu Terbitkan Handoff di akhir langkah ini,
+       bukan di toolbar: aksi penutup berada di dalam alur, perangkat berpindah tangan sekali. -->
+  <section class="step" data-step="5">
   <!-- D4b = langkah PERAWAT: dikerjakan setelah dokter sign-off (D7), lalu Terbitkan Handoff —
        supaya perangkat hanya berpindah tangan sekali (dokter → perawat). -->
   <div class="sec"><span class="n">D4b</span>Penjadwalan &amp; reminder SleekFlow <span class="opt">perawat — setelah sign-off dokter</span></div>
@@ -1741,10 +1759,15 @@ body.mode-kontrol #rb2{display:none;}
     
   </div>
 
-  <!-- D5 -->
-  
+  <div class="sec"><span class="n">D8</span>Penerbitan handoff <span class="opt">perawat — setelah jadwal tersimpan</span></div>
+  <div class="zone nr">
+    <div class="row">
+      <div class="f s4"><span class="lab">Diterbitkan oleh</span><input class="in" id="d8_by" placeholder="nama perawat / dokter"></div>
+      <div class="f w2 s8"><span class="lab">Status</span><input class="in" id="d8_status" placeholder="belum diterbitkan" readonly></div>
+    </div>
+  </div>
 
-  <div class="stepnav no-print"><button type="button" class="nb" onclick="goStep(3)">&lsaquo; Kembali</button><span class="donehint">Selesai &mdash; klik <b>Terbitkan Handoff</b> di atas.</span></div></section>
+  <div class="stepnav no-print"><button type="button" class="nb" onclick="goStep(4)">&lsaquo; Kembali</button><button type="button" class="nb nb-p nb-terbit" onclick="issueHandoff()">Terbitkan Handoff</button></div></section>
   <div class="foot">
     <div class="l">Pertanyaan di antara kunjungan? WhatsApp <b>+62 821 30144778</b><br>Tips perawatan: <b>@adc.skinexpert</b><br>Simpan salinan ini dan tunjukkan di setiap kunjungan.</div>
     <div class="r"><div class="nm">AESTHETIC DERMA CENTRE</div>Jl. Ir. H. Djuanda 88, Bandung<br>Form 2 dari 2 · Asesmen umum dokter</div>
@@ -3880,8 +3903,15 @@ function consentHTML(c){
    Navigasi tampilan saja. Field tidak dilepas dari DOM, jadi buildHandoff(),
    reqStatus(), metricWarnings(), dan palang handoff tetap membaca semuanya
    walau langkahnya sedang tidak tampil. */
-var RAIL=['Handoff & riwayat','Pemeriksaan & diagnosis','Program','Resep & ritme kontrol','Sign-off & penjadwalan'];
+var RAIL=['Handoff & riwayat','Pemeriksaan & diagnosis','Program','Resep, ritme & rencana','Sign-off dokter','Penjadwalan & terbit'];
 var _step=0;
+function tbMenu(open){
+  var m=document.getElementById('tbmenu'), b=document.getElementById('tb_more'); if(!m||!b) return;
+  var on=(open===undefined)?!m.classList.contains('on'):!!open;
+  m.classList.toggle('on',on); b.setAttribute('aria-expanded',on?'true':'false');
+}
+document.addEventListener('click',function(e){ var m=document.getElementById('tbmenu'); if(m&&m.classList.contains('on')&&!e.target.closest('.tb-more')) tbMenu(false); });
+document.addEventListener('keydown',function(e){ if(e.key==='Escape') tbMenu(false); });
 function buildRail(){
   var r=document.getElementById('rail'); if(!r) return;
   r.innerHTML=RAIL.map(function(l,i){

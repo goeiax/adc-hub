@@ -98,7 +98,7 @@ td.v{font-weight:620;color:var(--accent-deep);white-space:nowrap;}
     <span class="who nr">Perawat</span><div>Klik <b>Simpan Data Pasien</b> → berkas <span class="file">Intake_Nama_tanggal.json</span> terunduh. Serahkan/pindahkan ke PC dokter.</div>
     <span class="who nr">Perawat</span><div>Setelah Simpan, baca pesannya: <b>"✓ tersimpan di hub"</b> berarti dokter bisa memuat dengan No. RM; <b>"✗ GAGAL"</b> / "hub tidak tersambung" berarti data hanya ada di berkas unduhan — perbaiki chip HUB (alamat &amp; kunci) lalu Simpan lagi.</div>
     <span class="who">Dokter</span><div>Buka Form 2 → klik <b>Muat Form 1</b>. Identitas &amp; alergi terisi otomatis; seluruh anamnesis tampil sebagai <b>Ringkasan Anamnesis</b> — baca ringkasan &amp; konfirmasi alergi <b>sebelum</b> memeriksa. Lanjutkan D1 → D7 (rincian di bagian 3).</div>
-    <span class="who nr">Perawat</span><div><b>Setelah dokter sign-off (D7)</b>, di langkah 5: reserve slot NeoSoft → <b>Generate</b> jadwal → <b>Simpan</b> → <b>Kirim</b> ke SleekFlow (D4b), lalu klik <b>Terbitkan Handoff</b>. Baca status di D7: <b>"✓ tersimpan di hub"</b>; bila "✗", perbaiki chip HUB dan terbitkan lagi. Perangkat hanya berpindah tangan sekali: dokter → perawat.</div>
+    <span class="who nr">Perawat</span><div><b>Setelah dokter sign-off (D7, langkah 5)</b> dokter menekan <b>Serahkan ke perawat</b>; di langkah 6: reserve slot NeoSoft → <b>Generate</b> jadwal → <b>Simpan</b> → <b>Kirim</b> ke SleekFlow (D4b), lalu klik <b>Terbitkan Handoff</b> di akhir langkah itu. Baca status di D8 (langkah 6): <b>"✓ tersimpan di hub"</b>; bila "✗", perbaiki chip HUB dan terbitkan lagi. Perangkat hanya berpindah tangan sekali: dokter → perawat.</div>
   </div>
   <h3>Pasien kontrol</h3>
   <div class="step-flow">
@@ -153,9 +153,9 @@ Pada <b>kunjungan kontrol</b> (tanpa Form 1) kotak alergi tampil di D0, terisi d
 <p><b>Pilih produk dari daftar ADC</b>: di setiap baris krim/obat oles ada tombol <b>▾</b> — membuka daftar Med Ex + OTC (180 produk) dengan pencarian dan tab kategori; memilih produk mengisi nama + jadwal &amp; cara pakai (bila kosong). Mengetik bebas tetap bisa. Tabel <i>Obat Minum</i> belum punya daftar (menunggu daftar obat oral). Daftar diperbarui IT dari <span class="file">ADC_Data_Produk_MedEx_OTC.xlsx</span> lewat <span class="file">tools/produk-ke-form.js</span>, lalu <span class="file">update-forms.bat</span>.</p>
 <p>Hanya cermin — resep ditulis <b>di dalam form program</b>, tempat tabelnya punya default per tahap. Satu sumber supaya tidak ada dua versi resep yang bertentangan di handoff. Obat hormonal oral (Finasteride/Spironolactone/Minoxidil oral, dsb.) dirujuk keluar; treatment in-clinic ADC berjalan paralel — catat di handoff agar dokter berikutnya tahu.</p>
 
-<h3>D4 · Ritme kontrol (dokter) → D4b · Penjadwalan (perawat, langkah 5 setelah sign-off)</h3>
+<h3>D4 · Ritme kontrol (dokter) → D4b · Penjadwalan (perawat, langkah 6 setelah sign-off)</h3>
 <ul>
-  <li><b>Dokter</b> menetapkan ritme kontrol + tanggal mulai di D4 (langkah 4). Blok penjadwalan perawat (D4b) ada di <b>langkah 5, setelah D7</b>, dan terbuka setelah keduanya terisi.</li>
+  <li><b>Dokter</b> menetapkan ritme kontrol + tanggal mulai di D4 (langkah 4, bersama rekomendasi bertahap D5). Blok penjadwalan perawat (D4b) ada di <b>langkah 6, setelah sign-off D7</b>, dan terbuka setelah keduanya terisi. Tombol <b>Terbitkan Handoff</b> ada di akhir langkah 6; salinannya, <b>Cetak semua form program</b> dan <b>Reset form</b> ada di menu <b>Lainnya</b> di bilah atas.</li>
   <li><b>URL webhook Make.com</b> terisi otomatis dari hub (IT mengisi <span class="file">"webhook"</span> di <span class="file">config.json</span> sekali) atau diingat per perangkat setelah diisi sekali — tidak perlu ditempel per pasien.</li>
   <li><b>Perawat</b>: reserve slot di NeoSoft → <b>Generate</b> jadwal → <b>Simpan</b> (berkas <span class="file">Jadwal_Nama.json</span>, lampirkan ke rekam medis) → <b>Kirim</b> ke SleekFlow via webhook Make.com, atau <b>Salin</b> untuk tempel manual.</li>
 </ul>
@@ -174,7 +174,7 @@ Gerbang kehadirannya dipasang di skenario Make.com — jangan dikirim tanpa syar
   <span class="who">Dokter</span><div>Centang <b>Asesmen selesai</b> — tanda sign-off klinis Anda.</div>
   <span class="who nr">Perawat</span><div>Setelah sign-off dan jadwal ter-generate: klik <b>Terbitkan Handoff</b> → simpan berkas <span class="file">Handoff_Nama_tanggal.json</span> &amp; lampirkan ke rekam medis. Sampaikan edukasi sebelum pasien pulang (checklist di form program; untuk Melasma pakai skrip di <a href="#skrip">§6</a>).</div>
 </div>
-<p>Urutan lengkap satu kunjungan: dokter D0–D1 → form program di D2 → resep &amp; ritme D3–D4 → rekomendasi &amp; sign-off D5–D7 → <b>perawat</b>: jadwal D4b → Terbitkan Handoff.</p>
+<p>Urutan lengkap satu kunjungan: dokter D0–D1 → form program di D2 → resep, ritme &amp; rekomendasi D3–D5 → catatan &amp; sign-off D6–D7 → <b>Serahkan ke perawat</b> → <b>perawat</b>: jadwal D4b → Terbitkan Handoff (D8).</p>
 <p><b>Gerbang keamanan di D7</b> (dicatat, bukan menggantikan lembar consent klinik): centang <b>Informed consent tindakan</b> bila ada tindakan hari ini; bila resep memuat obat berisiko (isotretinoin, spironolactone, retinoid, hidrokuinon, finasteride, TXA, antibiotik tetrasiklin, pil KB) muncul baris <b>Skrining obat berisiko</b> — centang setelah status hamil/menyusui &amp; KB dikonfirmasi. Form memperingatkan saat Terbitkan bila belum, dan menandai keras bila Form 1 mencatat pasien hamil/menyusui.</p>
 
 <div class="sec" id="kontrol"><span class="n">4</span><h2>Kunjungan kontrol (mode Kontrol)</h2></div>
