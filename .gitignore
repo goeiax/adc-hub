@@ -21,3 +21,6 @@ users.json
 hub.pfx
 hub.cer
 backup/
+
+# impeccable live-mode scratch
+.impeccable/live/inject-journal.json
