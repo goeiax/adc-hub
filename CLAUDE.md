@@ -26,7 +26,7 @@ Indonesia (all form/patient text). Code comments: Indonesian is fine.
 - **Restyle ≠ relogic.** When changing look/layout, keep every `id` and JS function intact. Engines read fields by id/label: `buildIntake()` (F1), `applyIntake()`, `applyHandoff()`, `buildHandoff()`, `reqStatus()`, `igaData()` (F2).
 - Forms are **offline-first**: hub calls are optional and wrapped in try/catch; downloaded JSON files remain the backup in every path. Don't make the hub mandatory.
 - No instruction text inside forms (moved to the Panduan). Patient-facing text in Form 1 stays.
-- User-entered text renders blue (`--ink-fill:#1F4E9C`).
+- User-entered text renders blue (`--ink-fill:#1F4E9C`). Contrast floor 4.5:1 for all text incl. placeholders (2026-10-25): placeholders use `--ink-muted`, secondary text `--ink-faint:#6F685B`, text on the dark toolbar/modal header `--ink-on-dark`, status green `--green-text`, white-on-terracotta buttons use `#B0603F`/`--accent-act`, never `#C97A5E`.
 
 ## Data contracts (JSON)
 - `ADC-INTAKE v1` (Form 1 → Form 2): `pasien{nama,rm,wa,tanggal,…}`, `kritis{alergi,…,flags}`, `penugasan{dokter,foto_baseline,foto_area}`, `pengukuran{bb,tb,imt}`, `persetujuan{…,tanda_tangan}`.
