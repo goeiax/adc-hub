@@ -476,6 +476,23 @@ label.opt.lbl-hamil{border:1.5px solid var(--accent-deep,#8E4A33);background:#FB
 .ovl .pmodal .band{margin:16px 0 0;padding:5px 11px;}
 
 /* teks panjang harus membungkus, bukan terpotong */
+/* ===== wizard 3 bagian di dalam modal program ===== */
+.ovl .pmrail{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin:0 0 16px;border:1px solid var(--line) !important;background:var(--surface-quiet);}
+.ovl .pmrail button{font:inherit;text-align:left;background:none;border:none;border-right:1px solid var(--line);padding:10px 14px;cursor:pointer;min-height:56px;display:flex;flex-direction:column;gap:2px;color:var(--ink-2);}
+.ovl .pmrail button:last-child{border-right:none;}
+.ovl .pmrail button .pn{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);}
+.ovl .pmrail button .pl{font-size:14px;font-weight:600;line-height:1.3;}
+.ovl .pmrail button.on{background:#fff;box-shadow:inset 0 -3px 0 var(--accent-act) !important;color:var(--ink);}
+.ovl .pmrail button.done .pn::after{content:' · terisi';color:var(--green-a,#6E7C5E);text-transform:none;letter-spacing:0;}
+.ovl .pmrail button:focus-visible{outline:2px solid var(--accent-act);outline-offset:-2px;}
+.ovl .pmpart{display:none;}
+.ovl .pmpart.on{display:block;}
+.ovl .pmnav{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:22px 0 4px;padding-top:14px;border-top:1px solid var(--line);}
+.ovl .pmnav button{font:inherit;font-size:14px;font-weight:560;min-height:44px;padding:0 20px;border:1px solid var(--line-strong);background:#fff;color:var(--ink);cursor:pointer;}
+.ovl .pmnav button.pri{background:var(--accent-act);border-color:var(--accent-act);color:#fff;}
+.ovl .pmnav button.pri:hover{background:var(--accent-deep);border-color:var(--accent-deep);}
+.ovl .pmnav button.fin{background:var(--ink);border-color:var(--ink);color:var(--canvas);}
+@media print{ .ovl .pmpart{display:block !important;} .ovl .pmrail,.ovl .pmnav{display:none !important;} }
 .ovl .pmodal .sec-label{gap:10px;align-items:baseline;}
 .ovl .pmodal .sec-label .hint{opacity:1;color:#F0EBE4;text-align:right;flex:0 1 auto;}
 .ovl .pmodal .ff-list .ck,
@@ -2363,7 +2380,66 @@ function openProg(p){
   }
   o.classList.add('open'); _open=p; document.body.style.overflow='hidden';
   if(typeof renderHamilModal==='function') renderHamilModal(p);
+  if(typeof pmGo==='function'&&o.querySelector('.pmrail')) pmGo(p, window._pmPart[p]||1, true);
 }
+/* ===== WIZARD 3 BAGIAN DI DALAM MODAL PROGRAM =====
+   Bagian ditentukan dari huruf seksi: A,B = Penilaian · C,D = Tahap & resep · E,F,G = Edukasi & rencana;
+   seksi tanpa huruf (mis. "Tiga Pilar Wajib" melasma) ikut bagian Tahap. Node dibungkus, tidak dipindah urutannya. */
+var PM_BAGIAN=['Penilaian','Tahap & resep','Edukasi & rencana'];
+window._pmPart={};
+function _pmBagianDari(el){
+  var head=el.classList.contains('sec')?el.querySelector('.sech'):el;
+  var t=(head?head.textContent:'').replace(/\s+/g,' ').trim(), m=t.match(/^([A-G])\s*·/);
+  if(!m) return 2;
+  return 'AB'.indexOf(m[1])>=0?1:('CD'.indexOf(m[1])>=0?2:3);
+}
+function initPmWizard(){
+  document.querySelectorAll('.ovl[data-prog]').forEach(function(ovl){
+    var p=ovl.getAttribute('data-prog'), body=ovl.querySelector('.pmbody'); if(!body||body.querySelector('.pmrail')) return;
+    var isHeader=function(el){ return el.classList&&(el.classList.contains('sec-label')||(el.classList.contains('sec')&&el.querySelector(':scope > .sech'))); };
+    var kids=[].slice.call(body.children), part=0, wraps={}, started=false;
+    kids.forEach(function(el){
+      if(isHeader(el)){ part=_pmBagianDari(el); started=true; }
+      if(!started) return;                                     /* pmctx & pengantar tetap di luar bagian */
+      if(!wraps[part]){ var w=document.createElement('div'); w.className='pmpart'; w.setAttribute('data-part',part); wraps[part]=w; body.insertBefore(w,el); }
+      wraps[part].appendChild(el);
+    });
+    var urut=Object.keys(wraps).map(Number).sort(); if(urut.length<2) return;
+    /* urutkan pembungkus sesuai nomor bagian (bila markup menyelipkan seksi tak berhuruf lebih awal) */
+    urut.forEach(function(n){ body.appendChild(wraps[n]); });
+    var rail=document.createElement('div'); rail.className='pmrail'; rail.setAttribute('role','tablist'); rail.setAttribute('aria-label','Bagian form program');
+    rail.innerHTML=urut.map(function(n,i){ return '<button type="button" role="tab" data-part="'+n+'" onclick="pmGo(\''+p+'\','+n+')"><span class="pn">Bagian '+(i+1)+' dari '+urut.length+'</span><span class="pl">'+PM_BAGIAN[n-1]+'</span></button>'; }).join('');
+    body.insertBefore(rail, wraps[urut[0]]);
+    urut.forEach(function(n,i){
+      var nav=document.createElement('div'); nav.className='pmnav';
+      var prev=i>0?('<button type="button" onclick="pmGo(\''+p+'\','+urut[i-1]+')">&lsaquo; '+PM_BAGIAN[urut[i-1]-1]+'</button>'):'<span></span>';
+      var next=i<urut.length-1?('<button type="button" class="pri" onclick="pmGo(\''+p+'\','+urut[i+1]+')">'+PM_BAGIAN[urut[i+1]-1]+' &rsaquo;</button>')
+                              :('<button type="button" class="fin" onclick="closeProg(\''+p+'\')">Selesai — tutup &amp; simpan</button>');
+      nav.innerHTML=prev+next; wraps[n].appendChild(nav);
+    });
+    pmGo(p, urut[0], true);
+  });
+}
+function pmGo(p,n,diam){
+  var ovl=document.getElementById('ovl_'+p); if(!ovl) return;
+  window._pmPart[p]=n;
+  ovl.querySelectorAll('.pmpart').forEach(function(w){ w.classList.toggle('on', +w.getAttribute('data-part')===n); });
+  ovl.querySelectorAll('.pmrail button').forEach(function(b){ var on=+b.getAttribute('data-part')===n; b.classList.toggle('on',on); b.setAttribute('aria-selected',on?'true':'false'); });
+  pmTandaiTerisi(p);
+  if(!diam){ try{ ovl.scrollTop=0; if(ovl.scrollTo) ovl.scrollTo({top:0}); }catch(e){} }
+}
+/* tanda "terisi" per bagian: ada centang / radio / teks di dalamnya (tahap tersembunyi diabaikan) */
+function pmTandaiTerisi(p){
+  var ovl=document.getElementById('ovl_'+p); if(!ovl) return;
+  ovl.querySelectorAll('.pmpart').forEach(function(w){
+    var ada=[].some.call(w.querySelectorAll('input,select,textarea'),function(e){
+      if(e.closest('.stage-block:not(.show), .blk:not(.show)')) return false;
+      if(e.type==='checkbox'||e.type==='radio') return e.checked;
+      return !!(e.value||'').trim(); });
+    var b=ovl.querySelector('.pmrail button[data-part="'+w.getAttribute('data-part')+'"]'); if(b) b.classList.toggle('done',ada);
+  });
+}
+document.addEventListener('change',function(e){ var o=e.target&&e.target.closest&&e.target.closest('.ovl[data-prog]'); if(o) pmTandaiTerisi(o.getAttribute('data-prog')); },true);
 function closeProg(p){
   var o=document.getElementById('ovl_'+p); if(o) o.classList.remove('open');
   _open=null; document.body.style.overflow='';
@@ -2694,6 +2770,7 @@ window.addEventListener('load',function(){
   if(typeof updateIgaCards==='function') setTimeout(updateIgaCards,0);
   if(typeof initRxPick==='function') initRxPick();
   if(typeof initRxAdd==='function') initRxAdd();
+  if(typeof initPmWizard==='function') initPmWizard();
   if(typeof syncRisikoBekas==='function') syncRisikoBekas();
   var d=new Date(); var t=document.getElementById('tgl'); if(t) t.value=d.toISOString().split('T')[0];
   gateSched(); PROGS.forEach(markProg); updateReq();

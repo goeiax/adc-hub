@@ -482,6 +482,20 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
         check('Gerbang modal: baris ditandai LANGSUNG saat obat berisiko diketik (Niacinamide aman, Tretinoin ditandai)', aman && r2.classList.contains('rx-risk')); }
       check('Gerbang modal: pasien tidak hamil -> pita tersembunyi & tidak ada baris ditandai', (a.w.openProg('acne'), [...a.d.querySelectorAll('#ovl_acne .rxhamil')].every(b => b.hidden) && !a.d.querySelector('#ovl_acne tr.rx-risk') && !/HAMIL/.test($(a.d, 'ctx_acne').textContent)));
       a.w.closeProg('acne'); gt.w.closeProg('acne');
+      /* wizard 3 bagian di dalam modal */
+      { const parts = p => [...a.d.querySelectorAll('#ovl_' + p + ' .pmpart')].map(w => w.getAttribute('data-part')).join(',');
+        check('Modal wizard: Acne, Melasma, Hair masing-masing 3 bagian (1,2,3) + rel + navigasi', parts('acne') === '1,2,3' && parts('melasma') === '1,2,3' && parts('hair') === '1,2,3' && a.d.querySelectorAll('#ovl_acne .pmrail button').length === 3 && a.d.querySelectorAll('#ovl_acne .pmnav').length === 3, { acne: parts('acne'), mel: parts('melasma'), hair: parts('hair') });
+        a.w.openProg('acne');
+        const on = () => a.d.querySelector('#ovl_acne .pmpart.on').getAttribute('data-part');
+        check('Modal wizard: dibuka di bagian 1; A & B di bagian 1, tabel 4 faktor & tahap di bagian 2, edukasi di bagian 3', on() === '1' && a.d.querySelector('#ovl_acne .rbf').closest('.pmpart').getAttribute('data-part') === '1' && a.d.querySelector('#ovl_acne .ff-table').closest('.pmpart').getAttribute('data-part') === '2' && a.d.querySelector('#ac_block-2').closest('.pmpart').getAttribute('data-part') === '2' && a.d.querySelector('#ovl_acne label.consent-item').closest('.pmpart').getAttribute('data-part') === '3');
+        { const f0 = a.d.querySelector('#ovl_acne .rbf'); f0.checked = true; f0.dispatchEvent(new a.w.Event('change', { bubbles: true })); }
+        a.d.querySelector('#ovl_acne .pmpart[data-part="1"] .pmnav .pri').click();
+        check('Modal wizard: tombol Lanjut -> bagian 2, rel menandai bagian aktif, bagian 1 "terisi"', on() === '2' && a.d.querySelector('#ovl_acne .pmrail button[data-part="2"]').classList.contains('on') && a.d.querySelector('#ovl_acne .pmrail button[data-part="1"]').classList.contains('done'));
+        a.w.pmGo('acne', 3);
+        check('Modal wizard: isian bagian tersembunyi tetap terbaca handoff (resep bagian 2 saat bagian 3 aktif)', on() === '3' && a.w.collectRx().some(r => /Tretinoin/.test(r.obat)) && a.w._progDetail().acne.isian.some(x => /Kesimpulan risiko bekas|Tretinoin/.test(x)));
+        check('Modal wizard: bagian terakhir berakhir dengan "Selesai — tutup & simpan"', /Selesai/.test(a.d.querySelector('#ovl_acne .pmpart[data-part="3"] .pmnav .fin').textContent));
+        a.w.closeProg('acne'); a.w.openProg('acne');
+        check('Modal wizard: dibuka lagi -> kembali ke bagian terakhir yang dilihat', on() === '3'); a.w.closeProg('acne'); }
       gt.dialogs.length = 0; gt.w.issueHandoff(); await sleep(300);
       const cf = (gt.dialogs.find(x => x.type === 'confirm') || {}).msg || '';
       check('Gerbang: Terbitkan memperingatkan obat berisiko + consent tindakan; pasien hamil ditandai PALING ATAS',
