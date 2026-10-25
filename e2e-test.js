@@ -473,6 +473,15 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
         !!gt.d.querySelector('#d4_rx tr.rx-risk .rk') && /Isotretinoin/.test(gt.d.querySelector('#d4_rx tr.rx-risk').textContent) && $(gt.d, 'lbl_skrining').classList.contains('lbl-hamil') && /PASIEN SEDANG HAMIL/.test($(gt.d, 'skrining_obat').textContent),
         { v: $(gt.d, 'hamil_rx_v').textContent, sk: $(gt.d, 'skrining_obat').textContent });
       check('Gerbang: pasien tidak hamil -> bendera tersembunyi, baris resep tidak ditandai', $(a.d, 'hamil_box').style.display === 'none' && !a.d.querySelector('#d4_rx tr.rx-risk'));
+      /* di DALAM modal: pita di atas tiap tabel resep, baris Isotretinoin ditandai, chip di strip konteks */
+      gt.w.openProg('acne');
+      const bands = [...gt.d.querySelectorAll('#ovl_acne .rxhamil')];
+      check('Gerbang modal: strip konteks menyebut PASIEN SEDANG HAMIL; pita hamil di atas tiap tabel resep Acne; baris Isotretinoin ditandai rx-risk', /PASIEN SEDANG HAMIL/.test($(gt.d, 'ctx_acne').textContent) && bands.length === gt.d.querySelectorAll('#ovl_acne .rx-table').length && bands.every(b => !b.hidden) && gt.d.querySelector('#ac_block-1 .rx-table tbody tr:first-child').classList.contains('rx-risk'), { bands: bands.length, hidden: bands.map(b => b.hidden) });
+      { const r2 = gt.d.querySelectorAll('#ac_block-1 .rx-table tbody tr')[1], i2 = r2.querySelector('input'); i2.value = 'Niacinamide 5%'; i2.dispatchEvent(new gt.w.Event('input', { bubbles: true }));
+        const aman = !r2.classList.contains('rx-risk'); i2.value = 'Tretinoin 0,05%'; i2.dispatchEvent(new gt.w.Event('input', { bubbles: true }));
+        check('Gerbang modal: baris ditandai LANGSUNG saat obat berisiko diketik (Niacinamide aman, Tretinoin ditandai)', aman && r2.classList.contains('rx-risk')); }
+      check('Gerbang modal: pasien tidak hamil -> pita tersembunyi & tidak ada baris ditandai', (a.w.openProg('acne'), [...a.d.querySelectorAll('#ovl_acne .rxhamil')].every(b => b.hidden) && !a.d.querySelector('#ovl_acne tr.rx-risk') && !/HAMIL/.test($(a.d, 'ctx_acne').textContent)));
+      a.w.closeProg('acne'); gt.w.closeProg('acne');
       gt.dialogs.length = 0; gt.w.issueHandoff(); await sleep(300);
       const cf = (gt.dialogs.find(x => x.type === 'confirm') || {}).msg || '';
       check('Gerbang: Terbitkan memperingatkan obat berisiko + consent tindakan; pasien hamil ditandai PALING ATAS',

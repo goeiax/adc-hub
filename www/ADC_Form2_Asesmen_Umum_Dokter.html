@@ -81,6 +81,13 @@ table.tbl td{padding:4px 8px;border:1px solid var(--line);vertical-align:middle;
 .flag .alg-v{flex:1;font-size:15px;font-weight:600;color:var(--ink-fill);}
 .flag .alg-v.kosong{color:var(--accent-deep,#8E4A33);font-weight:600;}
 .flag .alg-src{font-size:11.5px;color:var(--ink-2);white-space:nowrap;}
+/* hamil/menyusui DI DALAM modal program: chip konteks, pita di atas tabel resep, baris berisiko */
+.ovl .ctx-hamil{display:inline-block;margin-top:5px;padding:4px 9px;border-radius:6px;background:#FBEDE8;color:#7A1A1A;font-weight:700;font-size:12.5px;line-height:1.4;}
+.ovl .rxhamil{display:flex;align-items:center;gap:8px;margin:8px 0 4px;padding:7px 11px;border:1.5px solid var(--accent-deep,#8E4A33);border-radius:8px;background:#FBEDE8;color:#7A1A1A;font-size:12.5px;line-height:1.4;}
+.ovl .rxhamil b{letter-spacing:.06em;text-transform:uppercase;font-size:11px;}
+.ovl .rxhamil[hidden]{display:none;}
+.ovl tr.rx-risk td{background:#FBEDE8;}
+.ovl tr.rx-risk td:first-child::before{content:'⚠ berisiko';flex:none;display:inline-block;margin-right:6px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent-deep,#8E4A33);border:1px solid var(--accent-deep,#8E4A33);border-radius:4px;padding:1px 5px;vertical-align:middle;}
 /* bendera hamil/menyusui + baris resep berisiko + baris skrining D7 */
 .flag.hamil{border-color:var(--accent-deep,#8E4A33) !important;background:#FBEDE8 !important;}
 .flag.hamil .badge{background:var(--accent-deep,#8E4A33);}
@@ -2351,9 +2358,11 @@ function openProg(p){
       ' · RM '+(_v('rm')||'—')+' · '+(_v('tgl')||'—')+' · Dokter: '+(_dokterKini()||'—')+
       '<br>Diagnosis (D1): '+(_v('d2_dx')||'—')+
       '<br><b>Alergi / kontraindikasi: '+al+'</b>'+
+      (_pasienHamilMenyusui()?('<br><span class="ctx-hamil">⚠ PASIEN '+_pasienHamilMenyusui().toUpperCase()+' — hindari obat berisiko (retinoid/isotretinoin, hormonal, TXA, tetrasiklin); baris resep berisiko ditandai otomatis</span>'):'')+
       '<br><span style="color:var(--ink-muted)">Diambil otomatis dari Form 2 — jangan ketik ulang. Tutup pop-up untuk kembali; isian tersimpan.</span>';
   }
   o.classList.add('open'); _open=p; document.body.style.overflow='hidden';
+  if(typeof renderHamilModal==='function') renderHamilModal(p);
 }
 function closeProg(p){
   var o=document.getElementById('ovl_'+p); if(o) o.classList.remove('open');
@@ -2732,6 +2741,7 @@ function collectRx(){
   return out;
 }
 function renderRxMirror(){
+  if(typeof renderHamilModal==='function') renderHamilModal();   /* pita & tanda baris di dalam modal ikut status terbaru */
   var tb=document.getElementById('d4_rx'); if(!tb) return;
   var rx=collectRx(), hm=_pasienHamilMenyusui();
   tb.innerHTML = rx.length ? rx.map(function(r){
@@ -3485,7 +3495,8 @@ function openRxPick(inp){
   document.addEventListener('keydown',_rxKb,true);
   bg.classList.add('on'); setTimeout(function(){ try{ document.getElementById('rxp_q').focus(); }catch(e){} },0);
 }
-function closeRxPick(){ var bg=document.getElementById('rxpick'); if(bg) bg.classList.remove('on');
+function closeRxPick(){
+  if(_rxTarget&&_rxTarget.closest&&typeof _markRxRow==='function') _markRxRow(_rxTarget.closest('tr')); var bg=document.getElementById('rxpick'); if(bg) bg.classList.remove('on');
   if(_rxKb){ document.removeEventListener('keydown',_rxKb,true); _rxKb=null; } _rxTarget=null; }
 function renderRxPick(){
   var tabs=document.getElementById('rxp_tabs'), list=document.getElementById('rxp_list'); if(!tabs||!list) return;
@@ -3836,6 +3847,31 @@ function syncRisikoBekas(manual){
   if(c){ c.hidden=!(cur==='Sedang'||cur==='Tinggi'); if(lv) lv.textContent=cur.toUpperCase(); }
   document.querySelectorAll('#rb_seg .rbopt').forEach(function(l){ var r=l.querySelector('input'); l.classList.toggle('on',r.checked); l.classList.toggle('saran',!!saran&&r.value===saran&&!r.checked); });
 }
+
+/* ===== HAMIL / MENYUSUI DI DALAM MODAL PROGRAM =====
+   Gerbang obat sebelumnya baru terlihat di D3/D7 — satu langkah setelah obat diketik. Di sini bendera
+   ada di tempat tangan mengetik: pita di atas tiap tabel resep + baris yang cocok OBAT_RISIKO ditandai
+   (nama produk ADC dicek bahannya lewat _produkByName). Tanpa status hamil, tidak ada yang ditandai. */
+function _rxRowRisk(tr){
+  var inp=tr.querySelector('input'); if(!inp) return false;
+  var v=(inp.value||'').trim(); if(!v) return false;
+  if(OBAT_RISIKO.test(v)) return true;
+  var pr=(typeof _produkByName==='function')?_produkByName(v):null; return !!(pr&&OBAT_RISIKO.test(pr.b||''));
+}
+function _markRxRow(tr,hm){ if(!tr) return; if(hm===undefined) hm=_pasienHamilMenyusui(); tr.classList.toggle('rx-risk', !!(hm&&_rxRowRisk(tr))); }
+function renderHamilModal(p){
+  var hm=_pasienHamilMenyusui(), roots=p?[document.getElementById('ovl_'+p)]:[].slice.call(document.querySelectorAll('.ovl'));
+  roots.forEach(function(root){ if(!root) return;
+    root.querySelectorAll('.rx-table, #hr_rxTable').forEach(function(tb){
+      var band=tb.previousElementSibling; if(!band||!band.classList||!band.classList.contains('rxhamil')){
+        band=document.createElement('div'); band.className='rxhamil'; band.setAttribute('role','status'); tb.parentNode.insertBefore(band,tb); }
+      band.hidden=!hm;
+      if(hm) band.innerHTML='<b>Hamil / menyusui</b><span>PASIEN '+_esc(hm.toUpperCase())+' — periksa tiap baris; obat berisiko ditandai ⚠ saat diketik.</span>';
+      tb.querySelectorAll('tbody tr').forEach(function(tr){ _markRxRow(tr,hm); });
+    });
+  });
+}
+document.addEventListener('input',function(e){ var t=e.target; if(t&&t.closest){ var tr=t.closest('.ovl .rx-table tbody tr, #hr_rxTable tbody tr'); if(tr) _markRxRow(tr); } },true);
 
 /* ===== ICD-10 (PMK 24/2022 Ps. 18: diagnosis diberi kode) =====
    Subset dermatologi-estetik & metabolik yang dipakai ADC; cari kode/nama, boleh lebih dari satu.
