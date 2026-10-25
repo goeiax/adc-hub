@@ -1489,9 +1489,9 @@ body.mode-kontrol #rb2 .rl::after{content:' — dilewati';font-size:11px;font-we
     <div class="tb-hint">Diisi dokter · sebelum masuk form program khusus · Form 1 (pasien) harus sudah lengkap</div>
   </div>
   <div class="tb-actions">
-    <span class="hubchip off" id="hubchip" onclick="hubMenu()" title="Klik: masuk / ganti pengguna &amp; atur hub">HUB &middot; …</span><button class="btn tan" onclick="muatIntakeHub()">Muat Form 1</button>
-    <button class="btn" onclick="muatHandoffHub()">Muat Handoff</button>
-    <button class="btn tan" onclick="cetakSemua()">Cetak / Simpan PDF</button>
+    <span class="hubchip off" id="hubchip" onclick="hubMenu()" title="Klik: masuk / ganti pengguna &amp; atur hub">HUB &middot; …</span><button class="btn tan" id="tb_muat1" onclick="muatIntakeHub()">Muat Form 1</button>
+    <button class="btn" id="tb_muatho" onclick="muatHandoffHub()">Muat Handoff</button>
+    <button class="btn" onclick="cetakSemua()">Cetak / Simpan PDF</button>
     <div class="tb-more"><button type="button" class="btn" id="tb_more" aria-haspopup="menu" aria-expanded="false" aria-controls="tbmenu" onclick="tbMenu()">Lainnya &#9662;</button>
       <div class="tbmenu" id="tbmenu" role="menu" aria-label="Aksi lain">
         <button type="button" role="menuitem" onclick="tbMenu(false);issueHandoff()">Terbitkan Handoff <small>juga di akhir langkah 6</small></button>
@@ -1763,7 +1763,6 @@ body.mode-kontrol #rb2 .rl::after{content:' — dilewati';font-size:11px;font-we
       <tr><td colspan="5" style="color:var(--ink-muted)">Belum ada resep — tulis di form program (D2).</td></tr>
     </tbody>
   </table>
-  <div class="callout"><span class="k">Rujukan bila perlu</span>Obat hormonal oral (Finasteride / Spironolactone / Minoxidil oral) belum tersedia di ADC — resep diperoleh di Melinda Hospital. Treatment in-clinic tetap di ADC.</div>
 
   <!-- D4 -->
   
@@ -1792,7 +1791,7 @@ body.mode-kontrol #rb2 .rl::after{content:' — dilewati';font-size:11px;font-we
 
   
   <!-- D5 (opsional) ikut langkah rencana, bukan langkah sign-off -->
-  <div class="sec"><span class="n">D5</span>Rekomendasi bertahap<span class="opt">opsional — isi bila pasien menanyakan langkah lanjutan</span> &nbsp;<span style="font-weight:600;color:var(--ink-muted);letter-spacing:.04em;text-transform:none">— catatan pegangan pasien (case-by-case)</span></div>
+  <div class="sec"><span class="n">D5</span>Rekomendasi bertahap<span class="opt">opsional — catatan pegangan pasien</span></div>
   <p class="note">Bersifat bertahap sesuai kondisi pasien — <b>bukan janji hasil</b>. Pasien membawa pulang catatan ini agar tahu langkah berikutnya; harga ditanyakan ke bagian depan.</p>
   <table class="tbl">
     <thead><tr><th style="width:12%">Tahap</th><th style="width:36%">Yang direkomendasikan</th><th style="width:28%">Tujuan / kondisi sasaran</th><th style="width:24%">Perkiraan waktu</th></tr></thead>
@@ -1943,27 +1942,27 @@ body.mode-kontrol #rb2 .rl::after{content:' — dilewati';font-size:11px;font-we
       <tr>
         <td class="ff-fac"><span class="ff-badge f1">1</span>Sebum berlebih</td>
         <td><div class="ff-list"><label class="ck"><input type="checkbox"> Kulit berminyak</label><label class="ck"><input type="checkbox"> Tanda hormonal</label><label class="ck"><input type="checkbox"> Diet tinggi GI (gula/karbo)</label></div></td>
-        <td class="tx-cell"><span class="tx-hint">centang pemicu di kiri dulu</span><div class="ff-list"><label class="ck"><input type="checkbox"> Microneedling RF</label><label class="ck"><input type="checkbox"> Metabolic Health</label><label class="ck"><input type="checkbox"> PCOS-Promi</label><label class="ck"><input type="checkbox"> Nutrigenomic</label><label class="ck ff-rx"><input type="checkbox"> Rx isotretinoin / spironolactone / pil KB</label><input class="tx-extra" placeholder="+ treatment lain (tulis bebas)"></div></td>
+        <td class="tx-cell"><span class="tx-hint">pilih pemicu dulu</span><div class="ff-list"><label class="ck"><input type="checkbox"> Microneedling RF</label><label class="ck"><input type="checkbox"> Metabolic Health</label><label class="ck"><input type="checkbox"> PCOS-Promi</label><label class="ck"><input type="checkbox"> Nutrigenomic</label><label class="ck ff-rx"><input type="checkbox"> Rx isotretinoin / spironolactone / pil KB</label><input class="tx-extra" placeholder="+ treatment lain (tulis bebas)"></div></td>
       </tr>
       <tr>
         <td class="ff-fac"><span class="ff-badge f2">2</span>Pori tersumbat</td>
         <td><div class="ff-list"><label class="ck"><input type="checkbox"> Komedo</label><label class="ck"><input type="checkbox"> Pori tersumbat</label></div></td>
-        <td class="tx-cell"><span class="tx-hint">centang pemicu di kiri dulu</span><div class="ff-list"><label class="ck"><input type="checkbox"> Deep Pore Cleansing (ekstraksi forceps)</label><label class="ck"><input type="checkbox"> Glow Peel</label><label class="ck"><input type="checkbox"> Dermapen 4</label><label class="ck ff-rx"><input type="checkbox"> Rx retinoid / azelaic</label><input class="tx-extra" placeholder="+ treatment lain (tulis bebas)"></div></td>
+        <td class="tx-cell"><span class="tx-hint">pilih pemicu dulu</span><div class="ff-list"><label class="ck"><input type="checkbox"> Deep Pore Cleansing (ekstraksi forceps)</label><label class="ck"><input type="checkbox"> Glow Peel</label><label class="ck"><input type="checkbox"> Dermapen 4</label><label class="ck ff-rx"><input type="checkbox"> Rx retinoid / azelaic</label><input class="tx-extra" placeholder="+ treatment lain (tulis bebas)"></div></td>
       </tr>
       <tr>
         <td class="ff-fac"><span class="ff-badge f3">3</span>Bakteri tidak seimbang</td>
         <td><div class="ff-list"><label class="ck"><input type="checkbox"> Lesi inflamasi</label><label class="ck"><input type="checkbox"> Pustul</label></div></td>
-        <td class="tx-cell"><span class="tx-hint">centang pemicu di kiri dulu</span><div class="ff-list"><label class="ck"><input type="checkbox"> Deep Pore Combo (IPL)</label><label class="ck ff-rx"><input type="checkbox"> Home: BPO + cuci muka lembut</label><input class="tx-extra" placeholder="+ treatment lain (tulis bebas)"></div></td>
+        <td class="tx-cell"><span class="tx-hint">pilih pemicu dulu</span><div class="ff-list"><label class="ck"><input type="checkbox"> Deep Pore Combo (IPL)</label><label class="ck ff-rx"><input type="checkbox"> Home: BPO + cuci muka lembut</label><input class="tx-extra" placeholder="+ treatment lain (tulis bebas)"></div></td>
       </tr>
       <tr>
         <td class="ff-fac"><span class="ff-badge f4">4</span>Imunitas / usus</td>
         <td><div class="ff-list"><label class="ck"><input type="checkbox"> Keluhan pencernaan</label><label class="ck"><input type="checkbox"> Sensitivitas makanan</label></div></td>
-        <td class="tx-cell"><span class="tx-hint">centang pemicu di kiri dulu</span><div class="ff-list"><label class="ck"><input type="checkbox"> Food Detective (IgG)</label><label class="ck"><input type="checkbox"> Nutrigenomic</label><label class="ck"><input type="checkbox"> Metabolic Health</label><label class="ck"><input type="checkbox"> Suplemen maintenance</label><input class="tx-extra" placeholder="+ treatment lain (tulis bebas)"></div></td>
+        <td class="tx-cell"><span class="tx-hint">pilih pemicu dulu</span><div class="ff-list"><label class="ck"><input type="checkbox"> Food Detective (IgG)</label><label class="ck"><input type="checkbox"> Nutrigenomic</label><label class="ck"><input type="checkbox"> Metabolic Health</label><label class="ck"><input type="checkbox"> Suplemen maintenance</label><input class="tx-extra" placeholder="+ treatment lain (tulis bebas)"></div></td>
       </tr>
       <tr>
         <td class="ff-fac"><span class="ff-badge fp">PIH</span>Bekas</td>
         <td><div class="ff-list"><label class="ck"><input type="checkbox"> Merah (PIE)</label><label class="ck"><input type="checkbox"> Gelap (PIH)</label></div></td>
-        <td class="tx-cell"><span class="tx-hint">centang pemicu di kiri dulu</span><div class="ff-list"><label class="ck"><input type="checkbox"> PicoSure Pro</label><label class="ck"><input type="checkbox"> Dermapen 4 + serum TXA</label><label class="ck"><input type="checkbox"> Excel-V</label><input class="tx-extra" placeholder="+ treatment lain (tulis bebas)"></div></td>
+        <td class="tx-cell"><span class="tx-hint">pilih pemicu dulu</span><div class="ff-list"><label class="ck"><input type="checkbox"> PicoSure Pro</label><label class="ck"><input type="checkbox"> Dermapen 4 + serum TXA</label><label class="ck"><input type="checkbox"> Excel-V</label><input class="tx-extra" placeholder="+ treatment lain (tulis bebas)"></div></td>
       </tr>
     </tbody>
   </table>
@@ -2433,7 +2432,7 @@ function openProg(p){
       '<br>Diagnosis (D1): '+(_v('d2_dx')||'—')+
       '<br><b>Alergi / kontraindikasi: '+al+'</b>'+
       (_pasienHamilMenyusui()?('<br><span class="ctx-hamil">⚠ PASIEN '+_pasienHamilMenyusui().toUpperCase()+' — hindari obat berisiko (retinoid/isotretinoin, hormonal, TXA, tetrasiklin); baris resep berisiko ditandai otomatis</span>'):'')+
-      '<br><span style="color:var(--ink-muted)">Diambil otomatis dari Form 2 — jangan ketik ulang. Tutup pop-up untuk kembali; isian tersimpan.</span>';
+      '';
   }
   o.classList.add('open'); _open=p; document.body.style.overflow='hidden';
   if(typeof renderHamilModal==='function') renderHamilModal(p);
@@ -3529,6 +3528,9 @@ function setMode(m){
   var a=document.getElementById('mb_awal'), k=document.getElementById('mb_kontrol'), ket=document.getElementById('mb_ket');
   if(a) a.classList.toggle('on', m==='awal');
   if(k) k.classList.toggle('on', m==='kontrol');
+  /* satu tombol utama di toolbar: awal = Muat Form 1, kontrol = Muat Handoff */
+  var t1=document.getElementById('tb_muat1'), th=document.getElementById('tb_muatho');
+  if(t1) t1.classList.toggle('tan', m!=='kontrol'); if(th) th.classList.toggle('tan', m==='kontrol');
   if(ket) ket.textContent = (m==='kontrol')
     ? 'Bagian pemeriksaan di D1 & D2 (penentuan program) disembunyikan — sudah ditetapkan di kunjungan awal. Ubah ke "Kunjungan awal" bila perlu direvisi.'
     : 'Semua bagian tampil.';
@@ -4121,7 +4123,7 @@ function openICD(){
   var bg=document.getElementById('icdlg');
   if(!bg){
     bg=document.createElement('div'); bg.id='icdlg'; bg.className='mdlg-bg';
-    bg.innerHTML='<div class="mdlg rxp" role="dialog" aria-modal="true"><div class="mdlg-t">Kode ICD-10</div>'+
+    bg.innerHTML='<div class="mdlg rxp" role="dialog" aria-modal="true"><div class="mdlg-t">Kode ICD-10</div><div class="mdlg-msg" style="margin:0 0 8px;color:var(--ink-muted)">Boleh lebih dari satu kode. Kode pertama mengisi kolom Diagnosis bila masih kosong.</div>'+
       '<input class="mdlg-in icdq" id="icd_q" autocomplete="off" placeholder="ketik kode (L70) atau nama (melasma, alopesia…)" oninput="_icdRender(this.value)">'+
       '<div class="rxp-list" id="icd_list"></div>'+
       '<div class="mdlg-b" style="margin-top:10px"><span class="mdlg-sp"></span><button type="button" class="mdlg-x" onclick="closeICD()">Tutup</button></div></div>';
@@ -4198,6 +4200,7 @@ function bukaConsent(){
     document.getElementById('cd_x').onclick=function(){ dlgTutup(bg); };
   }
   var g=function(id){ return document.getElementById(id); };
+  g('cd_tind').placeholder='terisi dari prosedur yang dicentang di form program — atau tulis di sini, satu per baris';
   g('cd_tind').value=tind.join('\n');
   g('cd_1').value=[a.diagnosis, a.derajat?('derajat '+a.derajat):'', _icdTeks(a.icd)?('ICD-10: '+_icdTeks(a.icd)):'', a.hasil?('Dasar: '+a.hasil):''].filter(Boolean).join('\n');
   g('cd_2').value=(tind.length?(tind.join(', ')+' — '):'')+'bertujuan '+(_icGabung('tujuan')||'memperbaiki kondisi kulit sesuai diagnosis')+'. Dikerjakan bertahap sesuai program; jumlah sesi menurut respons.';
