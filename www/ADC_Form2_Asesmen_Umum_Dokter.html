@@ -3847,7 +3847,7 @@ function openICD(){
 /* ===== WAKTU ISIAN per bagian (PMK 24/2022 Ps. 16 ayat 2: tiap entri bernama & berwaktu) =====
    Direkam otomatis saat field diubah; ikut ke handoff sebagai waktu_isian {bagian:{mulai,terakhir,n,oleh}}. */
 window._isian={};
-var _ISIAN_STEP={'0':'D0','1':'D1','2':'D2','3':'D3-D4','4':'D5-D7 + D4b'};
+var _ISIAN_STEP={'0':'D0','1':'D1','2':'D2','3':'D3-D5','4':'D6-D7','5':'D4b-D8'};
 function _catatIsian(e){
   var t=e.target; if(!t||!t.closest||!/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName||'')) return;
   if(t.closest('.mdlg-bg,.ldlg-bg')) return;
