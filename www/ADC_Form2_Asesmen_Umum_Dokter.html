@@ -1463,8 +1463,8 @@ body.mode-kontrol #rb2 .rl::after{content:' — dilewati';font-size:11px;font-we
   padding:0 !important;border:none !important;background:none !important;gap:6px;white-space:nowrap;flex:0 0 auto;}
 .ctlbar .reqbar{flex:1 1 320px;min-width:0;flex-wrap:wrap;padding-left:14px !important;border-left:1px solid var(--line-strong) !important;}
 /* hanya butir yang belum lengkap yang tampil; "lihat semua" membuka butir yang sudah OK */
-.reqbar .it.ok{display:none;}
-.reqbar.semua .it.ok{display:inline-block;}
+.reqbar .it.ok,.reqbar .it.lebih{display:none;}
+.reqbar.semua .it.ok,.reqbar.semua .it.lebih{display:inline-block;}
 .reqbar .tg{font:inherit;font-size:12px;color:var(--ink-muted);background:none;border:none;text-decoration:underline;text-underline-offset:2px;cursor:pointer;padding:4px 6px;min-height:32px;white-space:nowrap;}
 .reqbar .tg:hover{color:var(--accent-deep);}
 .ctlbar .modebar .lb{font-size:12px;letter-spacing:.1em;margin-right:2px;}
@@ -1473,8 +1473,8 @@ body.mode-kontrol #rb2 .rl::after{content:' — dilewati';font-size:11px;font-we
 .ctlbar .reqbar .cnt{font-size:12px !important;padding:0 11px !important;min-height:36px;display:inline-flex;align-items:center;border-radius:999px;}
 .ctlbar .reqbar .lst{flex-wrap:wrap !important;gap:5px;align-items:center;}
 .ctlbar .reqbar .it{padding:0 12px !important;min-height:44px;display:inline-flex;align-items:center;font-size:12.5px !important;white-space:nowrap;}
-.ctlbar .reqbar .it.ok{display:none;}
-.ctlbar .reqbar.semua .it.ok{display:inline-flex;}
+.ctlbar .reqbar .it.ok,.ctlbar .reqbar .it.lebih{display:none;}
+.ctlbar .reqbar.semua .it.ok,.ctlbar .reqbar.semua .it.lebih{display:inline-flex;}
 @media print{.ctlbar{display:none !important;}}
 </style>
 </head>
@@ -3739,11 +3739,13 @@ function updateReq(){
   cnt.textContent = done===st.length ? ('Wajib '+done+'/'+st.length+' — lengkap') : ('Wajib '+done+'/'+st.length);
   /* Bar hanya menampilkan yang BELUM lengkap (itulah yang perlu diklik); butir OK disembunyikan
      supaya bar tidak terpotong di lebar tablet. "lihat semua" membuka rinciannya. */
-  var semua=bar.classList.contains('semua'), sisa=st.length-done;
+  var semua=bar.classList.contains('semua'), sisa=st.length-done, MAKS=3, ke=0;
+  /* paling banyak 3 butir belum tampil (bar tetap satu baris di tablet); sisanya di balik "+N lagi" */
   lst.innerHTML = st.map(function(x,i){
-    return '<span class="it '+(x.ok?'ok':'no')+'" data-go="'+x.go+'">'+_hesc(x.label)+'</span>';
+    var lebih=!x.ok&&(++ke>MAKS);
+    return '<span class="it '+(x.ok?'ok':'no')+(lebih?' lebih':'')+'" data-go="'+x.go+'">'+_hesc(x.label)+'</span>';
   }).join('') + (st.length?('<button type="button" class="tg" onclick="toggleReqSemua()" aria-pressed="'+(semua?'true':'false')+'">'+
-    (semua?'sembunyikan yang selesai':(sisa?('lihat semua '+st.length):'lihat rincian'))+'</button>'):'');
+    (semua?'sembunyikan':(sisa>MAKS?('+'+(sisa-MAKS)+' lagi'):(sisa?('lihat semua '+st.length):'lihat rincian')))+'</button>'):'');
   lst.querySelectorAll('.it.no').forEach(function(el){
     el.onclick=function(){ goTo(el.getAttribute('data-go')); };
   });

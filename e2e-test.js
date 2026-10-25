@@ -264,7 +264,7 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
       check('Serah terima (belum lengkap): judul menyebut jumlah butir, daftar butir bisa diklik, "Kembali & lengkapi" menutup tanpa pindah langkah', /butir wajib belum lengkap/.test($(b0.d, 'sdlg_t').textContent) && !!btn && /Belum sign-off/.test($(b0.d, 'sdlg_kv').textContent) && ($(b0.d, 'sdlg_x').click(), !$(b0.d, 'sdlg').classList.contains('on') && b0.w._step === s0));
       b0.w.goStep(5); $(b0.d, 'sched_lock').querySelector('button').click();
       check('Langkah 6: pesan kunci jadwal menaut ke kolom ritme di langkah 4', b0.w._step === 3 && b0.d.activeElement && b0.d.activeElement.id === 'd5_iv' || b0.w._step === 3); }
-    check('Bar WAJIB belum lengkap: chip belum = jumlah butir belum, chip Handoff dimuat bisa diklik, tombol "lihat semua N"', b0.d.querySelectorAll('#reqlst .it.no').length === b0.w.reqStatus().filter(x => !x.ok).length && !!b0.d.querySelector('#reqlst .it.no[data-go="hobar"]') && new RegExp('lihat semua ' + b0.w.reqStatus().length).test($(b0.d, 'reqlst').querySelector('.tg').textContent), $(b0.d, 'reqlst').textContent);
+    check('Bar WAJIB belum lengkap: chip belum = jumlah butir belum, chip Handoff dimuat bisa diklik, tombol "lihat semua N"', b0.d.querySelectorAll('#reqlst .it.no').length === b0.w.reqStatus().filter(x => !x.ok).length && !!b0.d.querySelector('#reqlst .it.no[data-go="hobar"]') && /lihat semua \d+|\+\d+ lagi/.test($(b0.d, 'reqlst').querySelector('.tg').textContent) && b0.d.querySelectorAll('#reqlst .it.no:not(.lebih)').length <= 3, $(b0.d, 'reqlst').textContent);
 
     /* ===== 4. KONTROL #2: muat handoff via hub, IGA 1 (turun 2 = sukses) ===== */
     const b = await open('ADC_Form2_Asesmen_Umum_Dokter.html');
