@@ -43,6 +43,7 @@ Kontrol mode = `body.mode-kontrol` (`.vis-awal` hidden, `.vis-kontrol` shown); i
 - **Dual-role CSS classes**: `.sec`, `.row`, `.opt`, `.f`, `.ck` mean different things in main form vs. the Hair-Loss modal (`#ovl_hair`, imported markup). Any global style change must be checked for leakage into `#ovl_hair`.
 - Grid span classes differ per file (`.k4` exists in Form 2, not Form 1). Check definitions in the target file.
 - Avoid `border` shorthand with `var()` where tests run in jsdom — use longhands.
+- **Dialogs**: every `.mdlg-bg` dialog (Muat, Rx picker, ICD-10, consent) opens via `dlgBuka(bg, tutup)` and closes via `dlgTutup(bg)` (shared block in all 4 forms): Escape, focus trap, one dialog at a time, focus restored. The login/TTD dialog (`_ldlg`) closes any active dialog except Muat (`#mdlg`), which must stay open for the 401 → login → retry flow. Close labels: pickers "Tutup", forms "Batal".
 - Editing markup: delete exact element ranges (balanced-div scan), never broad regex — an earlier edit silently deleted the Acne program card.
 
 ## Testing

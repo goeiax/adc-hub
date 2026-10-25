@@ -364,6 +364,28 @@ function _hubCekSesi(j){
   }catch(e){}
 }
 function hubMenu(){ if(!_hubOn) hubSetup(); else hubLogin(); }
+/* ---- satu tata dialog (.mdlg-bg): Esc menutup, fokus terkunci, dialog lain ditutup dulu, fokus kembali ---- */
+window._dlgAktif=null;
+function dlgBuka(bg,tutup){
+  if(window._dlgAktif&&window._dlgAktif.bg!==bg){ try{ window._dlgAktif.tutup(); }catch(e){} }
+  if(window._ldlgAkhir){ var lama=window._ldlgAkhir; window._ldlgAkhir=null; lama(null); }
+  window._dlgAktif={bg:bg,tutup:tutup,fokus:document.activeElement};
+  bg.classList.add('on');
+}
+function dlgTutup(bg){
+  var a=window._dlgAktif; bg.classList.remove('on');
+  if(a&&a.bg===bg){ window._dlgAktif=null; try{ if(a.fokus&&a.fokus.focus&&document.body.contains(a.fokus)) a.fokus.focus(); }catch(e){} }
+}
+document.addEventListener('keydown',function(e){
+  var a=window._dlgAktif; if(!a||!a.bg.classList.contains('on')) return;
+  if(e.key==='Escape'){ e.stopPropagation(); e.preventDefault(); a.tutup(); return; }
+  if(e.key==='Tab'){
+    var f=[].filter.call(a.bg.querySelectorAll('button,[href],input,select,textarea,[tabindex]:not([tabindex="-1"])'),function(x){ return !x.disabled&&!x.closest('[hidden]'); });
+    if(!f.length) return; var awal=f[0], akhir=f[f.length-1];
+    if(e.shiftKey&&document.activeElement===awal){ e.preventDefault(); akhir.focus(); }
+    else if(!e.shiftKey&&(document.activeElement===akhir||!a.bg.contains(document.activeElement))){ e.preventDefault(); awal.focus(); }
+  }
+},true);
 function _ldlgBuat(){
   var bg=document.getElementById('ldlg'); if(bg) return bg;
   var st=document.createElement('style');
@@ -383,6 +405,8 @@ function _ldlgBuat(){
    _ldlg('ttd',{rm,id},cb) -> cb(ttdObj) | cb(null) batal */
 function _ldlg(mode,opsi,cb){
   var bg=_ldlgBuat(), g=function(id){return document.getElementById(id);}, ttd=(mode==='ttd'), u=window._hubUser, selesai=false;
+  /* dialog lain (picker/consent) ditutup; dialog Muat dibiarkan di bawah — alur 401 -> masuk -> ulangi memerlukannya */
+  if(window._dlgAktif&&window._dlgAktif.bg&&window._dlgAktif.bg.id!=='mdlg'){ try{ window._dlgAktif.tutup(); }catch(e){} }
   if(window._ldlgAkhir){ var sebelumnya=window._ldlgAkhir; window._ldlgAkhir=null; sebelumnya(null); }  /* dialog lama ditutup dulu — tidak ada callback yatim */
   var akhir=function(v){ if(selesai) return; selesai=true; window._ldlgAkhir=null; bg.classList.remove('on'); document.removeEventListener('keydown',kb,true); cb(v); };
   window._ldlgAkhir=akhir;
@@ -489,7 +513,7 @@ function _dlgMuat(judul, berkasId, onRM){
      dibuka diabaikan (tidak memuat pasien, tidak menutup dialog yang salah). Satu
      listener keydown global — dilepas sebelum dipasang lagi, supaya Esc tidak "bocor". */
   var tok=++_dlgSeq, btnOk=document.getElementById('mdlg_ok');
-  var tutup=function(){ _dlgSeq++; bg.classList.remove('on'); btnOk.disabled=false;
+  var tutup=function(){ _dlgSeq++; dlgTutup(bg); btnOk.disabled=false;
     if(_dlgKb){ document.removeEventListener('keydown',_dlgKb,true); _dlgKb=null; } };
   var inp=document.getElementById('mdlg_rm'), msg=document.getElementById('mdlg_msg');
   var ok=function(){
@@ -506,8 +530,7 @@ function _dlgMuat(judul, berkasId, onRM){
     });
   };
   if(_dlgKb) document.removeEventListener('keydown',_dlgKb,true);
-  _dlgKb=function(e){ if(e.key==='Escape'){ e.stopPropagation(); tutup(); }
-                      else if(e.key==='Enter'&&document.activeElement&&document.activeElement.id==='mdlg_rm'){ e.preventDefault(); ok(); } };
+  _dlgKb=function(e){ if(e.key==='Enter'&&document.activeElement&&document.activeElement.id==='mdlg_rm'){ e.preventDefault(); ok(); } };   /* Esc ditangani tata dialog bersama */
   document.getElementById('mdlg_t').textContent=judul;
   inp.value=((document.getElementById(RM_ID)||{}).value||'').trim(); msg.textContent='';
   document.getElementById('mdlg_ok').onclick=ok;
@@ -517,7 +540,7 @@ function _dlgMuat(judul, berkasId, onRM){
   bg.onclick=function(e){ if(e.target===bg) tutup(); };
   btnOk.disabled=false;
   document.addEventListener('keydown',_dlgKb,true);
-  bg.classList.add('on'); setTimeout(function(){ try{ inp.focus(); inp.select(); }catch(e){} },0);
+  dlgBuka(bg,tutup); setTimeout(function(){ try{ inp.focus(); inp.select(); }catch(e){} },0);
   /* saran RM dari daftar pasien di hub */
   try{
     fetch(hubURL()+'/api/pasien',{headers:hubHdr(),cache:'no-store'}).then(function(r){return r.json();})

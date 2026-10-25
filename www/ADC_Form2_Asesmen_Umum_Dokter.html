@@ -3136,6 +3136,28 @@ function _hubCekSesi(j){
   }catch(e){}
 }
 function hubMenu(){ if(!_hubOn) hubSetup(); else hubLogin(); }
+/* ---- satu tata dialog (.mdlg-bg): Esc menutup, fokus terkunci, dialog lain ditutup dulu, fokus kembali ---- */
+window._dlgAktif=null;
+function dlgBuka(bg,tutup){
+  if(window._dlgAktif&&window._dlgAktif.bg!==bg){ try{ window._dlgAktif.tutup(); }catch(e){} }
+  if(window._ldlgAkhir){ var lama=window._ldlgAkhir; window._ldlgAkhir=null; lama(null); }
+  window._dlgAktif={bg:bg,tutup:tutup,fokus:document.activeElement};
+  bg.classList.add('on');
+}
+function dlgTutup(bg){
+  var a=window._dlgAktif; bg.classList.remove('on');
+  if(a&&a.bg===bg){ window._dlgAktif=null; try{ if(a.fokus&&a.fokus.focus&&document.body.contains(a.fokus)) a.fokus.focus(); }catch(e){} }
+}
+document.addEventListener('keydown',function(e){
+  var a=window._dlgAktif; if(!a||!a.bg.classList.contains('on')) return;
+  if(e.key==='Escape'){ e.stopPropagation(); e.preventDefault(); a.tutup(); return; }
+  if(e.key==='Tab'){
+    var f=[].filter.call(a.bg.querySelectorAll('button,[href],input,select,textarea,[tabindex]:not([tabindex="-1"])'),function(x){ return !x.disabled&&!x.closest('[hidden]'); });
+    if(!f.length) return; var awal=f[0], akhir=f[f.length-1];
+    if(e.shiftKey&&document.activeElement===awal){ e.preventDefault(); akhir.focus(); }
+    else if(!e.shiftKey&&(document.activeElement===akhir||!a.bg.contains(document.activeElement))){ e.preventDefault(); awal.focus(); }
+  }
+},true);
 function _ldlgBuat(){
   var bg=document.getElementById('ldlg'); if(bg) return bg;
   var st=document.createElement('style');
@@ -3155,6 +3177,8 @@ function _ldlgBuat(){
    _ldlg('ttd',{rm,id},cb) -> cb(ttdObj) | cb(null) batal */
 function _ldlg(mode,opsi,cb){
   var bg=_ldlgBuat(), g=function(id){return document.getElementById(id);}, ttd=(mode==='ttd'), u=window._hubUser, selesai=false;
+  /* dialog lain (picker/consent) ditutup; dialog Muat dibiarkan di bawah — alur 401 -> masuk -> ulangi memerlukannya */
+  if(window._dlgAktif&&window._dlgAktif.bg&&window._dlgAktif.bg.id!=='mdlg'){ try{ window._dlgAktif.tutup(); }catch(e){} }
   if(window._ldlgAkhir){ var sebelumnya=window._ldlgAkhir; window._ldlgAkhir=null; sebelumnya(null); }  /* dialog lama ditutup dulu — tidak ada callback yatim */
   var akhir=function(v){ if(selesai) return; selesai=true; window._ldlgAkhir=null; bg.classList.remove('on'); document.removeEventListener('keydown',kb,true); cb(v); };
   window._ldlgAkhir=akhir;
@@ -3559,7 +3583,7 @@ function openRxPick(inp){
     bg.innerHTML='<div class="mdlg rxp" role="dialog" aria-modal="true"><div class="mdlg-t">Pilih produk ADC</div>'+
       '<input class="mdlg-in" id="rxp_q" placeholder="cari nama / kandungan (mis. tretinoin, BPO, sunscreen)" autocomplete="off">'+
       '<div class="rxp-tabs" id="rxp_tabs"></div><div class="rxp-list" id="rxp_list"></div>'+
-      '<div class="mdlg-b"><span class="mdlg-sp"></span><button type="button" class="mdlg-x" id="rxp_x">Batal</button></div></div>';
+      '<div class="mdlg-b"><span class="mdlg-sp"></span><button type="button" class="mdlg-x" id="rxp_x">Tutup</button></div></div>';
     document.body.appendChild(bg);
     document.getElementById('rxp_q').addEventListener('input',function(){ _rxQ=this.value; renderRxPick(); });
     document.getElementById('rxp_x').onclick=closeRxPick;
@@ -3567,14 +3591,11 @@ function openRxPick(inp){
   }
   _rxTarget=inp; _rxKat=_rxKatDefault(inp); _rxQ=''; document.getElementById('rxp_q').value='';
   renderRxPick();
-  if(_rxKb) document.removeEventListener('keydown',_rxKb,true);
-  _rxKb=function(e){ if(e.key==='Escape'){ e.stopPropagation(); closeRxPick(); } };
-  document.addEventListener('keydown',_rxKb,true);
-  bg.classList.add('on'); setTimeout(function(){ try{ document.getElementById('rxp_q').focus(); }catch(e){} },0);
+  dlgBuka(bg,closeRxPick); setTimeout(function(){ try{ document.getElementById('rxp_q').focus(); }catch(e){} },0);
 }
 function closeRxPick(){
-  if(_rxTarget&&_rxTarget.closest&&typeof _markRxRow==='function') _markRxRow(_rxTarget.closest('tr')); var bg=document.getElementById('rxpick'); if(bg) bg.classList.remove('on');
-  if(_rxKb){ document.removeEventListener('keydown',_rxKb,true); _rxKb=null; } _rxTarget=null; }
+  if(_rxTarget&&_rxTarget.closest&&typeof _markRxRow==='function') _markRxRow(_rxTarget.closest('tr')); var bg=document.getElementById('rxpick'); if(bg) dlgTutup(bg);
+  _rxTarget=null; }
 function renderRxPick(){
   var tabs=document.getElementById('rxp_tabs'), list=document.getElementById('rxp_list'); if(!tabs||!list) return;
   var q=_rxQ.trim().toLowerCase();
@@ -3827,7 +3848,7 @@ function _dlgMuat(judul, berkasId, onRM){
      dibuka diabaikan (tidak memuat pasien, tidak menutup dialog yang salah). Satu
      listener keydown global — dilepas sebelum dipasang lagi, supaya Esc tidak "bocor". */
   var tok=++_dlgSeq, btnOk=document.getElementById('mdlg_ok');
-  var tutup=function(){ _dlgSeq++; bg.classList.remove('on'); btnOk.disabled=false;
+  var tutup=function(){ _dlgSeq++; dlgTutup(bg); btnOk.disabled=false;
     if(_dlgKb){ document.removeEventListener('keydown',_dlgKb,true); _dlgKb=null; } };
   var inp=document.getElementById('mdlg_rm'), msg=document.getElementById('mdlg_msg');
   var ok=function(){
@@ -3844,8 +3865,7 @@ function _dlgMuat(judul, berkasId, onRM){
     });
   };
   if(_dlgKb) document.removeEventListener('keydown',_dlgKb,true);
-  _dlgKb=function(e){ if(e.key==='Escape'){ e.stopPropagation(); tutup(); }
-                      else if(e.key==='Enter'&&document.activeElement&&document.activeElement.id==='mdlg_rm'){ e.preventDefault(); ok(); } };
+  _dlgKb=function(e){ if(e.key==='Enter'&&document.activeElement&&document.activeElement.id==='mdlg_rm'){ e.preventDefault(); ok(); } };   /* Esc ditangani tata dialog bersama */
   document.getElementById('mdlg_t').textContent=judul;
   inp.value=((document.getElementById('rm')||{}).value||'').trim(); msg.textContent='';
   document.getElementById('mdlg_ok').onclick=ok;
@@ -3855,7 +3875,7 @@ function _dlgMuat(judul, berkasId, onRM){
   bg.onclick=function(e){ if(e.target===bg) tutup(); };
   btnOk.disabled=false;
   document.addEventListener('keydown',_dlgKb,true);
-  bg.classList.add('on'); setTimeout(function(){ try{ inp.focus(); inp.select(); }catch(e){} },0);
+  dlgBuka(bg,tutup); setTimeout(function(){ try{ inp.focus(); inp.select(); }catch(e){} },0);
   /* saran RM dari daftar pasien di hub */
   try{
     fetch(hubURL()+'/api/pasien',{headers:hubHdr(),cache:'no-store'}).then(function(r){return r.json();})
@@ -3979,7 +3999,7 @@ function pickICD(k){
   var dx=document.getElementById('d2_dx'); if(dx&&!dx.value.trim()){ dx.value=it[1]; if(typeof updateReq==='function') updateReq(); }
   closeICD();
 }
-function closeICD(){ var bg=document.getElementById('icdlg'); if(bg) bg.classList.remove('on'); }
+function closeICD(){ var bg=document.getElementById('icdlg'); if(bg) dlgTutup(bg); }
 function _icdRender(q){
   var ul=document.getElementById('icd_list'); if(!ul) return; q=(q||'').trim().toLowerCase();
   var rows=ICD10.filter(function(x){ return !q||x[0].toLowerCase().indexOf(q)===0||x[1].toLowerCase().indexOf(q)>=0; });
@@ -4001,7 +4021,7 @@ function openICD(){
   /* saran awal dari program aktif */
   var ap=(typeof activeProgs==='function')?activeProgs():[];
   _icdRender(ap.indexOf('acne')>=0?'acne':ap.indexOf('melasma')>=0?'melasma':ap.indexOf('hair')>=0?'alopesia':'');
-  bg.classList.add('on'); setTimeout(function(){ try{ q.focus(); }catch(e){} },0);
+  dlgBuka(bg,closeICD); setTimeout(function(){ try{ q.focus(); }catch(e){} },0);
 }
 
 /* ===== WAKTU ISIAN per bagian (PMK 24/2022 Ps. 16 ayat 2: tiap entri bernama & berwaktu) =====
@@ -4062,9 +4082,9 @@ function bukaConsent(){
       f('cd_saksi','Saksi (nakes)','nama perawat',false,false)+
       '</div></div>'+
       '<div class="mdlg-b" style="margin-top:12px"><span class="mdlg-sp"></span><button type="button" class="mdlg-x" id="cd_x">Batal</button><button type="button" class="mdlg-ok" id="cd_ok">Cetak lembar &amp; catat nomor</button></div></div>';
-    bg.onclick=function(e){ if(e.target===bg) bg.classList.remove('on'); };
-    document.getElementById && document.body.appendChild(bg);
-    document.getElementById('cd_x').onclick=function(){ bg.classList.remove('on'); };
+    bg.onclick=function(e){ if(e.target===bg) dlgTutup(bg); };
+    document.body.appendChild(bg);
+    document.getElementById('cd_x').onclick=function(){ dlgTutup(bg); };
   }
   var g=function(id){ return document.getElementById(id); };
   g('cd_tind').value=tind.join('\n');
@@ -4091,12 +4111,12 @@ function bukaConsent(){
     var noEl=g('d8_consent_no'), lbl=g('d8_consent_lbl'); if(noEl) noEl.value=no; if(lbl) lbl.textContent=no+(_hubOn?' · mencatat ke hub…':' · hub mati — lembar kertas saja');
     window._consent=c;
     if(_hubOn) hubPost('consent',c,function(ok,err){ if(lbl) lbl.textContent=no+(ok?' · ✓ tercatat di hub':(' · ✗ tidak tercatat di hub'+(err?(' — '+err):''))); });
-    bg.classList.remove('on');
+    dlgTutup(bg);
     var w=window.open('','_blank','width=900,height=940,scrollbars=yes,resizable=yes');
     if(!w){ alert('Pop-up diblokir browser. Izinkan pop-up lalu klik lagi "Buat lembar Informed Consent…".'); return; }
     w.document.open(); w.document.write(consentHTML(c)); w.document.close();
   };
-  bg.classList.add('on'); setTimeout(function(){ try{ g('cd_tind').focus(); }catch(e){} },0);
+  dlgBuka(bg,function(){ dlgTutup(bg); }); setTimeout(function(){ try{ g('cd_tind').focus(); }catch(e){} },0);
 }
 function consentHTML(c){
   var E=_esc, p=c.pasien||{}, x=c.penjelasan||{}, tgl=new Date(c.tanggal).toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'});

@@ -559,6 +559,26 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
       check('Risiko bekas: Nodulokistik -> saran Tinggi; memilih sesuai saran menghapus status timpaan', lv() === 'Tinggi' && rb.w._rbOverride === false, $(rb.d, 'rb_saran').textContent);
       check('Risiko bekas: hanya satu kesimpulan (radio), tiga pilihan', rb.d.querySelectorAll('input[name=rb_level]').length === 3 && rb.d.querySelectorAll('input[name=rb_level]:checked').length === 1); }
 
+    { const dg = await open('ADC_Form2_Asesmen_Umum_Dokter.html');
+      const on = id => !!$(dg.d, id) && $(dg.d, id).classList.contains('on');
+      dg.w.openICD(); const o1 = on('icdlg');
+      dg.w.openRxPick(dg.d.querySelector('#ac_block-1 .rx-table tbody tr td input'));
+      check('Dialog: membuka picker produk menutup picker ICD (tidak bertumpuk)', o1 && !on('icdlg') && on('rxpick'));
+      dg.d.dispatchEvent(new dg.w.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+      check('Dialog: Escape menutup picker produk', !on('rxpick'));
+      dg.w.bukaConsent(); const c1 = on('cdlg'); dg.w.hubLogin();
+      check('Dialog: membuka dialog Masuk menutup dialog consent; label tutup: picker "Tutup", form "Batal"', c1 && !on('cdlg') && on('ldlg') && $(dg.d, 'rxp_x').textContent === 'Tutup' && $(dg.d, 'cd_x').textContent === 'Batal' && $(dg.d, 'mdlg_x') === null);
+      $(dg.d, 'ldlg_x').click();
+      dg.w.bukaConsent(); const f = [...dg.d.querySelectorAll('#cdlg button, #cdlg input, #cdlg textarea')].filter(x => !x.disabled); f[f.length - 1].focus();
+      dg.d.dispatchEvent(new dg.w.KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
+      check('Dialog: fokus terkunci — Tab dari elemen terakhir kembali ke elemen pertama', dg.d.activeElement === f[0], dg.d.activeElement && (dg.d.activeElement.id || dg.d.activeElement.tagName));
+      dg.d.dispatchEvent(new dg.w.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+      check('Dialog: Escape menutup dialog consent', !on('cdlg'));
+      dg.w.muatIntakeHub(); dg.w.hubLogin();
+      check('Dialog: dialog Masuk di atas dialog Muat TIDAK menutupnya (alur 401 -> masuk -> ulangi)', on('mdlg') && on('ldlg'));
+      $(dg.d, 'ldlg_x').click(); dg.d.dispatchEvent(new dg.w.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+      check('Dialog: Escape menutup dialog Muat lewat tata dialog bersama', !on('mdlg')); }
+
     /* ===== 5h. jejak audit, koreksi 2x24 jam, TTD palsu, login dari form ===== */
     { const au = (await (await fetch(BASE + '/api/audit?n=500', { headers: Hd('admin') })).json()).audit;
       const aksi = au.map(x => x.aksi);
