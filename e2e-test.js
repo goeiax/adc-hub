@@ -225,6 +225,10 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
       check('Bar WAJIB: "lihat semua" membuka butir OK lalu menutupnya lagi', t1 && !$(a.d, 'reqbar').classList.contains('semua')); }
     a.w.generateSchedule();
     check('F2: jadwal ter-generate', (a.w._schedRows || []).length > 0, a.w.buildSchedule && a.w.buildSchedule());
+    { a.w.serahkanKePerawat();
+      check('Serah terima: tinjauan tampil — semua wajib lengkap, sign-off Ditandatangani, 1 baris resep, ritme kontrol, program Acne', $(a.d, 'sdlg').classList.contains('on') && /Serahkan ke perawat\?/.test($(a.d, 'sdlg_t').textContent) && /Semua butir wajib lengkap/.test($(a.d, 'sdlg_miss').textContent) && /Ditandatangani · dr\. Uji/.test($(a.d, 'sdlg_kv').textContent) && /1 baris/.test($(a.d, 'sdlg_kv').textContent) && /tiap/.test($(a.d, 'sdlg_kv').textContent) && /Acne/.test($(a.d, 'sdlg_kv').textContent), $(a.d, 'sdlg_kv').textContent);
+      $(a.d, 'sdlg_ok').click();
+      check('Serah terima: Serahkan -> langkah 6 dengan ringkasan status dokter baca-saja', a.w._step === 5 && !$(a.d, 'sdlg').classList.contains('on') && /Ditandatangani/.test($(a.d, 'serah_ringkas').textContent) && /Semua lengkap/.test($(a.d, 'serah_ringkas').textContent)); }
     a.dialogs.length = 0;
     const ttdDlg = await terbit(a);
     check('F2: Terbitkan TIDAK meminta PIN lagi (sudah ditandatangani saat sign-off) & tidak ada dialog peringatan', ttdDlg === false && !a.dialogs.some(x => x.type === 'confirm'), a.dialogs.filter(x => x.type === 'confirm'));
@@ -252,6 +256,11 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
     check('F2 kontrol tanpa handoff: penerbitan DIBLOK', /Tidak bisa diterbitkan/.test((lastDlg(b0, 'alert') || {}).msg || '') && !disk('handoff_terakhir.json').asesmen.__x && fs.readdirSync(path.join('data', RM)).filter(f => /^handoff_\d/.test(f)).length === 1);
     check('F2 tanpa Form 1: kotak alergi tampil & bisa diisi', $(b0.d, 'alergi_box').style.display !== 'none' && $(b0.d, 'alergi_flag').type !== 'hidden' && !$(b0.d, 'alergi_flag').readOnly);
     check('F2 kontrol: bar wajib menandai "Handoff dimuat" belum', b0.w.reqStatus().some(x => x.label === 'Handoff dimuat' && !x.ok));
+    { const s0 = b0.w._step; b0.w.serahkanKePerawat();
+      const btn = b0.d.querySelector('#sdlg_miss button[data-go="hobar"]');
+      check('Serah terima (belum lengkap): judul menyebut jumlah butir, daftar butir bisa diklik, "Kembali & lengkapi" menutup tanpa pindah langkah', /butir wajib belum lengkap/.test($(b0.d, 'sdlg_t').textContent) && !!btn && /Belum sign-off/.test($(b0.d, 'sdlg_kv').textContent) && ($(b0.d, 'sdlg_x').click(), !$(b0.d, 'sdlg').classList.contains('on') && b0.w._step === s0));
+      b0.w.goStep(5); $(b0.d, 'sched_lock').querySelector('button').click();
+      check('Langkah 6: pesan kunci jadwal menaut ke kolom ritme di langkah 4', b0.w._step === 3 && b0.d.activeElement && b0.d.activeElement.id === 'd5_iv' || b0.w._step === 3); }
     check('Bar WAJIB belum lengkap: chip belum = jumlah butir belum, chip Handoff dimuat bisa diklik, tombol "lihat semua N"', b0.d.querySelectorAll('#reqlst .it.no').length === b0.w.reqStatus().filter(x => !x.ok).length && !!b0.d.querySelector('#reqlst .it.no[data-go="hobar"]') && new RegExp('lihat semua ' + b0.w.reqStatus().length).test($(b0.d, 'reqlst').querySelector('.tg').textContent), $(b0.d, 'reqlst').textContent);
 
     /* ===== 4. KONTROL #2: muat handoff via hub, IGA 1 (turun 2 = sukses) ===== */

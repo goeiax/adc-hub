@@ -137,7 +137,21 @@ label.opt.lbl-hamil{border:1.5px solid var(--accent-deep,#8E4A33);background:#FB
 .zone.dr{border-left-color:var(--ink);}
 .zone.nr{border-left-color:var(--accent);}
 .lock{opacity:.45;pointer-events:none;}
-.lockmsg{font-size:11.5px;color:var(--accent-deep);font-weight:600;padding:7px 11px;border:1px dashed var(--accent-deep);margin:6px 0;}
+.lockmsg{font-size:12.5px;color:var(--accent-deep);font-weight:600;padding:9px 12px;border:1px dashed var(--accent-deep);margin:6px 0;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.lockmsg .lnk{font:inherit;font-size:12.5px;font-weight:600;color:var(--accent-deep);background:none;border:none;text-decoration:underline;text-underline-offset:2px;cursor:pointer;padding:6px 4px;min-height:36px;}
+/* serah terima: ringkasan status dokter (langkah 6) + dialog tinjauan */
+.serah{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px 18px;padding:12px 16px;border:1px solid var(--line-strong);background:var(--surface-quiet);margin:0 0 12px;}
+.serah:empty{display:none;}
+.serah .k{display:block;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-muted);margin-bottom:2px;}
+.serah .v{font-size:14px;font-weight:600;color:var(--ink);line-height:1.4;}
+.serah .v.ok{color:var(--green-text,#5F6C50);}
+.serah .v.warn{color:var(--accent-deep);}
+.serah .v button{font:inherit;font-size:12.5px;font-weight:600;color:var(--accent-deep);background:none;border:none;text-decoration:underline;text-underline-offset:2px;cursor:pointer;padding:0 2px;}
+.sdlg .serah{margin:0 0 12px;}
+.sdlg .miss{margin:0 0 6px;}
+.sdlg .miss button{display:block;width:100%;text-align:left;font:inherit;font-size:14px;min-height:44px;padding:8px 12px;margin:0 0 6px;border:1px solid var(--accent);border-radius:var(--r-box,8px);background:#fff;color:var(--ink);cursor:pointer;}
+.sdlg .miss button::before{content:'→ ';color:var(--accent-deep);font-weight:700;}
+.sdlg .okmsg{font-size:14px;color:var(--green-text,#5F6C50);font-weight:600;margin:0 0 8px;}
 
 /* ===== PROGRAM MODALS ===== */
 .progbtn{border:1px solid var(--line-strong);padding:9px 11px;cursor:pointer;background:var(--surface);text-align:left;font-family:var(--ff-body);width:100%;}
@@ -1792,7 +1806,7 @@ body.mode-kontrol #rb2 .rl::after{content:' — dilewati';font-size:11px;font-we
   <!-- D5 -->
   
 
-  <div class="stepnav no-print"><button type="button" class="nb" onclick="goStep(3)">&lsaquo; Kembali</button><button type="button" class="nb nb-p" onclick="goStep(5)">Serahkan ke perawat &rsaquo;</button></div></section>
+  <div class="stepnav no-print"><button type="button" class="nb" onclick="goStep(3)">&lsaquo; Kembali</button><button type="button" class="nb nb-p" onclick="serahkanKePerawat()">Serahkan ke perawat &rsaquo;</button></div></section>
 
   <!-- LANGKAH 6 — PERAWAT: penjadwalan (D4b) lalu Terbitkan Handoff di akhir langkah ini,
        bukan di toolbar: aksi penutup berada di dalam alur, perangkat berpindah tangan sekali. -->
@@ -1800,7 +1814,9 @@ body.mode-kontrol #rb2 .rl::after{content:' — dilewati';font-size:11px;font-we
   <!-- D4b = langkah PERAWAT: dikerjakan setelah dokter sign-off (D7), lalu Terbitkan Handoff —
        supaya perangkat hanya berpindah tangan sekali (dokter → perawat). -->
   <div class="sec"><span class="n">D4b</span>Penjadwalan &amp; reminder SleekFlow <span class="opt">perawat — setelah sign-off dokter</span></div>
-  <div id="sched_lock" class="lockmsg">Terkunci — menunggu dokter mengisi <b>kontrol tiap</b> dan <b>tanggal mulai</b> di D4.</div>
+  <!-- Ringkasan serah terima: perawat melihat status dokter (tanda tangan, wajib, program, resep, ritme) tanpa membuka langkah dokter -->
+  <div class="serah" id="serah_ringkas" aria-live="polite"></div>
+  <div id="sched_lock" class="lockmsg">Terkunci — <b>ritme kontrol</b> dan <b>tanggal mulai</b> belum diisi dokter. <button type="button" class="lnk" onclick="goTo('d5_iv')">Isi di langkah 4 &rsaquo;</button></div>
   <div class="zone nr lock" id="sched_zone">
     <div class="row">
       <div class="f s3"><span class="lab">Kunjungan berikutnya</span><input class="in" type="date" id="d5_next"></div>
@@ -3674,6 +3690,7 @@ function updateReq(){
   renderAlergi(); renderSkrining();
   syncFaktor();
   renderRxMirror();
+  if(_step===5&&typeof renderSerahRingkas==='function') renderSerahRingkas();
   var st=reqStatus(), done=st.filter(function(x){return x.ok;}).length;
   var bar=document.getElementById('reqbar'), cnt=document.getElementById('reqcnt'), lst=document.getElementById('reqlst');
   if(!bar) return;
@@ -3970,6 +3987,57 @@ function renderHamilModal(p){
 }
 document.addEventListener('input',function(e){ var t=e.target; if(t&&t.closest){ var tr=t.closest('.ovl .rx-table tbody tr, #hr_rxTable tbody tr'); if(tr) _markRxRow(tr); } },true);
 
+/* ===== SERAH TERIMA DOKTER -> PERAWAT =====
+   Perangkat berpindah tangan sekali; di titik itu dokter harus melihat apa yang belum lengkap selagi masih
+   di ruangan, dan perawat harus melihat status dokter tanpa membuka langkah dokter. */
+function _serahData(){
+  var st=(typeof reqStatus==='function')?reqStatus():[], miss=st.filter(function(x){ return !x.ok; });
+  var progs=(typeof activeProgs==='function')?activeProgs():[];
+  var prog=progs.map(function(p){ var th=(window._stage&&window._stage[p])?_psNamaTahap(p,window._stage[p]):''; return PLABEL[p]+(th?(' · '+th):''); }).join(', ');
+  var iga=progs.map(function(p){ var id=(typeof IGA_ID!=='undefined'&&IGA_ID[p])?IGA_ID[p]:''; var v=id?_v(id):''; return v?('IGA '+PLABEL[p]+' '+v):''; }).filter(Boolean).join(' · ');
+  var rx=(typeof collectRx==='function')?collectRx().length:0;
+  var iv=_v('d5_iv'), ritme=iv?('tiap '+(typeof IVTEXT!=='undefined'&&IVTEXT[iv]?IVTEXT[iv]:iv+' hari')+(_v('d5_start')?(' mulai '+_v('d5_start')):'')):'';
+  var ttd=window._ttd?('Ditandatangani · '+window._ttd.nama+' · '+_ttdJam(window._ttd.waktu)):(_ck('d8_signoff')?'Sign-off dicentang — tanpa verifikasi PIN':'Belum sign-off');
+  return {miss:miss, prog:prog, iga:iga, rx:rx, ritme:ritme, ttd:ttd, ttdOk:!!window._ttd, hm:_pasienHamilMenyusui()};
+}
+function _serahKV(d,denganTombol){
+  var kv=function(k,v,cls){ return '<div><span class="k">'+k+'</span><div class="v'+(cls?(' '+cls):'')+'">'+v+'</div></div>'; };
+  return kv('Sign-off dokter',_esc(d.ttd),d.ttdOk?'ok':'warn')+
+    kv('Butir wajib',d.miss.length?(d.miss.length+' belum lengkap'):'Semua lengkap',d.miss.length?'warn':'ok')+
+    kv('Program',_esc(d.prog||'—')+(d.iga?('<br><span style="font-weight:500">'+_esc(d.iga)+'</span>'):''))+
+    kv('Resep',d.rx?(d.rx+' baris'):'belum ada',d.rx?'':'warn')+
+    kv('Ritme kontrol',d.ritme?_esc(d.ritme):(denganTombol?'belum diisi <button type="button" onclick="goTo(\'d5_iv\')">isi di langkah 4 ›</button>':'belum diisi'),d.ritme?'':'warn')+
+    (d.hm?kv('Perhatian','PASIEN '+_esc(d.hm.toUpperCase()),'warn'):'');
+}
+function renderSerahRingkas(){
+  var el=document.getElementById('serah_ringkas'); if(!el) return;
+  el.innerHTML=_serahKV(_serahData(),true);
+  /* nama perawat & penerbit dari sesi hub bila masih kosong */
+  var u=window._hubUser; if(u){ var a=document.getElementById('d5_by'), b=document.getElementById('d8_by');
+    if(a&&!a.value.trim()&&u.peran==='perawat') a.value=u.nama||u.id; if(b&&!b.value.trim()) b.value=u.nama||u.id; }
+}
+function serahkanKePerawat(){
+  var d=_serahData(), bg=document.getElementById('sdlg');
+  if(!bg){
+    bg=document.createElement('div'); bg.id='sdlg'; bg.className='mdlg-bg';
+    bg.innerHTML='<div class="mdlg sdlg" role="dialog" aria-modal="true" aria-labelledby="sdlg_t"><div class="mdlg-t" id="sdlg_t"></div>'+
+      '<div class="serah" id="sdlg_kv"></div><div class="miss" id="sdlg_miss"></div>'+
+      '<div class="mdlg-b"><button type="button" class="mdlg-x" id="sdlg_x">Kembali &amp; lengkapi</button><span class="mdlg-sp"></span><button type="button" class="mdlg-ok" id="sdlg_ok">Serahkan &rsaquo;</button></div></div>';
+    bg.onclick=function(e){ if(e.target===bg) dlgTutup(bg); };
+    document.body.appendChild(bg);
+  }
+  var tutup=function(){ dlgTutup(bg); };
+  document.getElementById('sdlg_t').textContent=d.miss.length?('Masih ada '+d.miss.length+' butir wajib belum lengkap'):'Serahkan ke perawat?';
+  document.getElementById('sdlg_kv').innerHTML=_serahKV(d,false);
+  document.getElementById('sdlg_miss').innerHTML=d.miss.length
+    ? d.miss.map(function(x){ return '<button type="button" data-go="'+_esc(x.go)+'">'+_esc(x.label)+'</button>'; }).join('')
+    : '<div class="okmsg">Semua butir wajib lengkap. Perawat akan menjadwalkan dan menerbitkan handoff.</div>';
+  document.getElementById('sdlg_miss').querySelectorAll('button').forEach(function(b){ b.onclick=function(){ tutup(); goTo(b.getAttribute('data-go')); }; });
+  document.getElementById('sdlg_x').onclick=tutup;
+  document.getElementById('sdlg_ok').onclick=function(){ tutup(); goStep(5); };
+  dlgBuka(bg,tutup); setTimeout(function(){ try{ document.getElementById(d.miss.length?'sdlg_x':'sdlg_ok').focus(); }catch(e){} },0);
+}
+
 /* ===== ICD-10 (PMK 24/2022 Ps. 18: diagnosis diberi kode) =====
    Subset dermatologi-estetik & metabolik yang dipakai ADC; cari kode/nama, boleh lebih dari satu.
    Tersimpan di hidden #d2_icd (JSON) -> asesmen.icd; ikut dibawa di kunjungan kontrol. */
@@ -4174,6 +4242,7 @@ function goStep(i){
   _step=Math.max(0,Math.min(st.length-1,i));
   st.forEach(function(e,k){ e.classList.toggle('on',k===_step); });
   document.querySelectorAll('#rail button').forEach(function(b,k){ b.classList.toggle('on',k===_step); });
+  if(_step===5&&typeof renderSerahRingkas==='function') renderSerahRingkas();
   window.scrollTo({top:0,behavior:'smooth'});
 }
 /* ===== LEMBAR CETAK 1 HALAMAN =====
