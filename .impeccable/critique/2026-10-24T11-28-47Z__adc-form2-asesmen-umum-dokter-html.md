@@ -10,6 +10,7 @@ target_fingerprint: "sha256:88d5bb7324943f78904ac152c3fa0acf858244975469e995a176
 target_path: "C:\\Alex Workspace\\Cowork Playground\\Marketing\\ADC_Form2_Asesmen_Umum_Dokter.html"
 timestamp: 2026-10-24T11-28-47Z
 slug: adc-form2-asesmen-umum-dokter-html
+closed: true
 ---
 Method: dual-agent (A: design review sub-agent · B: detector + browser sub-agent)
 

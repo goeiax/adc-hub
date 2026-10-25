@@ -164,6 +164,8 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
     check('F2: tombol Terbitkan Handoff utama di akhir langkah 6 (bukan "klik di atas"); toolbar bertingkat dengan menu Lainnya berisi Reset', !!a.d.querySelector('.step[data-step="5"] .stepnav .nb-terbit[onclick="issueHandoff()"]') && !a.d.querySelector('.donehint') && a.d.querySelectorAll('.tb-actions > .btn, .tb-actions > .hubchip').length === 4 && !!a.d.querySelector('#tbmenu button[onclick*="resetForm"]') && !a.d.querySelector('.tb-actions > .btn[onclick="resetForm()"]'));
     { a.w.tbMenu(); const open = $(a.d, 'tbmenu').classList.contains('on') && $(a.d, 'tb_more').getAttribute('aria-expanded') === 'true'; a.d.body.click(); check('F2: menu Lainnya buka/tutup (klik luar menutup)', open && !$(a.d, 'tbmenu').classList.contains('on')); }
     check('F2: D1 — Catatan klinis (temuan) di atas Diagnosis', !!($(a.d, 'd2_hasil').compareDocumentPosition($(a.d, 'd2_dx')) & 4));
+    { const css = fs.readFileSync(path.join('www', 'ADC_Form2_Asesmen_Umum_Dokter.html'), 'utf8');
+      check('F2 polish: sisa cetak (tanda tangan basah, cap, footer, disclaimer) disembunyikan di layar; Fitzpatrick & Tipe kulit baris penuh', /@media screen\{ \.sigs,\.stamp,\.foot,\.disc\{display:none !important;\} \}/.test(css) && a.d.querySelector('input[name=d1_fitz]').closest('.f').classList.contains('s12') && $(a.d, 'd1_tk').closest('.f').classList.contains('s12')); }
     check('F2: alergi & dokter terisi dari intake', $(a.d, 'alergi_flag').value === 'Penisilin' && $(a.d, 'd1_dokter').value === 'dr. Uji, Sp.DVE');
     check('F2 pasien baru: kotak isian alergi disembunyikan, alergi tampil di Ringkasan Form 1', $(a.d, 'alergi_box').style.display === 'none' && $(a.d, 'alergi_flag').value === 'Penisilin' && /Penisilin/.test($(a.d, 'intake_body').textContent), { box: $(a.d, 'alergi_box').style.display, al: $(a.d, 'alergi_flag').value });
     check('F2: Ringkasan menampilkan detail keluhan P4 dari Form 1', /Detail keluhan/.test($(a.d, 'intake_body').textContent), a.w._intake && (a.w._intake.seksi || []).map(s => s.kode));
@@ -265,7 +267,8 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
     set(b.d, 'k1_dokter', 'dr. Pengganti, Sp.DVE'); set(b.d, 'k1_hasil', 'Lesi aktif berkurang');
     b.w.setIGA('ac_iga', '1');
     check('F2: IGA delta=2 & sukses', (() => { const g = b.w.igaData('acne'); return g && g.baseline === 3 && g.kini === 1 && g.delta === 2 && g.sukses === true; })(), b.w.igaData('acne'));
-    check('F2: label arah otomatis', /Acne −2/.test($(b.d, 'k1_arah').value), $(b.d, 'k1_arah').value);
+    check('F2: label arah otomatis berbahasa ("Acne turun 2 (−2)")', /Acne turun 2 \(−2\)/.test($(b.d, 'k1_arah').value), $(b.d, 'k1_arah').value);
+    check('F2 kontrol: rel menampilkan langkah 3 sebagai dilewati (tidak hilang)', /dilewati/.test(b.w.getComputedStyle($(b.d, 'rb2').querySelector('.rl'), '::after').content || '') || /body\.mode-kontrol #rb2 \.rl::after\{content:' — dilewati'/.test(fs.readFileSync(path.join('www', 'ADC_Form2_Asesmen_Umum_Dokter.html'), 'utf8')));
     set(b.d, 'k1_patuh', 'Patuh'); set(b.d, 'k1_es', 'Kulit kering ringan');
     set(b.d, 'd5_iv', '14'); set(b.d, 'd5_start', '2026-10-19'); set(b.d, 'd7_remarks', 'Lanjutkan'); set(b.d, 'd8_by', 'Perawat Uji'); await signoff(b); chk(b.d, 'd8_skrining'); chk(b.d, 'd8_consent');
     b.w.updateReq();

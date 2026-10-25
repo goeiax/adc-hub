@@ -106,6 +106,9 @@ label.opt.lbl-hamil{border:1.5px solid var(--accent-deep,#8E4A33);background:#FB
 .foot .r{text-align:right;font-size:11px;color:var(--ink-muted);}
 .foot .r .nm{font-family:var(--ff-head);font-size:11px;font-weight:600;color:var(--ink);letter-spacing:.04em;}
 .disc{max-width:210mm;margin:0 auto 28px;padding:7px 15mm;font-size:11px;color:var(--ink-muted);text-align:center;border-top:1px solid var(--line);}
+/* Form 2 adalah alat layar dokter: garis tanda tangan basah, kotak cap, footer pasien dan disclaimer
+   hanya berarti di kertas (printAll) — di layar justru mengaburkan akhir alur (sign-off PIN). */
+@media screen{ .sigs,.stamp,.foot,.disc{display:none !important;} }
 @media print{
   html,body{background:#fff;}
   .toolbar{display:none!important;}
@@ -1372,7 +1375,8 @@ textarea.in{height:auto;min-height:138px;resize:vertical;line-height:1.55;paddin
 
 .idrow{margin-bottom:18px;}
 
-body.mode-kontrol #rb2{display:none;}
+body.mode-kontrol #rb2{opacity:.45;pointer-events:none;}
+body.mode-kontrol #rb2 .rl::after{content:' — dilewati';font-size:11px;font-weight:400;color:var(--ink-faint);}
 .dxblk{margin-top:26px;}
 
 /* ==== Bar kontrol satu baris: jenis kunjungan + status wajib (permintaan Alex 23 Sep) ==== */
@@ -1518,7 +1522,7 @@ body.mode-kontrol #rb2{display:none;}
   <div class="d1h">Profil kulit</div>
   <div class="row">
     <!-- Fitzpatrick: RADIO — satu tipe kulit saja per pasien, tidak mungkin ganda. -->
-    <div class="f s5"><span class="lab">Fitzpatrick <span class="opt">pilih satu</span></span>
+    <div class="f s12"><span class="lab">Fitzpatrick <span class="opt">pilih satu</span></span>
       <div class="opts tight compact" style="padding-top:4px">
         <label class="opt"><input type="radio" name="d1_fitz" value="I"> I</label>
         <label class="opt"><input type="radio" name="d1_fitz" value="II"> II</label>
@@ -1530,7 +1534,7 @@ body.mode-kontrol #rb2{display:none;}
     </div>
     <!-- Tipe kulit: boleh lebih dari satu (mis. Kombinasi + Sensitif). Nilai digabung ke
          hidden #d1_tipekulit — id yang sama dibaca buildHandoff & _bawaKontrol. -->
-    <div class="f s7"><span class="lab">Tipe kulit <span class="opt">boleh lebih dari satu</span></span>
+    <div class="f s12"><span class="lab">Tipe kulit <span class="opt">boleh lebih dari satu</span></span>
       <div class="opts tight compact" style="padding-top:4px" id="d1_tk">
         <label class="opt"><input type="checkbox" value="Kering" onchange="syncTipeKulit()"> Kering</label>
         <label class="opt"><input type="checkbox" value="Normal" onchange="syncTipeKulit()"> Normal</label>
@@ -2477,7 +2481,7 @@ function _arahDariIGA(){
   ['acne','melasma'].forEach(function(p){
     if(!(progFilled(p)||_progInHandoff(p))) return;
     var d=igaData(p); if(!d||d.delta==null) return;
-    t.push(PLABEL[p]+' '+(d.delta>0?('−'+d.delta):(d.delta<0?('+'+Math.abs(d.delta)):'0')));
+    t.push(PLABEL[p]+' '+(d.delta>0?('turun '+d.delta+' (−'+d.delta+')'):(d.delta<0?('naik '+Math.abs(d.delta)+' (+'+Math.abs(d.delta)+')'):'tetap (IGA sama)')));
   });
   var hg=_hv('gis_hair_growth'); if(hg) t.push('Hair '+hg.split(' ')[0]);
   return t.join(' · ');
