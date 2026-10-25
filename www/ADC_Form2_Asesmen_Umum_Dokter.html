@@ -1394,6 +1394,40 @@ textarea.in{height:auto;min-height:138px;resize:vertical;line-height:1.55;paddin
 .hubchip.warn{border-color:#E0A860;color:#F3CF9A;}
 .hubchip{font-size:11.5px;min-height:44px;}
 .hubchip span{font-size:11px;}
+/* ===== PONSEL (<= 640 px): bukan ukuran kirim (tablet 1024), tetapi form dibuka sebagai berkas saat hub mati.
+   Toolbar & bilah kontrol melipat dan tidak lagi lengket (layar kecil habis oleh kepala), judul tidak pecah per kata,
+   tabel 4 faktor ditumpuk per faktor. Tidak ada yang memaksa lebar > layar. ===== */
+@media (max-width:640px){
+  .toolbar{position:static;flex-wrap:wrap;padding:10px 14px;gap:8px 12px;}
+  .toolbar > div:first-child{flex:1 1 100%;min-width:0;}
+  .toolbar .tb-title{font-size:14px;line-height:1.3;}
+  .toolbar .tb-hint{display:none;}
+  .tb-actions{flex:1 1 100%;flex-wrap:wrap;gap:6px;}
+  .tb-actions .btn{padding:0 12px !important;font-size:12px !important;min-height:40px;letter-spacing:.02em !important;}
+  .tb-actions .hubchip{min-height:40px;padding:3px 10px;margin-right:0;}
+  .tb-more{margin-left:auto;}
+  .ctlbar{position:static;padding:6px 12px;gap:8px;}
+  .ctlbar .modebar{flex-wrap:wrap !important;white-space:normal !important;flex:1 1 100% !important;}   /* mengalahkan aturan nowrap .ctlbar di bawahnya */
+  .ctlbar .modebar button{white-space:normal;}
+  .flag{flex-wrap:wrap;}
+  .flag .fin{flex:1 1 180px;min-width:0;}
+  .flag .none{white-space:normal;}
+  .flag .alg-src{white-space:normal;}
+  .hobar{flex-wrap:wrap;}
+  .ctlbar .reqbar{flex-basis:100%;border-left:none !important;padding-left:0 !important;}
+  .ovl .pmodal .pmbody{padding:12px !important;}
+  .ovl .pmrail button{padding:8px 8px;min-height:48px;}
+  .ovl .pmrail button .pn{font-size:10.5px;letter-spacing:.08em;}
+  .ovl .pmrail button .pl{font-size:12.5px;}
+  #ovl_acne .ff-table thead{display:none;}
+  #ovl_acne .ff-table,#ovl_acne .ff-table tbody,#ovl_acne .ff-table tr,#ovl_acne .ff-table td{display:block;width:100%;box-sizing:border-box;}
+  #ovl_acne .ff-table tr{border:1px solid var(--border);margin:0 0 10px;}
+  #ovl_acne .ff-table td{border:none;border-top:1px solid var(--border);}
+  #ovl_acne .ff-table td:first-child{border-top:none;background:var(--goldbg);font-weight:700;}
+  #ovl_acne .ff-table td:nth-child(2)::before{content:'Pemicu';display:block;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
+  #ovl_acne .ff-table td:nth-child(3)::before{content:'Treatment ADC';display:block;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
+  .serah{grid-template-columns:1fr 1fr;}
+}
 .hubchip{flex-direction:column;align-items:center;justify-content:center;text-align:center;line-height:1.2;max-width:190px;padding:5px 14px;white-space:normal;}
 .hubchip b{font-weight:700;letter-spacing:.16em;}
 .hubchip span{display:block;font-size:9.5px;font-weight:600;letter-spacing:.05em;text-transform:none;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
@@ -1439,6 +1473,8 @@ body.mode-kontrol #rb2 .rl::after{content:' — dilewati';font-size:11px;font-we
 .ctlbar .reqbar .cnt{font-size:12px !important;padding:0 11px !important;min-height:36px;display:inline-flex;align-items:center;border-radius:999px;}
 .ctlbar .reqbar .lst{flex-wrap:wrap !important;gap:5px;align-items:center;}
 .ctlbar .reqbar .it{padding:0 12px !important;min-height:44px;display:inline-flex;align-items:center;font-size:12.5px !important;white-space:nowrap;}
+.ctlbar .reqbar .it.ok{display:none;}
+.ctlbar .reqbar.semua .it.ok{display:inline-flex;}
 @media print{.ctlbar{display:none !important;}}
 </style>
 </head>

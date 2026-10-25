@@ -42,6 +42,7 @@ Kontrol mode = `body.mode-kontrol` (`.vis-awal` hidden, `.vis-kontrol` shown); i
 
 ## Known gotchas (each bit us before)
 - **Dual-role CSS classes**: `.sec`, `.row`, `.opt`, `.f`, `.ck` mean different things in main form vs. the Hair-Loss modal (`#ovl_hair`, imported markup). Any global style change must be checked for leakage into `#ovl_hair`.
+- Phone (≤640 px) rules live in one `@media (max-width:640px)` block near `.tb-more`: toolbar and ctlbar wrap and go static, the acne 4-factor table stacks per row. Shipping size is still the 1024 tablet; check both when touching chrome.
 - Grid span classes differ per file (`.k4` exists in Form 2, not Form 1). Check definitions in the target file.
 - Avoid `border` shorthand with `var()` where tests run in jsdom — use longhands.
 - **Dialogs**: every `.mdlg-bg` dialog (Muat, Rx picker, ICD-10, consent) opens via `dlgBuka(bg, tutup)` and closes via `dlgTutup(bg)` (shared block in all 4 forms): Escape, focus trap, one dialog at a time, focus restored. The login/TTD dialog (`_ldlg`) closes any active dialog except Muat (`#mdlg`), which must stay open for the 401 → login → retry flow. Close labels: pickers "Tutup", forms "Batal".
