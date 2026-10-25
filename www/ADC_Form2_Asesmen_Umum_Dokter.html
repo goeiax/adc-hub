@@ -247,6 +247,17 @@ label.opt.lbl-hamil{border:1.5px solid var(--accent-deep,#8E4A33);background:#FB
 #ovl_acne .subhead.red{color:var(--red);}
 #ovl_acne .warn-box{border:1.5px solid var(--red);border-radius:5px;background:var(--redbg);padding:6px 10px;margin-top:7px;font-size:12.5px;color:#7A1A1A;}
 #ovl_acne .warn-box strong{color:var(--red);}
+/* Risiko bekas: segmen kesimpulan (satu pilihan) + saran otomatis + konsekuensi */
+#ovl_acne .qline.rbq{flex-wrap:wrap;gap:8px 10px;}
+#ovl_acne .rbseg{display:inline-flex;border:1px solid var(--border);border-radius:999px;overflow:hidden;background:#fff;}
+#ovl_acne .rbopt{position:relative;display:flex;align-items:center;padding:7px 15px;font-size:13px;cursor:pointer;border-right:1px solid var(--border);min-height:36px;color:var(--text);}
+#ovl_acne .rbopt:last-child{border-right:none;}
+#ovl_acne .rbopt input{position:absolute;opacity:0;width:0;height:0;}
+#ovl_acne .rbopt.on{background:var(--text);color:#fff;font-weight:600;}
+#ovl_acne .rbopt.saran{box-shadow:inset 0 0 0 2px var(--gold);}
+#ovl_acne .rbopt:focus-within{outline:2px solid var(--blue);outline-offset:-2px;}
+#ovl_acne .rb-conseq{flex-basis:100%;font-size:12.5px;line-height:1.45;color:#7A1A1A;background:var(--redbg);border-radius:6px;padding:7px 11px;}
+#ovl_acne .rb-conseq[hidden]{display:none;}
 #ovl_acne .imp-box{background:var(--goldbg);border:1.5px solid var(--gold);border-radius:5px;padding:6px 10px;margin:7px 0;font-size:12.5px;color:#5A3800;}
 #ovl_acne .sched-controls{display:flex;gap:9px;flex-wrap:wrap;align-items:flex-end;background:#F7F9FC;border:1px solid var(--border);border-radius:6px;padding:9px;margin-bottom:8px;}
 #ovl_acne .sched-controls .field{flex:0 0 auto;min-width:110px;}
@@ -1826,8 +1837,15 @@ body.mode-kontrol #rb2{display:none;}
   
   <div class="qline"><span class="q">Bekas:</span><label class="ck"><input type="checkbox"> PIE (merah)</label><label class="ck"><input type="checkbox"> PIH (gelap)</label>
     <span class="q" style="margin-left:14px;">Jumlah lesi <span class="sub">(opsional)</span>:</span><input class="ln" placeholder="boleh dikosongkan" style="min-width:80px;"></div>
-  <div class="qline"><span class="q">Risiko bekas:</span><label class="ck"><input type="checkbox"> Nodulokistik</label><label class="ck"><input type="checkbox"> Badan (dada/punggung)</label><label class="ck"><input type="checkbox"> Bekas dini sudah ada</label><label class="ck"><input type="checkbox"> Datang terlambat</label>
-    <span class="q" style="margin-left:14px;">→ Risiko:</span><label class="ck"><input type="checkbox"> Risiko bekas rendah</label><label class="ck"><input type="checkbox"> Risiko bekas sedang</label><label class="ck"><input type="checkbox"> Risiko bekas tinggi</label><span class="sub">sedang/tinggi → kendalikan agresif &amp; dini, pertimbangkan jalur isotretinoin</span></div>
+  <!-- Risiko bekas: dua langkah yang jelas — (1) faktor yang ADA, (2) kesimpulan. Kesimpulan disarankan
+       otomatis dari faktor (Dr. Oku: 1 faktor = sedang; >=2 atau nodulokistik = tinggi) dan boleh ditimpa dokter.
+       Teks label faktor dipertahankan supaya isian handoff lama tetap terbaca. -->
+  <div class="qline rbq"><span class="q">Faktor risiko bekas <span class="sub">(centang yang ada)</span>:</span><label class="ck"><input type="checkbox" class="rbf" data-w="2" onchange="syncRisikoBekas()"> Nodulokistik</label><label class="ck"><input type="checkbox" class="rbf" onchange="syncRisikoBekas()"> Badan (dada/punggung)</label><label class="ck"><input type="checkbox" class="rbf" onchange="syncRisikoBekas()"> Bekas dini sudah ada</label><label class="ck"><input type="checkbox" class="rbf" onchange="syncRisikoBekas()"> Datang terlambat</label></div>
+  <div class="qline rbq"><span class="q">Kesimpulan risiko bekas:</span>
+    <div class="rbseg" id="rb_seg" role="radiogroup" aria-label="Kesimpulan risiko bekas">
+      <label class="rbopt"><input type="radio" name="rb_level" value="Rendah" onchange="syncRisikoBekas(true)"> Rendah</label><label class="rbopt"><input type="radio" name="rb_level" value="Sedang" onchange="syncRisikoBekas(true)"> Sedang</label><label class="rbopt"><input type="radio" name="rb_level" value="Tinggi" onchange="syncRisikoBekas(true)"> Tinggi</label>
+    </div><span class="sub" id="rb_saran"></span>
+    <div class="rb-conseq" id="rb_conseq" hidden>Risiko bekas <b id="rb_conseq_lv"></b>: kendalikan agresif &amp; dini — pertimbangkan jalur isotretinoin (tahap Menengah–Berat).</div></div>
   <div class="qline"><span class="q">Distribusi:</span><label class="ck"><input type="checkbox"> Dahi</label><label class="ck"><input type="checkbox"> Pipi</label><label class="ck"><input type="checkbox"> Rahang/dagu</label><label class="ck"><input type="checkbox"> Dada</label><label class="ck"><input type="checkbox"> Punggung</label><label class="ck" style="margin-left:auto"><input type="checkbox"> Hormonal</label></div>
 
   <div class="qline"><span class="q">Baseline waktu pemulihan (rentang — dari pengalaman dokter):</span><span class="q">Mulai membaik:</span><input class="ln" placeholder="mis. 4–6 minggu" style="min-width:75px;"><span class="q">Hasil optimal:</span><input class="ln" placeholder="mis. 3–6 bulan" style="min-width:75px;"><span class="sub">— sampaikan rentang, bukan janji absolut (no overclaiming)</span></div>
@@ -2642,7 +2660,7 @@ function saveSchedToRecord(){
   if(st){ st.textContent='Catatan jadwal tersimpan — berkas diunduh & disalin ke clipboard. Lampirkan ke rekam medis NeoSoft pasien.'; st.style.color='#3D7A5F'; }
 }
 function resetForm(){
-  try{ window._ttd=null; _ttdStatus(''); window._isian={}; var cl=document.getElementById('d8_consent_lbl'); if(cl) cl.textContent=''; setTimeout(_icdChips,0); }catch(e){}
+  try{ window._rbOverride=false; setTimeout(syncRisikoBekas,0); window._ttd=null; _ttdStatus(''); window._isian={}; var cl=document.getElementById('d8_consent_lbl'); if(cl) cl.textContent=''; setTimeout(_icdChips,0); }catch(e){}
   if(!confirm('Reset semua isian formulir?')) return;
   /* radio juga hanya dilepas centangnya — mengosongkan value-nya membuat Fitzpatrick
      terekam kosong setelah Reset. */
@@ -2663,6 +2681,7 @@ window.addEventListener('load',function(){
   if(typeof updateIgaCards==='function') setTimeout(updateIgaCards,0);
   if(typeof initRxPick==='function') initRxPick();
   if(typeof initRxAdd==='function') initRxAdd();
+  if(typeof syncRisikoBekas==='function') syncRisikoBekas();
   var d=new Date(); var t=document.getElementById('tgl'); if(t) t.value=d.toISOString().split('T')[0];
   gateSched(); PROGS.forEach(markProg); updateReq();
   /* tinggi toolbar bergantung ukuran font — hitung, jangan ditebak */
@@ -2846,6 +2865,12 @@ function _progDetail(){
       if(e.type==='checkbox'){
         if(!e.checked) return;
         var lab=e.closest('label'); if(lab) isian.push(lab.textContent.trim());
+        return;
+      }
+      if(e.type==='radio'){   /* satu pilihan: catat bersama pertanyaannya ("Kesimpulan risiko bekas: Tinggi") */
+        if(!e.checked) return;
+        var rl=e.closest('label'), rq=e.closest('.qline'), rk=rq?((rq.querySelector('.q')||{}).textContent||''):'';
+        isian.push((rk?rk.replace(/\s+/g,' ').replace(/\s*\(.*?\)\s*/,'').replace(/:\s*$/,'').trim()+': ':'')+(rl?rl.textContent.trim():e.value));
         return;
       }
       if(e.classList&&e.classList.contains('tx-extra')) return;  /* ditangani _faktorExtra dengan konteks faktor */
@@ -3788,6 +3813,24 @@ function signoffTTD(){
       _ttdStatus('Ditandatangani · '+ttd.nama+' · '+_ttdJam(ttd.waktu)+' · PIN diverifikasi hub','ok'); }
     else _ttdStatus('Belum ditandatangani PIN — klik centang lagi, atau akan diminta saat Terbitkan Handoff.','warn');
   });
+}
+
+/* ===== RISIKO BEKAS (Acne B): faktor -> kesimpulan otomatis, dokter boleh menimpa =====
+   Aturan (Dr. Oku): 0 faktor = belum disimpulkan (tidak ada centang bawaan), 1 faktor = Sedang,
+   >=2 faktor atau Nodulokistik = Tinggi. Pilihan manual yang berbeda dari saran dicatat sebagai timpaan. */
+window._rbOverride=false;
+function _rbSaran(){ var f=[].slice.call(document.querySelectorAll('#ovl_acne .rbf')), n=f.filter(function(c){return c.checked;}).length,
+  nod=f.some(function(c){return c.checked&&c.getAttribute('data-w')==='2';}); return n===0?'':((n>=2||nod)?'Tinggi':'Sedang'); }
+function syncRisikoBekas(manual){
+  var saran=_rbSaran(), radios=[].slice.call(document.querySelectorAll('input[name=rb_level]')), cur='';
+  radios.forEach(function(r){ if(r.checked) cur=r.value; });
+  if(manual){ window._rbOverride=!!(cur&&saran&&cur!==saran); }
+  else if(!window._rbOverride){ radios.forEach(function(r){ r.checked=(r.value===saran); }); cur=saran; }
+  var s=document.getElementById('rb_saran');
+  if(s) s.textContent=!saran&&!cur?'centang faktor di atas, atau pilih langsung':(window._rbOverride?('saran dari faktor: '+saran+' — dokter memilih '+cur):(saran?'saran otomatis dari faktor':''));
+  var c=document.getElementById('rb_conseq'), lv=document.getElementById('rb_conseq_lv');
+  if(c){ c.hidden=!(cur==='Sedang'||cur==='Tinggi'); if(lv) lv.textContent=cur.toUpperCase(); }
+  document.querySelectorAll('#rb_seg .rbopt').forEach(function(l){ var r=l.querySelector('input'); l.classList.toggle('on',r.checked); l.classList.toggle('saran',!!saran&&r.value===saran&&!r.checked); });
 }
 
 /* ===== ICD-10 (PMK 24/2022 Ps. 18: diagnosis diberi kode) =====

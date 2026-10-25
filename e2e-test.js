@@ -436,7 +436,7 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
       const ph = [...oral].map(i => i.placeholder);
       check('Acne selaras Dr. Oku: isotretinoin low-dose pertama, antibiotik terakhir & jangka pendek, tanpa kotak peringatan, BPO dulu, triase risiko bekas, Panduan §8',
         /^Isotretinoin low-dose/.test(ph[0]) && /Antibiotik oral — jangka pendek/.test(ph[ph.length - 1]) && !ok.d.querySelector('#ac_block-2 .warn-box') /* kotak peringatan dihapus 2026-10-23 atas permintaan; rinciannya di Panduan §8 */ &&
-        [...ok.d.querySelectorAll('#ovl_acne .rx-table input')].some(i => /^BPO 2,5/.test(i.placeholder)) && [...ok.d.querySelectorAll('#ovl_acne .qline .q')].some(q => /Risiko bekas/.test(q.textContent)) &&
+        [...ok.d.querySelectorAll('#ovl_acne .rx-table input')].some(i => /^BPO 2,5/.test(i.placeholder)) && [...ok.d.querySelectorAll('#ovl_acne .qline .q')].some(q => /risiko bekas/i.test(q.textContent)) &&
         /id="oku"/.test(fs.readFileSync(path.join('www', 'ADC_Panduan_Pengisian_Form.html'), 'utf8')), ph); }
     /* ===== 5h. pemilih produk resep ===== */
     { const rp = await open('ADC_Form2_Asesmen_Umum_Dokter.html');
@@ -515,6 +515,22 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
       check('Rx: baris tambahan terbaca collectRx & isian program', rx.some(r => r.obat === 'Azithromycin 500 mg' && r.jadwal === '1x1 3 hari') && rx.some(r => r.obat === 'Krim racik') && ra.w._progDetail().acne.isian.some(x => /Azithromycin/.test(x)), rx);
       trO.querySelector('.rxdel').click();
       check('Rx: hapus baris tambahan', oral.querySelectorAll('tbody tr').length === n0 && !ra.w.collectRx().some(r => /Azithromycin/.test(r.obat))); }
+
+    { const rb = await open('ADC_Form2_Asesmen_Umum_Dokter.html');
+      set(rb.d, 'd2_dx', 'Acne'); rb.w.pickStage('acne', 2);
+      const f = [...rb.d.querySelectorAll('#ovl_acne .rbf')], lv = () => ([...rb.d.querySelectorAll('input[name=rb_level]')].find(r => r.checked) || {}).value || '';
+      check('Risiko bekas: awal tanpa kesimpulan (tidak ada centang bawaan), konsekuensi tersembunyi', lv() === '' && $(rb.d, 'rb_conseq').hidden === true && /centang faktor/.test($(rb.d, 'rb_saran').textContent));
+      f[1].checked = true; f[1].dispatchEvent(new rb.w.Event('change', { bubbles: true }));
+      check('Risiko bekas: 1 faktor -> saran Sedang terpilih otomatis + konsekuensi tampil', lv() === 'Sedang' && $(rb.d, 'rb_conseq').hidden === false && /SEDANG/.test($(rb.d, 'rb_conseq_lv').textContent));
+      f[2].checked = true; f[2].dispatchEvent(new rb.w.Event('change', { bubbles: true }));
+      check('Risiko bekas: 2 faktor -> Tinggi; isian handoff memuat "Kesimpulan risiko bekas: Tinggi" dan faktornya', lv() === 'Tinggi' && rb.w._progDetail().acne.isian.includes('Kesimpulan risiko bekas: Tinggi') && rb.w._progDetail().acne.isian.includes('Badan (dada/punggung)'), rb.w._progDetail().acne.isian);
+      const rS = [...rb.d.querySelectorAll('input[name=rb_level]')].find(r => r.value === 'Sedang'); rS.checked = true; rS.dispatchEvent(new rb.w.Event('change', { bubbles: true }));
+      check('Risiko bekas: dokter menimpa ke Sedang -> tercatat sebagai timpaan, saran tetap Tinggi', lv() === 'Sedang' && rb.w._rbOverride === true && /saran dari faktor: Tinggi/.test($(rb.d, 'rb_saran').textContent) && rb.d.querySelector('#rb_seg .rbopt.saran input').value === 'Tinggi', $(rb.d, 'rb_saran').textContent);
+      f[2].checked = false; f[2].dispatchEvent(new rb.w.Event('change', { bubbles: true }));
+      check('Risiko bekas: timpaan dokter bertahan saat faktor berubah', lv() === 'Sedang');
+      f[0].checked = true; f[0].dispatchEvent(new rb.w.Event('change', { bubbles: true })); const rT = [...rb.d.querySelectorAll('input[name=rb_level]')].find(r => r.value === 'Tinggi'); rT.checked = true; rT.dispatchEvent(new rb.w.Event('change', { bubbles: true }));
+      check('Risiko bekas: Nodulokistik -> saran Tinggi; memilih sesuai saran menghapus status timpaan', lv() === 'Tinggi' && rb.w._rbOverride === false, $(rb.d, 'rb_saran').textContent);
+      check('Risiko bekas: hanya satu kesimpulan (radio), tiga pilihan', rb.d.querySelectorAll('input[name=rb_level]').length === 3 && rb.d.querySelectorAll('input[name=rb_level]:checked').length === 1); }
 
     /* ===== 5h. jejak audit, koreksi 2x24 jam, TTD palsu, login dari form ===== */
     { const au = (await (await fetch(BASE + '/api/audit?n=500', { headers: Hd('admin') })).json()).audit;
