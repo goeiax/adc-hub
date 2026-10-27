@@ -152,6 +152,7 @@ label.opt.lbl-hamil{border:1.5px solid var(--accent-deep,#8E4A33);background:#FB
 .sdlg .miss button{display:block;width:100%;text-align:left;font:inherit;font-size:14px;min-height:44px;padding:8px 12px;margin:0 0 6px;border:1px solid var(--accent);border-radius:var(--r-box,8px);background:#fff;color:var(--ink);cursor:pointer;}
 .sdlg .miss button::before{content:'→ ';color:var(--accent-deep);font-weight:700;}
 .sdlg .okmsg{font-size:14px;color:var(--green-text,#5F6C50);font-weight:600;margin:0 0 8px;}
+.sdlg .mdlg-t.warn{color:var(--accent-deep);}
 
 /* ===== PROGRAM MODALS ===== */
 .progbtn{border:1px solid var(--line-strong);padding:9px 11px;cursor:pointer;background:var(--surface);text-align:left;font-family:var(--ff-body);width:100%;}
@@ -4078,8 +4079,14 @@ function serahkanKePerawat(){
     ? d.miss.map(function(x){ return '<button type="button" data-go="'+_esc(x.go)+'">'+_esc(x.label)+'</button>'; }).join('')
     : '<div class="okmsg">Semua butir wajib lengkap. Perawat akan menjadwalkan dan menerbitkan handoff.</div>';
   document.getElementById('sdlg_miss').querySelectorAll('button').forEach(function(b){ b.onclick=function(){ tutup(); goTo(b.getAttribute('data-go')); }; });
-  document.getElementById('sdlg_x').onclick=tutup;
-  document.getElementById('sdlg_ok').onclick=function(){ tutup(); goStep(5); };
+  /* afordansi terkuat mengikuti jalan yang aman: ada kekurangan -> "Kembali & lengkapi" terisi, "Serahkan" garis */
+  var bx=document.getElementById('sdlg_x'), bok=document.getElementById('sdlg_ok'), judul=document.getElementById('sdlg_t');
+  bx.className=d.miss.length?'mdlg-ok':'mdlg-x';
+  bok.className=d.miss.length?'mdlg-x':'mdlg-ok';
+  bok.innerHTML=d.miss.length?('Serahkan dengan '+d.miss.length+' kekurangan &rsaquo;'):'Serahkan &rsaquo;';
+  judul.classList.toggle('warn',!!d.miss.length);
+  bx.onclick=tutup;
+  bok.onclick=function(){ tutup(); goStep(5); };
   dlgBuka(bg,tutup); setTimeout(function(){ try{ document.getElementById(d.miss.length?'sdlg_x':'sdlg_ok').focus(); }catch(e){} },0);
 }
 
