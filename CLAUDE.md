@@ -41,7 +41,7 @@ WAJIB strip (`#reqbar`, rendered by `updateReq()`) shows only unmet chips plus t
 Kontrol mode = `body.mode-kontrol` (`.vis-awal` hidden, `.vis-kontrol` shown); issuing a handoff is blocked until the previous handoff is loaded (`hoBelumDimuat()`), unless `ho_absen` is checked (audit-flagged).
 
 ## Known gotchas (each bit us before)
-- **Dual-role CSS classes**: `.sec`, `.row`, `.opt`, `.f`, `.ck` mean different things in main form vs. the Hair-Loss modal (`#ovl_hair`, imported markup). Any global style change must be checked for leakage into `#ovl_hair`.
+- **Dual-role CSS classes** (incl. `.fin` = allergy-flag input, so never use it for a button — the modal finish button is `.pm-selesai`): `.sec`, `.row`, `.opt`, `.f`, `.ck` mean different things in main form vs. the Hair-Loss modal (`#ovl_hair`, imported markup). Any global style change must be checked for leakage into `#ovl_hair`.
 - Phone (≤640 px) rules live in one `@media (max-width:640px)` block near `.tb-more`: toolbar and ctlbar wrap and go static, the acne 4-factor table stacks per row. Shipping size is still the 1024 tablet; check both when touching chrome.
 - Grid span classes differ per file (`.k4` exists in Form 2, not Form 1). Check definitions in the target file.
 - Avoid `border` shorthand with `var()` where tests run in jsdom — use longhands.

@@ -507,8 +507,8 @@ label.opt.lbl-hamil{border:1.5px solid var(--accent-deep,#8E4A33);background:#FB
 .ovl .pmnav button{font:inherit;font-size:14px;font-weight:560;min-height:44px;padding:0 20px;border:1px solid var(--line-strong);background:#fff;color:var(--ink);cursor:pointer;}
 .ovl .pmnav button.pri{background:var(--accent-act);border-color:var(--accent-act);color:#fff;}
 .ovl .pmnav button.pri:hover{background:var(--accent-deep);border-color:var(--accent-deep);}
-.ovl .pmnav button.fin{background:var(--accent-act);border-color:var(--accent-act);color:#fff;font-weight:620;}
-.ovl .pmnav button.fin:hover{background:var(--accent-deep);border-color:var(--accent-deep);}
+.ovl .pmnav button.pm-selesai{background:var(--accent-act);border-color:var(--accent-act);color:#fff;font-weight:620;}
+.ovl .pmnav button.pm-selesai:hover{background:var(--accent-deep);border-color:var(--accent-deep);}
 @media print{ .ovl .pmpart{display:block !important;} .ovl .pmrail,.ovl .pmnav{display:none !important;} }
 .ovl .pmodal .sec-label{gap:10px;align-items:baseline;}
 .ovl .pmodal .sec-label .hint{opacity:1;color:var(--ink-muted);font-style:normal;text-align:right;flex:0 1 auto;}
@@ -2473,7 +2473,7 @@ function initPmWizard(){
       var nav=document.createElement('div'); nav.className='pmnav';
       var prev=i>0?('<button type="button" onclick="pmGo(\''+p+'\','+urut[i-1]+')">&lsaquo; '+PM_BAGIAN[urut[i-1]-1]+'</button>'):'<span></span>';
       var next=i<urut.length-1?('<button type="button" class="pri" onclick="pmGo(\''+p+'\','+urut[i+1]+')">'+PM_BAGIAN[urut[i+1]-1]+' &rsaquo;</button>')
-                              :('<button type="button" class="fin" onclick="closeProg(\''+p+'\')">Selesai — tutup &amp; simpan</button>');
+                              :('<button type="button" class="pm-selesai" onclick="closeProg(\''+p+'\')">Selesai — tutup &amp; simpan</button>');
       nav.innerHTML=prev+next; wraps[n].appendChild(nav);
     });
     pmGo(p, urut[0], true);
