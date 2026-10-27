@@ -318,7 +318,8 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
     check('F2: IGA baseline di kunjungan 3 masih 3', c.w.igaData('acne') === null || c.w._igaBaseline('acne') === 3, c.w._igaBaseline('acne'));
     set(c.d, 'k1_dokter', 'dr. Uji, Sp.DVE'); set(c.d, 'k1_hasil', 'Stabil'); c.w.setIGA('ac_iga', '0');
     set(c.d, 'd5_iv', '14'); set(c.d, 'd5_start', '2026-11-02'); set(c.d, 'd7_remarks', 'Selesai'); await signoff(c, { batal: true });
-    check('F2 D7: Batal pada PIN saat sign-off -> status "Belum ditandatangani", centang tetap', /Belum ditandatangani PIN/.test($(c.d, 'd8_ttd').textContent) && $(c.d, 'd8_signoff').checked && !c.w._ttd, $(c.d, 'd8_ttd').textContent);
+    check('F2 D7: Batal pada PIN saat sign-off -> centang DILEPAS, chip amber "Belum ditandatangani"', /Belum ditandatangani/.test($(c.d, 'd8_ttd').textContent) && $(c.d, 'd8_ttd').classList.contains('warn') && !$(c.d, 'd8_signoff').checked && !c.w._ttd, $(c.d, 'd8_ttd').textContent);
+    $(c.d, 'd8_signoff').checked = true;   /* centang tanpa dialog (mis. form lama) -> PIN diminta saat Terbitkan */
     chk(c.d, 'd8_skrining'); chk(c.d, 'd8_consent');
     await terbit(c, { batal: true });
     const h3 = disk('handoff_terakhir.json');

@@ -987,7 +987,7 @@ body.showall .step{display:block;}
 .ttdst{flex-basis:100%;font-size:12.5px;color:var(--ink-muted);min-height:0;}
 .ttdst:empty{display:none;}
 .ttdst.ok{color:var(--green-text,#5F6C50);font-weight:600;}
-.ttdst.warn{color:var(--accent-deep,#8E4A33);}
+.ttdst.warn{display:inline-block;flex-basis:auto;color:var(--accent-deep,#8E4A33);background:#FBEDE8;border:1px solid var(--accent-deep,#8E4A33);border-radius:999px;padding:5px 11px;font-weight:600;}
 /* aksi penutup alur: Terbitkan di akhir langkah 6, lebih berat dari Lanjut biasa */
 .stepnav .nb-terbit{background:var(--ink);border-color:var(--ink);color:var(--canvas);font-weight:620;padding:13px 28px;}
 .stepnav .nb-terbit:hover{background:var(--accent-deep);border-color:var(--accent-deep);color:#fff;}
@@ -3986,7 +3986,9 @@ function signoffTTD(){
   hubTTD(_hv('rm'),'',function(ttd){
     if(ttd){ window._ttd=ttd; var dd=document.getElementById('d8_dokter'); if(dd&&!dd.value.trim()) dd.value=ttd.nama;
       _ttdStatus('Ditandatangani · '+ttd.nama+' · '+_ttdJam(ttd.waktu)+' · PIN diverifikasi hub','ok'); }
-    else _ttdStatus('Belum ditandatangani PIN — klik centang lagi, atau akan diminta saat Terbitkan Handoff.','warn');
+    else { /* dibatalkan: centang dilepas — kotak tercentang tanpa PIN terbaca sebagai "sudah tanda tangan" */
+      cb.checked=false; _ttdStatus('Belum ditandatangani — centang lagi untuk memasukkan PIN dokter.','warn');
+      if(typeof updateReq==='function') updateReq(); }
   });
 }
 
