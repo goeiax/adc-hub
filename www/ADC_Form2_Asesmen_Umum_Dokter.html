@@ -282,9 +282,10 @@ label.opt.lbl-hamil{border:1.5px solid var(--accent-deep,#8E4A33);background:#FB
 #ovl_acne .warn-box strong{color:var(--red);}
 /* Risiko bekas: segmen kesimpulan (satu pilihan) + saran otomatis + konsekuensi */
 #ovl_acne .qline.rbq{flex-wrap:wrap;gap:8px 10px;}
-#ovl_acne .rbseg{display:inline-flex;border:1px solid var(--border);border-radius:999px;overflow:hidden;background:#fff;}
-#ovl_acne .rbopt{position:relative;display:flex;align-items:center;padding:7px 15px;font-size:13px;cursor:pointer;border-right:1px solid var(--border);min-height:36px;color:var(--text);}
-#ovl_acne .rbopt:last-child{border-right:none;}
+#ovl_acne .rbseg{display:inline-flex;gap:8px;flex-wrap:wrap;}
+#ovl_acne .rbopt{position:relative;display:flex;align-items:center;gap:9px;padding:0 14px 0 11px;font-size:13px;cursor:pointer;border:1px solid var(--border);min-height:44px;color:var(--text);background:#fff;}
+#ovl_acne .rbopt::before{content:'';flex:none;width:14px;height:14px;border:2px solid var(--border);background:#fff;}
+#ovl_acne .rbopt.on::before{border-color:#fff;background:#fff;box-shadow:inset 0 0 0 4px var(--text);}
 #ovl_acne .rbopt input{position:absolute;opacity:0;width:0;height:0;}
 #ovl_acne .rbopt.on{background:var(--text);color:#fff;font-weight:600;}
 #ovl_acne .rbopt.saran{box-shadow:inset 0 0 0 2px var(--gold);}
@@ -494,13 +495,14 @@ label.opt.lbl-hamil{border:1.5px solid var(--accent-deep,#8E4A33);background:#FB
 .ovl .pmodal{max-width:1180px;background:#fff;}
 .ovl .pmodal .pmhead{z-index:5;}
 .ovl .pmodal .pmhead{padding:11px 18px;}
-.ovl .pmodal .pmbody{padding:16px 22px 24px;overflow-x:auto;}
+.ovl .pmodal .pmbody{padding:16px 22px 24px;overflow:visible;}
+.ovl .pmodal table{max-width:100%;}
 .ovl .pmodal .pmctx{padding:8px 12px;margin-bottom:12px;}
 .ovl .pmodal .band{margin:16px 0 0;padding:5px 11px;}
 
 /* teks panjang harus membungkus, bukan terpotong */
 /* ===== wizard 3 bagian di dalam modal program ===== */
-.ovl .pmrail{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin:0 0 16px;border:1px solid var(--line) !important;background:var(--surface-quiet);}
+.ovl .pmrail{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:0;margin:0 0 16px;border:1px solid var(--line) !important;background:var(--surface-quiet);position:sticky;top:var(--pmh,70px);z-index:4;}
 .ovl .pmrail button{font:inherit;text-align:left;background:none;border:none;border-right:1px solid var(--line);padding:10px 14px;cursor:pointer;min-height:56px;display:flex;flex-direction:column;gap:2px;color:var(--ink-2);}
 .ovl .pmrail button:last-child{border-right:none;}
 .ovl .pmrail button .pn{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);}
@@ -2457,18 +2459,21 @@ function openProg(p){
   }
   o.classList.add('open'); _open=p; document.body.style.overflow='hidden';
   if(typeof renderHamilModal==='function') renderHamilModal(p);
-  if(typeof pmGo==='function'&&o.querySelector('.pmrail')) pmGo(p, window._pmPart[p]||1, true);
+  if(typeof pmGo==='function'&&o.querySelector('.pmrail')){ var hd=o.querySelector('.pmhead'); if(hd) o.style.setProperty('--pmh',hd.offsetHeight+'px'); pmGo(p, window._pmPart[p]||1, true); }
 }
 /* ===== WIZARD 3 BAGIAN DI DALAM MODAL PROGRAM =====
    Bagian ditentukan dari huruf seksi: A,B = Penilaian · C,D = Tahap & resep · E,F,G = Edukasi & rencana;
    seksi tanpa huruf (mis. "Tiga Pilar Wajib" melasma) ikut bagian Tahap. Node dibungkus, tidak dipindah urutannya. */
-var PM_BAGIAN=['Penilaian','Tahap & resep','Edukasi & rencana'];
+var PM_BAGIAN={acne:{1:'Penilaian',2:'4 faktor',3:'Tahap & resep',4:'Edukasi & rencana'},
+  melasma:{1:'Penilaian',2:'Pilar & tahap',3:'Resep',4:'Edukasi'},
+  hair:{1:'Penilaian',2:'Fase program',3:'Resep & rujukan',4:'Edukasi'}};
+function _pmLabel(p,n){ return (PM_BAGIAN[p]&&PM_BAGIAN[p][n])||['Penilaian','Tahap','Resep','Edukasi'][n-1]||('Bagian '+n); }
 window._pmPart={};
 function _pmBagianDari(el){
   var head=el.classList.contains('sec')?el.querySelector('.sech'):el;
   var t=(head?head.textContent:'').replace(/\s+/g,' ').trim(), m=t.match(/^([A-G])\s*·/);
   if(!m) return 2;
-  return 'AB'.indexOf(m[1])>=0?1:('CD'.indexOf(m[1])>=0?2:3);
+  return 'AB'.indexOf(m[1])>=0?1:(m[1]==='C'?2:(m[1]==='D'?3:4));
 }
 function initPmWizard(){
   document.querySelectorAll('.ovl[data-prog]').forEach(function(ovl){
@@ -2485,12 +2490,12 @@ function initPmWizard(){
     /* urutkan pembungkus sesuai nomor bagian (bila markup menyelipkan seksi tak berhuruf lebih awal) */
     urut.forEach(function(n){ body.appendChild(wraps[n]); });
     var rail=document.createElement('div'); rail.className='pmrail'; rail.setAttribute('role','tablist'); rail.setAttribute('aria-label','Bagian form program');
-    rail.innerHTML=urut.map(function(n,i){ return '<button type="button" role="tab" data-part="'+n+'" onclick="pmGo(\''+p+'\','+n+')"><span class="pn">Bagian '+(i+1)+' dari '+urut.length+'</span><span class="pl">'+PM_BAGIAN[n-1]+'</span></button>'; }).join('');
+    rail.innerHTML=urut.map(function(n,i){ return '<button type="button" role="tab" data-part="'+n+'" onclick="pmGo(\''+p+'\','+n+')"><span class="pn">Bagian '+(i+1)+' dari '+urut.length+'</span><span class="pl">'+_pmLabel(p,n)+'</span></button>'; }).join('');
     body.insertBefore(rail, wraps[urut[0]]);
     urut.forEach(function(n,i){
       var nav=document.createElement('div'); nav.className='pmnav';
-      var prev=i>0?('<button type="button" onclick="pmGo(\''+p+'\','+urut[i-1]+')">&lsaquo; '+PM_BAGIAN[urut[i-1]-1]+'</button>'):'<span></span>';
-      var next=i<urut.length-1?('<button type="button" class="pri" onclick="pmGo(\''+p+'\','+urut[i+1]+')">'+PM_BAGIAN[urut[i+1]-1]+' &rsaquo;</button>')
+      var prev=i>0?('<button type="button" onclick="pmGo(\''+p+'\','+urut[i-1]+')">&lsaquo; '+_pmLabel(p,urut[i-1])+'</button>'):'<span></span>';
+      var next=i<urut.length-1?('<button type="button" class="pri" onclick="pmGo(\''+p+'\','+urut[i+1]+')">'+_pmLabel(p,urut[i+1])+' &rsaquo;</button>')
                               :('<button type="button" class="pm-selesai" onclick="closeProg(\''+p+'\')">Selesai — tutup &amp; simpan</button>');
       nav.innerHTML=prev+next; wraps[n].appendChild(nav);
     });
