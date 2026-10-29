@@ -1814,9 +1814,9 @@ body.mode-kontrol #rb2 .rl::after{content:' — dilewati';font-size:11px;font-we
   
   <!-- D5 (opsional) ikut langkah rencana, bukan langkah sign-off -->
   <div class="sec"><span class="n">D5</span>Rekomendasi bertahap<span class="opt">opsional — catatan pegangan pasien</span></div>
-  <p class="note">Bersifat bertahap sesuai kondisi pasien — <b>bukan janji hasil</b>. Pasien membawa pulang catatan ini agar tahu langkah berikutnya; harga ditanyakan ke bagian depan.</p>
+  <p class="note">Bertahap sesuai kondisi — <b>bukan janji hasil</b>. Harga: bagian depan.</p>
   <table class="tbl">
-    <thead><tr><th style="width:12%">Tahap</th><th style="width:36%">Yang direkomendasikan</th><th style="width:28%">Tujuan / kondisi sasaran</th><th style="width:24%">Perkiraan waktu</th></tr></thead>
+    <thead><tr><th style="width:17%">Tahap</th><th style="width:31%">Yang direkomendasikan</th><th style="width:28%">Tujuan / kondisi sasaran</th><th style="width:24%">Perkiraan waktu</th></tr></thead>
     <tbody>
       <tr><td><input class="cell" value="Sekarang"></td><td><input class="cell" placeholder="mis. kendalikan kondisi aktif"></td><td><input class="cell"></td><td><input class="cell" placeholder="mis. bln 1–3"></td></tr>
       <tr><td><input class="cell" value="Berikutnya"></td><td><input class="cell" placeholder="mis. perbaikan bekas / tekstur"></td><td><input class="cell"></td><td><input class="cell" placeholder="mis. bln 4–6"></td></tr>
@@ -1929,7 +1929,7 @@ body.mode-kontrol #rb2 .rl::after{content:' — dilewati';font-size:11px;font-we
       <div class="pmctx" id="ctx_acne"></div>
   
       <!-- A. RIWAYAT & PEMICU -->
-  <div class="sec-label">A · Riwayat &amp; Pemicu <span class="hint">khusus acne — tidak diulang dari Form 1/2</span></div>
+  <div class="sec-label">A · Riwayat &amp; Pemicu <span class="hint">khusus acne</span></div>
   
   <div class="qline"><span class="q">Pakai produk beli sendiri (skincare aktif / "probiotik" oles)?</span>
     <label class="ck"><input type="checkbox" id="ac_a_self_n"> Tidak</label><label class="ck"><input type="checkbox" id="ac_a_self_y"> Ya</label>
@@ -1952,10 +1952,10 @@ body.mode-kontrol #rb2 .rl::after{content:' — dilewati';font-size:11px;font-we
     <div class="rbseg" id="rb_seg" role="radiogroup" aria-label="Kesimpulan risiko bekas">
       <label class="rbopt"><input type="radio" name="rb_level" value="Rendah" onchange="syncRisikoBekas(true)"> Rendah</label><label class="rbopt"><input type="radio" name="rb_level" value="Sedang" onchange="syncRisikoBekas(true)"> Sedang</label><label class="rbopt"><input type="radio" name="rb_level" value="Tinggi" onchange="syncRisikoBekas(true)"> Tinggi</label>
     </div><span class="sub" id="rb_saran"></span>
-    <div class="rb-conseq" id="rb_conseq" hidden>Risiko bekas <b id="rb_conseq_lv"></b>: kendalikan agresif &amp; dini — pertimbangkan jalur isotretinoin (tahap Menengah–Berat).</div></div>
+    <div class="rb-conseq" id="rb_conseq" hidden>Risiko bekas <b id="rb_conseq_lv"></b>: kendalikan agresif &amp; dini — pertimbangkan jalur isotretinoin (Tahap 2 · Menengah–Berat).</div></div>
   <div class="qline"><span class="q">Distribusi:</span><label class="ck"><input type="checkbox"> Dahi</label><label class="ck"><input type="checkbox"> Pipi</label><label class="ck"><input type="checkbox"> Rahang/dagu</label><label class="ck"><input type="checkbox"> Dada</label><label class="ck"><input type="checkbox"> Punggung</label><label class="ck" style="margin-left:auto"><input type="checkbox"> Hormonal</label></div>
 
-  <div class="qline"><span class="q">Baseline waktu pemulihan (rentang — dari pengalaman dokter):</span><span class="q">Mulai membaik:</span><input class="ln" placeholder="mis. 4–6 minggu" style="min-width:75px;"><span class="q">Hasil optimal:</span><input class="ln" placeholder="mis. 3–6 bulan" style="min-width:75px;"><span class="sub">— sampaikan rentang, bukan janji absolut (no overclaiming)</span></div>
+  <div class="qline"><span class="q">Baseline waktu pemulihan (rentang — dari pengalaman dokter):</span><span class="q">Mulai membaik:</span><input class="ln" placeholder="mis. 4–6 minggu" style="min-width:75px;"><span class="q">Hasil optimal:</span><input class="ln" placeholder="mis. 3–6 bulan" style="min-width:75px;"><span class="sub">rentang, bukan janji</span></div>
 
   <!-- C. 4 FAKTOR -->
   <div class="sec-label">C · Penilaian 4 Faktor → Treatment ADC <span class="hint">centang pemicu yang ada &amp; treatment dipilih</span></div>
@@ -1997,10 +1997,10 @@ body.mode-kontrol #rb2 .rl::after{content:' — dilewati';font-size:11px;font-we
   <div class="sec-label gold">D · Tahap Perawatan &amp; Protokol <span class="hint">menentukan resep default + jadwal SleekFlow</span></div>
   
   <div class="sev-grid">
-    <div class="sev-card s1" id="ac_sev-1" onclick="pickStage('acne',1)"><div class="sev-tag">Ringan</div><div class="sev-name">Ringan</div><div class="sev-desc">Bruntusan/komedo. Pembersihan + obat oles.</div></div>
-    <div class="sev-card s2" id="ac_sev-2" onclick="pickStage('acne',2)"><div class="sev-tag">Menengah–Berat</div><div class="sev-name">Menengah–Berat</div><div class="sev-desc">+ Excel V, Plazion, obat minum.</div></div>
-    <div class="sev-card s3" id="ac_sev-3" onclick="pickStage('acne',3)"><div class="sev-tag">Pasca-Jerawat</div><div class="sev-name">Bekas</div><div class="sev-desc">±3 bln. PicoSure / Excel V / Dermapen.</div></div>
-    <div class="sev-card s4" id="ac_sev-4" onclick="pickStage('acne',4)"><div class="sev-tag">Maintenance</div><div class="sev-name">Maintenance</div><div class="sev-desc">Kulit bersih (3–6 bln). Cegah build-up.</div></div>
+    <div class="sev-card s1" id="ac_sev-1" onclick="pickStage('acne',1)"><div class="sev-tag">Tahap 1</div><div class="sev-name">Ringan</div><div class="sev-desc">Bruntusan/komedo. Pembersihan + obat oles.</div></div>
+    <div class="sev-card s2" id="ac_sev-2" onclick="pickStage('acne',2)"><div class="sev-tag">Tahap 2</div><div class="sev-name">Menengah–Berat</div><div class="sev-desc">+ Excel V, Plazion, obat minum.</div></div>
+    <div class="sev-card s3" id="ac_sev-3" onclick="pickStage('acne',3)"><div class="sev-tag">Tahap 3</div><div class="sev-name">Bekas (pasca-jerawat)</div><div class="sev-desc">±3 bln. PicoSure / Excel V / Dermapen.</div></div>
+    <div class="sev-card s4" id="ac_sev-4" onclick="pickStage('acne',4)"><div class="sev-tag">Tahap 4</div><div class="sev-name">Maintenance</div><div class="sev-desc">Kulit bersih (3–6 bln). Cegah build-up.</div></div>
   </div>
 
   <div class="stage-block" id="ac_block-1">
@@ -2104,7 +2104,7 @@ body.mode-kontrol #rb2 .rl::after{content:' — dilewati';font-size:11px;font-we
       <div class="pmctx" id="ctx_melasma"></div>
   
       <!-- A. RIWAYAT & PEMICU -->
-  <div class="sec-label">A · Riwayat &amp; Pemicu <span class="hint">khusus melasma — tidak diulang dari Form 1/2</span></div>
+  <div class="sec-label">A · Riwayat &amp; Pemicu <span class="hint">khusus melasma</span></div>
   
   <div class="qline"><span class="q">Krim/pemutih dipakai sekarang:</span><input class="ln" placeholder="produk saat ini (termasuk racikan)">
     <span class="q" style="margin-left:10px;">Beli sendiri / racikan tanpa anjuran dokter?</span><label class="ck"><input type="checkbox"> Tidak</label><label class="ck"><input type="checkbox"> Ya</label></div>
@@ -2127,7 +2127,7 @@ body.mode-kontrol #rb2 .rl::after{content:' — dilewati';font-size:11px;font-we
   <div class="qline"><span class="q">Kondisi barrier:</span><label class="ck"><input type="checkbox"> Baik</label><label class="ck"><input type="checkbox"> Kering/lemah</label><label class="ck"><input type="checkbox"> Sensitif</label></div>
   <div class="qline"><span class="q">Kesiapan laser:</span><label class="ck"><input type="checkbox"> Kulit cukup kuat → fase aktif</label><label class="ck"><input type="checkbox"> Belum → priming dulu</label></div>
 
-  <div class="qline"><span class="q">Baseline waktu (rentang — dari pengalaman dokter):</span><span class="q">Mulai memudar:</span><input class="ln" placeholder="mis. 4–8 minggu" style="min-width:75px;"><span class="q">Perbaikan maks:</span><input class="ln" placeholder="mis. 3–6 bulan" style="min-width:75px;"><span class="sub">— terkontrol, bukan sembuh total (no overclaiming)</span></div>
+  <div class="qline"><span class="q">Baseline waktu (rentang — dari pengalaman dokter):</span><span class="q">Mulai memudar:</span><input class="ln" placeholder="mis. 4–8 minggu" style="min-width:75px;"><span class="q">Perbaikan maks:</span><input class="ln" placeholder="mis. 3–6 bulan" style="min-width:75px;"><span class="sub">terkontrol, bukan sembuh total</span></div>
 
   <!-- 3 PILAR -->
   <div class="sec-label gold">Tiga Pilar Wajib <span class="hint">jelaskan ke pasien</span></div>
@@ -2240,7 +2240,7 @@ body.mode-kontrol #rb2 .rl::after{content:' — dilewati';font-size:11px;font-we
   
       <!-- A -->
   <div class="sec">
-    <div class="sech"><span>A · Riwayat &amp; Pemicu</span><em>khusus hair-loss — tidak diulang dari Form 1/2</em></div>
+    <div class="sech"><span>A · Riwayat &amp; Pemicu</span><em>khusus hair-loss</em></div>
     <div class="body">
       
       <div class="g g2" style="margin-top:9px">
@@ -4080,7 +4080,7 @@ function syncRisikoBekas(manual){
   if(manual){ window._rbOverride=!!(cur&&saran&&cur!==saran); }
   else if(!window._rbOverride){ radios.forEach(function(r){ r.checked=(r.value===saran); }); cur=saran; }
   var s=document.getElementById('rb_saran');
-  if(s) s.textContent=!saran&&!cur?'centang faktor di atas, atau pilih langsung':(window._rbOverride?('saran dari faktor: '+saran+' — dokter memilih '+cur):(saran?'saran otomatis dari faktor':''));
+  if(s) s.textContent=!saran&&!cur?'belum disimpulkan':(window._rbOverride?('saran dari faktor: '+saran+' — dokter memilih '+cur):(saran?'saran otomatis dari faktor':''));
   var c=document.getElementById('rb_conseq'), lv=document.getElementById('rb_conseq_lv');
   if(c){ c.hidden=!(cur==='Sedang'||cur==='Tinggi'); if(lv) lv.textContent=cur.toUpperCase(); }
   document.querySelectorAll('#rb_seg .rbopt').forEach(function(l){ var r=l.querySelector('input'); l.classList.toggle('on',r.checked); l.classList.toggle('saran',!!saran&&r.value===saran&&!r.checked); });
@@ -4114,13 +4114,14 @@ document.addEventListener('input',function(e){ var t=e.target; if(t&&t.closest){
 /* ===== SERAH TERIMA DOKTER -> PERAWAT =====
    Perangkat berpindah tangan sekali; di titik itu dokter harus melihat apa yang belum lengkap selagi masih
    di ruangan, dan perawat harus melihat status dokter tanpa membuka langkah dokter. */
+function _tglID(s){ try{ if(!s) return ''; var d=new Date(s+'T00:00:00'); if(isNaN(d)) return s; return d.toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'}); }catch(e){ return s; } }
 function _serahData(){
   var st=(typeof reqStatus==='function')?reqStatus():[], miss=st.filter(function(x){ return !x.ok; });
   var progs=(typeof activeProgs==='function')?activeProgs():[];
   var prog=progs.map(function(p){ var th=(window._stage&&window._stage[p])?_psNamaTahap(p,window._stage[p]):''; return PLABEL[p]+(th?(' · '+th):''); }).join(', ');
   var iga=progs.map(function(p){ var id=(typeof IGA_ID!=='undefined'&&IGA_ID[p])?IGA_ID[p]:''; var v=id?_v(id):''; return v?('IGA '+PLABEL[p]+' '+v):''; }).filter(Boolean).join(' · ');
   var rx=(typeof collectRx==='function')?collectRx().length:0;
-  var iv=_v('d5_iv'), ritme=iv?('tiap '+(typeof IVTEXT!=='undefined'&&IVTEXT[iv]?IVTEXT[iv]:iv+' hari')+(_v('d5_start')?(' mulai '+_v('d5_start')):'')):'';
+  var iv=_v('d5_iv'), ritme=iv?('tiap '+(typeof IVTEXT!=='undefined'&&IVTEXT[iv]?IVTEXT[iv]:iv+' hari')+(_v('d5_start')?(' mulai '+_tglID(_v('d5_start'))):'')):'';
   var ttd=window._ttd?('Ditandatangani · '+window._ttd.nama+' · '+_ttdJam(window._ttd.waktu)):(_ck('d8_signoff')?'Sign-off dicentang — tanpa verifikasi PIN':'Belum sign-off');
   return {miss:miss, prog:prog, iga:iga, rx:rx, ritme:ritme, ttd:ttd, ttdOk:!!window._ttd, hm:_pasienHamilMenyusui()};
 }
@@ -4237,7 +4238,7 @@ function openICD(){
   var bg=document.getElementById('icdlg');
   if(!bg){
     bg=document.createElement('div'); bg.id='icdlg'; bg.className='mdlg-bg';
-    bg.innerHTML='<div class="mdlg rxp" role="dialog" aria-modal="true"><div class="mdlg-t">Kode ICD-10</div><div class="mdlg-msg" style="margin:0 0 8px;color:var(--ink-muted)">Boleh lebih dari satu kode. Kode pertama mengisi kolom Diagnosis bila masih kosong.</div>'+
+    bg.innerHTML='<div class="mdlg rxp" role="dialog" aria-modal="true"><div class="mdlg-t">Kode ICD-10</div><div class="mdlg-msg" style="margin:0 0 8px;color:var(--ink-muted)">Boleh lebih dari satu kode; kode pertama mengisi Diagnosis bila kosong.</div>'+
       '<input class="mdlg-in icdq" id="icd_q" autocomplete="off" placeholder="ketik kode (L70) atau nama (melasma, alopesia…)" oninput="_icdRender(this.value)">'+
       '<div class="rxp-list" id="icd_list"></div>'+
       '<div class="mdlg-b" style="margin-top:10px"><span class="mdlg-sp"></span><button type="button" class="mdlg-x" onclick="closeICD()">Tutup</button></div></div>';
@@ -4492,7 +4493,7 @@ function _lembarCetak(){
     return '<div class="ps-kv"><span>Kunj. '+E(v.kunjungan_ke||'')+' · '+E(v.tanggal||'')+'</span>'+E([v.dokter,v.diagnosis,v.resep].filter(Boolean).join(' · '))+'</div>';
   }).join('');
   var jd=h.jadwal||[];
-  var ritme=(_v('d5_iv')||_v('d5_start'))?[_v('d5_iv')&&('kontrol tiap '+_v('d5_iv')+' hari'),_v('d5_start')&&('mulai '+_v('d5_start')),
+  var ritme=(_v('d5_iv')||_v('d5_start'))?[_v('d5_iv')&&('kontrol tiap '+_v('d5_iv')+' hari'),_v('d5_start')&&('mulai '+_tglID(_v('d5_start'))),
              _v('d5_months')&&(_v('d5_months')+' bulan'),jd.length&&(jd.length+' reminder WA')].filter(Boolean).join(' · '):'';
   var pn=h.penerbitan||{}, per=ik.persetujuan||{}, tt=(per.tanda_tangan||{}).pasien||{};
   var html=
