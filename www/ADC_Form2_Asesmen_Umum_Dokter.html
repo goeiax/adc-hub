@@ -986,6 +986,8 @@ body.showall .step{display:block;}
 .stepnav .nb-p:hover{background:var(--accent-deep);border-color:var(--accent-deep);color:#fff;}
 .stepnav .donehint{font-size:14px;color:var(--ink-muted);}
 /* status tanda tangan elektronik di bawah centang sign-off */
+.zone.dr .flag label.none{min-height:44px;display:inline-flex;align-items:center;gap:9px;padding:4px 8px;margin:-4px 0;cursor:pointer;}
+.zone.dr .flag label.none input{width:20px;height:20px;}
 .ttdst{flex-basis:100%;font-size:12.5px;color:var(--ink-muted);min-height:0;}
 .ttdst:empty{display:none;}
 .ttdst.ok{color:var(--green-text,#5F6C50);font-weight:600;}
@@ -3205,7 +3207,7 @@ function dlgBuka(bg,tutup){
 }
 function dlgTutup(bg){
   var a=window._dlgAktif; bg.classList.remove('on');
-  if(a&&a.bg===bg){ window._dlgAktif=null; try{ if(a.fokus&&a.fokus.focus&&document.body.contains(a.fokus)) a.fokus.focus(); }catch(e){} }
+  if(a&&a.bg===bg){ window._dlgAktif=null; try{ if(a.fokus&&a.fokus.focus&&document.body.contains(a.fokus)&&!bg.contains(a.fokus)) a.fokus.focus(); else if(document.activeElement&&bg.contains(document.activeElement)) document.activeElement.blur(); }catch(e){} }
 }
 document.addEventListener('keydown',function(e){
   var a=window._dlgAktif; if(!a||!a.bg.classList.contains('on')) return;
@@ -3235,11 +3237,13 @@ function _ldlgBuat(){
 /* _ldlg('login',{},cb)  -> cb(true) masuk | cb(false) keluar | cb(null) batal
    _ldlg('ttd',{rm,id},cb) -> cb(ttdObj) | cb(null) batal */
 function _ldlg(mode,opsi,cb){
-  var bg=_ldlgBuat(), g=function(id){return document.getElementById(id);}, ttd=(mode==='ttd'), u=window._hubUser, selesai=false;
+  var bg=_ldlgBuat(), g=function(id){return document.getElementById(id);}, ttd=(mode==='ttd'), u=window._hubUser, selesai=false, fokusAwal=document.activeElement;
   /* dialog lain (picker/consent) ditutup; dialog Muat dibiarkan di bawah — alur 401 -> masuk -> ulangi memerlukannya */
   if(window._dlgAktif&&window._dlgAktif.bg&&window._dlgAktif.bg.id!=='mdlg'){ try{ window._dlgAktif.tutup(); }catch(e){} }
   if(window._ldlgAkhir){ var sebelumnya=window._ldlgAkhir; window._ldlgAkhir=null; sebelumnya(null); }  /* dialog lama ditutup dulu — tidak ada callback yatim */
-  var akhir=function(v){ if(selesai) return; selesai=true; window._ldlgAkhir=null; bg.classList.remove('on'); document.removeEventListener('keydown',kb,true); cb(v); };
+  var akhir=function(v){ if(selesai) return; selesai=true; window._ldlgAkhir=null; bg.classList.remove('on'); document.removeEventListener('keydown',kb,true);
+    try{ if(fokusAwal&&fokusAwal.focus&&document.body.contains(fokusAwal)&&!bg.contains(fokusAwal)) fokusAwal.focus(); else if(document.activeElement&&bg.contains(document.activeElement)) document.activeElement.blur(); }catch(e){}
+    cb(v); };
   window._ldlgAkhir=akhir;
   var kb=function(e){ if(e.key==='Escape'){ e.stopPropagation(); akhir(null); }
     else if(e.key==='Enter'&&(document.activeElement===g('ldlg_pin')||document.activeElement===g('ldlg_id'))){ e.preventDefault(); ok(); } };
@@ -3340,9 +3344,22 @@ function loadIntakeFile(input){
   r.readAsText(f);
 }
 function _put(id,v){ var e=document.getElementById(id); if(e&&v&&!(e.value||'').trim()) e.value=v; }
+/* Identitas yang sudah diketik dan BERBEDA dari yang dimuat: tanya, lalu timpa semua kolom identitas.
+   Tanpa ini kolom nama/RM lama bertahan sementara ringkasan, konteks modal & bendera milik pasien lain. */
+function _identitasBeda(p){
+  var n0=_hv('p_nama'), r0=_hv('rm'), n1=(p.nama||'').trim(), r1=(p.rm||'').trim();
+  return !!((n0&&n1&&n0.toLowerCase()!==n1.toLowerCase())||(r0&&r1&&r0.toLowerCase()!==r1.toLowerCase()));
+}
+function _gantiIdentitas(p){
+  var ok=confirm('DATA PASIEN BERBEDA.\n\nDi layar: '+(_hv('p_nama')||'—')+' · RM '+(_hv('rm')||'—')+'\nDimuat : '+(p.nama||'—')+' · RM '+(p.rm||'—')+'\n\nGanti ke pasien yang dimuat? Seluruh kolom identitas akan ditimpa.');
+  if(!ok) return false;
+  ['p_nama','rm','p_nik','p_wa'].forEach(function(id){ var e=document.getElementById(id); if(e) e.value=''; });
+  return true;
+}
 function applyIntake(o){
-  window._intake=o;
   var p=o.pasien||{}, k=o.kritis||{};
+  if(_identitasBeda(p)&&!_gantiIdentitas(p)) return;
+  window._intake=o;
   _put('p_nama',p.nama); _put('rm',p.rm); _put('p_nik',p.nik); _put('p_wa',p.wa); _put('tgl',p.tanggal);
   /* Dokter sudah ditetapkan di registrasi (Form 1) — jadi acuan awal, tetap bisa
      diubah bila di lapangan dokternya berganti. */
@@ -3520,7 +3537,8 @@ function reqStatus(){
     metricStatus().forEach(function(m){ out.push(m); });
   }
   out.push({label:'Ritme kontrol', ok:!!(_v('d5_iv')&&_v('d5_start')), go:'d5_iv'});
-  out.push({label:'Sign-off dokter', ok:_ck('d8_signoff'), go:'d8_signoff'});
+  /* bila hub hidup & minta pengguna: yang dihitung adalah tanda tangan PIN, bukan kotak centang */
+  out.push({label:'Sign-off dokter', ok:(_hubOn&&window._hubLoginReq)?!!window._ttd:_ck('d8_signoff'), go:'d8_signoff'});
   return out;
 }
 /* ===== MODE KUNJUNGAN ===== */
@@ -3851,6 +3869,7 @@ function applyHandoff(h){
       if(h&&/^ADC-SLIMMING/i.test(h.sumber||'')){
         alert('Berkas ini handoff program SLIMMING (Sp.GK), bukan Skin Quality. Muat lewat form Asesmen Slimming.'); return; }
       var a=h.asesmen||{};
+      if(h.pasien&&_identitasBeda(h.pasien)&&!_gantiIdentitas(h.pasien)) return;
       function put(id,val){var el=document.getElementById(id); if(el&&val&&!el.value) el.value=val;}
       put('h_owner',a.dokter);
       put('h_fase',[a.program,a.derajat].filter(Boolean).join(' — '));

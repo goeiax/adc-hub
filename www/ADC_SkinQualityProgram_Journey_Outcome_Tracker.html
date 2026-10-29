@@ -376,7 +376,7 @@ function dlgBuka(bg,tutup){
 }
 function dlgTutup(bg){
   var a=window._dlgAktif; bg.classList.remove('on');
-  if(a&&a.bg===bg){ window._dlgAktif=null; try{ if(a.fokus&&a.fokus.focus&&document.body.contains(a.fokus)) a.fokus.focus(); }catch(e){} }
+  if(a&&a.bg===bg){ window._dlgAktif=null; try{ if(a.fokus&&a.fokus.focus&&document.body.contains(a.fokus)&&!bg.contains(a.fokus)) a.fokus.focus(); else if(document.activeElement&&bg.contains(document.activeElement)) document.activeElement.blur(); }catch(e){} }
 }
 document.addEventListener('keydown',function(e){
   var a=window._dlgAktif; if(!a||!a.bg.classList.contains('on')) return;
@@ -406,11 +406,13 @@ function _ldlgBuat(){
 /* _ldlg('login',{},cb)  -> cb(true) masuk | cb(false) keluar | cb(null) batal
    _ldlg('ttd',{rm,id},cb) -> cb(ttdObj) | cb(null) batal */
 function _ldlg(mode,opsi,cb){
-  var bg=_ldlgBuat(), g=function(id){return document.getElementById(id);}, ttd=(mode==='ttd'), u=window._hubUser, selesai=false;
+  var bg=_ldlgBuat(), g=function(id){return document.getElementById(id);}, ttd=(mode==='ttd'), u=window._hubUser, selesai=false, fokusAwal=document.activeElement;
   /* dialog lain (picker/consent) ditutup; dialog Muat dibiarkan di bawah — alur 401 -> masuk -> ulangi memerlukannya */
   if(window._dlgAktif&&window._dlgAktif.bg&&window._dlgAktif.bg.id!=='mdlg'){ try{ window._dlgAktif.tutup(); }catch(e){} }
   if(window._ldlgAkhir){ var sebelumnya=window._ldlgAkhir; window._ldlgAkhir=null; sebelumnya(null); }  /* dialog lama ditutup dulu — tidak ada callback yatim */
-  var akhir=function(v){ if(selesai) return; selesai=true; window._ldlgAkhir=null; bg.classList.remove('on'); document.removeEventListener('keydown',kb,true); cb(v); };
+  var akhir=function(v){ if(selesai) return; selesai=true; window._ldlgAkhir=null; bg.classList.remove('on'); document.removeEventListener('keydown',kb,true);
+    try{ if(fokusAwal&&fokusAwal.focus&&document.body.contains(fokusAwal)&&!bg.contains(fokusAwal)) fokusAwal.focus(); else if(document.activeElement&&bg.contains(document.activeElement)) document.activeElement.blur(); }catch(e){}
+    cb(v); };
   window._ldlgAkhir=akhir;
   var kb=function(e){ if(e.key==='Escape'){ e.stopPropagation(); akhir(null); }
     else if(e.key==='Enter'&&(document.activeElement===g('ldlg_pin')||document.activeElement===g('ldlg_id'))){ e.preventDefault(); ok(); } };

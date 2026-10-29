@@ -184,6 +184,13 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
     check('F2: Form 1 "tidak ada alergi" -> nihil, ringkasan menyebut Nihil', $(a.d, 'alergi_flag').value === '' && $(a.d, 'alergi_none').checked && /Nihil/.test($(a.d, 'intake_body').textContent));
     { const ik4 = JSON.parse(JSON.stringify(a.w._intake)); ik4.kritis.alergi = 'Penisilin'; ik4.kritis.alergi_nihil = false; a.w.applyIntake(ik4); }
     check('F2: ringkasan intake tampil', $(a.d, 'intake_box').style.display !== 'none');
+    { const asli = JSON.parse(JSON.stringify(a.w._intake)); const lain = JSON.parse(JSON.stringify(asli)); lain.pasien = { nama: 'Orang Lain', rm: 'RM-LAIN', nik: '1111222233334444', wa: '0800' };
+      a.w.confirm = m => { a.dialogs.push({ type: 'confirm', msg: String(m) }); return false; }; a.dialogs.length = 0; a.w.applyIntake(lain);
+      const tolak = /DATA PASIEN BERBEDA/.test((a.dialogs.find(x => x.type === 'confirm') || {}).msg || '') && $(a.d, 'p_nama').value === 'Pasien Uji Coba' && $(a.d, 'rm').value === RM && a.w._intake.pasien.rm === RM;
+      a.w.confirm = m => { a.dialogs.push({ type: 'confirm', msg: String(m) }); return true; }; a.w.applyIntake(lain);
+      const ganti = $(a.d, 'p_nama').value === 'Orang Lain' && $(a.d, 'rm').value === 'RM-LAIN' && $(a.d, 'p_nik').value === '1111222233334444' && a.w._intake.pasien.rm === 'RM-LAIN' && /Orang Lain/.test($(a.d, 'intake_meta').textContent);
+      check('F2: memuat Form 1 pasien LAIN di atas identitas terisi -> tanya; Batal = tidak ada yang berubah; Ganti = semua kolom identitas ditimpa (tidak ada dua pasien di satu layar)', tolak && ganti, { tolak, ganti, nama: $(a.d, 'p_nama').value });
+      a.w.applyIntake(asli); check('F2: muat ulang pasien asli -> identitas kembali', $(a.d, 'p_nama').value === 'Pasien Uji Coba' && $(a.d, 'rm').value === RM); }
     check('F2: mode awal', a.w._mode === 'awal');
 
     set(a.d, 'd2_dx', 'Acne vulgaris grade sedang'); set(a.d, 'd2_hasil', 'Temuan: papul rahang\nPenunjang: panel hormon'); a.d.querySelectorAll('#d1_tk input').forEach(c => { if (['Kombinasi', 'Sensitif'].includes(c.value)) { c.checked = true; c.dispatchEvent(new a.w.Event('change', { bubbles: true })); } });
@@ -320,6 +327,7 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
     set(c.d, 'd5_iv', '14'); set(c.d, 'd5_start', '2026-11-02'); set(c.d, 'd7_remarks', 'Selesai'); await signoff(c, { batal: true });
     check('F2 D7: Batal pada PIN saat sign-off -> centang DILEPAS, chip amber "Belum ditandatangani"', /Belum ditandatangani/.test($(c.d, 'd8_ttd').textContent) && $(c.d, 'd8_ttd').classList.contains('warn') && !$(c.d, 'd8_signoff').checked && !c.w._ttd, $(c.d, 'd8_ttd').textContent);
     $(c.d, 'd8_signoff').checked = true;   /* centang tanpa dialog (mis. form lama) -> PIN diminta saat Terbitkan */
+    check('WAJIB: butir Sign-off dokter membaca tanda tangan PIN (hub hidup) — centang tanpa PIN tetap BELUM', c.w.reqStatus().some(x => x.label === 'Sign-off dokter' && !x.ok));
     chk(c.d, 'd8_skrining'); chk(c.d, 'd8_consent');
     await terbit(c, { batal: true });
     const h3 = disk('handoff_terakhir.json');
@@ -591,6 +599,10 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
       check('Dialog: fokus terkunci — Tab dari elemen terakhir kembali ke elemen pertama', dg.d.activeElement === f[0], dg.d.activeElement && (dg.d.activeElement.id || dg.d.activeElement.tagName));
       dg.d.dispatchEvent(new dg.w.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
       check('Dialog: Escape menutup dialog consent', !on('cdlg'));
+      { $(dg.d, 'tb_more').focus(); dg.w.hubLogin(); dg.d.dispatchEvent(new dg.w.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+        const f1 = dg.d.activeElement === $(dg.d, 'tb_more');
+        $(dg.d, 'tb_more').focus(); dg.w.openICD(); dg.d.dispatchEvent(new dg.w.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+        check('Dialog: fokus kembali ke pemicu setelah Escape pada dialog Masuk dan picker ICD-10', f1 && dg.d.activeElement === $(dg.d, 'tb_more'), { f1, now: dg.d.activeElement && dg.d.activeElement.id }); }
       dg.w.muatIntakeHub(); dg.w.hubLogin();
       check('Dialog: dialog Masuk di atas dialog Muat TIDAK menutupnya (alur 401 -> masuk -> ulangi)', on('mdlg') && on('ldlg'));
       $(dg.d, 'ldlg_x').click(); dg.d.dispatchEvent(new dg.w.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
