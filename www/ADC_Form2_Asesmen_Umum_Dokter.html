@@ -65,6 +65,8 @@ textarea.in.ta:focus{outline:none;border-color:var(--accent-deep);}
 .prog .pname{font-family:var(--ff-head);font-size:14px;font-weight:600;padding-right:18px;}
 .prog .psub{font-size:11px;color:var(--ink-muted);margin-top:2px;}
 table.tbl{width:100%;border-collapse:collapse;font-size:12px;}
+.tblwrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+@media (max-width:640px){ .tblwrap table.tbl{min-width:680px;} }   /* ponsel: geser ke samping, kolom Tahap tidak terjepit */
 table.tbl th{background:var(--surface-quiet);color:var(--ink);text-align:left;font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:6px 8px;border:1px solid var(--line);}
 table.tbl td{padding:4px 8px;border:1px solid var(--line);vertical-align:middle;}
 .cell{border:none;width:100%;font-family:var(--ff-body);font-size:12.5px;color:var(--ink);background:transparent;padding:2px 0;}
@@ -496,6 +498,7 @@ label.opt.lbl-hamil{border:1.5px solid var(--accent-deep,#8E4A33);background:#FB
 .ovl .pmodal .pmhead{z-index:5;}
 .ovl .pmodal .pmhead{padding:11px 18px;}
 .ovl .pmodal .pmbody{padding:16px 22px 24px;overflow:visible;}
+@media (max-width:640px){ .ovl .pmodal .pmrail{position:static;} }   /* ponsel: hanya kepala modal yang lengket */
 .ovl .pmodal table{max-width:100%;}
 .ovl .pmodal .pmctx{padding:8px 12px;margin-bottom:12px;}
 .ovl .pmodal .band{margin:16px 0 0;padding:5px 11px;}
@@ -1815,14 +1818,14 @@ body.mode-kontrol #rb2 .rl::after{content:' — dilewati';font-size:11px;font-we
   <!-- D5 (opsional) ikut langkah rencana, bukan langkah sign-off -->
   <div class="sec"><span class="n">D5</span>Rekomendasi bertahap<span class="opt">opsional — catatan pegangan pasien</span></div>
   <p class="note">Bertahap sesuai kondisi — <b>bukan janji hasil</b>. Harga: bagian depan.</p>
-  <table class="tbl">
+  <div class="tblwrap"><table class="tbl">
     <thead><tr><th style="width:17%">Tahap</th><th style="width:31%">Yang direkomendasikan</th><th style="width:28%">Tujuan / kondisi sasaran</th><th style="width:24%">Perkiraan waktu</th></tr></thead>
     <tbody>
       <tr><td><input class="cell" value="Sekarang"></td><td><input class="cell" placeholder="mis. kendalikan kondisi aktif"></td><td><input class="cell"></td><td><input class="cell" placeholder="mis. bln 1–3"></td></tr>
       <tr><td><input class="cell" value="Berikutnya"></td><td><input class="cell" placeholder="mis. perbaikan bekas / tekstur"></td><td><input class="cell"></td><td><input class="cell" placeholder="mis. bln 4–6"></td></tr>
       <tr><td><input class="cell" value="Bila siap"></td><td><input class="cell" placeholder="mis. peremajaan lanjutan (opsional)"></td><td><input class="cell"></td><td><input class="cell" placeholder="mis. bln 7+"></td></tr>
     </tbody>
-  </table>
+  </table></div>
 
   <div class="stepnav no-print"><button type="button" class="nb" onclick="goStep(2)">&lsaquo; Kembali</button><button type="button" class="nb nb-p" onclick="goStep(4)">Lanjut &rsaquo;</button></div></section>
   <section class="step" data-step="4">
@@ -3244,7 +3247,7 @@ document.addEventListener('keydown',function(e){
 function _ldlgBuat(){
   var bg=document.getElementById('ldlg'); if(bg) return bg;
   var st=document.createElement('style');
-  st.textContent='.ldlg-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2100;display:none;align-items:flex-start;justify-content:center;padding:12vh 16px 16px}.ldlg-bg.on{display:flex}.ldlg{background:#fff;border-radius:14px;width:100%;max-width:400px;padding:22px 22px 18px;box-shadow:0 18px 50px rgba(0,0,0,.25);font-family:inherit;color:#1B1A18}.ldlg h3{margin:0 0 4px;font-size:17px;font-weight:620}.ldlg p{margin:0 0 12px;font-size:12.5px;line-height:1.5;color:#6B675E}.ldlg label{display:block;font-size:11px;font-weight:620;letter-spacing:.12em;text-transform:uppercase;color:#3A3833;margin:10px 0 5px}.ldlg input{width:100%;box-sizing:border-box;font:inherit;font-size:16px;color:#1F4E9C;padding:10px 12px;border:1px solid #D9CCB7;border-radius:8px;background:#fff}.ldlg input:focus{outline:none;border-color:#B0603F}.ldlg .msg{min-height:18px;font-size:12.5px;color:#8E4A33;margin:8px 0 6px}.ldlg .b{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.ldlg .b .lnk{order:1}.ldlg .b .sp{flex:1;order:2}.ldlg .b #ldlg_x{order:3}.ldlg .b .ok{order:4}.ldlg button{font:inherit;font-size:14px;font-weight:600;min-height:42px;padding:0 16px;border-radius:999px;cursor:pointer;border:1px solid #D9CCB7;background:#fff;color:#1B1A18}.ldlg button.ok{background:#B0603F;border-color:#B0603F;color:#fff}.ldlg button.lnk{border:none;background:none;color:#8E4A33;text-decoration:underline;padding:0 4px;min-height:32px;font-weight:500;font-size:12.5px}@media print{.ldlg-bg{display:none!important}}';
+  st.textContent='.ldlg-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2100;display:none;align-items:flex-start;justify-content:center;padding:12vh 16px 16px}.ldlg-bg.on{display:flex}.ldlg{background:#fff;border-radius:14px;width:100%;max-width:400px;padding:22px 22px 18px;box-shadow:0 18px 50px rgba(0,0,0,.25);font-family:inherit;color:#1B1A18}.ldlg h3{margin:0 0 4px;font-size:17px;font-weight:620}.ldlg p{margin:0 0 12px;font-size:12.5px;line-height:1.5;color:#6B675E}.ldlg label{display:block;font-size:11px;font-weight:620;letter-spacing:.12em;text-transform:uppercase;color:#3A3833;margin:10px 0 5px}.ldlg input{width:100%;box-sizing:border-box;font:inherit;font-size:16px;color:#1F4E9C;padding:10px 12px;border:1px solid #D9CCB7;border-radius:8px;background:#fff}.ldlg input:focus{outline:none;border-color:#B0603F}.ldlg .msg{min-height:18px;font-size:12.5px;color:#8E4A33;margin:8px 0 6px}.ldlg .b{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.ldlg .b .lnk{order:1}.ldlg .b .sp{flex:1;order:2}.ldlg .b #ldlg_x{order:3}.ldlg .b .ok{order:4}.ldlg button{font:inherit;font-size:14px;font-weight:600;min-height:42px;padding:0 16px;border-radius:999px;cursor:pointer;border:1px solid #D9CCB7;background:#fff;color:#1B1A18}.ldlg button.ok{background:#B0603F;border-color:#B0603F;color:#fff}.ldlg button.lnk{border:none;background:none;color:#8E4A33;text-decoration:underline;padding:0 4px;min-height:32px;font-weight:500;font-size:12.5px}@media (max-width:480px){.ldlg .b .sp{display:none}.ldlg .b #ldlg_x{order:1;flex:1 1 45%}.ldlg .b .ok{order:2;flex:1 1 45%}.ldlg .b .lnk{order:3;flex-basis:100%;text-align:left}}@media print{.ldlg-bg{display:none!important}}';
   document.head.appendChild(st);
   bg=document.createElement('div'); bg.id='ldlg'; bg.className='ldlg-bg';
   bg.innerHTML='<div class="ldlg" role="dialog" aria-modal="true" aria-labelledby="ldlg_t"><h3 id="ldlg_t"></h3><p id="ldlg_p"></p>'+
