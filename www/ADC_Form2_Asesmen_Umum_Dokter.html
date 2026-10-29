@@ -1113,6 +1113,14 @@ body.showall .step{display:block;}
 .rxc .rxpick-btn{flex:none;width:36px;min-height:36px;border:1px solid var(--line-strong);border-radius:6px;background:var(--surface);color:var(--accent-deep);font-size:15px;cursor:pointer;padding:0;line-height:1;}
 .rxc .rxpick-btn:hover{border-color:var(--accent);}
 .mdlg.rxp{max-width:760px;}
+/* baris "Saran protokol" di bawah tiap baris resep */
+.ovl tr.rx-saran td{padding:0 6px 8px 6px !important;border-top:none !important;background:transparent !important;font-size:12.5px;color:var(--ink-muted);line-height:1.5;}
+.ovl tr.rx-saran .rs-l{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;border:1px solid var(--line-strong);border-radius:4px;padding:1px 6px;margin-right:7px;color:var(--ink-muted);vertical-align:middle;}
+.ovl tr.rx-saran b{color:var(--ink);font-weight:600;}
+.ovl tr.rx-saran .rs-pakai{font:inherit;font-size:12px;font-weight:600;margin-left:10px;min-height:32px;padding:0 12px;border:1px solid var(--accent-act);border-radius:999px;background:#fff;color:var(--accent-deep);cursor:pointer;vertical-align:middle;}
+.ovl tr.rx-saran .rs-pakai:hover{background:var(--accent-act);color:#fff;}
+.ovl tr.rx-saran.used{display:none;}
+@media print{.rx-saran{display:none !important;}}
 /* tombol + Tambah baris di bawah tiap tabel resep (cream & obat minum) */
 .rxadd{display:inline-flex;align-items:center;gap:6px;margin:4px 0 2px;font:inherit;font-size:12px;font-weight:600;min-height:32px;padding:0 12px;border-radius:999px;border:1px dashed var(--line-strong,#D9CCB7);background:transparent;color:var(--accent-deep,#8E4A33);cursor:pointer;}
 .rxadd:hover{border-style:solid;border-color:var(--accent,#B0603F);}
@@ -2830,6 +2838,7 @@ function resetForm(){
 window.addEventListener('load',function(){
   if(typeof updateIgaCards==='function') setTimeout(updateIgaCards,0);
   if(typeof initRxPick==='function') initRxPick();
+  if(typeof initRxSaran==='function') initRxSaran();
   if(typeof initRxAdd==='function') initRxAdd();
   if(typeof initPmWizard==='function') initPmWizard();
   if(typeof syncRisikoBekas==='function') syncRisikoBekas();
@@ -3622,6 +3631,35 @@ function _produkByName(n){ n=(n||'').trim().toLowerCase(); if(!n||typeof ADC_PRO
    Baris baru = tiruan baris terakhir tabel itu (kelas input sama) tanpa isi & tanpa placeholder,
    jadi collectRx()/_progDetail() membacanya seperti baris bawaan (4 input per baris). Baris yang
    ditambah dokter bisa dihapus (×); baris bawaan tidak. */
+/* ===== SARAN PROTOKOL DI TABEL RESEP (acne & melasma) =====
+   Placeholder asli (Oku/ADC) -> data-ph + baris tr.rx-saran "Saran protokol … [Pakai]"; input hanya petunjuk kategori.
+   Pakai mengisi keempat kolom sebagai NILAI (ikut handoff). Baris saran hilang begitu kolom obat terisi. */
+function initRxSaran(){
+  document.querySelectorAll('#ovl_acne .rx-table, #ovl_melasma .rx-table').forEach(function(tb){
+    var oral=/Dosis/.test((tb.querySelector('thead')||{}).textContent||'');
+    var hint=oral?['obat minum','dosis','indikasi','durasi']:['cream / produk','jadwal','cara pakai','durasi'];
+    [].slice.call(tb.querySelectorAll('tbody tr')).forEach(function(tr){
+      if(tr.classList.contains('rx-saran')||tr.getAttribute('data-saran-ok')) return;
+      var ins=[].slice.call(tr.querySelectorAll('input')); if(ins.length<4) return;
+      var ph=ins.map(function(i){ return (i.getAttribute('placeholder')||'').trim(); });
+      ins.forEach(function(i,k){ if(ph[k]) i.setAttribute('data-ph',ph[k]); i.setAttribute('placeholder',hint[k]); });
+      tr.setAttribute('data-saran-ok','1');
+      if(!ph[0]) return;
+      var sr=document.createElement('tr'); sr.className='rx-saran';
+      sr.innerHTML='<td colspan="4"><span class="rs-l">Saran protokol</span><b>'+_esc(ph[0])+'</b>'+
+        ph.slice(1).filter(Boolean).map(function(x){ return ' · '+_esc(x); }).join('')+
+        '<button type="button" class="rs-pakai">Pakai</button></td>';
+      sr.querySelector('.rs-pakai').onclick=function(){
+        ins.forEach(function(i,k){ if(ph[k]) i.value=ph[k]; i.dispatchEvent(new Event('input',{bubbles:true})); });
+        ins[0].dispatchEvent(new Event('change',{bubbles:true}));
+        try{ ins[1].focus(); }catch(e){}
+      };
+      tr.parentNode.insertBefore(sr, tr.nextSibling);
+      var sinkron=function(){ sr.classList.toggle('used', !!(ins[0].value||'').trim()); };
+      ins[0].addEventListener('input',sinkron); ins[0].addEventListener('change',sinkron); sinkron();
+    });
+  });
+}
 function initRxAdd(){
   document.querySelectorAll('.rx-table, #hr_rxTable').forEach(function(tb){
     if(tb.nextElementSibling && tb.nextElementSibling.classList && tb.nextElementSibling.classList.contains('rxadd')) return;
@@ -3630,11 +3668,11 @@ function initRxAdd(){
   });
 }
 function tambahBarisRx(tb){
-  var body=tb.querySelector('tbody'), last=body&&body.querySelector('tr:last-child'); if(!last) return null;
+  var body=tb.querySelector('tbody'), last=body&&[].slice.call(body.querySelectorAll('tr:not(.rx-saran)')).pop(); if(!last) return null;
   var tr=last.cloneNode(true); tr.classList.add('rx-added');
   tr.querySelectorAll('.rxpick-btn,.rxdel').forEach(function(x){ x.remove(); });
   var td0=tr.querySelector('td'); if(td0) td0.classList.remove('rxc');
-  tr.querySelectorAll('input').forEach(function(i){ i.value=''; i.placeholder=''; });
+  tr.querySelectorAll('input').forEach(function(i){ i.value=''; i.placeholder=''; i.removeAttribute('data-ph'); }); tr.removeAttribute('data-saran-ok');
   var tdLast=tr.querySelector('td:last-child'); if(tdLast){ tdLast.style.whiteSpace='nowrap'; var d=document.createElement('button'); d.type='button'; d.className='rxdel'; d.title='Hapus baris'; d.setAttribute('aria-label','Hapus baris'); d.textContent='×';
     d.onclick=function(){ tr.remove(); if(typeof renderRxMirror==='function') renderRxMirror(); }; tdLast.appendChild(d); }
   body.appendChild(tr);

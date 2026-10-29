@@ -196,7 +196,7 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
     set(a.d, 'd2_dx', 'Acne vulgaris grade sedang'); set(a.d, 'd2_hasil', 'Temuan: papul rahang\nPenunjang: panel hormon'); a.d.querySelectorAll('#d1_tk input').forEach(c => { if (['Kombinasi', 'Sensitif'].includes(c.value)) { c.checked = true; c.dispatchEvent(new a.w.Event('change', { bubbles: true })); } });
     check('F2: tipe kulit pilihan ganda tergabung ke d1_tipekulit', $(a.d, 'd1_tipekulit').value === 'Kombinasi, Sensitif' && !a.d.querySelector('select#d1_tipekulit'), $(a.d, 'd1_tipekulit').value); a.w.setIGA('ac_iga', '3'); a.w.pickStage('acne', 1);
     check('F2: IGA 3 -> program Acne aktif', a.w.activeProgs().includes('acne'));
-    const rxIn = a.d.querySelectorAll('#ovl_acne .rx-table tbody tr')[0].querySelectorAll('input');
+    const rxIn = a.d.querySelectorAll('#ovl_acne .rx-table tbody tr:not(.rx-saran)')[0].querySelectorAll('input');
     rxIn[0].value = 'Tretinoin 0,025%'; rxIn[1].value = 'Malam'; rxIn[2].value = 'Oles tipis'; rxIn[3].value = '8 minggu';
     set(a.d, 'd5_iv', a.d.querySelector('#d5_iv option:nth-child(2)') ? a.d.querySelector('#d5_iv option:nth-child(2)').value : '14');
     set(a.d, 'd5_start', '2026-10-05'); set(a.d, 'd7_remarks', 'Hindari matahari'); set(a.d, 'd8_by', 'Perawat Uji');
@@ -462,10 +462,10 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
       check('F2: intake lama (tanpa foto_izin) tidak diberi label "belum dicatat"', !/belum dicatat/.test($(lg.d, 'intake_body').textContent) && !/izin lisan/.test($(lg.d, 'intake_body').textContent)); }
     { const ok = await open('ADC_Form2_Asesmen_Umum_Dokter.html');
       const oral = [...ok.d.querySelectorAll('#ac_block-2 .rx-table')].pop().querySelectorAll('tbody tr td:first-child input');
-      const ph = [...oral].map(i => i.placeholder);
+      const ph = [...oral].map(i => i.getAttribute('data-ph') || i.placeholder);
       check('Acne selaras Dr. Oku: isotretinoin low-dose pertama, antibiotik terakhir & jangka pendek, tanpa kotak peringatan, BPO dulu, triase risiko bekas, Panduan §8',
         /^Isotretinoin low-dose/.test(ph[0]) && /Antibiotik oral — jangka pendek/.test(ph[ph.length - 1]) && !ok.d.querySelector('#ac_block-2 .warn-box') /* kotak peringatan dihapus 2026-10-23 atas permintaan; rinciannya di Panduan §8 */ &&
-        [...ok.d.querySelectorAll('#ovl_acne .rx-table input')].some(i => /^BPO 2,5/.test(i.placeholder)) && [...ok.d.querySelectorAll('#ovl_acne .qline .q')].some(q => /risiko bekas/i.test(q.textContent)) &&
+        [...ok.d.querySelectorAll('#ovl_acne .rx-table input')].some(i => /^BPO 2,5/.test(i.getAttribute('data-ph') || '')) && [...ok.d.querySelectorAll('#ovl_acne .qline .q')].some(q => /risiko bekas/i.test(q.textContent)) &&
         /id="oku"/.test(fs.readFileSync(path.join('www', 'ADC_Panduan_Pengisian_Form.html'), 'utf8')), ph); }
     /* ===== 5h. pemilih produk resep ===== */
     { const rp = await open('ADC_Form2_Asesmen_Umum_Dokter.html');
@@ -481,7 +481,7 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
       hits[0].click();
       const ins = inp.closest('tr').querySelectorAll('input');
       check('Rx picker: pilih produk mengisi nama + jadwal + cara pakai, dialog tertutup, resep terekam', /Benzopalene/.test(ins[0].value) && ins[1].value === 'Pagi atau Malam' && /totol/.test(ins[2].value) && !rp.d.getElementById('rxpick').classList.contains('on') && rp.w.collectRx().some(r => /Benzopalene/.test(r.obat)), [...ins].map(i => i.value));
-      const inp2 = rp.d.querySelectorAll('#ac_block-1 .rx-table tbody tr')[1].querySelector('td input');
+      const inp2 = rp.d.querySelectorAll('#ac_block-1 .rx-table tbody tr:not(.rx-saran)')[1].querySelector('td input');
       rp.w.openRxPick(inp2); const q2 = rp.d.getElementById('rxp_q'); q2.value = 'Night Cream B 10'; q2.dispatchEvent(new rp.w.Event('input', { bubbles: true }));
       check('Rx picker: pencarian tanpa hasil di tab Acne jatuh ke semua kategori (dengan catatan)', rp.w._rxKat === 'Acne' && /menampilkan semua kategori/.test(rp.d.getElementById('rxp_list').textContent) && rp.d.querySelectorAll('#rxp_list .rxp-it').length === 1);
       rp.d.querySelector('#rxp_list .rxp-it').click();
@@ -491,7 +491,7 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
     { const gt = await open('ADC_Form2_Asesmen_Umum_Dokter.html');
       gt.w.applyIntake({ doc: 'ADC-INTAKE', pasien: { nama: 'Bumil', rm: 'RM-GATE' }, kritis: { alergi_nihil: true, hormonal: ['Sedang hamil'], flags: ['SEDANG HAMIL'] }, penugasan: {}, pengukuran: {}, persetujuan: {} });
       set(gt.d, 'd2_dx', 'Acne'); gt.w.pickStage('acne', 1);
-      const rx = gt.d.querySelectorAll('#ac_block-1 .rx-table tbody tr')[0].querySelectorAll('input'); rx[0].value = 'Isotretinoin 20 mg'; rx[1].value = '1x1';
+      const rx = gt.d.querySelectorAll('#ac_block-1 .rx-table tbody tr:not(.rx-saran)')[0].querySelectorAll('input'); rx[0].value = 'Isotretinoin 20 mg'; rx[1].value = '1x1';
       [...gt.d.querySelectorAll('#ac_block-1 label.chk-item')].find(l => /Peeling/.test(l.textContent)).querySelector('input').checked = true;
       await signoff(gt, { batal: true }); chk(gt.d, 'alergi_none'); gt.w.updateReq();
       check('Gerbang: bendera HAMIL tampil di D0 dan di atas cermin resep D3 (menyebut obat berisiko), baris Isotretinoin ditandai ⚠, baris skrining berbingkai merah',
@@ -503,7 +503,7 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
       gt.w.openProg('acne');
       const bands = [...gt.d.querySelectorAll('#ovl_acne .rxhamil')];
       check('Gerbang modal: strip konteks menyebut PASIEN SEDANG HAMIL; pita hamil di atas tiap tabel resep Acne; baris Isotretinoin ditandai rx-risk', /PASIEN SEDANG HAMIL/.test($(gt.d, 'ctx_acne').textContent) && bands.length === gt.d.querySelectorAll('#ovl_acne .rx-table').length && bands.every(b => !b.hidden) && gt.d.querySelector('#ac_block-1 .rx-table tbody tr:first-child').classList.contains('rx-risk'), { bands: bands.length, hidden: bands.map(b => b.hidden) });
-      { const r2 = gt.d.querySelectorAll('#ac_block-1 .rx-table tbody tr')[1], i2 = r2.querySelector('input'); i2.value = 'Niacinamide 5%'; i2.dispatchEvent(new gt.w.Event('input', { bubbles: true }));
+      { const r2 = gt.d.querySelectorAll('#ac_block-1 .rx-table tbody tr:not(.rx-saran)')[1], i2 = r2.querySelector('input'); i2.value = 'Niacinamide 5%'; i2.dispatchEvent(new gt.w.Event('input', { bubbles: true }));
         const aman = !r2.classList.contains('rx-risk'); i2.value = 'Tretinoin 0,05%'; i2.dispatchEvent(new gt.w.Event('input', { bubbles: true }));
         check('Gerbang modal: baris ditandai LANGSUNG saat obat berisiko diketik (Niacinamide aman, Tretinoin ditandai)', aman && r2.classList.contains('rx-risk')); }
       check('Gerbang modal: pasien tidak hamil -> pita tersembunyi & tidak ada baris ditandai', (a.w.openProg('acne'), [...a.d.querySelectorAll('#ovl_acne .rxhamil')].every(b => b.hidden) && !a.d.querySelector('#ovl_acne tr.rx-risk') && !/HAMIL/.test($(a.d, 'ctx_acne').textContent)));
@@ -555,7 +555,7 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
       set(ra.d, 'd2_dx', 'Acne'); ra.w.pickStage('acne', 2);
       const tabs = [...ra.d.querySelectorAll('#ovl_acne .rx-table, #ovl_melasma .rx-table, #hr_rxTable')];
       { const me = ['P','A','M'].map(k => [...ra.d.querySelectorAll('#me_block-' + k + ' .rx-table')]);
-        check('Melasma: tiap tahap punya tabel Cream + tabel Obat Minum terpisah (Tranexamic di oral, bukan di cream)', me.every(t => t.length === 2 && !/Dosis/.test(t[0].querySelector('thead').textContent) && /Dosis/.test(t[1].querySelector('thead').textContent) && ![...t[0].querySelectorAll('input')].some(i => /Tranexamic/.test(i.placeholder)) && [...t[1].querySelectorAll('input')].some(i => /Tranexamic/.test(i.placeholder)) && !t[1].querySelector('.rxpick-btn') && !!t[0].querySelector('.rxpick-btn')), me.map(t => t.length)); }
+        check('Melasma: tiap tahap punya tabel Cream + tabel Obat Minum terpisah (Tranexamic di oral, bukan di cream)', me.every(t => t.length === 2 && !/Dosis/.test(t[0].querySelector('thead').textContent) && /Dosis/.test(t[1].querySelector('thead').textContent) && ![...t[0].querySelectorAll('input')].some(i => /Tranexamic/.test(i.getAttribute('data-ph') || '')) && [...t[1].querySelectorAll('input')].some(i => /Tranexamic/.test(i.getAttribute('data-ph') || '')) && !t[1].querySelector('.rxpick-btn') && !!t[0].querySelector('.rxpick-btn')), me.map(t => t.length)); }
       check('Rx: tiap tabel resep (cream, obat minum, hair) punya tombol + Tambah baris', tabs.length > 0 && tabs.every(t => t.nextElementSibling && t.nextElementSibling.classList.contains('rxadd')), tabs.length);
       const oral = [...ra.d.querySelectorAll('#ac_block-2 .rx-table')].find(t => /Dosis/.test(t.querySelector('thead').textContent)), cream = ra.d.querySelector('#ac_block-2 .rx-table');
       const n0 = oral.querySelectorAll('tbody tr').length; oral.nextElementSibling.click(); const trO = oral.querySelector('tbody tr:last-child');
@@ -566,7 +566,17 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
       const rx = ra.w.collectRx();
       check('Rx: baris tambahan terbaca collectRx & isian program', rx.some(r => r.obat === 'Azithromycin 500 mg' && r.jadwal === '1x1 3 hari') && rx.some(r => r.obat === 'Krim racik') && ra.w._progDetail().acne.isian.some(x => /Azithromycin/.test(x)), rx);
       trO.querySelector('.rxdel').click();
-      check('Rx: hapus baris tambahan', oral.querySelectorAll('tbody tr').length === n0 && !ra.w.collectRx().some(r => /Azithromycin/.test(r.obat))); }
+      check('Rx: hapus baris tambahan', oral.querySelectorAll('tbody tr').length === n0 && !ra.w.collectRx().some(r => /Azithromycin/.test(r.obat)));
+      /* saran protokol */
+      { const rows = [...oral.querySelectorAll('tbody tr:not(.rx-saran)')].filter(r => r.getAttribute('data-saran-ok')), sarans = oral.querySelectorAll('tbody tr.rx-saran');
+        const in0 = rows[0].querySelectorAll('input');
+        check('Rx saran: tiap baris oral punya baris "Saran protokol" (tanpa input), kolom input hanya petunjuk kategori, placeholder asli di data-ph', sarans.length === rows.filter(r => r.querySelector('input').getAttribute('data-ph')).length && [...sarans].every(s => !s.querySelector('input')) && in0[0].placeholder === 'obat minum' && /^Isotretinoin low-dose/.test(in0[0].getAttribute('data-ph')) && /Isotretinoin low-dose/.test(sarans[0].textContent), { s: sarans.length, ph: in0[0].placeholder });
+        check('Rx saran: tanpa diketik, resep tetap KOSONG (saran bukan resep)', !ra.w.collectRx().some(r => /Isotretinoin/.test(r.obat)));
+        sarans[0].querySelector('.rs-pakai').click();
+        check('Rx saran: Pakai mengisi 4 kolom sebagai nilai, baris saran tersembunyi, resep & isian handoff memuatnya', in0[0].value === in0[0].getAttribute('data-ph') && /0,25/.test(in0[1].value) && sarans[0].classList.contains('used') && ra.w.collectRx().some(r => /^Isotretinoin low-dose/.test(r.obat) && /0,25/.test(r.jadwal)), { v: in0[0].value });
+        in0[0].value = ''; in0[0].dispatchEvent(new ra.w.Event('input', { bubbles: true }));
+        check('Rx saran: mengosongkan kolom obat memunculkan saran lagi', !sarans[0].classList.contains('used'));
+        check('Rx saran: baris cream juga punya saran; tabel hair tidak', ra.d.querySelectorAll('#ac_block-2 .rx-table')[0].querySelector('tr.rx-saran') !== null && ra.d.querySelector('#hr_rxTable tr.rx-saran') === null); } }
 
     { const rb = await open('ADC_Form2_Asesmen_Umum_Dokter.html');
       set(rb.d, 'd2_dx', 'Acne'); rb.w.pickStage('acne', 2);
