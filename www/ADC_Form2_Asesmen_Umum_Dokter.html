@@ -3421,7 +3421,7 @@ function _hubSiap(cb){
   if(!_hubOn){ cb('mati'); return; }
   try{ fetch(hubURL()+'/api/saya',{headers:hubHdr(),cache:'no-store'})
     .then(function(r){ return r.json().then(function(j){ j=j||{}; j._status=r.status; return j; }); })
-    .then(function(j){ if(j.ok) cb('siap'); else if(j._status===401&&j.error==='login') cb('login'); else if(j._status===401) cb('kunci',j.error); else cb('lain',j.error); })
+    .then(function(j){ if(j.ok) cb('siap'); else if(j._status===401&&j.error==='login') cb(window._hubLoginReq?'login':'siap'); else if(j._status===401) cb('kunci',j.error); else cb('lain',j.error); })
     .catch(function(e){ cb('jaringan',String(e)); }); }catch(e){ cb('jaringan',String(e)); }
 }
 function _hubChipGagal(err){ var k=_hubKelas(err); hubChip('warn',k==='kunci'?'belum terdaftar':(k==='jaringan'?'tidak terjangkau':('gagal: '+(err||''))));
