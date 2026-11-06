@@ -78,8 +78,8 @@ table.tbl td{padding:4px 8px;border:1px solid var(--line);vertical-align:middle;
 .flag .badge{font-family:var(--ff-head);font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#fff;background:var(--ink);padding:5px 9px;white-space:nowrap;}
 .flag .fin{flex:1;border:none;border-bottom:1px solid var(--ink);background:transparent;font-family:var(--ff-body);font-size:13.5px;font-weight:600;color:var(--ink);padding:3px 2px;}
 .flag .fin:focus{outline:none;}
-.flag .none{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink-2);white-space:nowrap;}
-.flag .none input{width:14px;height:14px;accent-color:var(--ink);}
+.flag .none{display:flex;align-items:center;gap:9px;font-size:12.5px;color:var(--ink-2);white-space:nowrap;min-height:44px;padding:0 8px;cursor:pointer;}
+.flag .none input{width:20px;height:20px;accent-color:var(--ink);}
 .flag .alg-v{flex:1;font-size:15px;font-weight:600;color:var(--ink-fill);}
 .flag .alg-v.kosong{color:var(--accent-deep,#8E4A33);font-weight:600;}
 .flag .alg-src{font-size:11.5px;color:var(--ink-2);white-space:nowrap;}
@@ -147,7 +147,7 @@ label.opt.lbl-hamil{border:1.5px solid var(--accent-deep,#8E4A33);background:#FB
 .serah-now{display:flex;align-items:center;gap:12px;margin:0 0 10px;padding:10px 14px;border:1px solid var(--line-strong);background:#fff;font-size:15px;font-weight:600;color:var(--ink);}
 .serah-now:empty{display:none;}
 .serah-now .sk{font-size:10.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#fff;background:var(--accent-act);padding:4px 8px;white-space:nowrap;}
-.serah-now button{font:inherit;font-size:13px;font-weight:600;color:var(--accent-deep);background:none;border:none;text-decoration:underline;text-underline-offset:2px;cursor:pointer;padding:0 4px;}
+.serah-now button{font:inherit;font-size:13px;font-weight:600;color:var(--accent-deep);background:none;border:none;text-decoration:underline;text-underline-offset:2px;cursor:pointer;padding:0 8px;min-height:44px;display:inline-flex;align-items:center;margin:-10px 0;vertical-align:middle;}
 .sbtn.done{border-color:var(--green-text,#5F6C50);color:var(--green-text,#5F6C50);background:#fff;}
 .sbtn.done .sn{background:var(--green-text,#5F6C50);border-color:var(--green-text,#5F6C50);color:#fff;}
 .stepnav .nb-terbit.dim{opacity:.55;}
@@ -155,7 +155,7 @@ label.opt.lbl-hamil{border:1.5px solid var(--accent-deep,#8E4A33);background:#FB
 .serah .v{font-size:14px;font-weight:600;color:var(--ink);line-height:1.4;}
 .serah .v.ok{color:var(--green-text,#5F6C50);}
 .serah .v.warn{color:var(--accent-deep);}
-.serah .v button{font:inherit;font-size:12.5px;font-weight:600;color:var(--accent-deep);background:none;border:none;text-decoration:underline;text-underline-offset:2px;cursor:pointer;padding:0 2px;}
+.serah .v button{font:inherit;font-size:12.5px;font-weight:600;color:var(--accent-deep);background:none;border:none;text-decoration:underline;text-underline-offset:2px;cursor:pointer;padding:0 8px;min-height:44px;display:inline-flex;align-items:center;margin:-10px 0;vertical-align:middle;}
 .sdlg .serah{margin:0 0 12px;}
 .sdlg .miss{margin:0 0 6px;}
 .sdlg .miss button{display:block;width:100%;text-align:left;font:inherit;font-size:14px;min-height:44px;padding:8px 12px;margin:0 0 6px;border:1px solid var(--accent);border-radius:var(--r-box,8px);background:#fff;color:var(--ink);cursor:pointer;}
@@ -736,7 +736,7 @@ textarea.in,textarea.cell,#ovl_acne textarea,#ovl_melasma textarea,#ovl_hair tex
   border:1px solid var(--line) !important;border-radius:var(--r-box) !important;
   background:var(--surface) !important;padding:10px 12px !important;font-size:15px !important;}
 .mini{padding:7px 10px !important;font-size:14px !important;}
-.cell,td .cell{padding:7px 9px !important;font-size:14px !important;}
+.cell,td .cell{padding:10px 9px !important;font-size:14px !important;min-height:44px;}
 .in:focus,.mini:focus,.cell:focus,.ln:focus,.fin:focus{border-color:var(--accent) !important;}
 input::placeholder,textarea::placeholder{color:var(--ink-faint) !important;font-weight:380;}
 
@@ -816,7 +816,9 @@ body.mode-kontrol #tb_muat1{display:none;}
 .hobar{background:var(--blush);border-bottom:1px solid var(--accent);padding:12px 36px;}
 .hobar .hb-badge{background:var(--accent-deep);color:#fff;padding:6px 12px;font-size:11px;font-weight:620;}
 .hobar .hb-txt{font-size:14px;}
-.hobar .hb-act{background:var(--accent-act);border-color:var(--accent-act);color:#fff;padding:8px 16px;font-size:12.5px;font-weight:560;}
+.hobar .hb-act{background:var(--accent-act);border-color:var(--accent-act);color:#fff;padding:0 18px;min-height:44px;font-size:13px;font-weight:560;}
+.hobar .hb-ovr{display:inline-flex;align-items:center;gap:9px;min-height:44px;font-size:12.5px;cursor:pointer;}
+.hobar .hb-ovr input{width:20px;height:20px;flex:none;}
 .hobar .hb-act:hover{background:var(--accent-deep);border-color:var(--accent-deep);}
 
 /* --- Alergi & ringkasan intake --- */
@@ -1144,31 +1146,32 @@ body.showall .step{display:block;}
 /* Pemilih produk resep (▾ di kolom obat/krim) */
 .rxc{display:flex;align-items:center;gap:4px;}
 .rxc input{flex:1;min-width:0;}
-.rxc .rxpick-btn{flex:none;width:36px;min-height:36px;border:1px solid var(--line-strong);border-radius:6px;background:var(--surface);color:var(--accent-deep);font-size:15px;cursor:pointer;padding:0;line-height:1;}
+.rxc .rxpick-btn{flex:none;width:44px;min-height:44px;border:1px solid var(--line-strong);border-radius:6px;background:var(--surface);color:var(--accent-deep);font-size:15px;cursor:pointer;padding:0;line-height:1;}
 .rxc .rxpick-btn:hover{border-color:var(--accent);}
 .mdlg.rxp{max-width:760px;}
 /* baris "Saran protokol" di bawah tiap baris resep */
 .ovl tr.rx-saran td{padding:0 6px 8px 6px !important;border-top:none !important;background:transparent !important;font-size:12.5px;color:var(--ink-muted);line-height:1.5;}
 .ovl tr.rx-saran .rs-l{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;border:1px solid var(--line-strong);border-radius:4px;padding:1px 6px;margin-right:7px;color:var(--ink-muted);vertical-align:middle;}
 .ovl tr.rx-saran b{color:var(--ink);font-weight:600;}
-.ovl tr.rx-saran .rs-pakai{font:inherit;font-size:12px;font-weight:600;margin-left:10px;min-height:32px;padding:0 12px;border:1px solid var(--accent-act);border-radius:999px;background:#fff;color:var(--accent-deep);cursor:pointer;vertical-align:middle;}
+.ovl tr.rx-saran .rs-pakai{font:inherit;font-size:12.5px;font-weight:600;margin-left:10px;min-height:44px;padding:0 16px;border:1px solid var(--accent-act);border-radius:999px;background:#fff;color:var(--accent-deep);cursor:pointer;vertical-align:middle;}
 .ovl tr.rx-saran .rs-pakai:hover{background:var(--accent-act);color:#fff;}
 .ovl tr.rx-saran.used{display:none;}
 @media print{.rx-saran{display:none !important;}}
 /* tombol + Tambah baris di bawah tiap tabel resep (cream & obat minum) */
-.rxadd{display:inline-flex;align-items:center;gap:6px;margin:4px 0 2px;font:inherit;font-size:12px;font-weight:600;min-height:32px;padding:0 12px;border-radius:999px;border:1px dashed var(--line-strong,#D9CCB7);background:transparent;color:var(--accent-deep,#8E4A33);cursor:pointer;}
+.rxadd{display:inline-flex;align-items:center;gap:6px;margin:4px 0 2px;font:inherit;font-size:12.5px;font-weight:600;min-height:44px;padding:0 16px;border-radius:999px;border:1px dashed var(--line-strong,#D9CCB7);background:transparent;color:var(--accent-deep,#8E4A33);cursor:pointer;}
 .rxadd:hover{border-style:solid;border-color:var(--accent,#B0603F);}
-.rxdel{flex:none;width:28px;min-height:30px;border:none;background:transparent;color:#9A3B2E;font-size:16px;cursor:pointer;padding:0;line-height:1;}
+.rxdel{flex:none;width:44px;min-height:44px;border:none;background:transparent;color:#9A3B2E;font-size:16px;cursor:pointer;padding:0;line-height:1;}
 @media print{.rxadd,.rxdel{display:none !important;}}
 /* ICD-10 & lembar consent (D1, D7) */
 .icdwrap{display:flex;gap:6px;align-items:stretch;}
 .icdwrap .in{flex:1;min-width:0;}
-.icdbtn{font:inherit;font-size:12px;font-weight:600;padding:0 11px;min-height:36px;border-radius:var(--r-box,8px);border:1px solid var(--accent-deep,#8E4A33);background:var(--accent-deep,#8E4A33);color:#fff;cursor:pointer;white-space:nowrap;}
+.icdbtn{font:inherit;font-size:12.5px;font-weight:600;padding:0 14px;min-height:44px;border-radius:var(--r-box,8px);border:1px solid var(--accent-deep,#8E4A33);background:var(--accent-deep,#8E4A33);color:#fff;cursor:pointer;white-space:nowrap;}
 .icdbtn:hover{background:var(--accent,#B0603F);border-color:var(--accent,#B0603F);}
-.icdchips{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px;min-height:0;}
-.icdchips span{display:inline-flex;align-items:center;font-size:11.5px;padding:3px 9px;border-radius:999px;border:1px solid var(--line-strong,#D9CCB7);background:var(--surface-quiet,#F7F3EC);color:var(--ink-fill,#1F4E9C);}
+.icdchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:5px;min-height:0;}
+.icdchips span{display:inline-flex;align-items:center;font-size:12.5px;padding:0 0 0 12px;min-height:44px;border-radius:999px;border:1px solid var(--line-strong,#D9CCB7);background:var(--surface-quiet,#F7F3EC);color:var(--ink-fill,#1F4E9C);}
 .icdchips span b{margin-right:5px;}
-.icdchips span i{cursor:pointer;margin-left:7px;font-style:normal;font-weight:700;color:var(--accent-deep,#8E4A33);}
+.icdchips span .x{font:inherit;font-size:17px;font-weight:700;min-width:44px;min-height:44px;margin-left:2px;padding:0;border:none;background:none;color:var(--accent-deep,#8E4A33);cursor:pointer;border-radius:0 999px 999px 0;}
+.icdchips span .x:hover{background:var(--line-strong,#D9CCB7);}
 .icdq{margin:0 0 8px;}
 .icrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:6px 0 2px 28px;}
 /* kalimat persetujuan & skrining panjang: huruf biasa, bukan kapital miring 12 px */
@@ -1183,7 +1186,7 @@ body.showall .step{display:block;}
 .cdlg textarea{min-height:48px;resize:vertical;}
 .cdlg .cdnote{font-size:12px;color:var(--ink-muted,#6B675E);margin:6px 0 10px;line-height:1.5;}
 .cdlg .cdbody{max-height:62vh;overflow:auto;padding-right:4px;}
-@media print{ .icdbtn,.icrow,.icdchips i{display:none !important;} }
+@media print{ .icdbtn,.icrow,.icdchips .x{display:none !important;} }
 .rxp-tabs{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 6px;}
 .rxp-tabs button{font:inherit;font-size:12px;padding:6px 11px;border-radius:999px;border:1px solid var(--line-strong);background:var(--surface);color:var(--ink-2);cursor:pointer;min-height:34px;}
 .rxp-tabs button.on{background:var(--ink);border-color:var(--ink);color:var(--canvas);}
@@ -3276,7 +3279,7 @@ document.addEventListener('keydown',function(e){
 function _ldlgBuat(){
   var bg=document.getElementById('ldlg'); if(bg) return bg;
   var st=document.createElement('style');
-  st.textContent='.ldlg-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2100;display:none;align-items:flex-start;justify-content:center;padding:12vh 16px 16px}.ldlg-bg.on{display:flex}.ldlg{background:#fff;border-radius:14px;width:100%;max-width:400px;padding:22px 22px 18px;box-shadow:0 18px 50px rgba(0,0,0,.25);font-family:inherit;color:#1B1A18}.ldlg h3{margin:0 0 4px;font-size:17px;font-weight:620}.ldlg p{margin:0 0 12px;font-size:12.5px;line-height:1.5;color:#6B675E}.ldlg label{display:block;font-size:11px;font-weight:620;letter-spacing:.12em;text-transform:uppercase;color:#3A3833;margin:10px 0 5px}.ldlg input{width:100%;box-sizing:border-box;font:inherit;font-size:16px;color:#1F4E9C;padding:10px 12px;border:1px solid #D9CCB7;border-radius:8px;background:#fff}.ldlg input:focus{outline:none;border-color:#B0603F}.ldlg .msg{min-height:18px;font-size:12.5px;color:#8E4A33;margin:8px 0 6px}.ldlg .b{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.ldlg .b .lnk{order:1}.ldlg .b .sp{flex:1;order:2}.ldlg .b #ldlg_x{order:3}.ldlg .b .ok{order:4}.ldlg button{font:inherit;font-size:14px;font-weight:600;min-height:42px;padding:0 16px;border-radius:999px;cursor:pointer;border:1px solid #D9CCB7;background:#fff;color:#1B1A18}.ldlg button.ok{background:#B0603F;border-color:#B0603F;color:#fff}.ldlg button.lnk{border:none;background:none;color:#8E4A33;text-decoration:underline;padding:0 4px;min-height:32px;font-weight:500;font-size:12.5px}@media (max-width:480px){.ldlg .b .sp{display:none}.ldlg .b #ldlg_x{order:1;flex:1 1 45%}.ldlg .b .ok{order:2;flex:1 1 45%}.ldlg .b .lnk{order:3;flex-basis:100%;text-align:left}}@media print{.ldlg-bg{display:none!important}}';
+  st.textContent='.ldlg-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2100;display:none;align-items:flex-start;justify-content:center;padding:12vh 16px 16px}.ldlg-bg.on{display:flex}.ldlg{background:#fff;border-radius:14px;width:100%;max-width:400px;padding:22px 22px 18px;box-shadow:0 18px 50px rgba(0,0,0,.25);font-family:inherit;color:#1B1A18}.ldlg h3{margin:0 0 4px;font-size:17px;font-weight:620}.ldlg p{margin:0 0 12px;font-size:12.5px;line-height:1.5;color:#6B675E}.ldlg label{display:block;font-size:11px;font-weight:620;letter-spacing:.12em;text-transform:uppercase;color:#3A3833;margin:10px 0 5px}.ldlg input{width:100%;box-sizing:border-box;font:inherit;font-size:16px;color:#1F4E9C;padding:10px 12px;border:1px solid #D9CCB7;border-radius:8px;background:#fff}.ldlg input:focus{outline:none;border-color:#B0603F}.ldlg .msg{min-height:18px;font-size:12.5px;color:#8E4A33;margin:8px 0 6px}.ldlg .b{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.ldlg .b .lnk{order:1}.ldlg .b .sp{flex:1;order:2}.ldlg .b #ldlg_x{order:3}.ldlg .b .ok{order:4}.ldlg button{font:inherit;font-size:14px;font-weight:600;min-height:44px;padding:0 16px;border-radius:999px;cursor:pointer;border:1px solid #D9CCB7;background:#fff;color:#1B1A18}.ldlg button.ok{background:#B0603F;border-color:#B0603F;color:#fff}.ldlg button.lnk{border:none;background:none;color:#8E4A33;text-decoration:underline;padding:0 6px;min-height:44px;font-weight:500;font-size:12.5px}@media (max-width:480px){.ldlg .b .sp{display:none}.ldlg .b #ldlg_x{order:1;flex:1 1 45%}.ldlg .b .ok{order:2;flex:1 1 45%}.ldlg .b .lnk{order:3;flex-basis:100%;text-align:left}}@media print{.ldlg-bg{display:none!important}}';
   document.head.appendChild(st);
   bg=document.createElement('div'); bg.id='ldlg'; bg.className='ldlg-bg';
   bg.innerHTML='<div class="ldlg" role="dialog" aria-modal="true" aria-labelledby="ldlg_t"><h3 id="ldlg_t"></h3><p id="ldlg_p"></p>'+
@@ -4327,7 +4330,7 @@ function _icdData(){ try{ var v=JSON.parse(_hv('d2_icd')||'[]'); return Array.is
 function _icdSet(arr){ var e=document.getElementById('d2_icd'); if(e) e.value=arr.length?JSON.stringify(arr):''; _icdChips(); }
 function _icdTeks(arr){ return (arr||[]).map(function(x){ return x.kode+' '+x.nama; }).join('; '); }
 function _icdChips(){ var c=document.getElementById('d2_icd_chips'); if(!c) return;
-  c.innerHTML=_icdData().map(function(x){ return '<span><b>'+_esc(x.kode)+'</b>'+_esc(x.nama)+'<i onclick="hapusICD(\''+_esc(x.kode)+'\')" title="hapus kode">×</i></span>'; }).join(''); }
+  c.innerHTML=_icdData().map(function(x){ return '<span><b>'+_esc(x.kode)+'</b>'+_esc(x.nama)+'<button type="button" class="x" onclick="hapusICD(\''+_esc(x.kode)+'\')" aria-label="Hapus kode '+_esc(x.kode)+'">×</button></span>'; }).join(''); }
 function hapusICD(k){ _icdSet(_icdData().filter(function(x){ return x.kode!==k; })); }
 function pickICD(k){
   var it=null; ICD10.forEach(function(x){ if(x[0]===k) it=x; }); if(!it) return;
