@@ -57,7 +57,7 @@ textarea.in.ta:focus{outline:none;border-color:var(--accent-deep);}
 .opts{display:flex;flex-wrap:wrap;gap:6px 18px;margin:3px 0 4px;}
 .opt{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--ink-2);}
 .opt input{width:14px;height:14px;accent-color:var(--accent-deep);cursor:pointer;flex-shrink:0;}
-.prog-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin:4px 0 6px;}
+.prog-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:4px 0 6px;}
 .prog{border:1px solid var(--line-strong);padding:9px 11px;cursor:pointer;transition:border-color .16s ease;position:relative;}
 .prog:hover{border-color:var(--accent-deep);}
 .prog.on{border-color:var(--accent-deep);border-top:3px solid var(--accent-deep);padding-top:7px;}
@@ -1052,10 +1052,10 @@ body.showall .step{display:block;}
 .tb-more{position:relative;}
 .tbmenu{display:none;position:absolute;right:0;top:calc(100% + 8px);min-width:250px;padding:6px;background:var(--surface,#fff);color:var(--ink);border:1px solid var(--line-strong,#D9CCB7);border-radius:12px;box-shadow:0 14px 36px rgba(27,26,24,.22);z-index:30;}
 .tbmenu.on{display:block;}
-.tbmenu button{display:block;width:100%;text-align:left;font:inherit;font-size:14px;font-weight:540;letter-spacing:0;text-transform:none;min-height:44px;padding:9px 12px;border:none;border-radius:8px;background:none;color:var(--ink);cursor:pointer;}
-.tbmenu button small{display:block;font-size:12px;font-weight:400;color:var(--ink-muted);}
-.tbmenu button:hover{background:var(--surface-quiet,#F7F3EC);}
-.tbmenu button:focus-visible{background:var(--surface-quiet,#F7F3EC);outline:2px solid var(--accent);outline-offset:-2px;}
+.tbmenu button,.tbmenu a{display:block;width:100%;text-align:left;font:inherit;font-size:14px;font-weight:540;text-decoration:none;box-sizing:border-box;letter-spacing:0;text-transform:none;min-height:44px;padding:9px 12px;border:none;border-radius:8px;background:none;color:var(--ink);cursor:pointer;}
+.tbmenu button small,.tbmenu a small{display:block;font-size:12px;font-weight:400;color:var(--ink-muted);}
+.tbmenu button:hover,.tbmenu a:hover{background:var(--surface-quiet,#F7F3EC);}
+.tbmenu button:focus-visible,.tbmenu a:focus-visible{background:var(--surface-quiet,#F7F3EC);outline:2px solid var(--accent);outline-offset:-2px;}
 .tbmenu button.danger{color:#9A3B2E;}
 @media print{.tb-more{display:none !important;}}
 
@@ -1568,6 +1568,7 @@ body.mode-kontrol #rb2 .rl::after{content:' — dilewati';font-size:11px;font-we
         <button type="button" role="menuitem" onclick="tbMenu(false);cetakSemua()">Cetak / Simpan PDF <small>lembar asesmen dokter 1 halaman</small></button>
         <button type="button" role="menuitem" onclick="tbMenu(false);issueHandoff()">Terbitkan Handoff <small>juga di akhir langkah 6</small></button>
         <button type="button" role="menuitem" onclick="tbMenu(false);printAll()">Cetak semua form program</button>
+        <a role="menuitem" href="ADC_Panduan_Pengisian_Form.html" target="_blank" rel="noopener" onclick="tbMenu(false)">Panduan pengisian <small>buka di tab baru</small></a>
         <button type="button" role="menuitem" class="danger" onclick="tbMenu(false);resetForm()">Reset form&hellip;</button>
       </div></div>
   </div>
@@ -1598,7 +1599,7 @@ body.mode-kontrol #rb2 .rl::after{content:' — dilewati';font-size:11px;font-we
   
   
   
-  <section class="step" data-step="0"><div class="sec"><span class="n">D0</span>Ringkasan handoff &amp; riwayat perawatan</div>
+  <section class="step" data-step="0"><div class="sec"><span class="n">D0</span>Identitas pasien, handoff &amp; riwayat</div>
   <!-- Identitas pasien (dulu panel gelap "Khusus staf" di atas wizard) — kini bagian D0.
        Id tetap sama -> applyIntake / applyHandoff / buildHandoff / hub tidak berubah. -->
   <div class="row idrow">
@@ -1855,7 +1856,7 @@ body.mode-kontrol #rb2 .rl::after{content:' — dilewati';font-size:11px;font-we
   
   <!-- D5 (opsional) ikut langkah rencana, bukan langkah sign-off -->
   <div class="sec"><span class="n">D5</span>Rekomendasi bertahap<span class="opt">opsional — catatan pegangan pasien</span></div>
-  <p class="note">Bertahap sesuai kondisi — <b>bukan janji hasil</b>. Harga: bagian depan.</p>
+  <p class="note">Bertahap sesuai kondisi — <b>bukan janji hasil</b>. Biaya ditanyakan ke bagian depan.</p>
   <div class="tblwrap"><table class="tbl">
     <thead><tr><th style="width:17%">Tahap</th><th style="width:31%">Yang direkomendasikan</th><th style="width:28%">Tujuan / kondisi sasaran</th><th style="width:24%">Perkiraan waktu</th></tr></thead>
     <tbody>
@@ -1930,9 +1931,9 @@ body.mode-kontrol #rb2 .rl::after{content:' — dilewati';font-size:11px;font-we
       <div class="f w2 s12" style="display:none"><label class="lab" for="cfg_webhook">Webhook Make.com</label><input class="in" id="cfg_webhook" onchange="try{localStorage.setItem('adc_webhook',this.value.trim());}catch(e){}" placeholder="https://hook.eu2.make.com/..."></div>
     </div>
     <div class="schedbtns">
-      <button type="button" class="sbtn pri" id="sb1" onclick="generateSchedule();stepperSync()"><span class="sn">1</span>Generate Jadwal</button>
-      <button type="button" class="sbtn" id="sb2" onclick="saveSchedToRecord();stepperSync()"><span class="sn">2</span>Simpan ke Rekam Medis</button>
-      <button type="button" class="sbtn" id="sb3" onclick="sendToSleekFlow();stepperSync()"><span class="sn">3</span>Kirim ke SleekFlow</button>
+      <button type="button" class="sbtn pri" id="sb1" onclick="generateSchedule();stepperSync()"><span class="sn">1</span>Buat jadwal kontrol</button>
+      <button type="button" class="sbtn" id="sb2" onclick="saveSchedToRecord();stepperSync()"><span class="sn">2</span>Simpan jadwal ke rekam medis</button>
+      <button type="button" class="sbtn" id="sb3" onclick="sendToSleekFlow();stepperSync()"><span class="sn">3</span>Kirim reminder (SleekFlow)</button>
       <button type="button" class="sbtn ghost" onclick="copySchedule()">Salin Jadwal</button>
     </div>
     <div id="send_status" style="font-size:13px;font-weight:600;margin-bottom:6px"></div>
@@ -2842,7 +2843,7 @@ function generateSchedule(){
   }).join('');
 }
 function copySchedule(){
-  var rows=window._schedRows||[]; if(!rows.length){alert('Generate Jadwal dulu.');return;}
+  var rows=window._schedRows||[]; if(!rows.length){alert('Buat jadwal kontrol dulu (tombol 1).');return;}
   var t=rows.map(function(r){return 'H+'+r.off+'\t'+_isoD(r.date)+'\t'+r.jenis+'\t'+r.msg;}).join('\n');
   navigator.clipboard.writeText(t).then(function(){alert('Jadwal disalin ('+rows.length+' reminder).');});
 }
@@ -2858,10 +2859,10 @@ function schedPayload(){
 function sendToSleekFlow(){
   var st=document.getElementById('send_status'), url=_v('cfg_webhook');
   if(!url){alert('Isi URL Webhook Make.com dulu.');return;}
-  if(!(window._schedRows&&window._schedRows.length)){alert('Generate Jadwal dulu.');return;}
+  if(!(window._schedRows&&window._schedRows.length)){alert('Buat jadwal kontrol dulu (tombol 1).');return;}
   var wa=_waNorm(_v('p_wa')); if(wa.length<9){alert('Nomor WhatsApp pasien belum valid.');return;}
   if(!_ck('d5_slot')){ if(!confirm('Slot NeoSoft belum ditandai ter-reserve. Tetap kirim?')) return; }
-  if(!window._schedSaved){ if(!confirm('Jadwal belum disimpan ke rekam medis.\n\nUrutannya: Generate → Simpan ke Rekam Medis → Kirim ke SleekFlow.\n\nTetap kirim sekarang?')) return; }
+  if(!window._schedSaved){ if(!confirm('Jadwal belum disimpan ke rekam medis.\n\nUrutannya: Buat jadwal → Simpan ke rekam medis → Kirim reminder.\n\nTetap kirim sekarang?')) return; }
   var p=schedPayload(), body=JSON.stringify(p), ok=false;
   try{ if(navigator.sendBeacon){ ok=navigator.sendBeacon(url,new Blob([body],{type:'application/json'})); } }catch(e){}
   if(!ok){ try{ fetch(url,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:body}); ok=true; }catch(e){} }
@@ -2891,7 +2892,7 @@ function recordText(){
   return L.join('\n');
 }
 function saveSchedToRecord(){
-  if(!(window._schedRows&&window._schedRows.length)){ alert('Generate Jadwal dulu sebelum menyimpan ke rekam medis.'); return; }
+  if(!(window._schedRows&&window._schedRows.length)){ alert('Buat jadwal kontrol dulu (tombol 1) sebelum menyimpan ke rekam medis.'); return; }
   var txt=recordText(), st=document.getElementById('rec_status');
   var nm=(_v('p_nama')||'Pasien').replace(/[^A-Za-z0-9]+/g,'_').replace(/^_+|_+$/g,'');
   var d=new Date(), ymd=d.getFullYear()+('0'+(d.getMonth()+1)).slice(-2)+('0'+d.getDate()).slice(-2);
@@ -4247,12 +4248,12 @@ function _dlgMuat(judul, berkasId, onRM){
       btnOk.disabled=false;
       if(gagal==='__kunci__'){
         /* kunci perangkat belum cocok: bukan "tidak ada di hub" — RM belum dicari sama sekali */
-        msg.innerHTML='Tablet ini belum terdaftar di hub — RM ini belum dicari. Minta admin mengatur kunci: <button type="button" id="mdlg_kunci" style="font:inherit;font-weight:600;color:#8E4A33;background:none;border:none;text-decoration:underline;cursor:pointer;min-height:44px;padding:0 6px">Atur alamat / kunci hub…</button>';
+        msg.innerHTML='Tablet ini belum terdaftar di hub — RM ini belum dicari. Minta admin mengatur kunci: <button type="button" id="mdlg_kunci" style="font:inherit;font-weight:600;color:#8E4A33;background:none;border:none;text-decoration:underline;cursor:pointer;min-height:44px;padding:0 6px">Atur alamat / kunci hub…</button> <a href="ADC_Panduan_Pengisian_Form.html" target="_blank" rel="noopener" style="color:#8E4A33">Panduan</a>';
         var bk=document.getElementById('mdlg_kunci'); if(bk) bk.onclick=function(){ hubSetup(); if(tok===_dlgSeq) ok(); };
         return false; }
       if(gagal==='__login__'){
         /* sesi hub belum ada (login dibatalkan): sebut sebabnya — bukan "tidak ada di hub"; RM tetap, Masuk lalu dimuat otomatis */
-        msg.innerHTML='Belum masuk ke hub — RM ini belum dicari. <button type="button" id="mdlg_login" style="font:inherit;font-weight:600;color:#8E4A33;background:none;border:none;text-decoration:underline;cursor:pointer;min-height:44px;padding:0 6px">Masuk</button> lalu RM dimuat otomatis.';
+        msg.innerHTML='Belum masuk ke hub — RM ini belum dicari. <button type="button" id="mdlg_login" style="font:inherit;font-weight:600;color:#8E4A33;background:none;border:none;text-decoration:underline;cursor:pointer;min-height:44px;padding:0 6px">Masuk</button> lalu RM dimuat otomatis. <a href="ADC_Panduan_Pengisian_Form.html" target="_blank" rel="noopener" style="color:#8E4A33">Panduan</a>';
         var bl=document.getElementById('mdlg_login'); if(bl) bl.onclick=function(){ hubLogin(function(sukses){ if(sukses&&tok===_dlgSeq) ok(); }); };
         return false; }
       if(gagal){ msg.textContent=gagal+' Coba RM lain, atau klik "Pilih berkas…".'; return false; }
@@ -4636,7 +4637,7 @@ function consentHTML(c){
    Navigasi tampilan saja. Field tidak dilepas dari DOM, jadi buildHandoff(),
    reqStatus(), metricWarnings(), dan palang handoff tetap membaca semuanya
    walau langkahnya sedang tidak tampil. */
-var RAIL=['Handoff & riwayat','Pemeriksaan & diagnosis','Program','Resep, ritme & rencana','Sign-off dokter','Penjadwalan & terbit'];
+var RAIL=['Identitas & handoff','Pemeriksaan & diagnosis','Program','Resep, ritme & rencana','Sign-off dokter','Penjadwalan & terbit'];
 var _step=0;
 function tbMenu(open){
   var m=document.getElementById('tbmenu'), b=document.getElementById('tb_more'); if(!m||!b) return;

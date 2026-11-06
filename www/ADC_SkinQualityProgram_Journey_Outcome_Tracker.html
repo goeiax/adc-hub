@@ -556,12 +556,12 @@ function _dlgMuat(judul, berkasId, onRM){
       btnOk.disabled=false;
       if(gagal==='__kunci__'){
         /* kunci perangkat belum cocok: bukan "tidak ada di hub" — RM belum dicari sama sekali */
-        msg.innerHTML='Tablet ini belum terdaftar di hub — RM ini belum dicari. Minta admin mengatur kunci: <button type="button" id="mdlg_kunci" style="font:inherit;font-weight:600;color:#8E4A33;background:none;border:none;text-decoration:underline;cursor:pointer;min-height:44px;padding:0 6px">Atur alamat / kunci hub…</button>';
+        msg.innerHTML='Tablet ini belum terdaftar di hub — RM ini belum dicari. Minta admin mengatur kunci: <button type="button" id="mdlg_kunci" style="font:inherit;font-weight:600;color:#8E4A33;background:none;border:none;text-decoration:underline;cursor:pointer;min-height:44px;padding:0 6px">Atur alamat / kunci hub…</button> <a href="ADC_Panduan_Pengisian_Form.html" target="_blank" rel="noopener" style="color:#8E4A33">Panduan</a>';
         var bk=document.getElementById('mdlg_kunci'); if(bk) bk.onclick=function(){ hubSetup(); if(tok===_dlgSeq) ok(); };
         return false; }
       if(gagal==='__login__'){
         /* sesi hub belum ada (login dibatalkan): sebut sebabnya — bukan "tidak ada di hub"; RM tetap, Masuk lalu dimuat otomatis */
-        msg.innerHTML='Belum masuk ke hub — RM ini belum dicari. <button type="button" id="mdlg_login" style="font:inherit;font-weight:600;color:#8E4A33;background:none;border:none;text-decoration:underline;cursor:pointer;min-height:44px;padding:0 6px">Masuk</button> lalu RM dimuat otomatis.';
+        msg.innerHTML='Belum masuk ke hub — RM ini belum dicari. <button type="button" id="mdlg_login" style="font:inherit;font-weight:600;color:#8E4A33;background:none;border:none;text-decoration:underline;cursor:pointer;min-height:44px;padding:0 6px">Masuk</button> lalu RM dimuat otomatis. <a href="ADC_Panduan_Pengisian_Form.html" target="_blank" rel="noopener" style="color:#8E4A33">Panduan</a>';
         var bl=document.getElementById('mdlg_login'); if(bl) bl.onclick=function(){ hubLogin(function(sukses){ if(sukses&&tok===_dlgSeq) ok(); }); };
         return false; }
       if(gagal){ msg.textContent=gagal+' Coba RM lain, atau klik "Pilih berkas…".'; return false; }
