@@ -1659,11 +1659,10 @@ body.mode-kontrol #rb2 .rl::after{content:' — dilewati';font-size:11px;font-we
        derajat → catatan klinis. Keadaan umum, hasil asesmen & penunjang kini SATU kolom
        "Catatan klinis" (#d2_hasil). #d1_umum dipertahankan tersembunyi agar skema handoff tetap. -->
   <input type="hidden" id="d1_umum">
-  <div class="d1h">Dokter &amp; profil kulit</div>
+  <div class="d1h">Profil kulit</div>
   <div class="row">
-    <div class="f s3"><label class="lab" for="d1_dokter">Dokter pemeriksa</label><input class="in" id="d1_dokter" placeholder="dr. …, Sp.DVE / Sp.GK"></div>
     <!-- Fitzpatrick: RADIO — satu tipe kulit saja per pasien, tidak mungkin ganda. -->
-    <div class="f s4"><span class="lab">Fitzpatrick <span class="opt">pilih satu</span></span>
+    <div class="f s5"><span class="lab">Fitzpatrick <span class="opt">pilih satu</span></span>
       <div class="opts tight compact" style="padding-top:4px">
         <label class="opt"><input type="radio" name="d1_fitz" value="I"> I</label>
         <label class="opt"><input type="radio" name="d1_fitz" value="II"> II</label>
@@ -1675,7 +1674,7 @@ body.mode-kontrol #rb2 .rl::after{content:' — dilewati';font-size:11px;font-we
     </div>
     <!-- Tipe kulit: boleh lebih dari satu (mis. Kombinasi + Sensitif). Nilai digabung ke
          hidden #d1_tipekulit — id yang sama dibaca buildHandoff & _bawaKontrol. -->
-    <div class="f s5"><span class="lab">Tipe kulit <span class="opt">boleh lebih dari satu</span></span>
+    <div class="f s7"><span class="lab">Tipe kulit <span class="opt">boleh lebih dari satu</span></span>
       <div class="opts tight compact" style="padding-top:4px" id="d1_tk">
         <label class="opt"><input type="checkbox" value="Kering" onchange="syncTipeKulit()"> Kering</label>
         <label class="opt"><input type="checkbox" value="Normal" onchange="syncTipeKulit()"> Normal</label>
@@ -1695,7 +1694,8 @@ body.mode-kontrol #rb2 .rl::after{content:' — dilewati';font-size:11px;font-we
   <div class="dxblk">
   <div class="d1h">Temuan &amp; diagnosis</div>
   <div class="row">
-    <div class="f s12"><label class="lab" for="d2_hasil">Catatan klinis</label><textarea class="in" id="d2_hasil" rows="4" placeholder="Temuan: mis. tampak sehat; papul-pustul dominan rahang, PIH ringan; kulit sensitif&#10;Penunjang: mis. panel hormon / InBody / Hair Analyser — atau &quot;tidak perlu&quot;"></textarea></div>
+    <div class="f s3"><label class="lab" for="d1_dokter">Dokter pemeriksa</label><input class="in" id="d1_dokter" placeholder="dr. …, Sp.DVE / Sp.GK"></div>
+    <div class="f s9"><label class="lab" for="d2_hasil">Catatan klinis</label><textarea class="in" id="d2_hasil" rows="4" placeholder="Temuan: mis. tampak sehat; papul-pustul dominan rahang, PIH ringan; kulit sensitif&#10;Penunjang: mis. panel hormon / InBody / Hair Analyser — atau &quot;tidak perlu&quot;"></textarea></div>
   </div>
   <!-- Derajat = skor IGA 0–4 (satu-satunya tempat mengisi IGA). Sebelum program dipilih,
        kartu umum menyimpan nilai sementara (d1_iga) yang otomatis dipakai program Acne /
