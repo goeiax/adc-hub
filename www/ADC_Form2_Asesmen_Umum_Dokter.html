@@ -1172,6 +1172,7 @@ body.showall .step{display:block;}
 .ovl tr.rx-saran .rs-pakai{font:inherit;font-size:12.5px;font-weight:600;margin-left:10px;min-height:44px;padding:0 16px;border:1px solid var(--accent-act);border-radius:999px;background:#fff;color:var(--accent-deep);cursor:pointer;vertical-align:middle;}
 .ovl tr.rx-saran .rs-pakai:hover{background:var(--accent-act);color:#fff;}
 .ovl tr.rx-saran.used{display:none;}
+.ovl tr.rx-kosong{display:none;}   /* baris isian kosong yang punya saran: tampil begitu Pakai ditekan / terisi */
 @media print{.rx-saran{display:none !important;}}
 /* tombol + Tambah baris di bawah tiap tabel resep (cream & obat minum) */
 .rxadd{display:inline-flex;align-items:center;gap:6px;margin:4px 0 2px;font:inherit;font-size:12.5px;font-weight:600;min-height:44px;padding:0 16px;border-radius:999px;border:1px dashed var(--line-strong,#D9CCB7);background:transparent;color:var(--accent-deep,#8E4A33);cursor:pointer;}
@@ -1657,14 +1658,12 @@ body.mode-kontrol #rb2 .rl::after{content:' — dilewati';font-size:11px;font-we
   <!-- Urutan D1 mengikuti alur pemeriksaan: siapa memeriksa → profil kulit → diagnosis &
        derajat → catatan klinis. Keadaan umum, hasil asesmen & penunjang kini SATU kolom
        "Catatan klinis" (#d2_hasil). #d1_umum dipertahankan tersembunyi agar skema handoff tetap. -->
-  <div class="row">
-    <div class="f s4"><label class="lab" for="d1_dokter">Dokter pemeriksa</label><input class="in" id="d1_dokter" placeholder="dr. …, Sp.DVE / Sp.GK"></div>
-  </div>
   <input type="hidden" id="d1_umum">
-  <div class="d1h">Profil kulit</div>
+  <div class="d1h">Dokter &amp; profil kulit</div>
   <div class="row">
+    <div class="f s3"><label class="lab" for="d1_dokter">Dokter pemeriksa</label><input class="in" id="d1_dokter" placeholder="dr. …, Sp.DVE / Sp.GK"></div>
     <!-- Fitzpatrick: RADIO — satu tipe kulit saja per pasien, tidak mungkin ganda. -->
-    <div class="f s12"><span class="lab">Fitzpatrick <span class="opt">pilih satu</span></span>
+    <div class="f s4"><span class="lab">Fitzpatrick <span class="opt">pilih satu</span></span>
       <div class="opts tight compact" style="padding-top:4px">
         <label class="opt"><input type="radio" name="d1_fitz" value="I"> I</label>
         <label class="opt"><input type="radio" name="d1_fitz" value="II"> II</label>
@@ -1676,7 +1675,7 @@ body.mode-kontrol #rb2 .rl::after{content:' — dilewati';font-size:11px;font-we
     </div>
     <!-- Tipe kulit: boleh lebih dari satu (mis. Kombinasi + Sensitif). Nilai digabung ke
          hidden #d1_tipekulit — id yang sama dibaca buildHandoff & _bawaKontrol. -->
-    <div class="f s12"><span class="lab">Tipe kulit <span class="opt">boleh lebih dari satu</span></span>
+    <div class="f s5"><span class="lab">Tipe kulit <span class="opt">boleh lebih dari satu</span></span>
       <div class="opts tight compact" style="padding-top:4px" id="d1_tk">
         <label class="opt"><input type="checkbox" value="Kering" onchange="syncTipeKulit()"> Kering</label>
         <label class="opt"><input type="checkbox" value="Normal" onchange="syncTipeKulit()"> Normal</label>
@@ -3816,7 +3815,8 @@ function initRxSaran(){
         try{ ins[1].focus(); }catch(e){}
       };
       tr.parentNode.insertBefore(sr, tr.nextSibling);
-      var sinkron=function(){ sr.classList.toggle('used', !!(ins[0].value||'').trim()); };
+      /* baris isian disembunyikan selama kosong: tabel = daftar saran (Pakai) + baris terisi; baris bebas via "+ Tambah baris" */
+      var sinkron=function(){ var isi=!!(ins[0].value||'').trim(); sr.classList.toggle('used', isi); tr.classList.toggle('rx-kosong', !isi); };
       ins[0].addEventListener('input',sinkron); ins[0].addEventListener('change',sinkron); sinkron();
     });
   });
