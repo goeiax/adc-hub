@@ -818,9 +818,18 @@ body.mode-kontrol #tb_muat1{display:none;}
   padding:8px 18px;font-size:13.5px;font-weight:560;color:var(--ink-2);}
 .modebar button.on{background:var(--accent-act);border-color:var(--accent-act);color:#fff;}
 .modebar .lb{font-size:11px;font-weight:560;letter-spacing:.14em;color:var(--ink-muted);}
-.hobar{background:var(--blush);border-bottom:1px solid var(--accent);padding:12px 36px;}
+/* saklar jenis kunjungan di toolbar: kontrol tersegmen (menghemat satu baris chrome di tablet) */
+.toolbar .modebar{display:inline-flex;align-items:center;gap:0;padding:0;border:none;background:none;font-size:13px;flex:0 0 auto;}
+.toolbar .modebar .lb{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-on-dark);margin-right:10px;font-weight:560;}
+.toolbar .modebar button{font:inherit;font-size:13px;font-weight:560;letter-spacing:.02em;min-height:44px;padding:0 16px;border:1px solid rgba(245,239,230,.4);background:transparent;color:var(--ink-on-dark);cursor:pointer;border-radius:0;}
+.toolbar .modebar button:first-of-type{border-radius:999px 0 0 999px;}
+.toolbar .modebar button:last-of-type{border-radius:0 999px 999px 0;margin-left:-1px;}
+.toolbar .modebar button.on{background:var(--accent-act);border-color:var(--accent-act);color:#fff;}
+.toolbar .modebar button:hover:not(.on){border-color:var(--canvas);color:var(--canvas);}
+.toolbar .modebar .ket{display:none !important;}
+.hobar{background:var(--blush);border-bottom:1px solid var(--accent);padding:8px 36px;gap:10px;}
 .hobar .hb-badge{background:var(--accent-deep);color:#fff;padding:6px 12px;font-size:11px;font-weight:620;}
-.hobar .hb-txt{font-size:14px;}
+.hobar .hb-txt{font-size:13px;}
 .hobar .hb-act{background:var(--accent-act);border-color:var(--accent-act);color:#fff;padding:0 18px;min-height:44px;font-size:13px;font-weight:560;}
 .hobar .hb-ovr{display:inline-flex;align-items:center;gap:9px;min-height:44px;font-size:12.5px;cursor:pointer;}
 .hobar .hb-ovr input{width:20px;height:20px;flex:none;}
@@ -1002,10 +1011,10 @@ select.in{min-height:46px;}
   border-radius:8px;background:rgba(245,239,230,.06);font-size:15px;color:#F5EFE6 !important;min-height:46px;}
 .staff .sin::placeholder{color:rgba(245,239,230,.45) !important;}
 
-.rail{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;border-top:1px solid var(--line);margin-bottom:32px;}
-.rail button{position:relative;border:none;background:none;text-align:left;cursor:pointer;padding:15px 12px 17px 0;font-family:inherit;}
-.rail button .rn{display:block;font-size:12px;letter-spacing:.14em;color:var(--ink-faint);margin-bottom:5px;}
-.rail button .rl{display:block;font-size:13.5px;line-height:1.35;color:var(--ink-2);font-weight:500;}
+.rail{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;border-top:1px solid var(--line);margin-bottom:18px;}
+.rail button{position:relative;border:none;background:none;text-align:left;cursor:pointer;padding:8px 12px 10px 0;min-height:44px;font-family:inherit;}
+.rail button .rn{display:block;font-size:11.5px;letter-spacing:.14em;color:var(--ink-faint);margin-bottom:2px;}
+.rail button .rl{display:block;font-size:13px;line-height:1.3;color:var(--ink-2);font-weight:500;}
 .rail button.on::before{content:'';position:absolute;top:-1px;left:0;right:8px;height:2px;background:var(--accent);}
 .rail button.on .rl{color:var(--ink);font-weight:600;}
 .rail button:hover .rl{color:var(--accent-deep);}
@@ -1462,8 +1471,8 @@ textarea.in{height:auto;min-height:138px;resize:vertical;line-height:1.55;paddin
   .tb-actions .hubchip{min-height:40px;padding:3px 10px;margin-right:0;}
   .tb-more{margin-left:auto;}
   .ctlbar{position:static;padding:6px 12px;gap:8px;}
-  .ctlbar .modebar{flex-wrap:wrap !important;white-space:normal !important;flex:1 1 100% !important;}   /* mengalahkan aturan nowrap .ctlbar di bawahnya */
-  .ctlbar .modebar button{white-space:normal;}
+  .toolbar .modebar{flex:1 1 100%;}
+  .toolbar .modebar button{flex:1;}
   .flag{flex-wrap:wrap;}
   .flag .fin{flex:1 1 180px;min-width:0;}
   .flag .none{white-space:normal;}
@@ -1513,18 +1522,15 @@ body.mode-kontrol #rb2 .rl::after{content:' — dilewati';font-size:11px;font-we
 
 /* ==== Bar kontrol satu baris: jenis kunjungan + status wajib (permintaan Alex 23 Sep) ==== */
 .ctlbar{position:sticky;top:0;z-index:9;display:flex;align-items:center;gap:14px;flex-wrap:wrap;
-  padding:4px 28px;background:var(--surface-quiet);border-bottom:1px solid var(--line);}
+  padding:6px 36px;background:var(--surface-quiet);border-bottom:1px solid var(--line);}
 .ctlbar .modebar,.ctlbar .reqbar{position:static;display:flex !important;flex-wrap:nowrap;align-items:center;
   padding:0 !important;border:none !important;background:none !important;gap:6px;white-space:nowrap;flex:0 0 auto;}
-.ctlbar .reqbar{flex:1 1 320px;min-width:0;flex-wrap:wrap;padding-left:14px !important;border-left:1px solid var(--line-strong) !important;}
+.ctlbar .reqbar{flex:1 1 320px;min-width:0;flex-wrap:wrap;padding-left:0 !important;border-left:none !important;}
 /* hanya butir yang belum lengkap yang tampil; "lihat semua" membuka butir yang sudah OK */
 .reqbar .it.ok,.reqbar .it.lebih{display:none;}
 .reqbar.semua .it.ok,.reqbar.semua .it.lebih{display:inline-block;}
 .reqbar .tg{font:inherit;font-size:12px;color:var(--ink-muted);background:none;border:none;text-decoration:underline;text-underline-offset:2px;cursor:pointer;padding:4px 6px;min-height:32px;white-space:nowrap;}
 .reqbar .tg:hover{color:var(--accent-deep);}
-.ctlbar .modebar .lb{font-size:12px;letter-spacing:.1em;margin-right:2px;}
-.ctlbar .modebar button{padding:0 14px !important;min-height:44px;font-size:12.5px !important;}
-.ctlbar .modebar .ket{display:none !important;}
 .ctlbar .reqbar .cnt{font-size:12px !important;padding:0 11px !important;min-height:36px;display:inline-flex;align-items:center;border-radius:999px;}
 .ctlbar .reqbar .lst{flex-wrap:wrap !important;gap:5px;align-items:center;}
 .ctlbar .reqbar .it{padding:0 12px !important;min-height:44px;display:inline-flex;align-items:center;font-size:12.5px !important;white-space:nowrap;}
@@ -1542,6 +1548,12 @@ body.mode-kontrol #rb2 .rl::after{content:' — dilewati';font-size:11px;font-we
   <div>
     <div class="tb-title">ADC · Form 2 — Asesmen Umum Dokter</div>
   </div>
+  <div class="modebar" role="group" aria-label="Jenis kunjungan">
+    <span class="lb">Kunjungan</span>
+    <button type="button" id="mb_awal" class="on" aria-pressed="true" onclick="setMode('awal')">Awal</button>
+    <button type="button" id="mb_kontrol" aria-pressed="false" onclick="setMode('kontrol')" title="Pemeriksaan umum di D1 &amp; penentuan program (D2) disembunyikan — sudah ditetapkan di kunjungan awal">Kontrol</button>
+    <span class="ket" id="mb_ket" hidden>Semua bagian tampil.</span>
+  </div>
   <div class="tb-actions">
     <span class="hubchip off" id="hubchip" onclick="hubMenu()" title="Klik: masuk / ganti pengguna &amp; atur hub">HUB &middot; …</span><button class="btn tan" id="tb_muat1" onclick="muatIntakeHub()">Muat Form 1</button>
     <button class="btn" id="tb_muatho" onclick="muatHandoffHub()">Muat Handoff</button>
@@ -1556,12 +1568,6 @@ body.mode-kontrol #rb2 .rl::after{content:' — dilewati';font-size:11px;font-we
 </div>
 
 <div class="ctlbar">
-<div class="modebar">
-  <span class="lb">Jenis kunjungan</span>
-  <button type="button" id="mb_awal" class="on" onclick="setMode('awal')">Kunjungan awal</button>
-  <button type="button" id="mb_kontrol" onclick="setMode('kontrol')" title="Pemeriksaan umum di D1 &amp; penentuan program (D2) disembunyikan — sudah ditetapkan di kunjungan awal">Kunjungan kontrol</button>
-  <span class="ket" id="mb_ket" hidden>Semua bagian tampil.</span>
-</div>
 <div class="reqbar" id="reqbar">
   <span class="cnt" id="reqcnt">Wajib —</span>
   <span class="lst" id="reqlst"></span>
@@ -1571,9 +1577,9 @@ body.mode-kontrol #rb2 .rl::after{content:' — dilewati';font-size:11px;font-we
      Tanpa itu riwayat, IGA baseline & resep berjalan hilang diam-diam. -->
 <div class="hobar" id="hobar" style="display:none">
   <span class="hb-badge">Handoff belum dimuat</span>
-  <span class="hb-txt">Kunjungan kontrol harus memakai handoff kunjungan sebelumnya — di situ tersimpan riwayat, <b>IGA baseline</b>, dan resep berjalan. Tanpa itu, perbandingan hasil mustahil dan riwayat pasien terputus.</span>
+  <span class="hb-txt">Kunjungan kontrol memakai handoff sebelumnya — riwayat, <b>IGA baseline</b> &amp; resep berjalan ikut terbawa.</span>
   <button type="button" class="hb-act" onclick="muatHandoffHub()">Muat Handoff sekarang</button>
-  <label class="hb-ovr"><input type="checkbox" id="ho_absen" onchange="renderHoBar()"> Handoff tidak tersedia (berkas hilang / kunjungan lama) — lanjut tanpa riwayat</label>
+  <label class="hb-ovr"><input type="checkbox" id="ho_absen" onchange="renderHoBar()"> Handoff tidak tersedia — lanjut tanpa riwayat</label>
 </div>
 
 
@@ -3641,8 +3647,8 @@ function setMode(m){
   _mode=m;
   document.body.classList.toggle('mode-kontrol', m==='kontrol');
   var a=document.getElementById('mb_awal'), k=document.getElementById('mb_kontrol'), ket=document.getElementById('mb_ket');
-  if(a) a.classList.toggle('on', m==='awal');
-  if(k) k.classList.toggle('on', m==='kontrol');
+  if(a){ a.classList.toggle('on', m==='awal'); a.setAttribute('aria-pressed', m==='awal'?'true':'false'); }
+  if(k){ k.classList.toggle('on', m==='kontrol'); k.setAttribute('aria-pressed', m==='kontrol'?'true':'false'); }
   /* satu tombol utama di toolbar: awal = Muat Form 1, kontrol = Muat Handoff */
   var t1=document.getElementById('tb_muat1'), th=document.getElementById('tb_muatho');
   if(t1) t1.classList.toggle('tan', m!=='kontrol'); if(th) th.classList.toggle('tan', m==='kontrol');
