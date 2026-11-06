@@ -602,6 +602,7 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
       check('Rx: baris tambahan terbaca collectRx & isian program', rx.some(r => r.obat === 'Azithromycin 500 mg' && r.jadwal === '1x1 3 hari') && rx.some(r => r.obat === 'Krim racik') && ra.w._progDetail().acne.isian.some(x => /Azithromycin/.test(x)), rx);
       trO.querySelector('.rxdel').click();
       check('Rx: hapus baris tambahan', oral.querySelectorAll('tbody tr').length === n0 && !ra.w.collectRx().some(r => /Azithromycin/.test(r.obat)));
+      { const tb2 = ra.w.tambahBarisRx(oral); check('Rx: baris tambahan tidak mewarisi rx-kosong (tetap tampil)', !!tb2 && !tb2.classList.contains('rx-kosong') && tb2.classList.contains('rx-added')); tb2.remove(); }
       /* saran protokol */
       { const rows = [...oral.querySelectorAll('tbody tr:not(.rx-saran)')].filter(r => r.getAttribute('data-saran-ok')), sarans = oral.querySelectorAll('tbody tr.rx-saran');
         const in0 = rows[0].querySelectorAll('input');
@@ -640,7 +641,9 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
       const nmHub = pf.w._hubUser && (pf.w._hubUser.nama || pf.w._hubUser.id);
       check('Nama dokter: d1_dokter terisi dari akun hub berperan dokter; d8_dokter terisi saat masuk langkah sign-off', !!nmHub && $(pf.d, 'd1_dokter').value === nmHub && (() => { pf.w.goStep(4); return $(pf.d, 'd8_dokter').value === nmHub; })(), { nmHub, d1: $(pf.d, 'd1_dokter').value, d8: $(pf.d, 'd8_dokter').value });
       set(pf.d, 'd1_dokter', 'dr. Lain'); $(pf.d, 'd8_dokter').value = ''; pf.w.goStep(3); pf.w.goStep(4);
-      check('Nama dokter: dokter pemeriksa yang diketik menang atas akun hub untuk penandatangan', $(pf.d, 'd8_dokter').value === 'dr. Lain'); }
+      check('Nama dokter: dokter pemeriksa yang diketik menang atas akun hub untuk penandatangan', $(pf.d, 'd8_dokter').value === 'dr. Lain');
+      set(pf.d, 'rm', 'RM-TTD-NAMA'); await signoff(pf);
+      check('Nama dokter: stempel PIN menimpa nama prefill — penanda tangan = pemilik PIN', !!pf.w._ttd && $(pf.d, 'd8_dokter').value === pf.w._ttd.nama && pf.w._ttd.nama !== 'dr. Lain', { d8: $(pf.d, 'd8_dokter').value, ttd: pf.w._ttd && pf.w._ttd.nama }); }
     { const ri = await open('ADC_Form2_Asesmen_Umum_Dokter.html', { user: null });
       ri.w.localStorage.removeItem('adc_hub_id'); ri.w._ldlg('login', {}, function () {}); const kosong = $(ri.d, 'ldlg_id').value; $(ri.d, 'ldlg_x').click();
       ri.w.localStorage.setItem('adc_hub_id', 'dokter'); ri.w._ldlg('login', {}, function () {}); await sleep(30);

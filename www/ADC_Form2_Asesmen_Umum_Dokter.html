@@ -3839,7 +3839,7 @@ function initRxAdd(){
 }
 function tambahBarisRx(tb){
   var body=tb.querySelector('tbody'), last=body&&[].slice.call(body.querySelectorAll('tr:not(.rx-saran)')).pop(); if(!last) return null;
-  var tr=last.cloneNode(true); tr.classList.add('rx-added');
+  var tr=last.cloneNode(true); tr.classList.add('rx-added'); tr.classList.remove('rx-kosong');   /* baris bebas selalu tampil (klon bisa membawa rx-kosong) */
   tr.querySelectorAll('.rxpick-btn,.rxdel').forEach(function(x){ x.remove(); });
   var td0=tr.querySelector('td'); if(td0) td0.classList.remove('rxc');
   tr.querySelectorAll('input').forEach(function(i){ i.value=''; i.placeholder=''; i.removeAttribute('data-ph'); }); tr.removeAttribute('data-saran-ok');
@@ -4110,7 +4110,7 @@ function _terbitLanjut(h,a,tanpaPin){
   if(!tanpaPin && _hubOn && window._hubLoginReq && _ck('d8_signoff') && !h.penerbitan.ttd){
     hubTTD(h.pasien.rm,'',function(ttd){
       if(ttd){ h.penerbitan.ttd=ttd; window._ttd=ttd; _ttdStatus('Ditandatangani · '+ttd.nama+' · '+_ttdJam(ttd.waktu)+' · PIN diverifikasi hub','ok');
-        if(!_hv('d8_dokter')){ var dd=document.getElementById('d8_dokter'); if(dd) dd.value=ttd.nama; h.penerbitan.dokter_signoff=ttd.nama; }
+        { var dd=document.getElementById('d8_dokter'); if(dd) dd.value=ttd.nama; h.penerbitan.dokter_signoff=ttd.nama; }   /* penanda tangan = pemilik PIN, menimpa nama prefill */
         _issueLanjut(h,a); return; }
       /* PIN dibatalkan: dialog yang sama, satu peringatan — bukan confirm() kedua */
       _terbitDialog(h,a,[{t:'Tanpa tanda tangan elektronik dokter (PIN) — handoff akan tercatat "sign-off tanpa verifikasi PIN".',go:'d8_signoff'}],true);
@@ -4317,7 +4317,7 @@ function signoffTTD(){
   if(!window._hubLoginReq){ _ttdStatus(''); return; }
   _ttdStatus('Menunggu PIN dokter…');
   hubTTD(_hv('rm'),'',function(ttd){
-    if(ttd){ window._ttd=ttd; var dd=document.getElementById('d8_dokter'); if(dd&&!dd.value.trim()) dd.value=ttd.nama;
+    if(ttd){ window._ttd=ttd; var dd=document.getElementById('d8_dokter'); if(dd) dd.value=ttd.nama;   /* penanda tangan = pemilik PIN */
       _ttdStatus('Ditandatangani · '+ttd.nama+' · '+_ttdJam(ttd.waktu)+' · PIN diverifikasi hub','ok'); }
     else { /* dibatalkan: centang dilepas — kotak tercentang tanpa PIN terbaca sebagai "sudah tanda tangan" */
       cb.checked=false; _ttdStatus('Belum ditandatangani — centang lagi untuk memasukkan PIN dokter.','warn');
