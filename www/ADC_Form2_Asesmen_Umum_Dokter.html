@@ -2512,8 +2512,8 @@ function openProg(p){
 /* ===== WIZARD 3 BAGIAN DI DALAM MODAL PROGRAM =====
    Bagian ditentukan dari huruf seksi: A,B = Penilaian · C,D = Tahap & resep · E,F,G = Edukasi & rencana;
    seksi tanpa huruf (mis. "Tiga Pilar Wajib" melasma) ikut bagian Tahap. Node dibungkus, tidak dipindah urutannya. */
-var PM_BAGIAN={acne:{1:'Penilaian',2:'4 faktor',3:'Tahap & resep',4:'Edukasi & rencana'},
-  melasma:{1:'Penilaian',2:'Pilar & tahap',3:'Resep',4:'Edukasi'},
+var PM_BAGIAN={acne:{1:'Penilaian',2:'4 faktor',3:'Tahap',4:'Resep & prosedur',5:'Edukasi & rencana'},
+  melasma:{1:'Penilaian',2:'Pilar & tahap',3:'Resep',5:'Edukasi'},
   hair:{1:'Penilaian',2:'Fase program',3:'Resep & rujukan',4:'Edukasi'}};
 function _pmLabel(p,n){ return (PM_BAGIAN[p]&&PM_BAGIAN[p][n])||['Penilaian','Tahap','Resep','Edukasi'][n-1]||('Bagian '+n); }
 window._pmPart={};
@@ -2527,9 +2527,11 @@ function initPmWizard(){
   document.querySelectorAll('.ovl[data-prog]').forEach(function(ovl){
     var p=ovl.getAttribute('data-prog'), body=ovl.querySelector('.pmbody'); if(!body||body.querySelector('.pmrail')) return;
     var isHeader=function(el){ return el.classList&&(el.classList.contains('sec-label')||(el.classList.contains('sec')&&el.querySelector(':scope > .sech'))); };
-    var kids=[].slice.call(body.children), part=0, wraps={}, started=false;
+    var kids=[].slice.call(body.children), part=0, wraps={}, started=false, geser=0, dasarGeser=0;
     kids.forEach(function(el){
-      if(isHeader(el)){ part=_pmBagianDari(el); started=true; }
+      if(isHeader(el)){ var b=_pmBagianDari(el); part=(geser&&b>dasarGeser)?b+geser:b; started=true; }
+      /* blok tahap (resep & prosedur tahap terpilih) = bagian sendiri setelah kartu tahap; header berikutnya digeser +1 */
+      else if(started&&!geser&&el.classList&&el.classList.contains('stage-block')){ dasarGeser=part; geser=1; part=part+1; }
       if(!started) return;                                     /* pmctx & pengantar tetap di luar bagian */
       if(!wraps[part]){ var w=document.createElement('div'); w.className='pmpart'; w.setAttribute('data-part',part); wraps[part]=w; body.insertBefore(w,el); }
       wraps[part].appendChild(el);
