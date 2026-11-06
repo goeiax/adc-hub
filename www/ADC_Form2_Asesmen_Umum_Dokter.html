@@ -1024,7 +1024,7 @@ select.in{min-height:46px;}
 @media (max-width:820px){ .rail{grid-auto-flow:row;grid-auto-columns:auto;}
   .rail button{padding:11px 0;border-top:1px solid var(--line);} .rail button.on::before{right:0;} }
 
-.step{background:var(--surface);border:1px solid var(--line);border-radius:14px;
+.step{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding-top:28px !important;
   padding:34px;margin-bottom:20px;display:none;}
 .step.on{display:block;}
 body.showall .step{display:block;}
@@ -1661,7 +1661,6 @@ body.mode-kontrol #rb2 .rl::after{content:' — dilewati';font-size:11px;font-we
        derajat → catatan klinis. Keadaan umum, hasil asesmen & penunjang kini SATU kolom
        "Catatan klinis" (#d2_hasil). #d1_umum dipertahankan tersembunyi agar skema handoff tetap. -->
   <input type="hidden" id="d1_umum">
-  <div class="d1h">Profil kulit</div>
   <div class="row">
     <!-- Fitzpatrick: RADIO — satu tipe kulit saja per pasien, tidak mungkin ganda. -->
     <div class="f s5"><span class="lab">Fitzpatrick <span class="opt">pilih satu</span></span>
