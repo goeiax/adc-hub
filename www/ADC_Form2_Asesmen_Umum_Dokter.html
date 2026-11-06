@@ -3927,6 +3927,9 @@ function issueHandoff(){
   if(ob.length && hm) w.unshift('PASIEN '+hm.toUpperCase()+' (Form 1) dan resep memuat obat berisiko: '+ob.join(', ')+' — periksa ulang sebelum terbit.');
   var adaTindakan=activeProgs().some(function(p){ return _psProgram(p).klinik.length>0; })||!!_hv('k1_tindakan');
   if(adaTindakan && !_ck('d8_consent')) w.push('Ada tindakan direncanakan/dilakukan hari ini tetapi "Informed consent tindakan" belum dicentang (D7).');
+  /* identitas: No. RM = kunci hub; tanpa RM handoff tak bisa ditemukan di kontrol -> peringatan PERTAMA, lompat ke kolomnya */
+  var _rm=((h.pasien||{}).rm||'').trim(), _nm=((h.pasien||{}).nama||'').trim();
+  if(!_rm||!_nm) w.unshift('Identitas pasien belum lengkap: '+[!_nm?'nama':'',!_rm?'No. RM':''].filter(Boolean).join(' & ')+' kosong — tanpa No. RM handoff tidak bisa ditemukan di kunjungan kontrol.');
   _terbitDialog(h,a,w.map(function(t){ return {t:t,go:_terbitGo(t)}; }),false);
 }
 /* ===== DIALOG TERBITKAN (pengganti confirm/alert bawaan browser) =====
@@ -3934,6 +3937,7 @@ function issueHandoff(){
    ringkasan program/resep/jadwal/hub. Ada peringatan -> "Kembali & lengkapi" terisi, "Terbitkan" garis.
    Tinta (--ink) hanya untuk tombol terbit (aturan warna: terbit = satu-satunya aksi tak bisa dibatalkan). */
 function _terbitGo(t){
+  if(/^Identitas pasien/.test(t)) return /No\. RM/.test(t)?'rm':'p_nama';
   if(/Asesmen selesai/.test(t)) return 'd8_signoff';
   if(/IGA belum/.test(t)) return document.getElementById('d1_iga')?'d1_iga':null;
   if(/Jadwal belum/.test(t)) return 'sb1';
@@ -3961,7 +3965,7 @@ function _terbitDialog(h,a,w,tanpaPin){
   var kv=function(k,v,cls){ return '<div><span class="k">'+k+'</span><div class="v'+(cls?(' '+cls):'')+'">'+v+'</div></div>'; };
   document.getElementById('tdlg_t').textContent=tanpaPin?'Terbitkan tanpa tanda tangan PIN?':(n?('Terbitkan dengan '+n+' peringatan?'):'Terbitkan handoff?');
   document.getElementById('tdlg_kv').innerHTML=
-    kv('Pasien',_esc(ps.nama||'(nama belum diisi)')+' · RM '+_esc(ps.rm||'—'))+
+    kv('Pasien',_esc(ps.nama||'(nama belum diisi)')+' · RM '+_esc(ps.rm||'—'),(ps.nama&&ps.rm)?'':'warn')+
     kv('Sign-off dokter',_esc(ttd),pe.ttd?'ok':'warn')+
     kv('Program',_esc([a.program,a.derajat].filter(Boolean).join(' — ')||'—'))+
     kv('Resep',a.resep.length?(a.resep.length+' baris'):'belum ada',a.resep.length?'':'warn')+

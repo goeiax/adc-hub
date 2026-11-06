@@ -619,6 +619,14 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
       check('Risiko bekas: Nodulokistik -> saran Tinggi; memilih sesuai saran menghapus status timpaan', lv() === 'Tinggi' && rb.w._rbOverride === false, $(rb.d, 'rb_saran').textContent);
       check('Risiko bekas: hanya satu kesimpulan (radio), tiga pilihan', rb.d.querySelectorAll('input[name=rb_level]').length === 3 && rb.d.querySelectorAll('input[name=rb_level]:checked').length === 1); }
 
+    { const idg = await open('ADC_Form2_Asesmen_Umum_Dokter.html');
+      idg.w.issueHandoff(); await sleep(200);
+      const items = [...idg.d.querySelectorAll('#tdlg_miss button, #tdlg_miss .plain')];
+      check('Terbit tanpa identitas: peringatan PERTAMA "Identitas pasien belum lengkap" melompat ke #rm, baris Pasien ditandai warn', $(idg.d, 'tdlg').classList.contains('on') && items.length > 0 && /^Identitas pasien belum lengkap: nama & No\. RM kosong/.test(items[0].textContent) && items[0].getAttribute('data-go') === 'rm' && !!idg.d.querySelector('#tdlg_kv .v.warn') && /\(nama belum diisi\)/.test(idg.d.querySelector('#tdlg_kv .v.warn').textContent), items.map(b => b.textContent.slice(0, 60)));
+      items[0].click(); await sleep(100);
+      check('Terbit tanpa identitas: tombol peringatan menutup dialog dan memfokuskan #rm', !$(idg.d, 'tdlg').classList.contains('on') && !!idg.d.activeElement && idg.d.activeElement.id === 'rm', idg.d.activeElement && idg.d.activeElement.id);
+      set(idg.d, 'p_nama', 'Uji Identitas'); set(idg.d, 'rm', 'RM-ID-1'); idg.w.issueHandoff(); await sleep(200);
+      check('Terbit dengan identitas: peringatan identitas hilang, baris Pasien tidak warn', ![...idg.d.querySelectorAll('#tdlg_miss button, #tdlg_miss .plain')].some(b => /Identitas pasien/.test(b.textContent)) && !/Uji Identitas/.test((idg.d.querySelector('#tdlg_kv .v.warn') || {}).textContent || '')); $(idg.d, 'tdlg_x').click(); }
     { const lg2 = await open('ADC_Form2_Asesmen_Umum_Dokter.html', { user: null });
       const onL = id => !!$(lg2.d, id) && $(lg2.d, id).classList.contains('on');
       muatRM(lg2, 'muatIntakeHub', RM);
