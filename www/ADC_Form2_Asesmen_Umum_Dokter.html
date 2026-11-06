@@ -302,14 +302,16 @@ label.opt.lbl-hamil{border:1.5px solid var(--accent-deep,#8E4A33);background:#FB
 #ovl_acne .warn-box strong{color:var(--red);}
 /* Risiko bekas: segmen kesimpulan (satu pilihan) + saran otomatis + konsekuensi */
 #ovl_acne .qline.rbq{flex-wrap:wrap;gap:8px 10px;}
-#ovl_acne .rbseg{display:inline-flex;gap:8px;flex-wrap:wrap;}
-#ovl_acne .rbopt{position:relative;display:flex;align-items:center;gap:9px;padding:0 14px 0 11px;font-size:13px;cursor:pointer;border:1px solid var(--border);min-height:44px;color:var(--text);background:#fff;}
-#ovl_acne .rbopt::before{content:'';flex:none;width:14px;height:14px;border:2px solid var(--border);background:#fff;}
-#ovl_acne .rbopt.on::before{border-color:#fff;background:#fff;box-shadow:inset 0 0 0 4px var(--text);}
-#ovl_acne .rbopt input{position:absolute;opacity:0;width:0;height:0;}
-#ovl_acne .rbopt.on{background:var(--text);color:#fff;font-weight:600;}
-#ovl_acne .rbopt.saran{box-shadow:inset 0 0 0 2px var(--gold);}
-#ovl_acne .rbopt:focus-within{outline:2px solid var(--blue);outline-offset:-2px;}
+.ovl .rbseg{display:inline-flex;gap:8px;flex-wrap:wrap;vertical-align:middle;}
+.ovl .rbopt{position:relative;display:flex;align-items:center;gap:9px;padding:0 14px 0 11px;font-size:13px;cursor:pointer;border:1px solid var(--border,var(--line-strong,#D9CCB7));min-height:44px;color:var(--text,var(--ink,#1B1A18));background:#fff;}
+.ovl .rbopt::before{content:'';flex:none;width:14px;height:14px;border:2px solid var(--border,var(--line-strong,#D9CCB7));background:#fff;}
+.ovl .rbopt.on::before{border-color:#fff;background:#fff;box-shadow:inset 0 0 0 4px var(--text,var(--ink,#1B1A18));}
+.ovl .rbopt input{position:absolute;opacity:0;width:0;height:0;}
+.ovl .rbopt.on{background:var(--text,var(--ink,#1B1A18));color:#fff;font-weight:600;}
+.ovl .rbopt.saran{box-shadow:inset 0 0 0 2px var(--gold,#C9A86A);}
+.ovl .rbopt:focus-within{outline:2px solid var(--blue,var(--accent,#B0603F));outline-offset:-2px;}
+.ovl .rbseg.yn{margin:2px 10px 2px 2px;}
+@media print{.ovl .rbopt.on{font-weight:700;text-decoration:underline;}}
 #ovl_acne .rb-conseq{flex-basis:100%;font-size:12.5px;line-height:1.45;color:#7A1A1A;background:var(--redbg);border-radius:6px;padding:7px 11px;}
 #ovl_acne .rb-conseq[hidden]{display:none;}
 #ovl_acne .imp-box{background:var(--goldbg);border:1.5px solid var(--gold);border-radius:5px;padding:6px 10px;margin:7px 0;font-size:12.5px;color:#5A3800;}
@@ -1968,8 +1970,8 @@ body.mode-kontrol #rb2 .rl::after{content:' — dilewati';font-size:11px;font-we
   <div class="qline"><span class="q">Pakai produk beli sendiri (skincare aktif / "probiotik" oles)?</span>
     <label class="ck"><input type="checkbox" id="ac_a_self_n"> Tidak</label><label class="ck"><input type="checkbox" id="ac_a_self_y"> Ya</label>
     <span class="sub">→ catat:</span><input class="ln" placeholder="produk apa (risiko relaps)"></div>
-  <div class="qline"><span class="q">Riwayat keluarga jerawat/bekas?</span><label class="ck"><input type="checkbox"> Ya</label><label class="ck"><input type="checkbox"> Tidak</label>
-    <span class="q" style="margin-left:10px;">Mudah menghitam (PIH)?</span><label class="ck"><input type="checkbox"> Ya</label><label class="ck"><input type="checkbox"> Tidak</label></div>
+  <div class="qline"><span class="q">Riwayat keluarga jerawat/bekas?</span><span class="rbseg yn"><label class="rbopt"><input type="radio" name="yn_1"> Ya</label><label class="rbopt"><input type="radio" name="yn_1"> Tidak</label></span>
+    <span class="q" style="margin-left:10px;">Mudah menghitam (PIH)?</span><span class="rbseg yn"><label class="rbopt"><input type="radio" name="yn_2"> Ya</label><label class="rbopt"><input type="radio" name="yn_2"> Tidak</label></span></div>
 
   <!-- B. PENILAIAN KLINIS -->
   <div class="sec-label">B · Penilaian Klinis <span class="hint">dokter</span></div>
@@ -2141,11 +2143,11 @@ body.mode-kontrol #rb2 .rl::after{content:' — dilewati';font-size:11px;font-we
   <div class="sec-label">A · Riwayat &amp; Pemicu <span class="hint">khusus melasma</span></div>
   
   <div class="qline"><span class="q">Krim/pemutih dipakai sekarang:</span><input class="ln" placeholder="produk saat ini (termasuk racikan)">
-    <span class="q" style="margin-left:10px;">Beli sendiri / racikan tanpa anjuran dokter?</span><label class="ck"><input type="checkbox"> Tidak</label><label class="ck"><input type="checkbox"> Ya</label></div>
+    <span class="q" style="margin-left:10px;">Beli sendiri / racikan tanpa anjuran dokter?</span><span class="rbseg yn"><label class="rbopt"><input type="radio" name="yn_3"> Ya</label><label class="rbopt"><input type="radio" name="yn_3"> Tidak</label></span></div>
   <div class="qline"><span class="q">Paparan panas tak disadari</span><span class="sub">(sauna / mandi air panas / masak / sering naik pesawat)</span>
-    <label class="ck"><input type="checkbox"> Ya</label><label class="ck"><input type="checkbox"> Tidak</label>
+    <span class="rbseg yn"><label class="rbopt"><input type="radio" name="yn_4"> Ya</label><label class="rbopt"><input type="radio" name="yn_4"> Tidak</label></span>
     <span class="sub">→ sumber:</span><input class="ln" placeholder="mis. masak tiap hari"></div>
-  <div class="qline"><span class="q">Riwayat laser/pemutih sebelumnya?</span><label class="ck"><input type="checkbox"> Ya</label><label class="ck"><input type="checkbox"> Tidak</label><span class="sub">→ reaksi/hasil:</span><input class="ln" placeholder="mis. sempat menggelap (rebound)"></div>
+  <div class="qline"><span class="q">Riwayat laser/pemutih sebelumnya?</span><span class="rbseg yn"><label class="rbopt"><input type="radio" name="yn_5"> Ya</label><label class="rbopt"><input type="radio" name="yn_5"> Tidak</label></span><span class="sub">→ reaksi/hasil:</span><input class="ln" placeholder="mis. sempat menggelap (rebound)"></div>
 
   <!-- B. PENILAIAN KLINIS -->
   <div class="sec-label">B · Penilaian Klinis <span class="hint">dokter — nilai kesiapan kulit untuk laser</span></div>
@@ -2871,6 +2873,7 @@ function resetForm(){
   /* radio juga hanya dilepas centangnya — mengosongkan value-nya membuat Fitzpatrick
      terekam kosong setelah Reset. */
   document.querySelectorAll('input,textarea').forEach(function(i){ if(i.type==='checkbox'||i.type==='radio'){i.checked=false;} else {i.value='';} });
+  document.querySelectorAll('.rbseg.yn .rbopt.on').forEach(function(l){ l.classList.remove('on'); });
   document.querySelectorAll('.progbtn').forEach(function(e){e.classList.remove('on');});
   document.querySelectorAll('.sev-card').forEach(function(e){e.classList.remove('active');});
   document.querySelectorAll('.stage-block,.blk').forEach(function(e){e.classList.remove('show');});
@@ -2886,6 +2889,7 @@ function resetForm(){
 window.addEventListener('load',function(){
   if(typeof updateIgaCards==='function') setTimeout(updateIgaCards,0);
   if(typeof initRxPick==='function') initRxPick();
+  if(typeof initYaTidak==='function') initYaTidak();
   if(typeof initRxSaran==='function') initRxSaran();
   if(typeof initRxAdd==='function') initRxAdd();
   if(typeof initPmWizard==='function') initPmWizard();
@@ -3078,7 +3082,7 @@ function _progDetail(){
       }
       if(e.type==='radio'){   /* satu pilihan: catat bersama pertanyaannya ("Kesimpulan risiko bekas: Tinggi") */
         if(!e.checked) return;
-        var rl=e.closest('label'), rq=e.closest('.qline'), rk=rq?((rq.querySelector('.q')||{}).textContent||''):'';
+        var rl=e.closest('label'), rk=_qSebelum(e);
         isian.push((rk?rk.replace(/\s+/g,' ').replace(/\s*\(.*?\)\s*/,'').replace(/:\s*$/,'').trim()+': ':'')+(rl?rl.textContent.trim():e.value));
         return;
       }
@@ -3686,6 +3690,16 @@ function _produkByName(n){ n=(n||'').trim().toLowerCase(); if(!n||typeof ADC_PRO
 /* ===== SARAN PROTOKOL DI TABEL RESEP (acne & melasma) =====
    Placeholder asli (Oku/ADC) -> data-ph + baris tr.rx-saran "Saran protokol … [Pakai]"; input hanya petunjuk kategori.
    Pakai mengisi keempat kolom sebagai NILAI (ikut handoff). Baris saran hilang begitu kolom obat terisi. */
+/* ===== YA / TIDAK = RADIO BERCHIP (satu jawaban, urutan tetap Ya -> Tidak) ===== */
+function initYaTidak(){
+  document.addEventListener('change',function(e){ var r=e.target; if(!r||r.type!=='radio') return; var s=r.closest('.rbseg.yn'); if(!s) return;
+    s.querySelectorAll('.rbopt').forEach(function(l){ var i=l.querySelector('input'); l.classList.toggle('on',!!(i&&i.checked)); }); },true);
+}
+function _qSebelum(el){   /* pertanyaan (.q) terdekat SEBELUM segmen — satu .qline bisa memuat dua pertanyaan */
+  var n=el.closest('.rbseg')||el.closest('label'); if(!n) return '';
+  var p=n.previousElementSibling; while(p){ if(p.classList&&p.classList.contains('q')) return p.textContent||''; p=p.previousElementSibling; }
+  var rq=el.closest('.qline'); return rq?((rq.querySelector('.q')||{}).textContent||''):'';
+}
 function initRxSaran(){
   document.querySelectorAll('#ovl_acne .rx-table, #ovl_melasma .rx-table').forEach(function(tb){
     var oral=/Dosis/.test((tb.querySelector('thead')||{}).textContent||'');

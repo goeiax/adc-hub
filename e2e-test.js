@@ -600,6 +600,12 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
     { const rb = await open('ADC_Form2_Asesmen_Umum_Dokter.html');
       set(rb.d, 'd2_dx', 'Acne'); rb.w.pickStage('acne', 2);
       const f = [...rb.d.querySelectorAll('#ovl_acne .rbf')], lv = () => ([...rb.d.querySelectorAll('input[name=rb_level]')].find(r => r.checked) || {}).value || '';
+      { const yn = [...rb.d.querySelectorAll('.ovl .rbseg.yn')]; const q = t => yn.find(s => ((s.previousElementSibling || {}).textContent || '').trim() === t);
+        const fam = q('Riwayat keluarga jerawat/bekas?'), pih = q('Mudah menghitam (PIH)?');
+        const pick = (sg, lab) => { const i = [...sg.querySelectorAll('label')].find(l => l.textContent.trim() === lab).querySelector('input'); i.checked = true; i.dispatchEvent(new rb.w.Event('change', { bubbles: true })); };
+        pick(fam, 'Tidak'); pick(pih, 'Ya');
+        const isi = rb.w._progDetail().acne.isian;
+        check('Ya/Tidak: 5 pasangan jadi radio berchip (satu jawaban, urutan Ya -> Tidak, tanpa checkbox Ya/Tidak tersisa); dua pertanyaan satu baris terekam masing-masing', yn.length === 5 && !!fam && !!pih && fam.querySelectorAll('input[type=radio]').length === 2 && fam.querySelector('label').textContent.trim() === 'Ya' && [...fam.querySelectorAll('input')].filter(i => i.checked).length === 1 && fam.querySelectorAll('.rbopt.on').length === 1 && isi.includes('Riwayat keluarga jerawat/bekas?: Tidak') && isi.includes('Mudah menghitam?: Ya') && ![...rb.d.querySelectorAll('.ovl label.ck')].some(l => /^(Ya|Tidak)$/.test(l.textContent.trim())), { n: yn.length, isi: isi.filter(x => /Riwayat keluarga|Mudah menghitam/.test(x)) }); }
       check('Risiko bekas: awal tanpa kesimpulan (tidak ada centang bawaan), konsekuensi tersembunyi', lv() === '' && $(rb.d, 'rb_conseq').hidden === true && /belum disimpulkan/.test($(rb.d, 'rb_saran').textContent));
       f[1].checked = true; f[1].dispatchEvent(new rb.w.Event('change', { bubbles: true }));
       check('Risiko bekas: 1 faktor -> saran Sedang terpilih otomatis + konsekuensi tampil', lv() === 'Sedang' && $(rb.d, 'rb_conseq').hidden === false && /SEDANG/.test($(rb.d, 'rb_conseq_lv').textContent));
