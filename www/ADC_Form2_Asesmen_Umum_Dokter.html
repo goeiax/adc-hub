@@ -930,7 +930,7 @@ select.in{min-height:46px;}
 .f.w2:has(> .opts),.f.w3:has(> .opts){grid-column:1 / -1;}
 
 /* --- Irama antar seksi: jeda lebih tegas supaya kelompok terbaca --- */
-.sec{margin:34px 0 16px !important;}
+.sec{margin:26px 0 12px !important;}
 .sec:first-of-type{margin-top:8px !important;}
 .note,.callout,.intro{margin-bottom:18px !important;}
 
@@ -1154,8 +1154,8 @@ body.showall .step{display:block;}
 /* D1: pemisah kelompok (Profil kulit / Diagnosis) + chip ringkas agar satu baris */
 .d1h{font-size:11px;font-weight:620;letter-spacing:.14em;text-transform:uppercase;color:var(--accent-deep);
   margin:4px 0 14px;padding-top:18px;border-top:1px solid var(--line);}
-.opts.compact{gap:6px !important;}
-.opts.compact .opt{padding:10px 10px !important;margin-left:0 !important;font-style:normal !important;letter-spacing:.04em !important;}
+.opts.compact{gap:4px !important;}
+.opts.compact .opt{padding:10px 8px !important;margin-left:0 !important;font-style:normal !important;letter-spacing:.04em !important;}
 /* Semua teks opsi jawaban di form program berwarna hitam (permintaan klinik) —
    sorotan warna lama (.hl, abu-abu) tidak dipakai lagi untuk opsi. */
 .ovl label.ck,.ovl .ck label,.ovl label.chk-item,.ovl label.consent-item{color:var(--ink) !important;}
@@ -1422,6 +1422,7 @@ body.showall .step{display:block;}
 
 /* Catatan klinis: dokter butuh ruang narasi ±5 baris, bukan satu baris. */
 textarea.in{height:auto;min-height:138px;resize:vertical;line-height:1.55;padding-top:11px;font:inherit;}
+textarea.in#d2_hasil{min-height:92px;}   /* 3 baris: Diagnosis & IGA tetap di atas lipatan 768 px tablet; bisa ditarik lebih tinggi */
 
 /* ==========================================================================
    MODAL HAIR-LOSS — perbaikan tabrakan kelas dwi-fungsi (kejadian ke-5).
@@ -1695,7 +1696,7 @@ body.mode-kontrol #rb2 .rl::after{content:' — dilewati';font-size:11px;font-we
   <div class="d1h">Temuan &amp; diagnosis</div>
   <div class="row">
     <div class="f s3"><label class="lab" for="d1_dokter">Dokter pemeriksa</label><input class="in" id="d1_dokter" placeholder="dr. …, Sp.DVE / Sp.GK"></div>
-    <div class="f s9"><label class="lab" for="d2_hasil">Catatan klinis</label><textarea class="in" id="d2_hasil" rows="4" placeholder="Temuan: mis. tampak sehat; papul-pustul dominan rahang, PIH ringan; kulit sensitif&#10;Penunjang: mis. panel hormon / InBody / Hair Analyser — atau &quot;tidak perlu&quot;"></textarea></div>
+    <div class="f s9"><label class="lab" for="d2_hasil">Catatan klinis</label><textarea class="in" id="d2_hasil" rows="3" placeholder="Temuan: mis. tampak sehat; papul-pustul dominan rahang, PIH ringan; kulit sensitif&#10;Penunjang: mis. panel hormon / InBody / Hair Analyser — atau &quot;tidak perlu&quot;"></textarea></div>
   </div>
   <!-- Derajat = skor IGA 0–4 (satu-satunya tempat mengisi IGA). Sebelum program dipilih,
        kartu umum menyimpan nilai sementara (d1_iga) yang otomatis dipakai program Acne /
