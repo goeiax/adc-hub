@@ -793,6 +793,10 @@ input::placeholder,textarea::placeholder{color:var(--ink-faint) !important;font-
 .btn.tan{background:var(--accent-act) !important;border-color:var(--accent-act) !important;color:#fff !important;}
 .btn.tan:hover{background:var(--accent-deep) !important;border-color:var(--accent-deep) !important;}
 .toolbar{padding:14px 36px;position:static;}   /* tidak lengket: bilah WAJIB/mode (.ctlbar) yang perlu menempel saat digulir, bukan toolbar */
+.tb-actions .btn{white-space:nowrap;min-height:44px;}   /* 1024: label tombol tidak boleh patah 3 baris */
+/* satu tombol muat sesuai mode — yang lain tetap di DOM (id & setMode tak berubah), hanya disembunyikan */
+body:not(.mode-kontrol) #tb_muatho{display:none;}
+body.mode-kontrol #tb_muat1{display:none;}
 .toolbar .tb-title{font-size:15px;font-weight:620;}
 .toolbar .tb-hint{font-size:13px;color:var(--ink-on-dark);}
 
@@ -1529,14 +1533,13 @@ body.mode-kontrol #rb2 .rl::after{content:' — dilewati';font-size:11px;font-we
 <div class="toolbar">
   <div>
     <div class="tb-title">ADC · Form 2 — Asesmen Umum Dokter</div>
-    <div class="tb-hint">Diisi dokter · sebelum masuk form program khusus · Form 1 (pasien) harus sudah lengkap</div>
   </div>
   <div class="tb-actions">
     <span class="hubchip off" id="hubchip" onclick="hubMenu()" title="Klik: masuk / ganti pengguna &amp; atur hub">HUB &middot; …</span><button class="btn tan" id="tb_muat1" onclick="muatIntakeHub()">Muat Form 1</button>
     <button class="btn" id="tb_muatho" onclick="muatHandoffHub()">Muat Handoff</button>
-    <button class="btn" onclick="cetakSemua()">Cetak / Simpan PDF</button>
     <div class="tb-more"><button type="button" class="btn" id="tb_more" aria-haspopup="menu" aria-expanded="false" aria-controls="tbmenu" onclick="tbMenu()">Lainnya &#9662;</button>
       <div class="tbmenu" id="tbmenu" role="menu" aria-label="Aksi lain">
+        <button type="button" role="menuitem" onclick="tbMenu(false);cetakSemua()">Cetak / Simpan PDF <small>lembar asesmen dokter 1 halaman</small></button>
         <button type="button" role="menuitem" onclick="tbMenu(false);issueHandoff()">Terbitkan Handoff <small>juga di akhir langkah 6</small></button>
         <button type="button" role="menuitem" onclick="tbMenu(false);printAll()">Cetak semua form program</button>
         <button type="button" role="menuitem" class="danger" onclick="tbMenu(false);resetForm()">Reset form&hellip;</button>
