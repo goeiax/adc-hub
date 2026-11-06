@@ -4089,8 +4089,10 @@ function _terbitDialog(h,a,w,tanpaPin){
   bok.onclick=function(){ tutup(); _terbitLanjut(h,a,tanpaPin); };
   dlgBuka(bg,tutup); setTimeout(function(){ try{ (n?bx:bok).focus(); }catch(e){} },0);
   /* kesiapan hub diperiksa sungguhan (kunci + sesi), bukan sekadar ping: dialog tidak boleh menjanjikan simpan yang gagal */
+  window._terbitHubSt='siap';
   if(_hubOn) _hubSiap(function(st,err){
     var el=document.getElementById('tdlg_hub'); if(!el||!bg.classList.contains('on')) return;
+    window._terbitHubSt=st;   /* dipakai _issueLanjut: "Terbitkan tanpa hub" tidak mengirim (tak ada dialog Masuk susulan) */
     var teks={siap:'siap — handoff disimpan ke hub',login:'belum masuk — handoff hanya akan diunduh (JSON)',kunci:'tablet belum terdaftar — handoff hanya akan diunduh (JSON)',
               jaringan:'tidak terjangkau — handoff hanya akan diunduh (JSON)',lain:'bermasalah — handoff hanya akan diunduh (JSON)'}[st]||st;
     el.textContent=teks; el.className='v '+(st==='siap'?'ok':'warn');
@@ -4147,18 +4149,20 @@ function _issueLanjut(h,a){
   var ds=document.getElementById('d8_status');
   var stamp='Diterbitkan '+new Date().toLocaleString('id-ID')+(_hv('d8_by')?(' oleh '+_hv('d8_by')):'')+
             (_ck('d8_signoff')?' · sign-off dokter ADA':' · TANPA sign-off dokter');
-  if(ds) ds.value=stamp+(_hubOn?' · mengirim ke hub…':' · HUB MATI — hanya berkas/pop-up (unduh JSON!)');
+  var tanpaHub=_hubOn&&window._terbitHubSt&&window._terbitHubSt!=='siap';
+  var ketTanpa={login:'belum masuk',kunci:'tablet belum terdaftar',jaringan:'tidak terjangkau',lain:'bermasalah'}[window._terbitHubSt]||'';
+  if(ds) ds.value=stamp+(!_hubOn?' · HUB MATI — hanya berkas/pop-up (unduh JSON!)':(tanpaHub?(' · ✗ tidak dikirim ke hub ('+ketTanpa+') — unduh JSON'):' · mengirim ke hub…'));
   /* kartu selesai: akhir alur yang terlihat (RM, waktu, hasil hub, aksi berikutnya) — bukan hanya kolom status readonly */
   var dc=document.getElementById('terbit_done');
   if(dc){ dc.hidden=false;
     var dl=document.getElementById('terbit_done_l'); if(dl) dl.textContent=((h.pasien&&h.pasien.nama)?(h.pasien.nama+' · '):'')+'RM '+((h.pasien&&h.pasien.rm)||'—')+' · '+new Date().toLocaleString('id-ID')+
       (h.penerbitan.ttd?(' · ditandatangani '+h.penerbitan.ttd.nama):(_ck('d8_signoff')?' · sign-off tanpa verifikasi PIN':' · tanpa sign-off dokter'));
     var dn=document.getElementById('terbit_done_note'); if(dn) dn.textContent='';
-    _doneHub(_hubOn?'Mengirim ke hub…':'HUB MATI — unduh JSON dan lampirkan ke rekam medis.',_hubOn?'':'warn');
+    _doneHub(!_hubOn?'HUB MATI — unduh JSON dan lampirkan ke rekam medis.':(tanpaHub?('✗ Tidak dikirim ke hub ('+ketTanpa+') — unduh JSON, atau perbaiki lalu Terbitkan lagi.'):'Mengirim ke hub…'),(!_hubOn||tanpaHub)?'warn':'');
     try{ dc.scrollIntoView({behavior:'smooth',block:'center'}); }catch(e){} }
   /* Hasil hub HARUS terlihat: sebelumnya status selalu "Diterbitkan" walau hub menolak (kunci
      salah, jaringan), dan baru ketahuan di kunjungan kontrol berikutnya ("RM tidak ada di hub"). */
-  if(_hubOn) hubPost('handoff',h,function(ok,err){
+  if(_hubOn&&!tanpaHub) hubPost('handoff',h,function(ok,err){
     if(ds) ds.value=stamp+(ok?(' · ✓ tersimpan di hub (RM '+(h.pasien.rm||'?')+')'):(' · ✗ TIDAK tersimpan di hub'+(err?(' — '+_hubPesan(err)):'')));
     _doneHub(ok?('✓ Tersimpan di hub (RM '+(h.pasien.rm||'?')+')'):('✗ TIDAK tersimpan di hub'+(err?(' — '+_hubPesan(err)):'')+' Terbitkan lagi setelah diperbaiki, atau unduh JSON.'),ok?'ok':'warn');
     /* kegagalan hub ditulis ke kartu selesai (#terbit_done_hub) — tidak ada alert() di momen terbit */
