@@ -766,6 +766,7 @@ input::placeholder,textarea::placeholder{color:var(--ink-faint) !important;font-
   padding:0 !important;display:flex;align-items:center;gap:10px;}
 .sec::after{content:'';flex:1;height:1px;background:var(--line);}
 .sec .n{color:var(--accent-deep) !important;font-weight:620;}
+@media screen{ .sec .n{display:none !important;} }   /* kode D0–D8/K1 hanya di lembar cetak; di layar rujukan memakai nama langkah (rel) */
 .brand .name{font-size:29px;font-weight:620;letter-spacing:-.01em;}
 .brand .eyebrow{color:var(--gold);letter-spacing:.18em;font-weight:560;}
 .doc-meta .title{font-size:17px;font-weight:620;}
@@ -1551,7 +1552,7 @@ body.mode-kontrol #rb2 .rl::after{content:' — dilewati';font-size:11px;font-we
   <div class="modebar" role="group" aria-label="Jenis kunjungan">
     <span class="lb">Kunjungan</span>
     <button type="button" id="mb_awal" class="on" aria-pressed="true" onclick="setMode('awal')">Awal</button>
-    <button type="button" id="mb_kontrol" aria-pressed="false" onclick="setMode('kontrol')" title="Pemeriksaan umum di D1 &amp; penentuan program (D2) disembunyikan — sudah ditetapkan di kunjungan awal">Kontrol</button>
+    <button type="button" id="mb_kontrol" aria-pressed="false" onclick="setMode('kontrol')" title="Langkah Pemeriksaan &amp; diagnosis dipersingkat dan langkah Program dilewati — sudah ditetapkan di kunjungan awal">Kontrol</button>
     <span class="ket" id="mb_ket" hidden>Semua bagian tampil.</span>
   </div>
   <div class="tb-actions">
@@ -1763,9 +1764,9 @@ body.mode-kontrol #rb2 .rl::after{content:' — dilewati';font-size:11px;font-we
   <div class="row">
     <div class="f w2 s8"><label class="lab" for="k1_hasil">Hasil hari ini vs kunjungan lalu<span class="req">wajib</span></label><input class="in" id="k1_hasil" placeholder="mis. grade sedang → ringan; lesi aktif berkurang, PIH menetap"></div>
     <div class="f s4"><label class="lab" for="k1_arah">Arah <span class="opt">terisi otomatis dari IGA</span></label>
-      <input class="in" id="k1_arah" readonly placeholder="otomatis dari Derajat (IGA) di D1"></div>
+      <input class="in" id="k1_arah" readonly placeholder="otomatis dari Derajat (IGA) di langkah 2"></div>
   </div>
-  <div class="imp-box" id="k1_iga_strip">Perbaikan dihitung otomatis dari <b>IGA</b>. Nilai <b>Derajat</b> hari ini di D1 — baseline diambil dari kunjungan pertama.</div>
+  <div class="imp-box" id="k1_iga_strip">Perbaikan dihitung otomatis dari <b>IGA</b>. Nilai <b>Derajat</b> hari ini di langkah 2 — baseline diambil dari kunjungan pertama.</div>
   
   <div class="row" id="k1_gis_acne" style="display:none">
     <div class="f w2 s12"><label class="lab" for="gis_acne_bekas">Bekas (PIH/PIE) vs baseline <span class="opt">tidak tercakup IGA</span></label>
@@ -1820,7 +1821,7 @@ body.mode-kontrol #rb2 .rl::after{content:' — dilewati';font-size:11px;font-we
   <table class="tbl">
     <thead><tr><th style="width:8%">Program</th><th style="width:28%">Obat / produk</th><th style="width:16%">Jadwal</th><th style="width:28%">Cara pakai</th><th style="width:20%">Durasi</th></tr></thead>
     <tbody id="d4_rx">
-      <tr><td colspan="5" style="color:var(--ink-muted)">Belum ada resep — tulis di form program (D2).</td></tr>
+      <tr><td colspan="5" style="color:var(--ink-muted)">Belum ada resep — tulis di form program (langkah 3 · Program).</td></tr>
     </tbody>
   </table>
 
@@ -2161,7 +2162,7 @@ body.mode-kontrol #rb2 .rl::after{content:' — dilewati';font-size:11px;font-we
   <!-- B. PENILAIAN KLINIS -->
   <div class="sec-label">B · Penilaian Klinis <span class="hint">dokter — nilai kesiapan kulit untuk laser</span></div>
   <div class="qline"><span class="q">Tipe melasma:</span><label class="ck"><input type="checkbox"> Epidermal</label><label class="ck"><input type="checkbox"> Dermal</label><label class="ck"><input type="checkbox"> Mixed</label><label class="ck"><input type="checkbox"> PIH pasca-acne</label><label class="ck"><input type="checkbox"> Lentigo/flek surya</label>
-    <span class="sub">Fitzpatrick sudah dinilai di D1</span></div>
+    <span class="sub">Fitzpatrick sudah dinilai di langkah 2</span></div>
   <div class="qline"><span class="q">IGA Melasma:</span><span class="igamirror" id="igamir_melasma">belum dinilai</span></div>
   
   
@@ -2363,7 +2364,7 @@ body.mode-kontrol #rb2 .rl::after{content:' — dilewati';font-size:11px;font-we
       </div>
 
       <div class="g g2" style="margin-top:9px">
-        <div class="f"><label>Detail diagnosis rambut (diagnosis utama di D1)</label><input class="in" id="hr_b_dx" placeholder="mis. sub-tipe: FPHL Ludwig II + TE pasca melahirkan"></div>
+        <div class="f"><label>Detail diagnosis rambut (diagnosis utama di langkah 2)</label><input class="in" id="hr_b_dx" placeholder="mis. sub-tipe: FPHL Ludwig II + TE pasca melahirkan"></div>
         <div class="f"><label>Estimasi waktu — rentang</label><input class="in" id="hr_b_estimasi" placeholder="mis. rontok berkurang 6–8 mgg, rambut baru 3–4 bln"></div>
       </div>
       
@@ -2497,7 +2498,7 @@ function openProg(p){
     var al=_v('alergi_flag')||(_ck('alergi_none')?'Nihil (dikonfirmasi)':'BELUM DIKONFIRMASI');
     ctx.innerHTML='<b>'+(_v('p_nama')||'(nama belum diisi)')+'</b>'+
       ' · RM '+(_v('rm')||'—')+' · '+(_v('tgl')||'—')+' · Dokter: '+(_dokterKini()||'—')+
-      '<br>Diagnosis (D1): '+(_v('d2_dx')||'—')+
+      '<br>Diagnosis: '+(_v('d2_dx')||'—')+
       '<br><b>Alergi / kontraindikasi: '+al+'</b>'+
       (_pasienHamilMenyusui()?('<br><span class="ctx-hamil">⚠ PASIEN '+_pasienHamilMenyusui().toUpperCase()+' — hindari obat berisiko (retinoid/isotretinoin, hormonal, TXA, tetrasiklin); baris resep berisiko ditandai otomatis</span>'):'')+
       '';
@@ -2722,7 +2723,7 @@ function renderIGA(){
   if(box){
     box.innerHTML = lines.length
       ? lines.map(function(s){return '<div>'+s+'</div>';}).join('')
-      : 'Perbaikan dihitung otomatis dari <b>IGA</b>. Nilai <b>Derajat</b> hari ini di D1 — baseline diambil dari kunjungan pertama.';
+      : 'Perbaikan dihitung otomatis dari <b>IGA</b>. Nilai <b>Derajat</b> hari ini di langkah 2 — baseline diambil dari kunjungan pertama.';
   }
   var a=document.getElementById('k1_arah'); if(a) a.value=_arahDariIGA();
   if(typeof updateReq==='function') updateReq();
@@ -2827,7 +2828,7 @@ function buildSchedule(){
 }
 function generateSchedule(){
   var rows=buildSchedule(), tb=document.getElementById('schedBody');
-  if(!rows){ tb.innerHTML='<tr><td colspan="4" style="color:var(--ink)">Dokter belum mengisi ritme kontrol / tanggal mulai di D4.</td></tr>'; return; }
+  if(!rows){ tb.innerHTML='<tr><td colspan="4" style="color:var(--ink)">Dokter belum mengisi ritme kontrol / tanggal mulai di langkah 4 (Resep, ritme & rencana).</td></tr>'; return; }
   window._schedRows=rows;
   tb.innerHTML=rows.map(function(r){
     return '<tr><td>H+'+r.off+'</td><td>'+_fmtD(r.date)+'</td><td>'+r.jenis+'</td><td>'+r.msg+'</td></tr>';
@@ -2977,7 +2978,7 @@ function renderRxMirror(){
     var pr=_produkByName(r.obat), risk=hm&&(OBAT_RISIKO.test(r.obat)||(pr&&OBAT_RISIKO.test(pr.b||'')));
     return '<tr'+(risk?' class="rx-risk"':'')+'><td>'+_hesc(r.program)+'</td><td>'+(risk?'<span class="rk" title="obat berisiko pada kehamilan / menyusui">⚠ berisiko</span>':'')+_hesc(r.obat)+'</td><td>'+_hesc(r.jadwal)+
            '</td><td>'+_hesc(r.cara)+'</td><td>'+_hesc(r.durasi)+'</td></tr>';
-  }).join('') : '<tr><td colspan="5" style="color:var(--ink-muted)">Belum ada resep — tulis di form program (D2).</td></tr>';
+  }).join('') : '<tr><td colspan="5" style="color:var(--ink-muted)">Belum ada resep — tulis di form program (langkah 3 · Program).</td></tr>';
 }
 /* fungsi _hRx lama dihapus — D3 kini cermin read-only, sumber resep tunggal = collectRx(). */
 function _hProg(){
@@ -3655,7 +3656,7 @@ function setMode(m){
   var t1=document.getElementById('tb_muat1'), th=document.getElementById('tb_muatho');
   if(t1) t1.classList.toggle('tan', m!=='kontrol'); if(th) th.classList.toggle('tan', m==='kontrol');
   if(ket) ket.textContent = (m==='kontrol')
-    ? 'Bagian pemeriksaan di D1 & D2 (penentuan program) disembunyikan — sudah ditetapkan di kunjungan awal. Ubah ke "Kunjungan awal" bila perlu direvisi.'
+    ? 'Langkah Pemeriksaan & diagnosis dipersingkat dan langkah Program dilewati — sudah ditetapkan di kunjungan awal. Ubah ke "Awal" bila perlu direvisi.'
     : 'Semua bagian tampil.';
   renderK1ctx();
   if(typeof updateGisDim==='function') updateGisDim();
@@ -3952,18 +3953,18 @@ function issueHandoff(){
   /* Semua pemeriksaan dikumpulkan jadi SATU dialog. Peringatan bertubi-tubi
      membuat orang menekan OK tanpa membaca — justru menggagalkan tujuannya. */
   var w=[];
-  if(!_ck('d8_signoff')) w.push('Dokter belum menandai "Asesmen selesai" (D7) — handoff berisi diagnosis, resep & rencana.');
+  if(!_ck('d8_signoff')) w.push('Dokter belum menandai "Asesmen selesai" (langkah 5 · Sign-off dokter) — handoff berisi diagnosis, resep & rencana.');
   metricWarnings().forEach(function(m){ w.push('Metrik wajib: '+m); });
   if(_v('d5_iv') && _v('d5_start') && !(window._schedRows&&window._schedRows.length))
-    w.push('Jadwal belum di-generate (D4b) — handoff ini tidak akan memuat jadwal kontrol.');
+    w.push('Jadwal belum di-generate (langkah 6 · Penjadwalan) — handoff ini tidak akan memuat jadwal kontrol.');
   if(!a.diagnosis && !a.hasil) w.push('Diagnosis / hasil asesmen masih kosong.');
   if(!a.alergi && !a.alergi_nihil) w.push('Alergi / kontraindikasi belum dikonfirmasi.');
   /* gerbang keamanan (D7) */
   var ob=_obatBerisiko(), hm=_pasienHamilMenyusui();
-  if(ob.length && !_ck('d8_skrining')) w.push('Obat berisiko (kehamilan / kontraindikasi): '+ob.join(', ')+' — konfirmasi status hamil/menyusui & KB, lalu centang "Skrining obat berisiko" di D7.');
+  if(ob.length && !_ck('d8_skrining')) w.push('Obat berisiko (kehamilan / kontraindikasi): '+ob.join(', ')+' — konfirmasi status hamil/menyusui & KB, lalu centang "Skrining obat berisiko" di langkah 5 (Sign-off dokter).');
   if(ob.length && hm) w.unshift('PASIEN '+hm.toUpperCase()+' (Form 1) dan resep memuat obat berisiko: '+ob.join(', ')+' — periksa ulang sebelum terbit.');
   var adaTindakan=activeProgs().some(function(p){ return _psProgram(p).klinik.length>0; })||!!_hv('k1_tindakan');
-  if(adaTindakan && !_ck('d8_consent')) w.push('Ada tindakan direncanakan/dilakukan hari ini tetapi "Informed consent tindakan" belum dicentang (D7).');
+  if(adaTindakan && !_ck('d8_consent')) w.push('Ada tindakan direncanakan/dilakukan hari ini tetapi "Informed consent tindakan" belum dicentang (langkah 5 · Sign-off dokter).');
   /* identitas: No. RM = kunci hub; tanpa RM handoff tak bisa ditemukan di kontrol -> peringatan PERTAMA, lompat ke kolomnya */
   var _rm=((h.pasien||{}).rm||'').trim(), _nm=((h.pasien||{}).nama||'').trim();
   if(!_rm||!_nm) w.unshift('Identitas pasien belum lengkap: '+[!_nm?'nama':'',!_rm?'No. RM':''].filter(Boolean).join(' & ')+' kosong — tanpa No. RM handoff tidak bisa ditemukan di kunjungan kontrol.');
