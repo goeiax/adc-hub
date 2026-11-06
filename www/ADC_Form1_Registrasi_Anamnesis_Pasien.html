@@ -1197,6 +1197,13 @@ function hubSetup(){
   if(k!==null){ try{ localStorage.setItem('adc_hub_key',k); }catch(e){} }
   hubPing();
 }
+/* ===== PESAN HUB UNTUK KLINISI =====
+   Kelas kesalahan -> kalimat tindakan. Teks mentah server (mis. "kunci salah. Lihat config.json…") hanya untuk admin:
+   console + title chip HUB; klinisi membaca "belum terdaftar / belum masuk / tidak terjangkau". */
+function _hubKelas(err){ err=String(err||''); if(/kunci|x-adc-key/i.test(err)) return 'kunci'; if(/belum masuk|login|sesi/i.test(err)) return 'login'; if(/fetch|network|failed|tidak tersambung|gagal kirim/i.test(err)) return 'jaringan'; return err?'lain':''; }
+function _hubPesan(err){ var k=_hubKelas(err); if(k==='kunci') return 'Tablet ini belum terdaftar di hub — minta admin mengatur kunci (chip HUB › Atur alamat / kunci hub).'; if(k==='login') return 'Belum masuk ke hub.'; if(k==='jaringan') return 'Hub tidak terjangkau — periksa jaringan / PC hub.'; return String(err||''); }
+function _hubChipGagal(err){ var k=_hubKelas(err); hubChip('warn',k==='kunci'?'belum terdaftar':(k==='jaringan'?'tidak terjangkau':('gagal: '+(err||''))));
+  try{ if(err) console.warn('[hub] '+err); var hc=document.getElementById('hubchip'); if(hc&&err) hc.title=String(err); }catch(e){} }
 function hubPost(jenis,obj,cb){
   if(!_hubOn){ if(cb) cb(false,'hub tidak tersambung'); return; }
   try{
@@ -1208,7 +1215,7 @@ function hubPost(jenis,obj,cb){
         hubChip('warn','belum masuk');
         hubLogin(function(ok){ if(ok) hubPost(jenis,obj,cb); else if(cb) cb(false,'belum masuk sebagai pengguna hub'); });
         return; }
-      if(j.ok){ hubChip('on',jenis+' tersimpan'+(window._hubUser?(' · '+window._hubUser.id):'')); } else hubChip('warn','gagal: '+(j.error||''));
+      if(j.ok){ hubChip('on',jenis+' tersimpan'+(window._hubUser?(' · '+window._hubUser.id):'')); } else _hubChipGagal(j.error);
       if(cb) cb(!!j.ok,j.error||'',j); })
     .catch(function(e){ hubChip('off','gagal kirim'); if(cb) cb(false,String(e)); });
   }catch(e){ if(cb) cb(false,String(e)); }
@@ -1262,7 +1269,7 @@ function simpanIntake(){
   }
   hubPost('intake',d,function(ok,err){
     if(ok) alert('✓ Data pasien tersimpan di hub klinik (RM '+(d.pasien.rm||'?')+').\n\nDokter: buka Form 2 → Muat Form 1 → ketik No. RM.\nBerkas unduhan = cadangan.');
-    else alert('✗ GAGAL menyimpan ke hub'+(err?(' — '+err):'')+'.\n\nData hanya tersimpan sebagai berkas unduhan.\nCek chip HUB (kunci hub salah?) lalu klik Simpan Data Pasien lagi — atau berikan berkas Intake_… ke dokter.');
+    else alert('✗ GAGAL menyimpan ke hub'+(err?('.\n'+_hubPesan(err)):'.')+'\n\nData hanya tersimpan sebagai berkas unduhan. Klik Simpan Data Pasien lagi setelah diperbaiki — atau berikan berkas Intake_… ke dokter.');
   });
 }
 

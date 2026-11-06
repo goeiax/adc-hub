@@ -715,16 +715,16 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
     /* ===== 6. offline-first: kunci salah / hub mati ===== */
     const bad = await open('ADC_Form2_Asesmen_Umum_Dokter.html', { key: 'salah' });
     muatRM(bad, 'muatIntakeHub', RM); await sleep(500);
-    check('F2 kunci salah: tidak crash, dialog tetap terbuka & menyarankan pilih berkas', bad.d.getElementById('mdlg').classList.contains('on') && /tidak ada di hub.*Pilih berkas/.test(bad.d.getElementById('mdlg_msg').textContent), bad.d.getElementById('mdlg_msg').textContent);
+    check('F2 kunci salah: tidak crash, dialog tetap terbuka, pesan "belum terdaftar di hub" + tombol Atur hub (bukan "tidak ada di hub" / config.json)', bad.d.getElementById('mdlg').classList.contains('on') && /belum terdaftar di hub/.test(bad.d.getElementById('mdlg_msg').textContent) && !/tidak ada di hub|config\.json/.test(bad.d.getElementById('mdlg_msg').textContent) && !!bad.d.getElementById('mdlg_kunci'), bad.d.getElementById('mdlg_msg').textContent);
     set(bad.d, 'rm', RM); set(bad.d, 'd2_dx', 'x'); chk(bad.d, 'alergi_none'); await signoff(bad, { batal: true }); bad.dialogs.length = 0; await terbit(bad, { batal: true });
-    await until(() => bad.dialogs.some(x => x.type === 'alert' && /TIDAK tersimpan di hub/.test(x.msg)), 3000);
-    check('F2 kunci salah: Terbitkan memperingatkan keras + status ✗', bad.dialogs.some(x => x.type === 'alert' && /PERHATIAN: handoff TIDAK tersimpan di hub/.test(x.msg)) && /✗ TIDAK tersimpan di hub/.test($(bad.d, 'd8_status').value), $(bad.d, 'd8_status').value);
+    await until(() => /✗ TIDAK tersimpan di hub/.test($(bad.d, 'd8_status').value), 3000);
+    check('F2 kunci salah: Terbitkan TANPA alert — kartu selesai menyebut "belum terdaftar di hub" + status ✗', !bad.dialogs.some(x => x.type === 'alert' && /PERHATIAN/.test(x.msg)) && /belum terdaftar di hub/.test($(bad.d, 'terbit_done_hub').textContent) && !/config\.json/.test($(bad.d, 'terbit_done_hub').textContent) && /✗ TIDAK tersimpan di hub/.test($(bad.d, 'd8_status').value), $(bad.d, 'd8_status').value);
     const before = fs.readdirSync(path.join('data', RM)).length;
     const f1b = await open('ADC_Form1_Registrasi_Anamnesis_Pasien.html', { key: 'salah' });
     set(f1b.d, 'p_nama', 'Offline'); set(f1b.d, 'rm', 'RM-TEST-OFF'); chk(f1b.d, 'p_foto_ok'); f1b.w.simpanIntake(); await sleep(500);
     check('F1: foto diambil tanpa izin lisan -> peringatan', f1b.dialogs.some(x => x.type === 'confirm' && /persetujuan lisan/.test(x.msg)));
     await until(() => f1b.dialogs.some(x => x.type === 'alert' && /GAGAL/.test(x.msg)), 3000);
-    check('F1 kunci salah: pesan ✗ GAGAL menyimpan ke hub (bukan "tersimpan")', f1b.dialogs.some(x => x.type === 'alert' && /✗ GAGAL menyimpan ke hub/.test(x.msg)) && !f1b.dialogs.some(x => x.type === 'alert' && /✓/.test(x.msg)));
+    check('F1 kunci salah: pesan ✗ GAGAL menyimpan ke hub (bukan "tersimpan")', f1b.dialogs.some(x => x.type === 'alert' && /✗ GAGAL menyimpan ke hub/.test(x.msg) && /belum terdaftar di hub/.test(x.msg) && !/config\.json/.test(x.msg)) && !f1b.dialogs.some(x => x.type === 'alert' && /✓/.test(x.msg)));
     check('F1 kunci salah: berkas unduhan tetap dibuat; hub menolak (tak ada data baru)', f1b.dialogs.some(x => x.type === 'download') && !fs.existsSync(path.join('data', 'RM-TEST-OFF')) && fs.readdirSync(path.join('data', RM)).length === before);
     srv.kill(); await sleep(400);
     const off = await open('ADC_Form2_Asesmen_Umum_Dokter.html');

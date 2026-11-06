@@ -466,6 +466,13 @@ function hubSetup(){
   if(k!==null){ try{ localStorage.setItem('adc_hub_key',k); }catch(e){} }
   hubPing();
 }
+/* ===== PESAN HUB UNTUK KLINISI =====
+   Kelas kesalahan -> kalimat tindakan. Teks mentah server (mis. "kunci salah. Lihat config.json…") hanya untuk admin:
+   console + title chip HUB; klinisi membaca "belum terdaftar / belum masuk / tidak terjangkau". */
+function _hubKelas(err){ err=String(err||''); if(/kunci|x-adc-key/i.test(err)) return 'kunci'; if(/belum masuk|login|sesi/i.test(err)) return 'login'; if(/fetch|network|failed|tidak tersambung|gagal kirim/i.test(err)) return 'jaringan'; return err?'lain':''; }
+function _hubPesan(err){ var k=_hubKelas(err); if(k==='kunci') return 'Tablet ini belum terdaftar di hub — minta admin mengatur kunci (chip HUB › Atur alamat / kunci hub).'; if(k==='login') return 'Belum masuk ke hub.'; if(k==='jaringan') return 'Hub tidak terjangkau — periksa jaringan / PC hub.'; return String(err||''); }
+function _hubChipGagal(err){ var k=_hubKelas(err); hubChip('warn',k==='kunci'?'belum terdaftar':(k==='jaringan'?'tidak terjangkau':('gagal: '+(err||''))));
+  try{ if(err) console.warn('[hub] '+err); var hc=document.getElementById('hubchip'); if(hc&&err) hc.title=String(err); }catch(e){} }
 function hubPost(jenis,obj,cb){
   if(!_hubOn){ if(cb) cb(false,'hub tidak tersambung'); return; }
   try{
@@ -477,7 +484,7 @@ function hubPost(jenis,obj,cb){
         hubChip('warn','belum masuk');
         hubLogin(function(ok){ if(ok) hubPost(jenis,obj,cb); else if(cb) cb(false,'belum masuk sebagai pengguna hub'); });
         return; }
-      if(j.ok){ hubChip('on',jenis+' tersimpan'+(window._hubUser?(' · '+window._hubUser.id):'')); } else hubChip('warn','gagal: '+(j.error||''));
+      if(j.ok){ hubChip('on',jenis+' tersimpan'+(window._hubUser?(' · '+window._hubUser.id):'')); } else _hubChipGagal(j.error);
       if(cb) cb(!!j.ok,j.error||'',j); })
     .catch(function(e){ hubChip('off','gagal kirim'); if(cb) cb(false,String(e)); });
   }catch(e){ if(cb) cb(false,String(e)); }
@@ -529,6 +536,11 @@ function _dlgMuat(judul, berkasId, onRM){
     onRM(rm,function(gagal){
       if(tok!==_dlgSeq) return false;
       btnOk.disabled=false;
+      if(gagal==='__kunci__'){
+        /* kunci perangkat belum cocok: bukan "tidak ada di hub" — RM belum dicari sama sekali */
+        msg.innerHTML='Tablet ini belum terdaftar di hub — RM ini belum dicari. Minta admin mengatur kunci: <button type="button" id="mdlg_kunci" style="font:inherit;font-weight:600;color:#8E4A33;background:none;border:none;text-decoration:underline;cursor:pointer;min-height:44px;padding:0 6px">Atur alamat / kunci hub…</button>';
+        var bk=document.getElementById('mdlg_kunci'); if(bk) bk.onclick=function(){ hubSetup(); if(tok===_dlgSeq) ok(); };
+        return false; }
       if(gagal==='__login__'){
         /* sesi hub belum ada (login dibatalkan): sebut sebabnya — bukan "tidak ada di hub"; RM tetap, Masuk lalu dimuat otomatis */
         msg.innerHTML='Belum masuk ke hub — RM ini belum dicari. <button type="button" id="mdlg_login" style="font:inherit;font-weight:600;color:#8E4A33;background:none;border:none;text-decoration:underline;cursor:pointer;min-height:44px;padding:0 6px">Masuk</button> lalu RM dimuat otomatis.';
@@ -566,7 +578,7 @@ function muatHandoffHub(){
     hubGetPasien(rm,function(j,err){
       var ho=j&&(j.handoff_terakhir||j.handoff_terakhir_slimming);
       if(ho){ if(selesai()) renderHO(ho); }
-      else selesai(err==='belum masuk sebagai pengguna hub'?'__login__':('Handoff untuk RM '+rm+' tidak ada di hub'+(err?(' ('+err+')'):'')+'.'));
+      else selesai(err==='belum masuk sebagai pengguna hub'?'__login__':(_hubKelas(err)==='kunci'?'__kunci__':('Handoff untuk RM '+rm+' tidak ada di hub'+(err?(' ('+err+')'):'')+'.')));
     });
   });
 }
