@@ -619,6 +619,16 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
       check('Risiko bekas: Nodulokistik -> saran Tinggi; memilih sesuai saran menghapus status timpaan', lv() === 'Tinggi' && rb.w._rbOverride === false, $(rb.d, 'rb_saran').textContent);
       check('Risiko bekas: hanya satu kesimpulan (radio), tiga pilihan', rb.d.querySelectorAll('input[name=rb_level]').length === 3 && rb.d.querySelectorAll('input[name=rb_level]:checked').length === 1); }
 
+    { const lg2 = await open('ADC_Form2_Asesmen_Umum_Dokter.html', { user: null });
+      const onL = id => !!$(lg2.d, id) && $(lg2.d, id).classList.contains('on');
+      muatRM(lg2, 'muatIntakeHub', RM);
+      await until(() => onL('ldlg'), 1500); $(lg2.d, 'ldlg_x').click(); await sleep(200);
+      const m1 = $(lg2.d, 'mdlg_msg').textContent;
+      check('Muat tanpa sesi: login dibatalkan -> pesan "Belum masuk ke hub" + tombol Masuk di dialog, RM tetap, bukan "tidak ada di hub"', onL('mdlg') && /Belum masuk ke hub/.test(m1) && !/tidak ada di hub/.test(m1) && !!$(lg2.d, 'mdlg_login') && $(lg2.d, 'mdlg_rm').value === RM, m1);
+      $(lg2.d, 'mdlg_login').click(); await until(() => onL('ldlg'), 1500);
+      $(lg2.d, 'ldlg_id').value = 'dokter'; $(lg2.d, 'ldlg_pin').value = PIN.dokter; $(lg2.d, 'ldlg_ok').click();
+      await until(() => !!lg2.w._intake, 4000);
+      check('Muat tanpa sesi: Masuk dari dialog -> RM dimuat otomatis, dialog tertutup, chip HUB bernama pengguna', !!lg2.w._intake && lg2.w._intake.pasien.rm === RM && !onL('mdlg') && !/belum masuk/i.test($(lg2.d, 'hubchip').textContent), $(lg2.d, 'hubchip').textContent); }
     { const dg = await open('ADC_Form2_Asesmen_Umum_Dokter.html');
       const on = id => !!$(dg.d, id) && $(dg.d, id).classList.contains('on');
       dg.w.openICD(); const o1 = on('icdlg');
@@ -668,7 +678,7 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
       const hf = disk('handoff_terakhir.json', 'RM-FORGE');
       check('hub: stempel TTD yang diubah ditandai ttd_valid=false & tercatat di audit', hf && hf._audit.ttd_valid === false && (await (await fetch(BASE + '/api/audit?rm=RM-FORGE', { headers: Hd('admin') })).json()).audit.some(x => /TTD-TIDAK-VALID/.test(x.detail || '')), hf && hf._audit); }
     { const lg = await open('ADC_Form2_Asesmen_Umum_Dokter.html', { user: null });
-      check('F2 tanpa sesi: chip kuning "klik untuk masuk"', $(lg.d, 'hubchip').classList.contains('warn') && /klik untuk masuk/i.test($(lg.d, 'hubchip').textContent), $(lg.d, 'hubchip').textContent);
+      check('F2 tanpa sesi: chip kuning "belum masuk" (12 px)', $(lg.d, 'hubchip').classList.contains('warn') && /belum masuk/i.test($(lg.d, 'hubchip').textContent), $(lg.d, 'hubchip').textContent);
       muatRM(lg, 'muatIntakeHub', RM);
       const dl = await until(() => $(lg.d, 'ldlg') && $(lg.d, 'ldlg').classList.contains('on'), 2000);
       check('F2 tanpa sesi: Muat Form 1 memunculkan dialog Masuk', dl === true);

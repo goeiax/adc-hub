@@ -102,7 +102,7 @@ input::-webkit-input-placeholder, textarea::-webkit-input-placeholder{color:#7E8
 .hubchip.off{border-color:rgba(245,239,230,.25);color:rgba(245,239,230,.45);}
 .hubchip.sync{border-color:#C9A86A;color:#C9A86A;}
 .hubchip.warn{border-color:#E0A860;color:#F3CF9A;}
-.hubchip{font-size:11.5px;min-height:44px;}
+.hubchip{font-size:12px;min-height:44px;}
 .hubchip span{font-size:11px;}
 .hubchip{flex-direction:column;align-items:center;justify-content:center;text-align:center;line-height:1.2;max-width:190px;padding:5px 14px;white-space:normal;}
 .hubchip b{font-weight:700;letter-spacing:.16em;}
@@ -389,7 +389,7 @@ function _hubSimpanSesi(tok,user){
   window._hubUser=tok?(user||null):null; }
 function _hubChipUser(){ if(!_hubOn){ hubChip('off','mati'); return; } if(!window._hubLoginReq){ hubChip('on','tersambung'); return; }
   var u=window._hubUser, nm=u?String(u.nama||u.id):''; if(nm.length>18) nm=nm.slice(0,17)+'…';
-  hubChip(u?'on':'warn', u?nm:'klik untuk masuk'); var c=document.getElementById('hubchip'); if(c) c.title=u?('Masuk sebagai '+(u.nama||u.id)+' ('+(u.peran||'')+') — klik untuk keluar / ganti pengguna'):'Klik untuk masuk dengan ID & PIN'; }
+  hubChip(u?'on':'warn', u?nm:'belum masuk'); var c=document.getElementById('hubchip'); if(c) c.title=u?('Masuk sebagai '+(u.nama||u.id)+' ('+(u.peran||'')+') — klik untuk keluar / ganti pengguna'):'Klik untuk masuk dengan ID & PIN'; }
 /* setelah ping: hub v2 meminta pengguna -> cek token tersimpan lewat /api/saya */
 function _hubCekSesi(j){
   window._hubLoginReq=!!(j&&j.login);
@@ -510,7 +510,7 @@ function hubPost(jenis,obj,cb){
     .then(function(r){ return r.json().then(function(j){ j=j||{}; j._status=r.status; return j; }); })
     .then(function(j){
       if(j._status===401&&j.error==='login'){ /* belum masuk / sesi habis -> minta masuk, lalu kirim ulang */
-        hubChip('warn','klik untuk masuk');
+        hubChip('warn','belum masuk');
         hubLogin(function(ok){ if(ok) hubPost(jenis,obj,cb); else if(cb) cb(false,'belum masuk sebagai pengguna hub'); });
         return; }
       if(j.ok){ hubChip('on',jenis+' tersimpan'+(window._hubUser?(' · '+window._hubUser.id):'')); } else hubChip('warn','gagal: '+(j.error||''));
@@ -568,6 +568,11 @@ function _dlgMuat(judul, berkasId, onRM){
     onRM(rm,function(gagal){
       if(tok!==_dlgSeq) return false;
       btnOk.disabled=false;
+      if(gagal==='__login__'){
+        /* sesi hub belum ada (login dibatalkan): sebut sebabnya — bukan "tidak ada di hub"; RM tetap, Masuk lalu dimuat otomatis */
+        msg.innerHTML='Belum masuk ke hub — RM ini belum dicari. <button type="button" id="mdlg_login" style="font:inherit;font-weight:600;color:#8E4A33;background:none;border:none;text-decoration:underline;cursor:pointer;min-height:44px;padding:0 6px">Masuk</button> lalu RM dimuat otomatis.';
+        var bl=document.getElementById('mdlg_login'); if(bl) bl.onclick=function(){ hubLogin(function(sukses){ if(sukses&&tok===_dlgSeq) ok(); }); };
+        return false; }
       if(gagal){ msg.textContent=gagal+' Coba RM lain, atau klik "Pilih berkas…".'; return false; }
       tutup(); return true;
     });
@@ -806,7 +811,7 @@ function muatIntakeHub(){
   _dlgMuat('Muat Form 1 (data pasien baru)','_intakefile',function(rm,selesai){
     hubGetPasien(rm,function(j,err){
       if(j&&j.intake){ if(selesai()) applyIntake(j.intake); }
-      else selesai('Form 1 untuk RM '+rm+' tidak ada di hub'+(err?(' ('+err+')'):'')+'.');
+      else selesai(err==='belum masuk sebagai pengguna hub'?'__login__':('Form 1 untuk RM '+rm+' tidak ada di hub'+(err?(' ('+err+')'):'')+'.'));
     });
   });
 }
@@ -815,7 +820,7 @@ function muatHandoffHub(){
   _dlgMuat('Muat Handoff (kunjungan kontrol)','_hofile',function(rm,selesai){
     hubGetPasien(rm,function(j,err){
       if(j&&j.handoff_terakhir_slimming){ if(selesai()) applyHandoff(j.handoff_terakhir_slimming); }
-      else selesai('Handoff Slimming untuk RM '+rm+' tidak ada di hub'+(err?(' ('+err+')'):'')+'.');
+      else selesai(err==='belum masuk sebagai pengguna hub'?'__login__':('Handoff Slimming untuk RM '+rm+' tidak ada di hub'+(err?(' ('+err+')'):'')+'.'));
     });
   });
 }

@@ -532,7 +532,7 @@ body.past0 #staff_mini{display:flex !important;}
 .hubchip.off{border-color:rgba(245,239,230,.25);color:rgba(245,239,230,.45);}
 .hubchip.sync{border-color:#C9A86A;color:#C9A86A;}
 .hubchip.warn{border-color:#E0A860;color:#F3CF9A;}
-.hubchip{font-size:11.5px;min-height:44px;}
+.hubchip{font-size:12px;min-height:44px;}
 .hubchip span{font-size:11px;}
 .hubchip{flex-direction:column;align-items:center;justify-content:center;text-align:center;line-height:1.2;max-width:190px;padding:5px 14px;white-space:normal;}
 .hubchip b{font-weight:700;letter-spacing:.16em;}
@@ -1086,7 +1086,7 @@ function _hubSimpanSesi(tok,user){
   window._hubUser=tok?(user||null):null; }
 function _hubChipUser(){ if(!_hubOn){ hubChip('off','mati'); return; } if(!window._hubLoginReq){ hubChip('on','tersambung'); return; }
   var u=window._hubUser, nm=u?String(u.nama||u.id):''; if(nm.length>18) nm=nm.slice(0,17)+'…';
-  hubChip(u?'on':'warn', u?nm:'klik untuk masuk'); var c=document.getElementById('hubchip'); if(c) c.title=u?('Masuk sebagai '+(u.nama||u.id)+' ('+(u.peran||'')+') — klik untuk keluar / ganti pengguna'):'Klik untuk masuk dengan ID & PIN'; }
+  hubChip(u?'on':'warn', u?nm:'belum masuk'); var c=document.getElementById('hubchip'); if(c) c.title=u?('Masuk sebagai '+(u.nama||u.id)+' ('+(u.peran||'')+') — klik untuk keluar / ganti pengguna'):'Klik untuk masuk dengan ID & PIN'; }
 /* setelah ping: hub v2 meminta pengguna -> cek token tersimpan lewat /api/saya */
 function _hubCekSesi(j){
   window._hubLoginReq=!!(j&&j.login);
@@ -1205,7 +1205,7 @@ function hubPost(jenis,obj,cb){
     .then(function(r){ return r.json().then(function(j){ j=j||{}; j._status=r.status; return j; }); })
     .then(function(j){
       if(j._status===401&&j.error==='login'){ /* belum masuk / sesi habis -> minta masuk, lalu kirim ulang */
-        hubChip('warn','klik untuk masuk');
+        hubChip('warn','belum masuk');
         hubLogin(function(ok){ if(ok) hubPost(jenis,obj,cb); else if(cb) cb(false,'belum masuk sebagai pengguna hub'); });
         return; }
       if(j.ok){ hubChip('on',jenis+' tersimpan'+(window._hubUser?(' · '+window._hubUser.id):'')); } else hubChip('warn','gagal: '+(j.error||''));
