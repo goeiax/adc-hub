@@ -318,7 +318,7 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
     check('F2: identitas & alergi terisi dari handoff', $(b.d, 'p_nama').value === 'Pasien Uji Coba' && $(b.d, 'rm').value === RM && $(b.d, 'alergi_flag').value === 'Penisilin');
     check('F2: program Acne dikenali dari handoff', b.w.progsKunjungan().includes('acne'));
     const baru = b.w.reqStatus().filter(x => !x.ok).map(x => x.label);
-    check('F2 kontrol: bar wajib menagih IGA/hasil/dokter/dll (belum diisi)', ['Dokter pemeriksa', 'Hasil vs kunjungan lalu', 'IGA Acne', 'Remarks berikutnya', 'Ritme kontrol', 'Sign-off dokter'].every(l => baru.includes(l)), baru);
+    check('F2 kontrol: bar wajib menagih IGA/hasil/dll (belum diisi; dokter pemeriksa terisi dari akun hub)', ['Hasil vs kunjungan lalu', 'IGA Acne', 'Remarks berikutnya', 'Ritme kontrol', 'Sign-off dokter'].every(l => baru.includes(l)), baru);
     b.w.updateReq();
     check('F2 kontrol: gerbang obat melihat resep yang DIBAWA dari handoff (modal tak dibuka)', b.w._obatBerisiko().includes('Tretinoin 0,025%') && $(b.d, 'lbl_skrining').style.display !== 'none', b.w._obatBerisiko());
     set(b.d, 'k1_dokter', 'dr. Pengganti, Sp.DVE'); set(b.d, 'k1_hasil', 'Lesi aktif berkurang');
@@ -634,6 +634,17 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
       check('Risiko bekas: Nodulokistik -> saran Tinggi; memilih sesuai saran menghapus status timpaan', lv() === 'Tinggi' && rb.w._rbOverride === false, $(rb.d, 'rb_saran').textContent);
       check('Risiko bekas: hanya satu kesimpulan (radio), tiga pilihan', rb.d.querySelectorAll('input[name=rb_level]').length === 3 && rb.d.querySelectorAll('input[name=rb_level]:checked').length === 1); }
 
+    { const pf = await open('ADC_Form2_Asesmen_Umum_Dokter.html'); await sleep(300);
+      const nmHub = pf.w._hubUser && (pf.w._hubUser.nama || pf.w._hubUser.id);
+      check('Nama dokter: d1_dokter terisi dari akun hub berperan dokter; d8_dokter terisi saat masuk langkah sign-off', !!nmHub && $(pf.d, 'd1_dokter').value === nmHub && (() => { pf.w.goStep(4); return $(pf.d, 'd8_dokter').value === nmHub; })(), { nmHub, d1: $(pf.d, 'd1_dokter').value, d8: $(pf.d, 'd8_dokter').value });
+      set(pf.d, 'd1_dokter', 'dr. Lain'); $(pf.d, 'd8_dokter').value = ''; pf.w.goStep(3); pf.w.goStep(4);
+      check('Nama dokter: dokter pemeriksa yang diketik menang atas akun hub untuk penandatangan', $(pf.d, 'd8_dokter').value === 'dr. Lain'); }
+    { const ri = await open('ADC_Form2_Asesmen_Umum_Dokter.html', { user: null });
+      ri.w.localStorage.removeItem('adc_hub_id'); ri.w._ldlg('login', {}, function () {}); const kosong = $(ri.d, 'ldlg_id').value; $(ri.d, 'ldlg_x').click();
+      ri.w.localStorage.setItem('adc_hub_id', 'dokter'); ri.w._ldlg('login', {}, function () {}); await sleep(30);
+      check('ID diingat: tanpa riwayat kolom ID kosong; dengan adc_hub_id dialog memprefill ID dan memfokuskan PIN', kosong === '' && $(ri.d, 'ldlg_id').value === 'dokter' && ri.d.activeElement && ri.d.activeElement.id === 'ldlg_pin', { kosong, id: $(ri.d, 'ldlg_id').value, af: ri.d.activeElement && ri.d.activeElement.id });
+      $(ri.d, 'ldlg_pin').value = PIN.dokter; $(ri.d, 'ldlg_ok').click(); await until(() => !!ri.w._hubUser, 3000);
+      check('ID diingat: login sukses menyimpan adc_hub_id', !!ri.w._hubUser && ri.w.localStorage.getItem('adc_hub_id') === 'dokter'); }
     { const ar = await open('ADC_Form2_Asesmen_Umum_Dokter.html');
       const named = e => e.hasAttribute('aria-label') || e.hasAttribute('aria-labelledby') || (e.id && !!ar.d.querySelector('label[for="' + e.id + '"]')) || !!e.closest('label');
       const fields = [...ar.d.querySelectorAll('input:not([type=hidden]):not([type=checkbox]):not([type=radio]):not([type=file]),select,textarea')];
