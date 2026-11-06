@@ -533,6 +533,7 @@ body.past0 #staff_mini{display:flex !important;}
 .hubchip.sync{border-color:#C9A86A;color:#C9A86A;}
 .hubchip.warn{border-color:#E0A860;color:#F3CF9A;}
 .hubchip{font-size:12px;min-height:44px;}
+button.hubchip{font-family:inherit;background:transparent;}
 .hubchip span{font-size:11px;}
 .hubchip{flex-direction:column;align-items:center;justify-content:center;text-align:center;line-height:1.2;max-width:190px;padding:5px 14px;white-space:normal;}
 .hubchip b{font-weight:700;letter-spacing:.16em;}
@@ -548,7 +549,7 @@ body.past0 #staff_mini{display:flex !important;}
     <div class="tb-hint">Diisi pasien · boleh dibantu perawat · sebelum masuk ruang konsultasi</div>
   </div>
   <div class="tb-actions">
-    <span class="hubchip off" id="hubchip" onclick="hubMenu()" title="Klik: masuk / ganti pengguna &amp; atur hub">HUB &middot; …</span><button class="btn" onclick="resetForm()">Reset</button>
+    <button type="button" class="hubchip off" id="hubchip" onclick="hubMenu()" title="Klik: masuk / ganti pengguna &amp; atur hub">HUB &middot; …</button><button class="btn" onclick="resetForm()">Reset</button>
     <button class="btn" onclick="cetakSemua()">Cetak / Simpan PDF</button>
     <button class="btn tan" onclick="simpanIntake()">Simpan Data Pasien</button>
   </div>

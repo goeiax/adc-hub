@@ -1459,6 +1459,7 @@ textarea.in{height:auto;min-height:138px;resize:vertical;line-height:1.55;paddin
 .hubchip.sync{border-color:#C9A86A;color:#C9A86A;}
 .hubchip.warn{border-color:#E0A860;color:#F3CF9A;}
 .hubchip{font-size:12px;min-height:44px;}
+button.hubchip{font-family:inherit;background:transparent;}
 .hubchip span{font-size:11px;}
 /* ===== PONSEL (<= 640 px): bukan ukuran kirim (tablet 1024), tetapi form dibuka sebagai berkas saat hub mati.
    Toolbar & bilah kontrol melipat dan tidak lagi lengket (layar kecil habis oleh kepala), judul tidak pecah per kata,
@@ -1557,7 +1558,7 @@ body.mode-kontrol #rb2 .rl::after{content:' — dilewati';font-size:11px;font-we
     <span class="ket" id="mb_ket" hidden>Semua bagian tampil.</span>
   </div>
   <div class="tb-actions">
-    <span class="hubchip off" id="hubchip" onclick="hubMenu()" title="Klik: masuk / ganti pengguna &amp; atur hub">HUB &middot; …</span><button class="btn tan" id="tb_muat1" onclick="muatIntakeHub()">Muat Form 1</button>
+    <button type="button" class="hubchip off" id="hubchip" onclick="hubMenu()" title="Klik: masuk / ganti pengguna &amp; atur hub">HUB &middot; …</button><button class="btn tan" id="tb_muat1" onclick="muatIntakeHub()">Muat Form 1</button>
     <button class="btn" id="tb_muatho" onclick="muatHandoffHub()">Muat Handoff</button>
     <div class="tb-more"><button type="button" class="btn" id="tb_more" aria-haspopup="menu" aria-expanded="false" aria-controls="tbmenu" onclick="tbMenu()">Lainnya &#9662;</button>
       <div class="tbmenu" id="tbmenu" role="menu" aria-label="Aksi lain">
@@ -2921,6 +2922,7 @@ function resetForm(){
 window.addEventListener('load',function(){
   if(typeof updateIgaCards==='function') setTimeout(updateIgaCards,0);
   if(typeof initRxPick==='function') initRxPick();
+  if(typeof initAriaNama==='function') initAriaNama();
   if(typeof initYaTidak==='function') initYaTidak();
   if(typeof initRxSaran==='function') initRxSaran();
   if(typeof initRxAdd==='function') initRxAdd();
@@ -3729,6 +3731,45 @@ function _produkByName(n){ n=(n||'').trim().toLowerCase(); if(!n||typeof ADC_PRO
 /* ===== SARAN PROTOKOL DI TABEL RESEP (acne & melasma) =====
    Placeholder asli (Oku/ADC) -> data-ph + baris tr.rx-saran "Saran protokol … [Pakai]"; input hanya petunjuk kategori.
    Pakai mengisi keempat kolom sebagai NILAI (ikut handoff). Baris saran hilang begitu kolom obat terisi. */
+/* ===== NAMA AKSESIBEL UNTUK SEMUA ISIAN (pembaca layar) =====
+   Markup & id tidak diubah. Urutan: label di .f (span.lab -> id + aria-labelledby; <label> tanpa for -> for), sel tabel
+   ("judul kolom — label baris / baris n"), isian .ln (pertanyaan .q/.sub terdekat sebelum isian), lalu data-ph/placeholder.
+   Dipanggil saat load dan saat fokus (baris resep yang ditambah). */
+function _ariaTeks(el){ return (el?el.textContent:'').replace(/\s+/g,' ').replace(/\bwajib\b/,'').replace(/\s+/g,' ').trim(); }
+function _ariaAda(e){ return e.hasAttribute('aria-label')||e.hasAttribute('aria-labelledby')||!!(e.id&&document.querySelector('label[for="'+e.id+'"]'))||!!e.closest('label'); }
+var _ariaSeq=0;
+function _namaiSatu(e){
+  if(_ariaAda(e)) return;
+  var f=e.closest('.f'), lab=null;
+  if(f){ for(var i=0;i<f.children.length;i++){ var c=f.children[i]; if(c.tagName==='LABEL'&&!c.getAttribute('for')){ lab=c; break; } if(c.classList&&c.classList.contains('lab')){ lab=c; break; } } }
+  if(lab){
+    if(lab.tagName==='LABEL'&&e.id&&f.querySelectorAll('input:not([type=hidden]),select,textarea').length===1){ lab.setAttribute('for',e.id); return; }
+    if(!lab.id) lab.id='lab_'+(++_ariaSeq); e.setAttribute('aria-labelledby',lab.id); return;
+  }
+  var td=e.closest('td'), tr=td&&td.parentElement, tb=tr&&tr.closest('table');
+  if(td&&tb){
+    var ths=tb.querySelectorAll('thead th'), th=ths[td.cellIndex], c0=tr.children[0], baris='';
+    if(c0&&c0!==td){ var i0=c0.querySelector('input'); baris=i0?(i0.value||''):_ariaTeks(c0); }
+    if(!baris){ var rows=[].filter.call(tr.parentElement.children,function(r){ return !r.classList.contains('rx-saran'); }); baris='baris '+(rows.indexOf(tr)+1); }
+    e.setAttribute('aria-label',(_ariaTeks(th)||('kolom '+(td.cellIndex+1)))+' — '+baris); return;
+  }
+  var q='', p=e.previousElementSibling;
+  while(p){ if(p.classList&&(p.classList.contains('q')||p.classList.contains('sub')||p.classList.contains('lab'))&&_ariaTeks(p)){ q=_ariaTeks(p); break; } p=p.previousElementSibling; }
+  if(!q){ var ql=e.closest('.qline'); if(ql&&ql.querySelector('.q')) q=_ariaTeks(ql.querySelector('.q')); }
+  var ph=e.getAttribute('data-ph')||e.getAttribute('placeholder')||'';
+  var nama=[q.replace(/[:→]\s*$/,'').trim(),ph].filter(Boolean).join(' — ');
+  if(nama) e.setAttribute('aria-label',nama);
+}
+function initAriaNama(){
+  document.querySelectorAll('input:not([type=hidden]):not([type=checkbox]):not([type=radio]):not([type=file]),select,textarea').forEach(_namaiSatu);
+  document.querySelectorAll('.step .sec').forEach(function(h){ h.setAttribute('role','heading'); h.setAttribute('aria-level','2'); });
+  document.querySelectorAll('.ovl .sec-label').forEach(function(h){ h.setAttribute('role','heading'); h.setAttribute('aria-level','3'); });
+  var pg=document.querySelector('.page'); if(pg&&!pg.getAttribute('role')) pg.setAttribute('role','main');
+  document.addEventListener('focusin',function(ev){ var t=ev.target; if(t&&/^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName)&&t.type!=='checkbox'&&t.type!=='radio') _namaiSatu(t); },true);
+  _igaPressed();
+}
+/* tombol IGA = toggle: aria-pressed mengikuti .on */
+function _igaPressed(){ document.querySelectorAll('.igaseg button').forEach(function(b){ b.setAttribute('aria-pressed',b.classList.contains('on')?'true':'false'); }); }
 /* ===== YA / TIDAK = RADIO BERCHIP (satu jawaban, urutan tetap Ya -> Tidak) ===== */
 function initYaTidak(){
   document.addEventListener('change',function(e){ var r=e.target; if(!r||r.type!=='radio') return; var s=r.closest('.rbseg.yn'); if(!s) return;
@@ -3803,7 +3844,7 @@ function openRxPick(inp){
   var bg=document.getElementById('rxpick');
   if(!bg){
     bg=document.createElement('div'); bg.id='rxpick'; bg.className='mdlg-bg';
-    bg.innerHTML='<div class="mdlg rxp" role="dialog" aria-modal="true"><div class="mdlg-t">Pilih produk ADC</div>'+
+    bg.innerHTML='<div class="mdlg rxp" role="dialog" aria-modal="true" aria-labelledby="dlgt_1"><div class="mdlg-t" id="dlgt_1">Pilih produk ADC</div>'+
       '<input class="mdlg-in" id="rxp_q" placeholder="cari nama / kandungan (mis. tretinoin, BPO, sunscreen)" autocomplete="off">'+
       '<div class="rxp-tabs" id="rxp_tabs"></div><div class="rxp-list" id="rxp_list"></div>'+
       '<div class="mdlg-b"><span class="mdlg-sp"></span><button type="button" class="mdlg-x" id="rxp_x">Tutup</button></div></div>';
@@ -4415,7 +4456,7 @@ function openICD(){
   var bg=document.getElementById('icdlg');
   if(!bg){
     bg=document.createElement('div'); bg.id='icdlg'; bg.className='mdlg-bg';
-    bg.innerHTML='<div class="mdlg rxp" role="dialog" aria-modal="true"><div class="mdlg-t">Kode ICD-10</div><div class="mdlg-msg" style="margin:0 0 8px;color:var(--ink-muted)">Boleh lebih dari satu kode; kode pertama mengisi Diagnosis bila kosong.</div>'+
+    bg.innerHTML='<div class="mdlg rxp" role="dialog" aria-modal="true" aria-labelledby="dlgt_2"><div class="mdlg-t" id="dlgt_2">Kode ICD-10</div><div class="mdlg-msg" style="margin:0 0 8px;color:var(--ink-muted)">Boleh lebih dari satu kode; kode pertama mengisi Diagnosis bila kosong.</div>'+
       '<input class="mdlg-in icdq" id="icd_q" autocomplete="off" placeholder="ketik kode (L70) atau nama (melasma, alopesia…)" oninput="_icdRender(this.value)">'+
       '<div class="rxp-list" id="icd_list"></div>'+
       '<div class="mdlg-b" style="margin-top:10px"><span class="mdlg-sp"></span><button type="button" class="mdlg-x" onclick="closeICD()">Tutup</button></div></div>';
@@ -4472,7 +4513,7 @@ function bukaConsent(){
   if(!bg){
     bg=document.createElement('div'); bg.id='cdlg'; bg.className='mdlg-bg';
     var f=function(id,lbl,em,w,ta){ return '<div class="cdf'+(w?' w':'')+'"><span class="cdl">'+lbl+(em?('<em>'+em+'</em>'):'')+'</span>'+(ta?('<textarea id="'+id+'"></textarea>'):('<input id="'+id+'">'))+'</div>'; };
-    bg.innerHTML='<div class="mdlg rxp cdlg" role="dialog" aria-modal="true"><div class="mdlg-t">Lembar Informed Consent tindakan</div>'+
+    bg.innerHTML='<div class="mdlg rxp cdlg" role="dialog" aria-modal="true" aria-labelledby="dlgt_3"><div class="mdlg-t" id="dlgt_3">Lembar Informed Consent tindakan</div>'+
       '<div class="cdnote">Teks terisi otomatis dari asesmen — <b>periksa & sunting</b> sebelum cetak. Lembar dicetak lalu ditandatangani <b>basah</b> oleh pasien/wali, saksi (perawat), dan dokter, kemudian disimpan di berkas RM. Nomor lembar tercatat di handoff.</div>'+
       '<div class="cdbody"><div class="cdg">'+
       f('cd_tind','Tindakan yang direncanakan','satu per baris',true,true)+
@@ -4748,6 +4789,7 @@ function setIGAUmum(id,v){
   el.value=(el.value===v)?'':v;
   if(typeof updateIgaCards==='function') updateIgaCards();
   if(typeof updateReq==='function') updateReq();
+  if(typeof _igaPressed==='function') setTimeout(_igaPressed,0);
 }
 function _derajatTeks(){
   var t=[];
@@ -4763,6 +4805,7 @@ function setIGA(id,v){
   el.value=(el.value===v)?'':v;          /* ketuk lagi = batalkan */
   if(typeof renderIGA==='function') renderIGA();
   if(typeof updateReq==='function') updateReq();
+  if(typeof _igaPressed==='function') setTimeout(_igaPressed,0);
 }
 function syncIGAseg(){
   [['ac_iga','acne'],['me_iga','melasma']].forEach(function(pair){
@@ -4770,7 +4813,7 @@ function syncIGAseg(){
     var v=(el.value||'').trim();
     var seg=el.previousElementSibling;
     if(seg&&seg.classList&&seg.classList.contains('igaseg'))
-      seg.querySelectorAll('button').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-v')===v); });
+      seg.querySelectorAll('button').forEach(function(b){ var on=b.getAttribute('data-v')===v; b.classList.toggle('on',on); b.setAttribute('aria-pressed',on?'true':'false'); });
     var mir=document.getElementById('igamir_'+pair[1]);
     if(mir) mir.textContent = v===''?'belum dinilai':(v+' · '+(IGA_LBL[v]||''));
     var st=document.getElementById('igastat_'+pair[1]);

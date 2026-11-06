@@ -103,6 +103,7 @@ input::-webkit-input-placeholder, textarea::-webkit-input-placeholder{color:#7E8
 .hubchip.sync{border-color:#C9A86A;color:#C9A86A;}
 .hubchip.warn{border-color:#E0A860;color:#F3CF9A;}
 .hubchip{font-size:12px;min-height:44px;}
+button.hubchip{font-family:inherit;background:transparent;}
 .hubchip span{font-size:11px;}
 .hubchip{flex-direction:column;align-items:center;justify-content:center;text-align:center;line-height:1.2;max-width:190px;padding:5px 14px;white-space:normal;}
 .hubchip b{font-weight:700;letter-spacing:.16em;}
@@ -131,7 +132,7 @@ input::-webkit-input-placeholder, textarea::-webkit-input-placeholder{color:#7E8
 <div class="bar">
   <span class="t">ADC · Asesmen Slimming (Sp.GK) · Program terpisah dari Skin Quality</span>
   <span>
-    <span class="hubchip off" id="hubchip" onclick="hubMenu()" title="Klik: masuk / ganti pengguna &amp; atur hub" style="margin-right:6px">HUB &middot; …</span>
+    <button type="button" class="hubchip off" id="hubchip" onclick="hubMenu()" title="Klik: masuk / ganti pengguna &amp; atur hub" style="margin-right:6px">HUB &middot; …</button>
     <button type="button" onclick="muatIntakeHub()">Muat Form 1</button>
     <button type="button" onclick="muatHandoffHub()">Muat Handoff</button>
     <button type="button" onclick="issueHandoff()">Terbitkan Handoff</button>
