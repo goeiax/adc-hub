@@ -279,6 +279,9 @@ label.opt.lbl-hamil{border:1.5px solid var(--accent-deep,#8E4A33);background:#FB
 #ovl_acne .sev-tag{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);}
 #ovl_acne .sev-name{font-size:15px;font-weight:700;margin:2px 0;}
 #ovl_acne .sev-desc{font-size:11px;color:var(--muted);line-height:1.3;}
+/* kartu tahap = tombol (keyboard & pembaca layar); tampilan kartu dipertahankan */
+.ovl button.sev-card{font:inherit;text-align:left;color:inherit;background:#fff;display:block;min-height:44px;}
+.ovl .sev-tag,.ovl .sev-name,.ovl .sev-desc{display:block;}
 #ovl_acne .stage-block{border:1.5px solid var(--border);border-radius:6px;margin-bottom:9px;overflow:hidden;display:none;}
 #ovl_acne .stage-block.show{display:block;}
 #ovl_acne .stage-head{background:var(--blue);color:#fff;padding:5px 11px;font-size:12.5px;font-weight:700;}
@@ -1956,9 +1959,9 @@ body.mode-kontrol #rb2 .rl::after{content:' — dilewati';font-size:11px;font-we
 </div>
 
 <div class="ovl" id="ovl_acne" data-prog="acne">
-  <div class="pmodal">
+  <div class="pmodal" role="dialog" aria-modal="true" aria-labelledby="pmt_acne">
     <div class="pmhead">
-      <div><div class="t">Asesmen Acne — 4 Faktor</div><div class="sub">Akar penyebab → tahap → resep &amp; parameter jadwal</div></div>
+      <div><div class="t" id="pmt_acne">Asesmen Acne — 4 Faktor</div><div class="sub">Akar penyebab → tahap → resep &amp; parameter jadwal</div></div>
       <button type="button" class="pmx" onclick="closeProg('acne')" aria-label="Tutup" title="Tutup (isian tersimpan)">&times;</button>
     </div>
     <div class="pmbody">
@@ -2033,10 +2036,10 @@ body.mode-kontrol #rb2 .rl::after{content:' — dilewati';font-size:11px;font-we
   <div class="sec-label gold">D · Tahap Perawatan &amp; Protokol <span class="hint">menentukan resep default + jadwal SleekFlow</span></div>
   
   <div class="sev-grid">
-    <div class="sev-card s1" id="ac_sev-1" onclick="pickStage('acne',1)"><div class="sev-tag">Tahap 1</div><div class="sev-name">Ringan</div><div class="sev-desc">Bruntusan/komedo. Pembersihan + obat oles.</div></div>
-    <div class="sev-card s2" id="ac_sev-2" onclick="pickStage('acne',2)"><div class="sev-tag">Tahap 2</div><div class="sev-name">Menengah–Berat</div><div class="sev-desc">+ Excel V, Plazion, obat minum.</div></div>
-    <div class="sev-card s3" id="ac_sev-3" onclick="pickStage('acne',3)"><div class="sev-tag">Tahap 3</div><div class="sev-name">Bekas (pasca-jerawat)</div><div class="sev-desc">±3 bln. PicoSure / Excel V / Dermapen.</div></div>
-    <div class="sev-card s4" id="ac_sev-4" onclick="pickStage('acne',4)"><div class="sev-tag">Tahap 4</div><div class="sev-name">Maintenance</div><div class="sev-desc">Kulit bersih (3–6 bln). Cegah build-up.</div></div>
+    <button type="button" class="sev-card s1" id="ac_sev-1" onclick="pickStage('acne',1)" aria-pressed="false"><span class="sev-tag">Tahap 1</span><span class="sev-name">Ringan</span><span class="sev-desc">Bruntusan/komedo. Pembersihan + obat oles.</span></button>
+    <button type="button" class="sev-card s2" id="ac_sev-2" onclick="pickStage('acne',2)" aria-pressed="false"><span class="sev-tag">Tahap 2</span><span class="sev-name">Menengah–Berat</span><span class="sev-desc">+ Excel V, Plazion, obat minum.</span></button>
+    <button type="button" class="sev-card s3" id="ac_sev-3" onclick="pickStage('acne',3)" aria-pressed="false"><span class="sev-tag">Tahap 3</span><span class="sev-name">Bekas (pasca-jerawat)</span><span class="sev-desc">±3 bln. PicoSure / Excel V / Dermapen.</span></button>
+    <button type="button" class="sev-card s4" id="ac_sev-4" onclick="pickStage('acne',4)" aria-pressed="false"><span class="sev-tag">Tahap 4</span><span class="sev-name">Maintenance</span><span class="sev-desc">Kulit bersih (3–6 bln). Cegah build-up.</span></button>
   </div>
 
   <div class="stage-block" id="ac_block-1">
@@ -2131,9 +2134,9 @@ body.mode-kontrol #rb2 .rl::after{content:' — dilewati';font-size:11px;font-we
   </div>
 </div>
 <div class="ovl" id="ovl_melasma" data-prog="melasma">
-  <div class="pmodal">
+  <div class="pmodal" role="dialog" aria-modal="true" aria-labelledby="pmt_melasma">
     <div class="pmhead">
-      <div><div class="t">Asesmen Hiperpigmentasi / Melasma</div><div class="sub">Multi-modalitas · metrik: foto klinis + deskriptif</div></div>
+      <div><div class="t" id="pmt_melasma">Asesmen Hiperpigmentasi / Melasma</div><div class="sub">Multi-modalitas · metrik: foto klinis + deskriptif</div></div>
       <button type="button" class="pmx" onclick="closeProg('melasma')" aria-label="Tutup" title="Tutup (isian tersimpan)">&times;</button>
     </div>
     <div class="pmbody">
@@ -2177,9 +2180,9 @@ body.mode-kontrol #rb2 .rl::after{content:' — dilewati';font-size:11px;font-we
   <div class="sec-label">C · Tahap Perawatan &amp; Protokol <span class="hint">menentukan resep default + jadwal SleekFlow</span></div>
   
   <div class="sev-grid">
-    <div class="sev-card sP" id="me_sev-P" onclick="pickStage('melasma','P')"><div class="sev-tag">Tahap A</div><div class="sev-name">Priming</div><div class="sev-desc">±1 bln. Persiapan kulit: peeling + krim. Nilai kesiapan laser.</div></div>
-    <div class="sev-card sA" id="me_sev-A" onclick="pickStage('melasma','A')"><div class="sev-tag">Tahap B</div><div class="sev-name">Aktif (Bln 1–6)</div><div class="sev-desc">Wajib: peeling + krim + laser PicoSure. + injeksi/booster (bln 3).</div></div>
-    <div class="sev-card sM" id="me_sev-M" onclick="pickStage('melasma','M')"><div class="sev-tag">Tahap C</div><div class="sev-name">Maintenance</div><div class="sev-desc">Seumur hidup (hormonal). Peeling + krim pencerah + laser sesekali.</div></div>
+    <button type="button" class="sev-card sP" id="me_sev-P" onclick="pickStage('melasma','P')" aria-pressed="false"><span class="sev-tag">Tahap A</span><span class="sev-name">Priming</span><span class="sev-desc">±1 bln. Persiapan kulit: peeling + krim. Nilai kesiapan laser.</span></button>
+    <button type="button" class="sev-card sA" id="me_sev-A" onclick="pickStage('melasma','A')" aria-pressed="false"><span class="sev-tag">Tahap B</span><span class="sev-name">Aktif (Bln 1–6)</span><span class="sev-desc">Wajib: peeling + krim + laser PicoSure. + injeksi/booster (bln 3).</span></button>
+    <button type="button" class="sev-card sM" id="me_sev-M" onclick="pickStage('melasma','M')" aria-pressed="false"><span class="sev-tag">Tahap C</span><span class="sev-name">Maintenance</span><span class="sev-desc">Seumur hidup (hormonal). Peeling + krim pencerah + laser sesekali.</span></button>
   </div>
 
   <div class="stage-block" id="me_block-P">
@@ -2266,9 +2269,9 @@ body.mode-kontrol #rb2 .rl::after{content:' — dilewati';font-size:11px;font-we
   </div>
 </div>
 <div class="ovl" id="ovl_hair" data-prog="hair">
-  <div class="pmodal">
+  <div class="pmodal" role="dialog" aria-modal="true" aria-labelledby="pmt_hair">
     <div class="pmhead">
-      <div><div class="t">Asesmen Hair-Loss</div><div class="sub">Staging Norwood/Ludwig oleh dokter · Hair Analyser</div></div>
+      <div><div class="t" id="pmt_hair">Asesmen Hair-Loss</div><div class="sub">Staging Norwood/Ludwig oleh dokter · Hair Analyser</div></div>
       <button type="button" class="pmx" onclick="closeProg('hair')" aria-label="Tutup" title="Tutup (isian tersimpan)">&times;</button>
     </div>
     <div class="pmbody">
@@ -2493,9 +2496,12 @@ function openProg(p){
       (_pasienHamilMenyusui()?('<br><span class="ctx-hamil">⚠ PASIEN '+_pasienHamilMenyusui().toUpperCase()+' — hindari obat berisiko (retinoid/isotretinoin, hormonal, TXA, tetrasiklin); baris resep berisiko ditandai otomatis</span>'):'')+
       '';
   }
+  window._pmFokus=document.activeElement;   /* dikembalikan oleh closeProg */
   o.classList.add('open'); _open=p; document.body.style.overflow='hidden';
   if(typeof renderHamilModal==='function') renderHamilModal(p);
   if(typeof pmGo==='function'&&o.querySelector('.pmrail')){ var hd=o.querySelector('.pmhead'); if(hd) o.style.setProperty('--pmh',hd.offsetHeight+'px'); pmGo(p, window._pmPart[p]||1, true); }
+  /* dialog sungguhan: fokus pindah ke dalam (tombol bagian aktif, atau ×) */
+  setTimeout(function(){ try{ var f=o.querySelector('.pmrail button.on')||o.querySelector('.pmrail button')||o.querySelector('.pmx'); if(f) f.focus({preventScroll:true}); }catch(e){} },0);
 }
 /* ===== WIZARD 3 BAGIAN DI DALAM MODAL PROGRAM =====
    Bagian ditentukan dari huruf seksi: A,B = Penilaian · C,D = Tahap & resep · E,F,G = Edukasi & rencana;
@@ -2542,7 +2548,7 @@ function pmGo(p,n,diam){
   var ovl=document.getElementById('ovl_'+p); if(!ovl) return;
   window._pmPart[p]=n;
   ovl.querySelectorAll('.pmpart').forEach(function(w){ w.classList.toggle('on', +w.getAttribute('data-part')===n); });
-  ovl.querySelectorAll('.pmrail button').forEach(function(b){ var on=+b.getAttribute('data-part')===n; b.classList.toggle('on',on); b.setAttribute('aria-selected',on?'true':'false'); });
+  ovl.querySelectorAll('.pmrail button').forEach(function(b){ var on=+b.getAttribute('data-part')===n; b.classList.toggle('on',on); b.setAttribute('aria-selected',on?'true':'false'); if(on) b.setAttribute('aria-current','step'); else b.removeAttribute('aria-current'); });
   pmTandaiTerisi(p);
   if(!diam){ try{ ovl.scrollTop=0; if(ovl.scrollTo) ovl.scrollTo({top:0}); }catch(e){} }
 }
@@ -2562,6 +2568,10 @@ function closeProg(p){
   var o=document.getElementById('ovl_'+p); if(o) o.classList.remove('open');
   _open=null; document.body.style.overflow='';
   markProg(p);
+  /* fokus kembali ke pemicu (kartu program), bukan tertinggal di dalam modal yang tertutup */
+  try{ var f=window._pmFokus; window._pmFokus=null;
+    if(!(f&&f.focus&&document.body.contains(f)&&!(o&&o.contains(f)))){ var alt=(_mode==='kontrol'&&document.getElementById('pb2_'+p))?'pb2_'+p:'pb_'+p; f=document.getElementById(alt); }
+    if(f&&f.focus) f.focus({preventScroll:true}); }catch(e){}
 }
 function progFilled(p){
   var o=document.getElementById('ovl_'+p); if(!o) return false;
@@ -2709,7 +2719,19 @@ function renderIGA(){
   var a=document.getElementById('k1_arah'); if(a) a.value=_arahDariIGA();
   if(typeof updateReq==='function') updateReq();
 }
-document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&_open) closeProg(_open); });
+document.addEventListener('keydown',function(e){
+  if(!_open) return;
+  if(window._dlgAktif&&window._dlgAktif.bg&&window._dlgAktif.bg.classList.contains('on')) return;   /* picker/ICD di atas modal punya perangkapnya sendiri */
+  if(e.key==='Escape'){ closeProg(_open); return; }
+  if(e.key!=='Tab') return;
+  var o=document.getElementById('ovl_'+_open); if(!o) return;
+  var f=[].filter.call(o.querySelectorAll('button,[href],input,select,textarea,[tabindex]:not([tabindex="-1"])'),function(x){
+    return !x.disabled&&!x.closest('[hidden]')&&!x.closest('.pmpart:not(.on)')&&!x.closest('.stage-block:not(.show), .blk:not(.show)')&&!x.closest('tr.rx-saran.used')&&x.style.display!=='none'&&
+      (x.offsetParent!==null||(typeof navigator!=='undefined'&&/jsdom/i.test(navigator.userAgent))); });
+  if(!f.length) return; var awal=f[0], akhir=f[f.length-1];
+  if(e.shiftKey&&document.activeElement===awal){ e.preventDefault(); akhir.focus(); }
+  else if(!e.shiftKey&&(document.activeElement===akhir||!o.contains(document.activeElement))){ e.preventDefault(); awal.focus(); }
+});
 
 /* ===== stage pickers, satu dispatcher untuk semua program ===== */
 window._stage={};
@@ -2718,7 +2740,7 @@ function pickStage(prog,k){
   var root=document.getElementById('ovl_'+prog); if(!root) return;
   if(prog==='acne'||prog==='melasma'){
     root.querySelectorAll('.sev-card').forEach(function(c){
-      c.classList.toggle('active', c.id.split('_').pop()==='sev-'+k);
+      var on=c.id.split('_').pop()==='sev-'+k; c.classList.toggle('active',on); c.setAttribute('aria-pressed',on?'true':'false');
     });
     root.querySelectorAll('.stage-block').forEach(function(b){
       b.classList.toggle('show', b.id.split('_').pop()===('block-'+k));

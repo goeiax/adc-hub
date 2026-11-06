@@ -619,6 +619,19 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
       check('Risiko bekas: Nodulokistik -> saran Tinggi; memilih sesuai saran menghapus status timpaan', lv() === 'Tinggi' && rb.w._rbOverride === false, $(rb.d, 'rb_saran').textContent);
       check('Risiko bekas: hanya satu kesimpulan (radio), tiga pilihan', rb.d.querySelectorAll('input[name=rb_level]').length === 3 && rb.d.querySelectorAll('input[name=rb_level]:checked').length === 1); }
 
+    { const md = await open('ADC_Form2_Asesmen_Umum_Dokter.html');
+      const dlgOk = p => { const m = md.d.querySelector('#ovl_' + p + ' .pmodal'); const lb = m && m.getAttribute('aria-labelledby'); return !!m && m.getAttribute('role') === 'dialog' && m.getAttribute('aria-modal') === 'true' && !!lb && !!md.d.getElementById(lb) && md.d.getElementById(lb).textContent.length > 5; };
+      check('Modal program: role=dialog + aria-modal + aria-labelledby ke judul (acne, melasma, hair)', dlgOk('acne') && dlgOk('melasma') && dlgOk('hair'));
+      md.w.goStep(2); $(md.d, 'pb_acne').focus(); md.w.openProg('acne'); await sleep(50);
+      const inside = md.d.activeElement && $(md.d, 'ovl_acne').contains(md.d.activeElement);
+      check('Modal program: fokus masuk ke tombol bagian aktif saat dibuka (aria-current=step)', inside && md.d.activeElement.classList.contains('on') && md.d.activeElement.getAttribute('aria-current') === 'step', md.d.activeElement && (md.d.activeElement.id || md.d.activeElement.className));
+      const cards = [...md.d.querySelectorAll('.ovl .sev-card')];
+      md.w.pickStage('acne', 2);
+      check('Modal program: 7 kartu tahap = <button aria-pressed>; pilih tahap 2 -> pressed hanya di kartu 2; isi kartu tetap (tag/nama/desk)', cards.length === 7 && cards.every(c => c.tagName === 'BUTTON' && c.hasAttribute('aria-pressed')) && $(md.d, 'ac_sev-2').getAttribute('aria-pressed') === 'true' && $(md.d, 'ac_sev-1').getAttribute('aria-pressed') === 'false' && $(md.d, 'ac_sev-2').querySelector('.sev-tag').textContent === 'Tahap 2' && !!$(md.d, 'ac_sev-2').querySelector('.sev-desc'));
+      md.d.querySelector('#ovl_acne .pmx').focus(); md.d.dispatchEvent(new md.w.KeyboardEvent('keydown', { key: 'Tab', shiftKey: true, bubbles: true }));
+      check('Modal program: Shift+Tab dari × memutar ke elemen terakhir yang terlihat di modal (perangkap fokus)', md.d.activeElement && $(md.d, 'ovl_acne').contains(md.d.activeElement) && !md.d.activeElement.classList.contains('pmx'), md.d.activeElement && (md.d.activeElement.id || md.d.activeElement.className));
+      md.w.closeProg('acne');
+      check('Modal program: tutup -> fokus kembali ke kartu program #pb_acne', md.d.activeElement && md.d.activeElement.id === 'pb_acne', md.d.activeElement && md.d.activeElement.id); }
     { const idg = await open('ADC_Form2_Asesmen_Umum_Dokter.html');
       idg.w.issueHandoff(); await sleep(200);
       const items = [...idg.d.querySelectorAll('#tdlg_miss button, #tdlg_miss .plain')];
