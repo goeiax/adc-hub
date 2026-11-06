@@ -72,8 +72,17 @@ async function signoff(x, { pin = PIN.dokter, batal = false } = {}) {
 /* Terbitkan Handoff: bila dialog TTD (PIN dokter) muncul, isi PIN (atau Batal), lalu tunggu hasil hub di d8_status */
 async function terbit(x, { pin = PIN.dokter, batal = false } = {}) {
   x.w.issueHandoff();
+  const tdOn = () => { const b = x.d.getElementById('tdlg'); return b && b.classList.contains('on'); };
+  const td = await until(tdOn, 1200);
+  x.w.__tdlgJudul = td ? x.d.getElementById('tdlg_t').textContent : ''; x.w.__tdlgUlang = '';
+  if (td) x.d.getElementById('tdlg_ok').click();
   const dlg = await until(() => { const b = x.d.getElementById('ldlg'); return b && b.classList.contains('on'); }, 1200);
-  if (dlg) { if (batal) x.d.getElementById('ldlg_x').click(); else { x.d.getElementById('ldlg_pin').value = pin; x.d.getElementById('ldlg_ok').click(); } }
+  if (dlg) {
+    if (batal) { x.d.getElementById('ldlg_x').click();
+      const td2 = await until(tdOn, 1200);
+      if (td2) { x.w.__tdlgUlang = x.d.getElementById('tdlg_t').textContent + ' ' + x.d.getElementById('tdlg_miss').textContent; x.d.getElementById('tdlg_ok').click(); } }
+    else { x.d.getElementById('ldlg_pin').value = pin; x.d.getElementById('ldlg_ok').click(); }
+  }
   await until(() => /✓|✗/.test(x.d.getElementById('d8_status').value), 4000);
   return dlg;
 }
@@ -161,6 +170,7 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
     { const wh = $(a.d, 'cfg_webhook'); wh.value = 'https://hook.test/baru'; wh.dispatchEvent(new a.w.Event('change', { bubbles: true }));
       check('F2: webhook diingat per perangkat (localStorage)', a.w.localStorage.getItem('adc_webhook') === 'https://hook.test/baru'); }
     check('F2: alur berakhir di dalam langkah — D5 di langkah 4, sign-off di langkah 5, D4b + Terbitkan di langkah 6', $(a.d, 'd5_iv').closest('.step').getAttribute('data-step') === '3' && a.d.querySelector('.tbl input.cell[value="Sekarang"]').closest('.step').getAttribute('data-step') === '3' && $(a.d, 'd8_signoff').closest('.step').getAttribute('data-step') === '4' && $(a.d, 'schedBody').closest('.step').getAttribute('data-step') === '5' && $(a.d, 'd8_status').closest('.step').getAttribute('data-step') === '5' && a.d.querySelectorAll('#rail button').length === 6, [...a.d.querySelectorAll('#rail button .rl')].map(b => b.textContent));
+    check('F2 terbit: kartu selesai tersembunyi sebelum terbit, dialog Terbitkan belum dibuat', $(a.d, 'terbit_done').hidden === true && !a.d.getElementById('tdlg'));
     check('F2: tombol Terbitkan Handoff utama di akhir langkah 6 (bukan "klik di atas"); toolbar bertingkat dengan menu Lainnya berisi Reset', !!a.d.querySelector('.step[data-step="5"] .stepnav .nb-terbit[onclick="issueHandoff()"]') && !a.d.querySelector('.donehint') && a.d.querySelectorAll('.tb-actions > .btn, .tb-actions > .hubchip').length === 4 && !!a.d.querySelector('#tbmenu button[onclick*="resetForm"]') && !a.d.querySelector('.tb-actions > .btn[onclick="resetForm()"]'));
     { a.w.tbMenu(); const open = $(a.d, 'tbmenu').classList.contains('on') && $(a.d, 'tb_more').getAttribute('aria-expanded') === 'true'; a.d.body.click(); check('F2: menu Lainnya buka/tutup (klik luar menutup)', open && !$(a.d, 'tbmenu').classList.contains('on')); }
     check('F2: D1 — Catatan klinis (temuan) di atas Diagnosis', !!($(a.d, 'd2_hasil').compareDocumentPosition($(a.d, 'd2_dx')) & 4));
@@ -249,8 +259,9 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
       check('Langkah 6: baris "Sekarang" menyebut aksi berikutnya; stepper: Generate ✓ (sudah), Simpan aktif; webhook tersembunyi; Terbitkan tidak redup (sudah tanda tangan)', /Sekarang/.test($(a.d, 'serah_now').textContent) && /Simpan jadwal/.test($(a.d, 'serah_now').textContent) && $(a.d, 'sb1').classList.contains('done') && $(a.d, 'sb1').querySelector('.sn').textContent === '✓' && $(a.d, 'sb2').classList.contains('pri') && !$(a.d, 'sb3').classList.contains('pri') && $(a.d, 'cfg_webhook').closest('.f').style.display === 'none' && !a.d.querySelector('.nb-terbit').classList.contains('dim'), $(a.d, 'serah_now').textContent); }
     a.dialogs.length = 0;
     const ttdDlg = await terbit(a);
-    check('F2: Terbitkan TIDAK meminta PIN lagi (sudah ditandatangani saat sign-off) & tidak ada dialog peringatan', ttdDlg === false && !a.dialogs.some(x => x.type === 'confirm'), a.dialogs.filter(x => x.type === 'confirm'));
+    check('F2: Terbitkan TIDAK meminta PIN lagi (sudah ditandatangani saat sign-off) & tidak ada dialog peringatan', ttdDlg === false && !a.dialogs.some(x => x.type === 'confirm') && a.w.__tdlgJudul === 'Terbitkan handoff?', a.dialogs.filter(x => x.type === 'confirm'));
     check('F2: popup ringkasan handoff dibuat', a.w.__popup && /Ringkasan Handoff/.test(a.w.__popup.document.html));
+    check('F2 terbit: kartu selesai tampil (nama, RM, waktu, hub ✓) + 4 tombol (ringkasan / JSON / cetak / pasien berikutnya); dialog Terbitkan pakai pola #sdlg', !$(a.d, 'terbit_done').hidden && new RegExp('RM ' + RM).test($(a.d, 'terbit_done_l').textContent) && /✓ Tersimpan di hub/.test($(a.d, 'terbit_done_hub').textContent) && $(a.d, 'terbit_done_hub').classList.contains('ok') && a.d.querySelectorAll('#terbit_done .dc-b button').length === 4 && !!a.d.querySelector('#tdlg.mdlg-bg .sdlg.tdlg #tdlg_kv') && !$(a.d, 'tdlg').classList.contains('on'), { l: $(a.d, 'terbit_done_l').textContent, h: $(a.d, 'terbit_done_hub').textContent });
     const h1 = disk('handoff_terakhir.json');
     check('hub: handoff #1 tersimpan', h1 && h1.doc === 'ADC-HANDOFF' && h1.kunjungan_ke === 1 && h1.riwayat.length === 0, h1 && { k: h1.kunjungan_ke });
     check('hub: isian program hanya dari tahap terpilih (tanpa baris default tahap lain)', h1 && (() => { const t = h1.program_detail.acne.isian.join(' | '); return /Tretinoin 0,025%/.test(t) && !/Isotretinoin|Spironolactone|Eritromisin|Excel V/.test(t); })(), h1 && h1.program_detail.acne.isian);
@@ -337,7 +348,7 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
     chk(c.d, 'd8_skrining'); chk(c.d, 'd8_consent');
     await terbit(c, { batal: true });
     const h3 = disk('handoff_terakhir.json');
-    check('F2: Batal lagi pada dialog TTD saat Terbitkan -> konfirmasi lalu tetap terbit TANPA ttd (tercatat)', h3 && h3.penerbitan.ttd === null && c.dialogs.some(x => x.type === 'confirm' && /Tanpa tanda tangan elektronik/.test(x.msg)) && /tanpa verifikasi PIN/.test(c.w.__popup.document.html), h3 && h3.penerbitan.ttd);
+    check('F2: Batal lagi pada dialog TTD saat Terbitkan -> konfirmasi lalu tetap terbit TANPA ttd (tercatat)', h3 && h3.penerbitan.ttd === null && /Terbitkan tanpa tanda tangan PIN\?.*Tanpa tanda tangan elektronik/.test(c.w.__tdlgUlang) && !c.dialogs.some(x => x.type === 'confirm') && /tanpa verifikasi PIN/.test(c.w.__popup.document.html), h3 && h3.penerbitan.ttd);
     check('hub: handoff #3 = kunjungan_ke 3, riwayat 2 (urut)', h3 && h3.kunjungan_ke === 3 && h3.riwayat.length === 2 && h3.riwayat[0].kunjungan_ke === 1 && h3.riwayat[1].kunjungan_ke === 2, h3 && { k: h3.kunjungan_ke, r: h3.riwayat.map(x => x.kunjungan_ke) });
     check('hub: riwayat kunjungan 2 membawa evaluasi (IGA) agar tren tak hilang', h3 && h3.riwayat[1] && h3.riwayat[1].evaluasi && h3.riwayat[1].evaluasi.iga, h3 && h3.riwayat[1]);
     check('hub: riwayat kunjungan 2 membawa diagnosis & resep (rantai utuh)', h3 && /Acne/.test(h3.riwayat[1].diagnosis || '') && /Tretinoin/.test(h3.riwayat[1].resep || ''), h3 && h3.riwayat[1]);
@@ -529,9 +540,9 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
         a.w.closeProg('acne'); a.w.openProg('acne');
         check('Modal wizard: dibuka lagi -> kembali ke bagian terakhir yang dilihat', on() === '3'); a.w.closeProg('acne'); }
       gt.dialogs.length = 0; gt.w.issueHandoff(); await sleep(300);
-      const cf = (gt.dialogs.find(x => x.type === 'confirm') || {}).msg || '';
+      const cfItems = [...gt.d.querySelectorAll('#tdlg_miss button, #tdlg_miss .plain')].map(b => b.textContent); const cf = cfItems.join('\n'); gt.d.getElementById('tdlg_x').click();
       check('Gerbang: Terbitkan memperingatkan obat berisiko + consent tindakan; pasien hamil ditandai PALING ATAS',
-        /Obat berisiko.*Isotretinoin/.test(cf) && /Informed consent tindakan/.test(cf) && /^Belum lengkap[^\n]*\n\n· PASIEN SEDANG HAMIL/.test(cf), cf.slice(0, 260));
+        /Obat berisiko.*Isotretinoin/.test(cf) && /Informed consent tindakan/.test(cf) && /^PASIEN SEDANG HAMIL/.test(cfItems[0] || '') && !gt.dialogs.some(x => x.type === 'confirm') && gt.d.querySelector('#tdlg_miss button[data-go="d8_skrining"]') !== null, cf.slice(0, 260));
       const hg = gt.w.buildHandoff(); const k2 = await open('ADC_Form2_Asesmen_Umum_Dokter.html'); k2.w.applyHandoff(hg);
       check('Gerbang kontrol: status hamil dirantai lewat handoff (tanpa Form 1) & obat dari isian lalu tetap terdeteksi', k2.w._pasienHamilMenyusui() === 'Sedang hamil' && k2.w._obatBerisiko().some(x => /Isotretinoin/.test(x)), { hm: k2.w._pasienHamilMenyusui(), ob: k2.w._obatBerisiko() });
       check('Gerbang kontrol: bendera HAMIL langsung tampil setelah Muat Handoff, dengan obat yang dibawa', $(k2.d, 'hamil_box').style.display !== 'none' && /Isotretinoin/.test($(k2.d, 'hamil_rx_v').textContent), $(k2.d, 'hamil_rx_v').textContent); }
@@ -683,7 +694,11 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
     check('F2 hub mati: sign-off menampilkan "Hub mati — tanpa tanda tangan elektronik" tanpa dialog', /Hub mati/.test($(off.d, 'd8_ttd').textContent) && !$(off.d, 'ldlg'), $(off.d, 'd8_ttd').textContent);
     chk(off.d, 'd8_consent');
     let threw = null; try { off.w.issueHandoff(); } catch (e) { threw = e; }
-    check('F2 hub mati: terbitkan handoff tetap jalan (popup/JSON cadangan)', !threw && off.w.__popup && /Ringkasan Handoff/.test(off.w.__popup.document.html), threw && String(threw));
+    const offDlg = $(off.d, 'tdlg') && $(off.d, 'tdlg').classList.contains('on');
+    const offHub = (off.d.querySelector('#tdlg_kv') || {}).textContent || '';
+    if (offDlg) $(off.d, 'tdlg_ok').click();
+    check('F2 hub mati: dialog Terbitkan tetap muncul (tanpa PIN), menyebut HUB MATI; terbitkan handoff tetap jalan (popup/JSON cadangan)', !threw && offDlg && /MATI/.test(offHub) && !$(off.d, 'ldlg') && off.w.__popup && /Ringkasan Handoff/.test(off.w.__popup.document.html), threw ? String(threw) : { offDlg, offHub: offHub.slice(0, 120) });
+    check('F2 hub mati: kartu selesai memperingatkan HUB MATI (unduh JSON)', !$(off.d, 'terbit_done').hidden && /HUB MATI/.test($(off.d, 'terbit_done_hub').textContent) && $(off.d, 'terbit_done_hub').classList.contains('warn'));
     let klik = 0; off.w.HTMLInputElement.prototype.click = function () { if (this.id === '_handofffile') klik++; };
     check('F2 hub mati: status D7 menyebut HUB MATI', /HUB MATI/.test($(off.d, 'd8_status').value), $(off.d, 'd8_status').value);
     { const f1o = await open('ADC_Form1_Registrasi_Anamnesis_Pasien.html');

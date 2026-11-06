@@ -162,6 +162,24 @@ label.opt.lbl-hamil{border:1.5px solid var(--accent-deep,#8E4A33);background:#FB
 .sdlg .miss button::before{content:'→ ';color:var(--accent-deep);font-weight:700;}
 .sdlg .okmsg{font-size:14px;color:var(--green-text,#5F6C50);font-weight:600;margin:0 0 8px;}
 .sdlg .mdlg-t.warn{color:var(--accent-deep);}
+.sdlg .miss .plain{font-size:14px;line-height:1.45;padding:8px 12px;margin:0 0 6px;border:1px solid var(--line-strong,#D9CCB7);border-radius:var(--r-box,8px);background:var(--surface-quiet,#F7F3EC);color:var(--ink);}
+.tdlg .mdlg-b .terbit.mdlg-ok{background:var(--ink);border-color:var(--ink);color:var(--canvas);}
+.tdlg .mdlg-b .terbit.mdlg-x{border-color:var(--ink);color:var(--ink);}
+/* kartu selesai setelah Terbitkan (langkah 6) */
+.done-card{margin:18px 0 6px;padding:18px 20px;border:1px solid var(--green-text,#5F6C50);border-radius:var(--r-card,14px);background:var(--surface,#fff);}
+.done-card .dc-t{font-family:var(--ff-head);font-size:18px;font-weight:620;color:var(--green-text,#5F6C50);margin:0 0 4px;}
+.done-card .dc-l{font-size:14px;color:var(--ink);margin:0 0 4px;}
+.done-card .dc-hub{font-size:14px;font-weight:600;color:var(--ink-muted);margin:0 0 4px;}
+.done-card .dc-hub.ok{color:var(--green-text,#5F6C50);}
+.done-card .dc-hub.warn{color:var(--accent-deep);}
+.done-card .dc-note{font-size:13px;color:var(--ink-muted);margin:0 0 4px;}
+.done-card .dc-note:empty{display:none;}
+.done-card .dc-b{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
+.done-card .dc-b button{font:inherit;font-size:14px;font-weight:540;min-height:44px;padding:0 18px;border-radius:8px;border:1px solid var(--line-strong,#D9CCB7);background:var(--surface,#fff);color:var(--ink);cursor:pointer;}
+.done-card .dc-b button:hover{border-color:var(--accent);color:var(--accent-deep);}
+.done-card .dc-b button.pri{background:var(--accent-act);border-color:var(--accent-act);color:#fff;}
+.done-card .dc-b button.pri:hover{background:var(--accent-deep);border-color:var(--accent-deep);color:#fff;}
+@media print{.done-card{display:none !important;}}
 
 /* ===== PROGRAM MODALS ===== */
 .progbtn{border:1px solid var(--line-strong);padding:9px 11px;cursor:pointer;background:var(--surface);text-align:left;font-family:var(--ff-body);width:100%;}
@@ -1914,6 +1932,13 @@ body.mode-kontrol #rb2 .rl::after{content:' — dilewati';font-size:11px;font-we
     </div>
   </div>
 
+  <div class="done-card no-print" id="terbit_done" hidden>
+    <div class="dc-t">Handoff diterbitkan</div>
+    <div class="dc-l" id="terbit_done_l"></div>
+    <div class="dc-hub" id="terbit_done_hub" aria-live="polite"></div>
+    <div class="dc-note" id="terbit_done_note"></div>
+    <div class="dc-b"><button type="button" onclick="bukaRingkasanHandoff()">Buka ringkasan handoff</button><button type="button" onclick="unduhHandoffJSON()">Unduh JSON</button><button type="button" onclick="cetakSemua()">Cetak / Simpan PDF</button><button type="button" class="pri" onclick="resetForm()">Pasien berikutnya</button></div>
+  </div>
   <div class="stepnav no-print"><button type="button" class="nb" onclick="goStep(4)">&lsaquo; Kembali</button><button type="button" class="nb nb-p nb-terbit" onclick="issueHandoff()">Terbitkan Handoff</button></div></section>
   <div class="foot">
     <div class="l">Pertanyaan di antara kunjungan? WhatsApp <b>+62 821 30144778</b><br>Tips perawatan: <b>@adc.skinexpert</b><br>Simpan salinan ini dan tunjukkan di setiap kunjungan.</div>
@@ -2836,6 +2861,7 @@ function saveSchedToRecord(){
 function resetForm(){
   try{ window._rbOverride=false; setTimeout(syncRisikoBekas,0); window._ttd=null; _ttdStatus(''); window._isian={}; var cl=document.getElementById('d8_consent_lbl'); if(cl) cl.textContent=''; setTimeout(_icdChips,0); }catch(e){}
   if(!confirm('Reset semua isian formulir?')) return;
+  var _dc=document.getElementById('terbit_done'); if(_dc) _dc.hidden=true;
   /* radio juga hanya dilepas centangnya — mengosongkan value-nya membuat Fitzpatrick
      terekam kosong setelah Reset. */
   document.querySelectorAll('input,textarea').forEach(function(i){ if(i.type==='checkbox'||i.type==='radio'){i.checked=false;} else {i.value='';} });
@@ -3881,21 +3907,89 @@ function issueHandoff(){
   if(ob.length && hm) w.unshift('PASIEN '+hm.toUpperCase()+' (Form 1) dan resep memuat obat berisiko: '+ob.join(', ')+' — periksa ulang sebelum terbit.');
   var adaTindakan=activeProgs().some(function(p){ return _psProgram(p).klinik.length>0; })||!!_hv('k1_tindakan');
   if(adaTindakan && !_ck('d8_consent')) w.push('Ada tindakan direncanakan/dilakukan hari ini tetapi "Informed consent tindakan" belum dicentang (D7).');
-  if(w.length){
-    if(!confirm('Belum lengkap ('+w.length+'):\n\n· '+w.join('\n· ')+'\n\nTetap terbitkan handoff sekarang?')) return;
+  _terbitDialog(h,a,w.map(function(t){ return {t:t,go:_terbitGo(t)}; }),false);
+}
+/* ===== DIALOG TERBITKAN (pengganti confirm/alert bawaan browser) =====
+   Satu dialog untuk semua pemeriksaan: tiap peringatan = tombol lompat ke kolomnya, status tanda tangan,
+   ringkasan program/resep/jadwal/hub. Ada peringatan -> "Kembali & lengkapi" terisi, "Terbitkan" garis.
+   Tinta (--ink) hanya untuk tombol terbit (aturan warna: terbit = satu-satunya aksi tak bisa dibatalkan). */
+function _terbitGo(t){
+  if(/Asesmen selesai/.test(t)) return 'd8_signoff';
+  if(/IGA belum/.test(t)) return document.getElementById('d1_iga')?'d1_iga':null;
+  if(/Jadwal belum/.test(t)) return 'sb1';
+  if(/^Diagnosis/.test(t)) return 'd2_dx';
+  if(/^Alergi/.test(t)) return 'alergi_flag';
+  if(/Skrining obat|^PASIEN/.test(t)) return 'd8_skrining';
+  if(/Informed consent/.test(t)) return 'd8_consent';
+  return null;
+}
+function _terbitDialog(h,a,w,tanpaPin){
+  var bg=document.getElementById('tdlg');
+  if(!bg){
+    bg=document.createElement('div'); bg.id='tdlg'; bg.className='mdlg-bg';
+    bg.innerHTML='<div class="mdlg sdlg tdlg" role="dialog" aria-modal="true" aria-labelledby="tdlg_t"><div class="mdlg-t" id="tdlg_t"></div>'+
+      '<div class="serah" id="tdlg_kv"></div><div class="miss" id="tdlg_miss"></div>'+
+      '<div class="mdlg-b"><button type="button" class="mdlg-x" id="tdlg_x">Kembali &amp; lengkapi</button><span class="mdlg-sp"></span><button type="button" class="mdlg-ok terbit" id="tdlg_ok">Terbitkan</button></div></div>';
+    bg.onclick=function(e){ if(e.target===bg) dlgTutup(bg); };
+    document.body.appendChild(bg);
   }
+  var tutup=function(){ dlgTutup(bg); }, n=w.length, ps=h.pasien||{}, pe=h.penerbitan||{};
+  var mintaPin=!tanpaPin&&_hubOn&&window._hubLoginReq&&_ck('d8_signoff')&&!pe.ttd;
+  var ttd=pe.ttd?('Ditandatangani · '+pe.ttd.nama+' · PIN diverifikasi hub')
+        :(tanpaPin?'TANPA verifikasi PIN — dicatat di handoff':(_ck('d8_signoff')?('Sign-off dicentang'+(mintaPin?' · PIN dokter diminta setelah ini':'')):'belum sign-off'));
+  var jml=(window._schedRows&&window._schedRows.length)||0;
+  var kv=function(k,v,cls){ return '<div><span class="k">'+k+'</span><div class="v'+(cls?(' '+cls):'')+'">'+v+'</div></div>'; };
+  document.getElementById('tdlg_t').textContent=tanpaPin?'Terbitkan tanpa tanda tangan PIN?':(n?('Terbitkan dengan '+n+' peringatan?'):'Terbitkan handoff?');
+  document.getElementById('tdlg_kv').innerHTML=
+    kv('Pasien',_esc(ps.nama||'(nama belum diisi)')+' · RM '+_esc(ps.rm||'—'))+
+    kv('Sign-off dokter',_esc(ttd),pe.ttd?'ok':'warn')+
+    kv('Program',_esc([a.program,a.derajat].filter(Boolean).join(' — ')||'—'))+
+    kv('Resep',a.resep.length?(a.resep.length+' baris'):'belum ada',a.resep.length?'':'warn')+
+    kv('Jadwal kontrol',jml?(jml+' baris'+(window._schedSaved?' · tersimpan ke rekam medis':'')):'belum di-generate',jml?'':'warn')+
+    kv('Hub',_hubOn?'tersambung — handoff disimpan ke hub':'MATI — hanya berkas / pop-up (unduh JSON)',_hubOn?'ok':'warn');
+  var ms=document.getElementById('tdlg_miss');
+  ms.innerHTML=n
+    ? w.map(function(x){ return x.go?('<button type="button" data-go="'+_esc(x.go)+'">'+_esc(x.t)+'</button>'):('<div class="plain">'+_esc(x.t)+'</div>'); }).join('')
+    : '<div class="okmsg">Semua pemeriksaan lolos. Setelah terbit, handoff ini menjadi catatan resmi kunjungan.</div>';
+  ms.querySelectorAll('button').forEach(function(b){ b.onclick=function(){ tutup(); goTo(b.getAttribute('data-go')); }; });
+  var bx=document.getElementById('tdlg_x'), bok=document.getElementById('tdlg_ok'), judul=document.getElementById('tdlg_t');
+  bx.className=n?'mdlg-ok':'mdlg-x'; bx.textContent=n?'Kembali & lengkapi':'Batal';
+  bok.className=(n?'mdlg-x':'mdlg-ok')+' terbit';
+  bok.textContent=tanpaPin?'Terbitkan tanpa PIN':(n?('Terbitkan dengan '+n+' peringatan'):'Terbitkan handoff');
+  judul.classList.toggle('warn',!!n);
+  bx.onclick=tutup;
+  bok.onclick=function(){ tutup(); _terbitLanjut(h,a,tanpaPin); };
+  dlgBuka(bg,tutup); setTimeout(function(){ try{ (n?bx:bok).focus(); }catch(e){} },0);
+}
+function _terbitLanjut(h,a,tanpaPin){
   /* TANDA TANGAN ELEKTRONIK: hub hidup + dokter sign-off -> dokter memasukkan PIN-nya; hub menerbitkan
      stempel (nama, waktu, bukti) yang ikut tersimpan di handoff (PMK 24/2022 Ps. 16 ayat 2, Ps. 31). */
-  if(_hubOn && window._hubLoginReq && _ck('d8_signoff') && !h.penerbitan.ttd){
+  if(!tanpaPin && _hubOn && window._hubLoginReq && _ck('d8_signoff') && !h.penerbitan.ttd){
     hubTTD(h.pasien.rm,'',function(ttd){
       if(ttd){ h.penerbitan.ttd=ttd; window._ttd=ttd; _ttdStatus('Ditandatangani · '+ttd.nama+' · '+_ttdJam(ttd.waktu)+' · PIN diverifikasi hub','ok');
-        if(!_hv('d8_dokter')){ var dd=document.getElementById('d8_dokter'); if(dd) dd.value=ttd.nama; h.penerbitan.dokter_signoff=ttd.nama; } }
-      else if(!confirm('Tanpa tanda tangan elektronik dokter (PIN).\n\nHandoff akan tercatat "sign-off tanpa verifikasi PIN". Tetap terbitkan?')) return;
-      _issueLanjut(h,a);
+        if(!_hv('d8_dokter')){ var dd=document.getElementById('d8_dokter'); if(dd) dd.value=ttd.nama; h.penerbitan.dokter_signoff=ttd.nama; }
+        _issueLanjut(h,a); return; }
+      /* PIN dibatalkan: dialog yang sama, satu peringatan — bukan confirm() kedua */
+      _terbitDialog(h,a,[{t:'Tanpa tanda tangan elektronik dokter (PIN) — handoff akan tercatat "sign-off tanpa verifikasi PIN".',go:'d8_signoff'}],true);
     });
     return;
   }
   _issueLanjut(h,a);
+}
+function _doneHub(t,cls){ var e=document.getElementById('terbit_done_hub'); if(!e) return; e.textContent=t||''; e.className='dc-hub'+(cls?(' '+cls):''); }
+function bukaRingkasanHandoff(){
+  var h=window._handoff; if(!h){ alert('Belum ada handoff yang diterbitkan.'); return; }
+  var w=window.open('','_blank','width=900,height=940,scrollbars=yes,resizable=yes');
+  if(!w){ alert('Pop-up masih diblokir browser. Izinkan pop-up untuk situs ini, lalu klik lagi.'); return; }
+  w.document.open(); w.document.write(handoffDocHTML(h)); w.document.close();
+}
+function unduhHandoffJSON(){
+  var h=window._handoff; if(!h){ alert('Belum ada handoff yang diterbitkan.'); return; }
+  try{
+    var b=new Blob([JSON.stringify(h,null,2)],{type:'application/json'}), u=URL.createObjectURL(b), a=document.createElement('a');
+    a.href=u; a.download='Handoff_'+String((h.pasien&&h.pasien.rm)||'pasien').replace(/[^\w-]+/g,'_')+'_'+new Date().toISOString().slice(0,10)+'.json';
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(function(){ try{ URL.revokeObjectURL(u); }catch(e){} },2000);
+  }catch(e){ alert('Gagal mengunduh JSON: '+e); }
 }
 function _issueLanjut(h,a){
   function set(id,val){var e=document.getElementById(id); if(e&&val&&!e.value) e.value=val;}
@@ -3911,16 +4005,25 @@ function _issueLanjut(h,a){
   var stamp='Diterbitkan '+new Date().toLocaleString('id-ID')+(_hv('d8_by')?(' oleh '+_hv('d8_by')):'')+
             (_ck('d8_signoff')?' · sign-off dokter ADA':' · TANPA sign-off dokter');
   if(ds) ds.value=stamp+(_hubOn?' · mengirim ke hub…':' · HUB MATI — hanya berkas/pop-up (unduh JSON!)');
+  /* kartu selesai: akhir alur yang terlihat (RM, waktu, hasil hub, aksi berikutnya) — bukan hanya kolom status readonly */
+  var dc=document.getElementById('terbit_done');
+  if(dc){ dc.hidden=false;
+    var dl=document.getElementById('terbit_done_l'); if(dl) dl.textContent=((h.pasien&&h.pasien.nama)?(h.pasien.nama+' · '):'')+'RM '+((h.pasien&&h.pasien.rm)||'—')+' · '+new Date().toLocaleString('id-ID')+
+      (h.penerbitan.ttd?(' · ditandatangani '+h.penerbitan.ttd.nama):(_ck('d8_signoff')?' · sign-off tanpa verifikasi PIN':' · tanpa sign-off dokter'));
+    var dn=document.getElementById('terbit_done_note'); if(dn) dn.textContent='';
+    _doneHub(_hubOn?'Mengirim ke hub…':'HUB MATI — unduh JSON dan lampirkan ke rekam medis.',_hubOn?'':'warn');
+    try{ dc.scrollIntoView({behavior:'smooth',block:'center'}); }catch(e){} }
   /* Hasil hub HARUS terlihat: sebelumnya status selalu "Diterbitkan" walau hub menolak (kunci
      salah, jaringan), dan baru ketahuan di kunjungan kontrol berikutnya ("RM tidak ada di hub"). */
   if(_hubOn) hubPost('handoff',h,function(ok,err){
     if(ds) ds.value=stamp+(ok?(' · ✓ tersimpan di hub (RM '+(h.pasien.rm||'?')+')'):(' · ✗ TIDAK tersimpan di hub'+(err?(' — '+err):'')));
+    _doneHub(ok?('✓ Tersimpan di hub (RM '+(h.pasien.rm||'?')+')'):('✗ TIDAK tersimpan di hub'+(err?(' — '+err):'')+' — cek chip HUB lalu Terbitkan lagi, atau unduh JSON.'),ok?'ok':'warn');
     if(!ok&&_hubOn) alert('PERHATIAN: handoff TIDAK tersimpan di hub'+(err?('\n('+err+')'):'')+'.\n\n'+
       'Kunjungan kontrol berikutnya tidak akan menemukan RM ini di hub.\n'+
       'Cek chip HUB (kunci hub salah?) lalu klik Terbitkan Handoff lagi — atau unduh JSON dari pop-up dan lampirkan ke rekam medis.');
   });
   var w=window.open('','_blank','width=900,height=940,scrollbars=yes,resizable=yes');
-  if(!w){ alert('Pop-up diblokir browser. Ringkasan ditampilkan di panel pada halaman ini. Izinkan pop-up untuk tampilan penuh + tombol Google Docs / .doc / JSON.'); return; }
+  if(!w){ var dn2=document.getElementById('terbit_done_note'); if(dn2) dn2.textContent='Pop-up diblokir browser — pakai tombol "Buka ringkasan handoff" (izinkan pop-up untuk situs ini).'; return; }
   w.document.open(); w.document.write(handoffDocHTML(h)); w.document.close();
 }
 function applyHandoff(h){
