@@ -395,10 +395,16 @@ function _hubChipUser(){ if(!_hubOn){ hubChip('off','mati'); return; } if(!windo
 function _hubCekSesi(j){
   window._hubLoginReq=!!(j&&j.login);
   if(!_hubOn||!window._hubLoginReq){ _hubChipUser(); return; }
-  if(!hubTok()){ window._hubUser=null; _hubChipUser(); return; }
+  if(!hubTok()){ window._hubUser=null;
+    /* tanpa sesi: tetap tanya /api/saya supaya chip membedakan "belum terdaftar" (kunci) dari "belum masuk" */
+    try{ fetch(hubURL()+'/api/saya',{headers:hubHdr(),cache:'no-store'}).then(function(r){ return r.json().then(function(s){ s=s||{}; s._status=r.status; return s; }); })
+      .then(function(s){ if(s._status===401&&s.error!=='login') _hubChipGagal(s.error); else _hubChipUser(); }).catch(function(){ _hubChipUser(); }); }catch(e){ _hubChipUser(); }
+    return; }
   try{
-    fetch(hubURL()+'/api/saya',{headers:hubHdr(),cache:'no-store'}).then(function(r){return r.json();})
-    .then(function(s){ if(s&&s.ok){ window._hubUser=s.user; try{localStorage.setItem('adc_hub_user',JSON.stringify(s.user));}catch(e){} } else { _hubSimpanSesi('',null); } _hubChipUser(); })
+    fetch(hubURL()+'/api/saya',{headers:hubHdr(),cache:'no-store'}).then(function(r){ return r.json().then(function(s){ s=s||{}; s._status=r.status; return s; }); })
+    .then(function(s){ if(s&&s.ok){ window._hubUser=s.user; try{localStorage.setItem('adc_hub_user',JSON.stringify(s.user));}catch(e){} }
+      else if(s._status===401&&s.error!=='login'){ _hubChipGagal(s.error); return; }   /* kunci perangkat salah: sesi tak relevan */
+      else { _hubSimpanSesi('',null); } _hubChipUser(); })
     .catch(function(){ _hubChipUser(); });
   }catch(e){}
 }
@@ -508,6 +514,15 @@ function hubSetup(){
    console + title chip HUB; klinisi membaca "belum terdaftar / belum masuk / tidak terjangkau". */
 function _hubKelas(err){ err=String(err||''); if(/kunci|x-adc-key/i.test(err)) return 'kunci'; if(/belum masuk|login|sesi/i.test(err)) return 'login'; if(/fetch|network|failed|tidak tersambung|gagal kirim/i.test(err)) return 'jaringan'; return err?'lain':''; }
 function _hubPesan(err){ var k=_hubKelas(err); if(k==='kunci') return 'Tablet ini belum terdaftar di hub — minta admin mengatur kunci (chip HUB › Atur alamat / kunci hub).'; if(k==='login') return 'Belum masuk ke hub.'; if(k==='jaringan') return 'Hub tidak terjangkau — periksa jaringan / PC hub.'; return String(err||''); }
+/* kesiapan hub untuk MENYIMPAN: terjangkau + kunci cocok + sesi (bila hub meminta login). cb(status[,err]):
+   siap | mati | kunci | login | jaringan | lain */
+function _hubSiap(cb){
+  if(!_hubOn){ cb('mati'); return; }
+  try{ fetch(hubURL()+'/api/saya',{headers:hubHdr(),cache:'no-store'})
+    .then(function(r){ return r.json().then(function(j){ j=j||{}; j._status=r.status; return j; }); })
+    .then(function(j){ if(j.ok) cb('siap'); else if(j._status===401&&j.error==='login') cb('login'); else if(j._status===401) cb('kunci',j.error); else cb('lain',j.error); })
+    .catch(function(e){ cb('jaringan',String(e)); }); }catch(e){ cb('jaringan',String(e)); }
+}
 function _hubChipGagal(err){ var k=_hubKelas(err); hubChip('warn',k==='kunci'?'belum terdaftar':(k==='jaringan'?'tidak terjangkau':('gagal: '+(err||''))));
   try{ if(err) console.warn('[hub] '+err); var hc=document.getElementById('hubchip'); if(hc&&err) hc.title=String(err); }catch(e){} }
 function hubPost(jenis,obj,cb){

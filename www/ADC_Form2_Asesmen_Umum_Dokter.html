@@ -3284,10 +3284,16 @@ function _hubChipUser(){ if(!_hubOn){ hubChip('off','mati'); return; } if(!windo
 function _hubCekSesi(j){
   window._hubLoginReq=!!(j&&j.login);
   if(!_hubOn||!window._hubLoginReq){ _hubChipUser(); return; }
-  if(!hubTok()){ window._hubUser=null; _hubChipUser(); return; }
+  if(!hubTok()){ window._hubUser=null;
+    /* tanpa sesi: tetap tanya /api/saya supaya chip membedakan "belum terdaftar" (kunci) dari "belum masuk" */
+    try{ fetch(hubURL()+'/api/saya',{headers:hubHdr(),cache:'no-store'}).then(function(r){ return r.json().then(function(s){ s=s||{}; s._status=r.status; return s; }); })
+      .then(function(s){ if(s._status===401&&s.error!=='login') _hubChipGagal(s.error); else _hubChipUser(); }).catch(function(){ _hubChipUser(); }); }catch(e){ _hubChipUser(); }
+    return; }
   try{
-    fetch(hubURL()+'/api/saya',{headers:hubHdr(),cache:'no-store'}).then(function(r){return r.json();})
-    .then(function(s){ if(s&&s.ok){ window._hubUser=s.user; try{localStorage.setItem('adc_hub_user',JSON.stringify(s.user));}catch(e){} } else { _hubSimpanSesi('',null); } _hubChipUser(); })
+    fetch(hubURL()+'/api/saya',{headers:hubHdr(),cache:'no-store'}).then(function(r){ return r.json().then(function(s){ s=s||{}; s._status=r.status; return s; }); })
+    .then(function(s){ if(s&&s.ok){ window._hubUser=s.user; try{localStorage.setItem('adc_hub_user',JSON.stringify(s.user));}catch(e){} }
+      else if(s._status===401&&s.error!=='login'){ _hubChipGagal(s.error); return; }   /* kunci perangkat salah: sesi tak relevan */
+      else { _hubSimpanSesi('',null); } _hubChipUser(); })
     .catch(function(){ _hubChipUser(); });
   }catch(e){}
 }
@@ -3401,6 +3407,15 @@ function hubSetup(){
    console + title chip HUB; klinisi membaca "belum terdaftar / belum masuk / tidak terjangkau". */
 function _hubKelas(err){ err=String(err||''); if(/kunci|x-adc-key/i.test(err)) return 'kunci'; if(/belum masuk|login|sesi/i.test(err)) return 'login'; if(/fetch|network|failed|tidak tersambung|gagal kirim/i.test(err)) return 'jaringan'; return err?'lain':''; }
 function _hubPesan(err){ var k=_hubKelas(err); if(k==='kunci') return 'Tablet ini belum terdaftar di hub — minta admin mengatur kunci (chip HUB › Atur alamat / kunci hub).'; if(k==='login') return 'Belum masuk ke hub.'; if(k==='jaringan') return 'Hub tidak terjangkau — periksa jaringan / PC hub.'; return String(err||''); }
+/* kesiapan hub untuk MENYIMPAN: terjangkau + kunci cocok + sesi (bila hub meminta login). cb(status[,err]):
+   siap | mati | kunci | login | jaringan | lain */
+function _hubSiap(cb){
+  if(!_hubOn){ cb('mati'); return; }
+  try{ fetch(hubURL()+'/api/saya',{headers:hubHdr(),cache:'no-store'})
+    .then(function(r){ return r.json().then(function(j){ j=j||{}; j._status=r.status; return j; }); })
+    .then(function(j){ if(j.ok) cb('siap'); else if(j._status===401&&j.error==='login') cb('login'); else if(j._status===401) cb('kunci',j.error); else cb('lain',j.error); })
+    .catch(function(e){ cb('jaringan',String(e)); }); }catch(e){ cb('jaringan',String(e)); }
+}
 function _hubChipGagal(err){ var k=_hubKelas(err); hubChip('warn',k==='kunci'?'belum terdaftar':(k==='jaringan'?'tidak terjangkau':('gagal: '+(err||''))));
   try{ if(err) console.warn('[hub] '+err); var hc=document.getElementById('hubchip'); if(hc&&err) hc.title=String(err); }catch(e){} }
 function hubPost(jenis,obj,cb){
@@ -3735,7 +3750,7 @@ function _produkByName(n){ n=(n||'').trim().toLowerCase(); if(!n||typeof ADC_PRO
    Markup & id tidak diubah. Urutan: label di .f (span.lab -> id + aria-labelledby; <label> tanpa for -> for), sel tabel
    ("judul kolom — label baris / baris n"), isian .ln (pertanyaan .q/.sub terdekat sebelum isian), lalu data-ph/placeholder.
    Dipanggil saat load dan saat fokus (baris resep yang ditambah). */
-function _ariaTeks(el){ return (el?el.textContent:'').replace(/\s+/g,' ').replace(/\bwajib\b/,'').replace(/\s+/g,' ').trim(); }
+function _ariaTeks(el){ if(!el) return ''; var c=el.cloneNode(true); c.querySelectorAll('.req').forEach(function(x){ x.remove(); }); c.querySelectorAll('*').forEach(function(x){ x.insertAdjacentText('beforebegin',' '); }); return c.textContent.replace(/\s+/g,' ').trim(); }
 function _ariaAda(e){ return e.hasAttribute('aria-label')||e.hasAttribute('aria-labelledby')||!!(e.id&&document.querySelector('label[for="'+e.id+'"]'))||!!e.closest('label'); }
 var _ariaSeq=0;
 function _namaiSatu(e){
@@ -4050,7 +4065,7 @@ function _terbitDialog(h,a,w,tanpaPin){
     kv('Program',_esc([a.program,a.derajat].filter(Boolean).join(' — ')||'—'))+
     kv('Resep',a.resep.length?(a.resep.length+' baris'):'belum ada',a.resep.length?'':'warn')+
     kv('Jadwal kontrol',jml?(jml+' baris'+(window._schedSaved?' · tersimpan ke rekam medis':'')):'belum di-generate',jml?'':'warn')+
-    kv('Hub',_hubOn?'tersambung — handoff disimpan ke hub':'MATI — hanya berkas / pop-up (unduh JSON)',_hubOn?'ok':'warn');
+    '<div><span class="k">Hub</span><div class="v'+(_hubOn?'':' warn')+'" id="tdlg_hub">'+(_hubOn?'memeriksa kesiapan hub…':'MATI — hanya berkas / pop-up (unduh JSON)')+'</div></div>';
   var ms=document.getElementById('tdlg_miss');
   ms.innerHTML=n
     ? w.map(function(x){ return x.go?('<button type="button" data-go="'+_esc(x.go)+'">'+_esc(x.t)+'</button>'):('<div class="plain">'+_esc(x.t)+'</div>'); }).join('')
@@ -4064,6 +4079,21 @@ function _terbitDialog(h,a,w,tanpaPin){
   bx.onclick=tutup;
   bok.onclick=function(){ tutup(); _terbitLanjut(h,a,tanpaPin); };
   dlgBuka(bg,tutup); setTimeout(function(){ try{ (n?bx:bok).focus(); }catch(e){} },0);
+  /* kesiapan hub diperiksa sungguhan (kunci + sesi), bukan sekadar ping: dialog tidak boleh menjanjikan simpan yang gagal */
+  if(_hubOn) _hubSiap(function(st,err){
+    var el=document.getElementById('tdlg_hub'); if(!el||!bg.classList.contains('on')) return;
+    var teks={siap:'siap — handoff disimpan ke hub',login:'belum masuk — handoff hanya akan diunduh (JSON)',kunci:'tablet belum terdaftar — handoff hanya akan diunduh (JSON)',
+              jaringan:'tidak terjangkau — handoff hanya akan diunduh (JSON)',lain:'bermasalah — handoff hanya akan diunduh (JSON)'}[st]||st;
+    el.textContent=teks; el.className='v '+(st==='siap'?'ok':'warn');
+    if(st==='siap') return;
+    var ok0=ms.querySelector('.okmsg'); if(ok0) ok0.remove();
+    var b=document.createElement('button'); b.type='button'; b.setAttribute('data-hub',st);
+    b.textContent=st==='login'?'Masuk ke hub dulu — supaya handoff tersimpan':(st==='kunci'?'Daftarkan tablet ini (Atur alamat / kunci hub) — supaya handoff tersimpan':'Periksa sambungan hub — atau terbitkan tanpa hub (unduh JSON)');
+    b.onclick=function(){ tutup(); if(st==='login') hubLogin(function(sukses){ if(sukses) issueHandoff(); }); else if(st==='kunci'){ hubSetup(); } };
+    ms.insertBefore(b,ms.firstChild);
+    bok.textContent=tanpaPin?'Terbitkan tanpa PIN & tanpa hub':(n?('Terbitkan tanpa hub, '+n+' peringatan'):'Terbitkan tanpa hub');
+    if(!n){ bok.className='mdlg-x terbit'; bx.className='mdlg-ok'; bx.textContent='Kembali & perbaiki'; }
+  });
 }
 function _terbitLanjut(h,a,tanpaPin){
   /* TANDA TANGAN ELEKTRONIK: hub hidup + dokter sign-off -> dokter memasukkan PIN-nya; hub menerbitkan
