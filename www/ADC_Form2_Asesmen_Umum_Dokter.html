@@ -1326,7 +1326,9 @@ body.showall .step{display:block;}
 .intake .kvgrid{grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px 24px;margin-top:10px;}
 .intake .kv{gap:3px;}
 .intake .kv .k{font-size:12px;font-weight:600;letter-spacing:0;text-transform:none;color:var(--ink-muted);line-height:1.35;}
-.intake .kv .v{font-size:15px;line-height:1.45;color:var(--ink);}
+.intake .kv .v{font-size:15px;line-height:1.45;color:var(--ink-fill);}
+/* jawaban pasien = biru isian (konvensi nilai terketik di seluruh form); peringatan baris .crit tetap terakota */
+.intake .tier:not(.crit) .tc b{color:var(--ink-fill);}
 .intake .tier{gap:8px 20px;padding:15px 0 !important;}
 .intake .tc .none{font-size:14px;}
 .intake .tc .none.sub{display:block;margin-top:3px;}
