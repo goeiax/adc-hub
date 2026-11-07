@@ -204,6 +204,13 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
     check('F2: alergi & dokter terisi dari intake', $(a.d, 'alergi_flag').value === 'Penisilin' && $(a.d, 'd1_dokter').value === 'dr. Uji, Sp.DVE');
     check('F2 pasien baru: kotak isian alergi disembunyikan, alergi tampil di Ringkasan Form 1', $(a.d, 'alergi_box').style.display === 'none' && $(a.d, 'alergi_flag').value === 'Penisilin' && /Penisilin/.test($(a.d, 'intake_body').textContent), { box: $(a.d, 'alergi_box').style.display, al: $(a.d, 'alergi_flag').value });
     check('F2: Ringkasan menampilkan detail keluhan P4 dari Form 1', /Detail keluhan/.test($(a.d, 'intake_body').textContent), a.w._intake && (a.w._intake.seksi || []).map(s => s.kode));
+    check('F2 Ringkasan: label pasangan 12 px huruf biasa, nilai 15 px, grid min 190 px; label pertanyaan pasien jadi label klinis',
+      /\.intake \.kv \.k\{font-size:12px;[^}]*text-transform:none/.test(fs.readFileSync(path.join('www', 'ADC_Form2_Asesmen_Umum_Dokter.html'), 'utf8')) &&
+      /\.intake \.kv \.v\{font-size:15px/.test(fs.readFileSync(path.join('www', 'ADC_Form2_Asesmen_Umum_Dokter.html'), 'utf8')) &&
+      /\.intake \.kvgrid\{grid-template-columns:repeat\(auto-fill,minmax\(190px/.test(fs.readFileSync(path.join('www', 'ADC_Form2_Asesmen_Umum_Dokter.html'), 'utf8')) &&
+      a.w._kLabel('Jenis jerawat yang Anda rasakan') === 'Jenis jerawat' && a.w._kLabel('Sudah ada bekas?') === 'Sudah ada bekas' && a.w._kLabel('Pemakaian sunscreen saat ini') === 'Sunscreen saat ini' && a.w._kLabel('Lokasi utama') === 'Lokasi utama' &&
+      /Lokasi utama/.test($(a.d, 'intake_body').textContent) && !/yang Anda/.test($(a.d, 'intake_body').textContent) && !!a.d.querySelector('#intake_body .none.sub'),
+      { k: ['Jenis jerawat yang Anda rasakan', 'Sudah ada bekas?', 'Pemakaian sunscreen saat ini'].map(a.w._kLabel) });
     { const ik2 = JSON.parse(JSON.stringify(a.w._intake)); ik2.kritis.alergi = 'Sulfa'; a.w.applyIntake(ik2); }
     check('F2: kotak alergi disembunyikan bila Ringkasan Form 1 tampil (tidak dobel)', $(a.d, 'alergi_box').style.display === 'none' && $(a.d, 'intake_body').textContent.includes($(a.d, 'alergi_flag').value) && $(a.d, 'alergi_flag').value !== '', { box: $(a.d, 'alergi_box').style.display, alergi: $(a.d, 'alergi_flag').value });
     check('F2: muat ulang Form 1 yang dikoreksi menimpa alergi lama', $(a.d, 'alergi_flag').value === 'Sulfa' && /Sulfa/.test($(a.d, 'intake_body').textContent), $(a.d, 'alergi_flag').value);

@@ -1320,6 +1320,19 @@ body.showall .step{display:block;}
   .intake .tier.crit{margin:0;padding:8px 0 !important;border-left-width:3px;border-left-style:solid;border-left-color:#8E4A33;padding-left:10px !important;}
   .intake .kvgrid{gap:4px 14px;margin-top:5px;}
 }
+/* Keterbacaan (2026-11-07): label pasangan huruf biasa 12 px (kapital rapat 10.5 px sulit dibaca
+   untuk label panjang Form 1), nilai 15 px tinta penuh, maksimal 4 kolom, jarak pasangan longgar. */
+.intake .tc{font-size:15px;line-height:1.5;}
+.intake .kvgrid{grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px 24px;margin-top:10px;}
+.intake .kv{gap:3px;}
+.intake .kv .k{font-size:12px;font-weight:600;letter-spacing:0;text-transform:none;color:var(--ink-muted);line-height:1.35;}
+.intake .kv .v{font-size:15px;line-height:1.45;color:var(--ink);}
+.intake .tier{gap:8px 20px;padding:15px 0 !important;}
+.intake .tc .none{font-size:14px;}
+.intake .tc .none.sub{display:block;margin-top:3px;}
+.intake .warnrow{font-size:14px;margin-top:12px;}
+@media (max-width:720px){ .intake .kvgrid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px 18px;} }
+@media print{ .intake .kv .k{font-size:11px;} .intake .kv .v,.intake .tc{font-size:13.5px;} }
 
 
 /* ==========================================================================
@@ -3515,7 +3528,13 @@ function applyIntake(o){
 }
 function _isImgData(v){ return typeof v==='string' && v.indexOf('data:image/')===0; }
 function _esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
-function _kv(k,v){ return v?('<div class="kv"><span class="k">'+_esc(k)+'</span><span class="v">'+_esc(v)+'</span></div>'):''; }
+/* Label pertanyaan Form 1 bersuara pasien ("Jenis jerawat yang Anda rasakan", "Sudah ada bekas?");
+   di ringkasan dokter dibaca sebagai label klinis singkat. */
+function _kLabel(k){
+  return String(k||'').replace(/\s+yang\s+(Anda|kamu)\s+(rasakan|sadari|alami)/i,'').replace(/\s+yang\s+dirasakan/i,'')
+    .replace(/^Pemakaian\s+sunscreen/i,'Sunscreen').replace(/\s*\?\s*$/,'').trim();
+}
+function _kv(k,v){ return v?('<div class="kv"><span class="k">'+_esc(_kLabel(k))+'</span><span class="v">'+_esc(v)+'</span></div>'):''; }
 function renderIntake(){
   var o=window._intake, box=document.getElementById('intake_box'); if(!o||!box) return;
   var p=o.pasien||{}, k=o.kritis||{}, g=o.gaya_hidup||{}, per=o.persetujuan||{};
@@ -3538,7 +3557,7 @@ function renderIntake(){
     ? '<div class="tier"><span class="tg">Foto baseline</span><div class="tc">Sudah diambil'+
       (pn.foto_area?(' &middot; <b>'+_esc(pn.foto_area)+'</b>'):'')+
       (pn.foto_izin?' &middot; izin lisan ✓':(pn.foto_izin===false?' &middot; <b>izin difoto belum dicatat</b>':''))+
-      ' <span class="none">— jadi pembanding untuk seluruh evaluasi berikutnya</span></div></div>'
+      '<span class="none sub">Jadi pembanding untuk seluruh evaluasi berikutnya.</span></div></div>'
     : '<div class="tier crit"><span class="tg">Foto baseline</span><div class="tc">'+
       '<b>BELUM DIAMBIL</b> — ambil sebelum tindakan hari ini. Tanpa foto baseline, '+
       'perbandingan IGA di kunjungan berikutnya tidak punya titik awal dan tidak bisa dipulihkan.</div></div>';
