@@ -278,6 +278,7 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
     check('F2: Terbitkan TIDAK meminta PIN lagi (sudah ditandatangani saat sign-off) & tidak ada dialog peringatan', ttdDlg === false && !a.dialogs.some(x => x.type === 'confirm') && a.w.__tdlgJudul === 'Terbitkan handoff?', a.dialogs.filter(x => x.type === 'confirm'));
     check('F2: popup ringkasan handoff dibuat', a.w.__popup && /Ringkasan Handoff/.test(a.w.__popup.document.html));
     { a.w.issueHandoff(); await until(() => /^siap —/.test(($(a.d, 'tdlg_hub') || {}).textContent || ''), 2000);
+      check('Baris Program di dialog Terbitkan tidak menggandakan nama program; WAJIB terhitung penuh setelah PIN', !/Acne — Acne/.test($(a.d, 'tdlg_kv').textContent) && /IGA/.test($(a.d, 'tdlg_kv').textContent) && !a.w.reqStatus().some(x => x.label === 'Sign-off dokter' && !x.ok) && new RegExp('Wajib ' + a.w.reqStatus().filter(x => x.ok).length + '/' + a.w.reqStatus().length).test($(a.d, 'reqcnt').textContent), { kv: $(a.d, 'tdlg_kv').textContent.slice(0, 120), cnt: $(a.d, 'reqcnt').textContent });
       check('Dialog Terbitkan dengan sesi dokter: baris Hub "siap — handoff disimpan ke hub" (ok), tanpa tombol hub', /siap — handoff disimpan ke hub/.test($(a.d, 'tdlg_hub').textContent) && $(a.d, 'tdlg_hub').classList.contains('ok') && !a.d.querySelector('#tdlg_miss button[data-hub]'), { hub: $(a.d, 'tdlg_hub').textContent, err: a.dialogs.filter(x => x.type === 'jsdomError').slice(-3) });
       $(a.d, 'tdlg_x').click(); }
     { const ns = await open('ADC_Form2_Asesmen_Umum_Dokter.html', { user: null }); set(ns.d, 'p_nama', 'Tanpa Sesi'); set(ns.d, 'rm', 'RM-NS');
@@ -770,6 +771,7 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
     $(bad.d, 'tdlg_x').click();
     const sgBad = await signoff(bad, { batal: true }); await sleep(300);
     check('Sign-off dengan kunci salah: tanpa dialog PIN, centang tetap, status "dicatat tanpa tanda tangan PIN" + Daftarkan tablet, butir WAJIB sign-off terpenuhi', sgBad === false && $(bad.d, 'd8_signoff').checked && /tanpa tanda tangan PIN/.test($(bad.d, 'd8_ttd').textContent) && $(bad.d, 'd8_ttd').classList.contains('warn') && !!bad.d.querySelector('#d8_ttd button') && bad.w.reqStatus().some(x => x.label === 'Sign-off dokter' && x.ok), $(bad.d, 'd8_ttd').textContent);
+    check('Sign-off tanpa PIN (kunci salah): baris "Sekarang" langkah 6 tidak lagi menunggu tanda tangan; kosakata tombol perawat', !/Tunggu dokter/.test(bad.w._serahSekarang(bad.w._serahData())[0]) && /Buat jadwal kontrol|ritme kontrol/.test(bad.w._serahSekarang(bad.w._serahData())[0]), bad.w._serahSekarang(bad.w._serahData())[0]);
     bad.dialogs.length = 0; await terbit(bad, { batal: true });
     check('Terbitkan dengan kunci salah: PIN tidak diminta lagi; handoff mencatat ttd_tidak_bisa', !($(bad.d, 'ldlg') && $(bad.d, 'ldlg').classList.contains('on')) && bad.w.buildHandoff().penerbitan.ttd_tidak_bisa === 'kunci');
     await until(() => /✗ TIDAK tersimpan di hub/.test($(bad.d, 'd8_status').value), 3000);

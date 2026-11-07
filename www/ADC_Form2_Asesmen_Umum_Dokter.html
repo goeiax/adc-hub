@@ -1934,9 +1934,9 @@ body.mode-kontrol #rb2 .rl::after{content:' — dilewati';font-size:12px;font-we
       <div class="f w2 s12" style="display:none"><label class="lab" for="cfg_webhook">Webhook Make.com</label><input class="in" id="cfg_webhook" onchange="try{localStorage.setItem('adc_webhook',this.value.trim());}catch(e){}" placeholder="https://hook.eu2.make.com/..."></div>
     </div>
     <div class="schedbtns">
-      <button type="button" class="sbtn pri" id="sb1" onclick="generateSchedule();stepperSync()"><span class="sn">1</span>Buat jadwal kontrol</button>
-      <button type="button" class="sbtn" id="sb2" onclick="saveSchedToRecord();stepperSync()"><span class="sn">2</span>Simpan jadwal ke rekam medis</button>
-      <button type="button" class="sbtn" id="sb3" onclick="sendToSleekFlow();stepperSync()"><span class="sn">3</span>Kirim reminder (SleekFlow)</button>
+      <button type="button" class="sbtn pri" id="sb1" onclick="generateSchedule();stepperSync();renderSerahRingkas()"><span class="sn">1</span>Buat jadwal kontrol</button>
+      <button type="button" class="sbtn" id="sb2" onclick="saveSchedToRecord();stepperSync();renderSerahRingkas()"><span class="sn">2</span>Simpan jadwal ke rekam medis</button>
+      <button type="button" class="sbtn" id="sb3" onclick="sendToSleekFlow();stepperSync();renderSerahRingkas()"><span class="sn">3</span>Kirim reminder (SleekFlow)</button>
       <button type="button" class="sbtn ghost" onclick="copySchedule()">Salin Jadwal</button>
     </div>
     <div id="send_status" style="font-size:13px;font-weight:600;margin-bottom:6px"></div>
@@ -2639,6 +2639,8 @@ function _isiDokterDariHub(){
   var u=window._hubUser; if(!u||u.peran!=='dokter') return; var nm=u.nama||u.id;
   ['d1_dokter','d8_dokter'].forEach(function(id){ var e=document.getElementById(id); if(e&&!e.value.trim()) e.value=nm; });
 }
+/* "Acne — Acne IGA 3 · Sedang" -> derajat sudah memuat nama program; jangan digandakan */
+function _programDerajat(a){ var p=(a&&a.program)||'', d=(a&&a.derajat)||''; if(p&&d&&d.toLowerCase().indexOf(p.toLowerCase())===0) return d; return [p,d].filter(Boolean).join(' — '); }
 function _dokterKini(){
   return (_mode==='kontrol')
     ? (_v('k1_dokter')||_v('d1_dokter'))
@@ -4065,16 +4067,16 @@ function _terbitDialog(h,a,w,tanpaPin){
     document.body.appendChild(bg);
   }
   var tutup=function(){ dlgTutup(bg); }, n=w.length, ps=h.pasien||{}, pe=h.penerbitan||{};
-  var mintaPin=!tanpaPin&&_hubOn&&window._hubLoginReq&&_ck('d8_signoff')&&!pe.ttd;
+  var mintaPin=!tanpaPin&&_hubOn&&window._hubLoginReq&&_ck('d8_signoff')&&!pe.ttd&&!window._ttdTakBisa;
   var ttd=pe.ttd?('Ditandatangani · '+pe.ttd.nama+' · PIN diverifikasi hub')
-        :(tanpaPin?'TANPA verifikasi PIN — dicatat di handoff':(_ck('d8_signoff')?('Sign-off dicentang'+(mintaPin?' · PIN dokter diminta setelah ini':'')):'belum sign-off'));
+        :(tanpaPin?'TANPA verifikasi PIN — dicatat di handoff':(_ck('d8_signoff')?(window._ttdTakBisa?('Sign-off tanpa PIN — '+(window._ttdTakBisa==='kunci'?'tablet belum terdaftar':'hub tak terjangkau')):('Sign-off dicentang'+(mintaPin?' · PIN dokter diminta setelah ini':''))):'belum sign-off'));
   var jml=(window._schedRows&&window._schedRows.length)||0;
   var kv=function(k,v,cls){ return '<div><span class="k">'+k+'</span><div class="v'+(cls?(' '+cls):'')+'">'+v+'</div></div>'; };
   document.getElementById('tdlg_t').textContent=tanpaPin?'Terbitkan tanpa tanda tangan PIN?':(n?('Terbitkan dengan '+n+' peringatan?'):'Terbitkan handoff?');
   document.getElementById('tdlg_kv').innerHTML=
     kv('Pasien',_esc(ps.nama||'(nama belum diisi)')+' · RM '+_esc(ps.rm||'—'),(ps.nama&&ps.rm)?'':'warn')+
     kv('Sign-off dokter',_esc(ttd),pe.ttd?'ok':'warn')+
-    kv('Program',_esc([a.program,a.derajat].filter(Boolean).join(' — ')||'—'))+
+    kv('Program',_esc(_programDerajat(a)||'—'))+
     kv('Resep',a.resep.length?(a.resep.length+' baris'):'belum ada',a.resep.length?'':'warn')+
     kv('Jadwal kontrol',jml?(jml+' baris'+(window._schedSaved?' · tersimpan ke rekam medis':'')):'belum di-generate',jml?'':'warn')+
     '<div><span class="k">Hub</span><div class="v'+(_hubOn?'':' warn')+'" id="tdlg_hub">'+(_hubOn?'memeriksa kesiapan hub…':'MATI — hanya berkas / pop-up (unduh JSON)')+'</div></div>';
@@ -4142,7 +4144,7 @@ function unduhHandoffJSON(){
 function _issueLanjut(h,a){
   function set(id,val){var e=document.getElementById(id); if(e&&val&&!e.value) e.value=val;}
   set('h_owner', a.dokter);
-  set('h_fase', [a.program,a.derajat].filter(Boolean).join(' — '));
+  set('h_fase', _programDerajat(a));
   set('h_last', [(a.diagnosis||a.hasil), a.tanggal].filter(Boolean).join(' · '));
   set('h_next', a.instruksi_kontrol || a.remarks);
   set('h_meds', a.resep.map(function(r){return [r.obat,r.jadwal].filter(Boolean).join(' ');}).filter(Boolean).join('; '));
@@ -4159,7 +4161,7 @@ function _issueLanjut(h,a){
   var dc=document.getElementById('terbit_done');
   if(dc){ dc.hidden=false;
     var dl=document.getElementById('terbit_done_l'); if(dl) dl.textContent=((h.pasien&&h.pasien.nama)?(h.pasien.nama+' · '):'')+'RM '+((h.pasien&&h.pasien.rm)||'—')+' · '+new Date().toLocaleString('id-ID')+
-      (h.penerbitan.ttd?(' · ditandatangani '+h.penerbitan.ttd.nama):(_ck('d8_signoff')?' · sign-off tanpa verifikasi PIN':' · tanpa sign-off dokter'));
+      (h.penerbitan.ttd?(' · ditandatangani '+h.penerbitan.ttd.nama):(_ck('d8_signoff')?(window._ttdTakBisa?' · sign-off tanpa PIN (tablet belum terdaftar / hub tak terjangkau)':' · sign-off tanpa verifikasi PIN'):' · tanpa sign-off dokter'));
     var dn=document.getElementById('terbit_done_note'); if(dn) dn.textContent='';
     _doneHub(!_hubOn?'HUB MATI — unduh JSON dan lampirkan ke rekam medis.':(tanpaHub?('✗ Tidak dikirim ke hub ('+ketTanpa+') — unduh JSON, atau perbaiki lalu Terbitkan lagi.'):'Mengirim ke hub…'),(!_hubOn||tanpaHub)?'warn':'');
     try{ dc.scrollIntoView({behavior:'smooth',block:'center'}); }catch(e){} }
@@ -4181,7 +4183,7 @@ function applyHandoff(h){
       if(h.pasien&&_identitasBeda(h.pasien)&&!_gantiIdentitas(h.pasien)) return;
       function put(id,val){var el=document.getElementById(id); if(el&&val&&!el.value) el.value=val;}
       put('h_owner',a.dokter);
-      put('h_fase',[a.program,a.derajat].filter(Boolean).join(' — '));
+      put('h_fase',_programDerajat(a));
       put('h_last',[(a.diagnosis||a.hasil),a.tanggal].filter(Boolean).join(' · '));
       put('h_next',a.instruksi_kontrol||a.remarks);
       put('h_meds',(a.resep||[]).map(function(x){return [x.obat,x.jadwal].filter(Boolean).join(' ');}).filter(Boolean).join('; '));
@@ -4334,7 +4336,8 @@ function signoffTTD(){
     _ttdStatus('Menunggu PIN dokter…');
     hubTTD(_hv('rm'),'',function(ttd){
       if(ttd){ window._ttd=ttd; var dd=document.getElementById('d8_dokter'); if(dd) dd.value=ttd.nama;   /* penanda tangan = pemilik PIN */
-        _ttdStatus('Ditandatangani · '+ttd.nama+' · '+_ttdJam(ttd.waktu)+' · PIN diverifikasi hub','ok'); }
+        _ttdStatus('Ditandatangani · '+ttd.nama+' · '+_ttdJam(ttd.waktu)+' · PIN diverifikasi hub','ok');
+        if(typeof updateReq==='function') updateReq(); }
       else { /* dibatalkan: centang dilepas — kotak tercentang tanpa PIN terbaca sebagai "sudah tanda tangan" */
         cb.checked=false; _ttdStatus('Belum ditandatangani — centang lagi untuk memasukkan PIN dokter.','warn');
         if(typeof updateReq==='function') updateReq(); }
@@ -4420,13 +4423,13 @@ function stepperSync(){
   return st;
 }
 function _serahSekarang(d){
-  var ttdPerlu=(_hubOn&&window._hubLoginReq)?!window._ttd:!_ck('d8_signoff');
+  var ttdPerlu=(_hubOn&&window._hubLoginReq&&!window._ttdTakBisa)?!window._ttd:!_ck('d8_signoff');
   if(ttdPerlu) return ['Tunggu dokter menandatangani di langkah 5','goStep(4)','ke langkah 5'];
   if(!d.ritme) return ['Minta dokter mengisi ritme kontrol di langkah 4','goTo(\'d5_iv\')','ke langkah 4'];
   var st=stepperSync();
-  if(!st[0]) return ['Generate jadwal (tombol 1)','',''];
+  if(!st[0]) return ['Buat jadwal kontrol (tombol 1)','',''];
   if(!st[1]) return ['Simpan jadwal ke rekam medis (tombol 2)','',''];
-  if(!st[2]) return ['Kirim jadwal ke SleekFlow (tombol 3)','',''];
+  if(!st[2]) return ['Kirim reminder SleekFlow (tombol 3)','',''];
   return ['Terbitkan Handoff (tombol di bawah)','',''];
 }
 function renderSerahRingkas(){
