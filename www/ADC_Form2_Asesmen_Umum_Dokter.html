@@ -1217,9 +1217,13 @@ body.showall .step{display:block;}
 .rxp-empty{padding:16px;color:var(--ink-muted);font-size:13px;}
 @media print{ .rxc .rxpick-btn{display:none !important;} }
 /* Dialog Muat Form 1 / Muat Handoff */
-.mdlg-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2000;display:none;align-items:flex-start;justify-content:center;padding:12vh 16px 16px;}
+.mdlg-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2000;display:none;align-items:flex-start;justify-content:center;padding:6vh 16px 16px;overflow:auto;}
 .mdlg-bg.on{display:flex;}
 .mdlg{background:var(--surface);border-radius:var(--r-card);width:100%;max-width:460px;padding:24px 24px 20px;box-shadow:0 18px 50px rgba(0,0,0,.25);}
+/* dialog tinjauan (serah terima & terbit) muat di viewport tablet: daftar peringatan menggulir, tombol tetap terlihat */
+.mdlg.sdlg{max-height:calc(100vh - 6vh - 16px);display:flex;flex-direction:column;min-height:0;}
+.mdlg.sdlg .mdlg-t,.mdlg.sdlg .serah,.mdlg.sdlg .mdlg-b{flex:none;}
+.mdlg.sdlg .miss{flex:1 1 auto;min-height:0;overflow:auto;overscroll-behavior:contain;padding-right:2px;}
 .mdlg-t{font-size:18px;font-weight:620;color:var(--ink);margin-bottom:16px;}
 .mdlg-l{display:block;font-size:11px;font-weight:620;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2);margin-bottom:6px;}
 .mdlg-l span{font-weight:400;letter-spacing:0;text-transform:none;color:var(--ink-muted);margin-left:6px;}
