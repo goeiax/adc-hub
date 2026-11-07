@@ -1156,7 +1156,7 @@ body.showall .step{display:block;}
 .d1h{font-size:11px;font-weight:620;letter-spacing:.14em;text-transform:uppercase;color:var(--accent-deep);
   margin:4px 0 14px;padding-top:18px;border-top:1px solid var(--line);}
 .opts.compact{gap:4px !important;}
-.opts.compact .opt{padding:10px 8px !important;margin-left:0 !important;font-style:normal !important;letter-spacing:.04em !important;}
+.opts.compact .opt{padding:10px 7px !important;margin-left:0 !important;font-style:normal !important;letter-spacing:.02em !important;}
 /* Semua teks opsi jawaban di form program berwarna hitam (permintaan klinik) —
    sorotan warna lama (.hl, abu-abu) tidak dipakai lagi untuk opsi. */
 .ovl label.ck,.ovl .ck label,.ovl label.chk-item,.ovl label.consent-item{color:var(--ink) !important;}
@@ -1659,46 +1659,7 @@ body.mode-kontrol #rb2 .rl::after{content:' — dilewati';font-size:12px;font-we
   <!-- D1 -->
   <div class="stepnav no-print"><span></span><button type="button" class="nb nb-p" onclick="goStep(1)">Lanjut &rsaquo;</button></div></section>
   <section class="step" data-step="1"><div class="sec"><span class="n">D1</span>Pemeriksaan &amp; diagnosis</div>
-  <div class="vis-awal">
-  
-  
-  <!-- Urutan D1 mengikuti alur pemeriksaan: siapa memeriksa → profil kulit → diagnosis &
-       derajat → catatan klinis. Keadaan umum, hasil asesmen & penunjang kini SATU kolom
-       "Catatan klinis" (#d2_hasil). #d1_umum dipertahankan tersembunyi agar skema handoff tetap. -->
-  <input type="hidden" id="d1_umum">
-  <div class="row">
-    <!-- Fitzpatrick: RADIO — satu tipe kulit saja per pasien, tidak mungkin ganda. -->
-    <div class="f s5"><span class="lab">Fitzpatrick <span class="opt">pilih satu</span></span>
-      <div class="opts tight compact" style="padding-top:4px">
-        <label class="opt"><input type="radio" name="d1_fitz" value="I"> I</label>
-        <label class="opt"><input type="radio" name="d1_fitz" value="II"> II</label>
-        <label class="opt"><input type="radio" name="d1_fitz" value="III"> III</label>
-        <label class="opt"><input type="radio" name="d1_fitz" value="IV"> IV</label>
-        <label class="opt"><input type="radio" name="d1_fitz" value="V"> V</label>
-        <label class="opt"><input type="radio" name="d1_fitz" value="VI"> VI</label>
-      </div>
-    </div>
-    <!-- Tipe kulit: boleh lebih dari satu (mis. Kombinasi + Sensitif). Nilai digabung ke
-         hidden #d1_tipekulit — id yang sama dibaca buildHandoff & _bawaKontrol. -->
-    <div class="f s7"><span class="lab">Tipe kulit <span class="opt">boleh lebih dari satu</span></span>
-      <div class="opts tight compact" style="padding-top:4px" id="d1_tk">
-        <label class="opt"><input type="checkbox" value="Kering" onchange="syncTipeKulit()"> Kering</label>
-        <label class="opt"><input type="checkbox" value="Normal" onchange="syncTipeKulit()"> Normal</label>
-        <label class="opt"><input type="checkbox" value="Kombinasi" onchange="syncTipeKulit()"> Kombinasi</label>
-        <label class="opt"><input type="checkbox" value="Berminyak" onchange="syncTipeKulit()"> Berminyak</label>
-        <label class="opt"><input type="checkbox" value="Sensitif" onchange="syncTipeKulit()"> Sensitif</label>
-      </div>
-      <input type="hidden" id="d1_tipekulit">
-    </div>
-  </div>
-  <!-- BB/TB/IMT diukur PERAWAT di Form 1; nilainya masuk lewat Muat Form 1 dan
-       tetap tersimpan ke handoff lewat id yang sama (hidden). -->
-  <input type="hidden" id="d1_bb"><input type="hidden" id="d1_tb"><input type="hidden" id="d1_imt">
-
-  </div>
-  <!-- D1 lama (diagnosis, IGA) — kini bagian D1; tampil di awal & kontrol -->
   <div class="dxblk">
-  <div class="d1h">Temuan &amp; diagnosis</div>
   <div class="row">
     <div class="f s3"><label class="lab" for="d1_dokter">Dokter pemeriksa</label><input class="in" id="d1_dokter" placeholder="dr. …, Sp.DVE / Sp.GK"></div>
     <div class="f s9"><label class="lab" for="d2_hasil">Catatan klinis</label><textarea class="in" id="d2_hasil" rows="3" placeholder="Temuan: mis. tampak sehat; papul-pustul dominan rahang, PIH ringan; kulit sensitif&#10;Penunjang: mis. panel hormon / InBody / Hair Analyser — atau &quot;tidak perlu&quot;"></textarea></div>
@@ -1752,6 +1713,44 @@ body.mode-kontrol #rb2 .rl::after{content:' — dilewati';font-size:12px;font-we
   </div>
     </div>
   </div>
+
+  </div>
+  <!-- D1 lama (diagnosis, IGA) — kini bagian D1; tampil di awal & kontrol -->
+  <div class="vis-awal">
+  
+  
+  <!-- Urutan D1 mengikuti alur pemeriksaan: siapa memeriksa → profil kulit → diagnosis &
+       derajat → catatan klinis. Keadaan umum, hasil asesmen & penunjang kini SATU kolom
+       "Catatan klinis" (#d2_hasil). #d1_umum dipertahankan tersembunyi agar skema handoff tetap. -->
+  <input type="hidden" id="d1_umum">
+  <div class="row">
+    <!-- Fitzpatrick: RADIO — satu tipe kulit saja per pasien, tidak mungkin ganda. -->
+    <div class="f s5"><span class="lab">Fitzpatrick <span class="opt">pilih satu</span></span>
+      <div class="opts tight compact" style="padding-top:4px">
+        <label class="opt"><input type="radio" name="d1_fitz" value="I"> I</label>
+        <label class="opt"><input type="radio" name="d1_fitz" value="II"> II</label>
+        <label class="opt"><input type="radio" name="d1_fitz" value="III"> III</label>
+        <label class="opt"><input type="radio" name="d1_fitz" value="IV"> IV</label>
+        <label class="opt"><input type="radio" name="d1_fitz" value="V"> V</label>
+        <label class="opt"><input type="radio" name="d1_fitz" value="VI"> VI</label>
+      </div>
+    </div>
+    <!-- Tipe kulit: boleh lebih dari satu (mis. Kombinasi + Sensitif). Nilai digabung ke
+         hidden #d1_tipekulit — id yang sama dibaca buildHandoff & _bawaKontrol. -->
+    <div class="f s7"><span class="lab">Tipe kulit <span class="opt">boleh lebih dari satu</span></span>
+      <div class="opts tight compact" style="padding-top:4px" id="d1_tk">
+        <label class="opt"><input type="checkbox" value="Kering" onchange="syncTipeKulit()"> Kering</label>
+        <label class="opt"><input type="checkbox" value="Normal" onchange="syncTipeKulit()"> Normal</label>
+        <label class="opt"><input type="checkbox" value="Kombinasi" onchange="syncTipeKulit()"> Kombinasi</label>
+        <label class="opt"><input type="checkbox" value="Berminyak" onchange="syncTipeKulit()"> Berminyak</label>
+        <label class="opt"><input type="checkbox" value="Sensitif" onchange="syncTipeKulit()"> Sensitif</label>
+      </div>
+      <input type="hidden" id="d1_tipekulit">
+    </div>
+  </div>
+  <!-- BB/TB/IMT diukur PERAWAT di Form 1; nilainya masuk lewat Muat Form 1 dan
+       tetap tersimpan ke handoff lewat id yang sama (hidden). -->
+  <input type="hidden" id="d1_bb"><input type="hidden" id="d1_tb"><input type="hidden" id="d1_imt">
 
   </div>
   <div class="vis-kontrol">
