@@ -1570,7 +1570,6 @@ body.mode-kontrol #rb2 .rl::after{content:' — dilewati';font-size:12px;font-we
     <div class="tb-more"><button type="button" class="btn" id="tb_more" aria-haspopup="menu" aria-expanded="false" aria-controls="tbmenu" onclick="tbMenu()">Lainnya &#9662;</button>
       <div class="tbmenu" id="tbmenu" role="menu" aria-label="Aksi lain">
         <button type="button" role="menuitem" onclick="tbMenu(false);cetakSemua()">Cetak / Simpan PDF <small>lembar asesmen dokter 1 halaman</small></button>
-        <button type="button" role="menuitem" onclick="tbMenu(false);issueHandoff()">Terbitkan Handoff <small>juga di akhir langkah 6</small></button>
         <button type="button" role="menuitem" onclick="tbMenu(false);printAll()">Cetak semua form program</button>
         <a role="menuitem" href="ADC_Panduan_Pengisian_Form.html" target="_blank" rel="noopener" onclick="tbMenu(false)">Panduan pengisian <small>buka di tab baru</small></a>
         <button type="button" role="menuitem" class="danger" onclick="tbMenu(false);resetForm()">Reset form&hellip;</button>
@@ -2909,7 +2908,7 @@ function saveSchedToRecord(){
   if(st){ st.textContent='Catatan jadwal tersimpan — berkas diunduh & disalin ke clipboard. Lampirkan ke rekam medis NeoSoft pasien.'; st.style.color='#3D7A5F'; }
 }
 function resetForm(){
-  try{ window._rbOverride=false; setTimeout(syncRisikoBekas,0); window._ttd=null; _ttdStatus(''); window._isian={}; var cl=document.getElementById('d8_consent_lbl'); if(cl) cl.textContent=''; setTimeout(_icdChips,0); }catch(e){}
+  try{ window._rbOverride=false; setTimeout(syncRisikoBekas,0); window._ttd=null; window._ttdTakBisa=false; _ttdStatus(''); window._isian={}; var cl=document.getElementById('d8_consent_lbl'); if(cl) cl.textContent=''; setTimeout(_icdChips,0); }catch(e){}
   if(!confirm('Reset semua isian formulir?')) return;
   var _dc=document.getElementById('terbit_done'); if(_dc) _dc.hidden=true;
   /* radio juga hanya dilepas centangnya — mengosongkan value-nya membuat Fitzpatrick
@@ -3081,7 +3080,7 @@ function buildHandoff(){
     }:null,
     penerbitan:{ oleh:_hv('d8_by'), waktu:new Date().toISOString(),
                  /* siapa yang masuk ke hub saat terbit + tanda tangan PIN dokter (diisi issueHandoff) + nomor lembar consent */
-                 pengguna_hub:(window._hubUser?{id:window._hubUser.id,nama:window._hubUser.nama,peran:window._hubUser.peran}:null), ttd:window._ttd||null,
+                 pengguna_hub:(window._hubUser?{id:window._hubUser.id,nama:window._hubUser.nama,peran:window._hubUser.peran}:null), ttd:window._ttd||null, ttd_tidak_bisa:window._ttdTakBisa||null,
                  consent_no:_hv('d8_consent_no')||undefined,
                  signoff_dokter:_ck('d8_signoff'), dokter_signoff:_hv('d8_dokter'), tgl_signoff:_hv('d8_tgl'),
                  consent_tindakan:_ck('d8_consent'), skrining_obat:_ck('d8_skrining'), obat_berisiko:_obatBerisiko(),
@@ -3670,7 +3669,7 @@ function reqStatus(){
   }
   out.push({label:'Ritme kontrol', ok:!!(_v('d5_iv')&&_v('d5_start')), go:'d5_iv'});
   /* bila hub hidup & minta pengguna: yang dihitung adalah tanda tangan PIN, bukan kotak centang */
-  out.push({label:'Sign-off dokter', ok:(_hubOn&&window._hubLoginReq)?!!window._ttd:_ck('d8_signoff'), go:'d8_signoff'});
+  out.push({label:'Sign-off dokter', ok:(_hubOn&&window._hubLoginReq&&!window._ttdTakBisa)?!!window._ttd:_ck('d8_signoff'), go:'d8_signoff'});
   return out;
 }
 /* ===== MODE KUNJUNGAN ===== */
@@ -4112,7 +4111,7 @@ function _terbitDialog(h,a,w,tanpaPin){
 function _terbitLanjut(h,a,tanpaPin){
   /* TANDA TANGAN ELEKTRONIK: hub hidup + dokter sign-off -> dokter memasukkan PIN-nya; hub menerbitkan
      stempel (nama, waktu, bukti) yang ikut tersimpan di handoff (PMK 24/2022 Ps. 16 ayat 2, Ps. 31). */
-  if(!tanpaPin && _hubOn && window._hubLoginReq && _ck('d8_signoff') && !h.penerbitan.ttd){
+  if(!tanpaPin && _hubOn && window._hubLoginReq && _ck('d8_signoff') && !h.penerbitan.ttd && !window._ttdTakBisa && !/^(kunci|jaringan|lain)$/.test(window._terbitHubSt||'')){
     hubTTD(h.pasien.rm,'',function(ttd){
       if(ttd){ h.penerbitan.ttd=ttd; window._ttd=ttd; _ttdStatus('Ditandatangani · '+ttd.nama+' · '+_ttdJam(ttd.waktu)+' · PIN diverifikasi hub','ok');
         { var dd=document.getElementById('d8_dokter'); if(dd) dd.value=ttd.nama; h.penerbitan.dokter_signoff=ttd.nama; }   /* penanda tangan = pemilik PIN, menimpa nama prefill */
@@ -4317,20 +4316,31 @@ function _ttdJam(w){ try{ return new Date(w).toLocaleTimeString('id-ID',{hour:'2
 function _ttdStatus(t,cls){ var el=document.getElementById('d8_ttd'); if(!el) return; el.textContent=t||''; el.className='ttdst'+(cls?(' '+cls):''); }
 function signoffTTD(){
   var cb=document.getElementById('d8_signoff'); if(!cb) return;
-  if(!cb.checked){ window._ttd=null; _ttdStatus(''); return; }
+  if(!cb.checked){ window._ttd=null; window._ttdTakBisa=false; _ttdStatus(''); return; }
   var tg=document.getElementById('d8_tgl'); if(tg&&!tg.value) tg.value=new Date().toISOString().slice(0,10);
   if(window._ttd){ _ttdStatus('Ditandatangani · '+window._ttd.nama+' · '+_ttdJam(window._ttd.waktu)+' · PIN diverifikasi hub','ok'); return; }
   if(!_hubOn){ _ttdStatus('Hub mati — sign-off tercatat tanpa tanda tangan elektronik (PIN).','warn'); return; }
   if(!window._hubLoginReq){ _ttdStatus(''); return; }
-  _ttdStatus('Menunggu PIN dokter…');
-  hubTTD(_hv('rm'),'',function(ttd){
-    if(ttd){ window._ttd=ttd; var dd=document.getElementById('d8_dokter'); if(dd) dd.value=ttd.nama;   /* penanda tangan = pemilik PIN */
-      _ttdStatus('Ditandatangani · '+ttd.nama+' · '+_ttdJam(ttd.waktu)+' · PIN diverifikasi hub','ok'); }
-    else { /* dibatalkan: centang dilepas — kotak tercentang tanpa PIN terbaca sebagai "sudah tanda tangan" */
-      cb.checked=false; _ttdStatus('Belum ditandatangani — centang lagi untuk memasukkan PIN dokter.','warn');
-      if(typeof updateReq==='function') updateReq(); }
+  _ttdStatus('Memeriksa hub…'); window._ttdTakBisa=false;
+  /* kesiapan hub dulu: tablet belum terdaftar / hub tak terjangkau -> PIN mustahil diverifikasi, jangan buka dialog buntu */
+  _hubSiap(function(st){
+    if(!cb.checked) return;
+    if(st==='kunci'||st==='jaringan'||st==='lain'){
+      window._ttdTakBisa=st;
+      _ttdStatusHTML((st==='kunci'?'Tablet belum terdaftar di hub':'Hub tidak terjangkau')+' — sign-off dicatat tanpa tanda tangan PIN.'+
+        (st==='kunci'?' <button type="button" class="lnk" onclick="hubSetup();signoffTTD()">Daftarkan tablet…</button>':''),'warn');
+      if(typeof updateReq==='function') updateReq(); return; }
+    _ttdStatus('Menunggu PIN dokter…');
+    hubTTD(_hv('rm'),'',function(ttd){
+      if(ttd){ window._ttd=ttd; var dd=document.getElementById('d8_dokter'); if(dd) dd.value=ttd.nama;   /* penanda tangan = pemilik PIN */
+        _ttdStatus('Ditandatangani · '+ttd.nama+' · '+_ttdJam(ttd.waktu)+' · PIN diverifikasi hub','ok'); }
+      else { /* dibatalkan: centang dilepas — kotak tercentang tanpa PIN terbaca sebagai "sudah tanda tangan" */
+        cb.checked=false; _ttdStatus('Belum ditandatangani — centang lagi untuk memasukkan PIN dokter.','warn');
+        if(typeof updateReq==='function') updateReq(); }
+    });
   });
 }
+function _ttdStatusHTML(h,cls){ var el=document.getElementById('d8_ttd'); if(!el) return; el.innerHTML=h||''; el.className='ttdst'+(cls?(' '+cls):''); }
 
 /* ===== RISIKO BEKAS (Acne B): faktor -> kesimpulan otomatis, dokter boleh menimpa =====
    Aturan (Dr. Oku): 0 faktor = belum disimpulkan (tidak ada centang bawaan), 1 faktor = Sedang,
@@ -4386,8 +4396,8 @@ function _serahData(){
   var iga=progs.map(function(p){ var id=(typeof IGA_ID!=='undefined'&&IGA_ID[p])?IGA_ID[p]:''; var v=id?_v(id):''; return v?('IGA '+PLABEL[p]+' '+v):''; }).filter(Boolean).join(' · ');
   var rx=(typeof collectRx==='function')?collectRx().length:0;
   var iv=_v('d5_iv'), ritme=iv?('tiap '+(typeof IVTEXT!=='undefined'&&IVTEXT[iv]?IVTEXT[iv]:iv+' hari')+(_v('d5_start')?(' mulai '+_tglID(_v('d5_start'))):'')):'';
-  var ttd=window._ttd?('Ditandatangani · '+window._ttd.nama+' · '+_ttdJam(window._ttd.waktu)):(_ck('d8_signoff')?'Sign-off dicentang — tanpa verifikasi PIN':'Belum sign-off');
-  return {miss:miss, prog:prog, iga:iga, rx:rx, ritme:ritme, ttd:ttd, ttdOk:!!window._ttd, hm:_pasienHamilMenyusui()};
+  var ttd=window._ttd?('Ditandatangani · '+window._ttd.nama+' · '+_ttdJam(window._ttd.waktu)):(_ck('d8_signoff')?(window._ttdTakBisa?'Sign-off tanpa PIN — tablet belum terdaftar / hub tak terjangkau':'Sign-off dicentang — tanpa verifikasi PIN'):'Belum sign-off');
+  return {miss:miss, prog:prog, iga:iga, rx:rx, ritme:ritme, ttd:ttd, ttdOk:!!window._ttd||(!!window._ttdTakBisa&&_ck('d8_signoff')), hm:_pasienHamilMenyusui()};
 }
 function _serahKV(d,denganTombol){
   var kv=function(k,v,cls){ return '<div><span class="k">'+k+'</span><div class="v'+(cls?(' '+cls):'')+'">'+v+'</div></div>'; };
