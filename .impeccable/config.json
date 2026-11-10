@@ -1,0 +1,18 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "cream-palette",
+        "value": "*",
+        "files": [
+          "www/admin.html",
+          "www/index.html"
+        ],
+        "createdAt": "2026-11-10T12:22:08.692Z",
+        "reason": "Palet ADC yang disengaja: --canvas #FBF8F3 dipakai index.html dan keempat form (sistem Archivo hangat); halaman hub mengikuti sistem yang sama"
+      }
+    ]
+  }
+}

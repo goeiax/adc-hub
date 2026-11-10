@@ -24,3 +24,6 @@ backup/
 
 # impeccable live-mode scratch
 .impeccable/live/inject-journal.json
+
+# pengecualian: config detektor desain impeccable (bukan config.json hub) boleh ikut repo
+!.impeccable/config.json
