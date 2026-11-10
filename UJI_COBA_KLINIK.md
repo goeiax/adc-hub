@@ -17,7 +17,8 @@ lembar cetak dan handoff dari hub dilampirkan ke sana seperti biasa.
 | **1 PC hub** (Windows) | Menyala selama jam klinik, di Wi-Fi/LAN yang **sama** dengan tablet (bukan Wi-Fi tamu). Minta IT memberi **IP statis / DHCP reservation**, karena alamat ini disimpan di tiap tablet. |
 | **Node.js LTS** | Unduh dari nodejs.org, pasang next-next-finish. Cek di Command Prompt: `node -v`. |
 | **Folder `adc-hub`** dari PC pengembangan | Salin **tanpa** `data\`, `config.json`, `users.json`, `hub.pfx` (lihat §1). Isi wajib: `server.js`, `start.bat`, `backup.bat`, folder `www\` (5 HTML + index), folder `tools\`. |
-| **Tablet** perawat & dokter | Chrome (Android) atau Safari (iPad), tersambung ke Wi-Fi klinik. Satu tablet registrasi, satu per ruang konsultasi. |
+| **Perangkat staf** | Perawat: tablet (Chrome Android / Safari iPad) **atau** PC meja registrasi. Dokter: **PC di tiap ruang konsultasi** (Chrome atau Edge). Semua di jaringan klinik yang sama dengan PC hub. PC hub boleh sekaligus PC meja perawat. |
+| **Printer** | Satu printer jaringan di meja perawat (lihat §9). Semua cetakan dari PC dokter dan tablet keluar di situ. |
 | **Tempat cadangan** | Folder di drive lain / NAS / folder OneDrive-Drive di PC hub. Diisi ke `backup_dir` (§1). |
 | **Daftar staf** | Nama lengkap + peran (dokter / perawat / cs) untuk dibuatkan akun. PIN dokter = tanda tangan elektroniknya, jadi dokter memilih sendiri dan tidak dibagikan. |
 
@@ -88,7 +89,13 @@ node tools\pengguna.js daftar
 
 ---
 
-## 3. Daftarkan tiap tablet (sekali per perangkat, ±3 menit)
+## 3. Daftarkan tiap perangkat — tablet maupun PC (sekali per perangkat, ±3 menit)
+
+Langkah di bawah sama untuk PC dokter: buka alamat hub di Chrome/Edge, buat **shortcut
+di desktop** (Chrome: ⋮ → *Simpan dan bagikan* → *Buat pintasan*, centang "Buka sebagai
+jendela"), lalu daftarkan kunci dan Masuk lewat chip HUB. Di PC dokter sekalian
+**izinkan pop-up** untuk alamat hub (§9), karena lembar consent dan lembar program dibuka
+di jendela baru untuk dicetak.
 
 1. Tablet di Wi-Fi klinik. Buka `http://<IP-PC-hub>:3777/` (contoh `http://192.168.1.10:3777/`).
    Halaman "Pilih form" tampil → **tambahkan ke layar utama**
@@ -185,11 +192,70 @@ Sesi staf tidak hilang.
 | Peringatan sertifikat di tablet (HTTPS) | Normal untuk sertifikat buatan sendiri; terima sekali, atau pasang `hub.cer` sebagai tepercaya. |
 | Halaman lama setelah form diperbarui | Tutup tab & buka lagi dari layar utama; pastikan `www\` di PC hub sudah ditimpa. |
 | Lupa PIN admin | `node tools\pengguna.js pin admin <baru>` di PC hub (butuh akses PC hub). |
-| Printer | Cetak dari tablet mengikuti printer yang terlihat tablet; bila tidak ada, buka RM yang sama di PC hub (CS masuk) dan cetak dari sana. |
+| Printer tidak muncul di PC dokter | Printer jaringan: cek IP printer & tambahkan manual by IP (§8A). Printer bagi-pakai: PC perawat mati / profil jaringan *Public* / sharing belum aktif (§8B). |
+| "Pop-up masih diblokir browser" saat cetak consent / program | Izinkan pop-up untuk alamat hub di Chrome/Edge (§8), lalu klik lagi. |
+| Cetakan terpotong / tanpa warna pita | Kertas bukan A4, atau *Background graphics* tidak dicentang di dialog cetak. |
 
 ---
 
-## 8. Yang dicatat selama uji coba (untuk evaluasi)
+## 8. Printer: satu printer di meja perawat untuk semua
+
+Hub **tidak** mencetak. Tombol *Cetak* di form memakai dialog cetak browser perangkat
+yang menekannya, jadi printer harus terlihat oleh **tiap PC dokter** dan (bila perlu)
+oleh tablet. Cara paling mudah: satu printer **jaringan** di meja perawat.
+
+**A. Printer jaringan (dianjurkan)** — printer punya port LAN/Wi-Fi (hampir semua printer
+kantor; cari logo *Mopria* / *AirPrint* di spesifikasi).
+
+1. Sambungkan printer ke jaringan klinik; minta IT memberi **IP statis** (sama seperti PC hub).
+2. **Setiap PC dokter & PC perawat**: Settings → Bluetooth & devices → Printers & scanners →
+   *Add device*. Bila tidak muncul otomatis: *Add manually* → *Add a printer using an IP
+   address* → isi IP printer → Next (Windows mengunduh driver). Jadikan **default**,
+   lalu *Printing preferences* → ukuran kertas **A4** (lembar form memakai A4).
+3. **Tablet Android**: Settings → Connected devices → Printing → *Default Print Service*
+   aktif → printer muncul sendiri. **iPad**: AirPrint otomatis; tombol Cetak di Safari
+   langsung menampilkan printer itu.
+4. Uji dari tiap perangkat: Form 2 → Lainnya → *Cetak / Simpan PDF* → pilih printer → cetak
+   satu halaman. Lembar keluar di meja perawat.
+
+**B. Printer USB ke PC meja perawat (bila printer tidak punya jaringan)**
+
+1. Colok printer ke PC meja perawat (boleh PC hub). Pasang driver, cetak uji.
+2. Bagikan: Settings → Printers & scanners → pilih printer → *Printer properties* → tab
+   **Sharing** → centang *Share this printer*, beri nama pendek, mis. `ADC-Perawat`.
+   Pastikan PC itu di profil jaringan **Private** dan *Network discovery* + *File and printer
+   sharing* aktif (Settings → Network → Advanced sharing settings).
+3. **Setiap PC dokter**: Printers & scanners → *Add device* → *Add manually* →
+   *Select a shared printer by name* → `\\NAMA-PC-PERAWAT\ADC-Perawat` → Next.
+   Bila diminta kredensial, pakai akun Windows PC perawat (atau aktifkan *Turn off
+   password protected sharing* di PC perawat).
+4. **Tablet** tidak bisa memakai printer bagi-pakai Windows. Untuk tablet, cetakan dilakukan
+   dari PC perawat: buka RM yang sama di PC perawat → cetak. Dalam praktik tablet jarang
+   perlu mencetak (Form 1 ditandatangani di layar).
+5. PC perawat harus **menyala** agar PC dokter bisa mencetak.
+
+**Pengaturan browser di PC dokter (sekali)**
+
+- Chrome/Edge: Settings → Privacy and security → Site settings → **Pop-ups and redirects**
+  → *Allowed to send pop-ups* → *Add* → alamat hub (mis. `http://192.168.1.10:3777`).
+  Tanpa ini lembar consent / lembar program tidak terbuka dan form menampilkan
+  "Pop-up masih diblokir browser".
+- Dialog cetak: *Destination* = printer meja perawat, kertas A4, *Margins* default,
+  centang *Background graphics* supaya pita judul dan kotak tanda tangan ikut tercetak.
+- **Simpan PDF**: pilih *Save as PDF* / *Microsoft Print to PDF* di dialog yang sama — untuk
+  melampirkan lembar ke NeoSoft tanpa kertas.
+
+**Lembar yang dicetak & siapa yang mencetak**
+
+| Lembar | Dari | Siapa |
+|---|---|---|
+| Lembar pasien (rencana program, resep, jadwal) | Form 2 → Lainnya → Cetak | Dokter (PC ruang) atau perawat setelah Terbitkan |
+| Lembar informed consent (ditandatangani di kertas) | Form 2 langkah 5 → *Lembar consent* (jendela baru) | Dokter, sebelum tindakan |
+| Lembar program (Acne/Melasma/Hair) | Di dalam form program → *Cetak program ini* | Dokter, bila perlu |
+| Ringkasan untuk pasien / tren IGA | Journey & Outcome Tracker → Cetak | CS / dokter |
+| Form 1 registrasi | Form 1 → Cetak | Perawat, hanya bila klinik ingin arsip kertas |
+
+## 9. Yang dicatat selama uji coba (untuk evaluasi)
 
 Satu lembar per hari di meja registrasi:
 
