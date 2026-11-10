@@ -7,7 +7,10 @@ Unduhan berkas di form tetap jalan sebagai cadangan; hub mati = form tetap bisa
 dipakai dengan berkas.
 
 Tanpa dependensi: **Node.js LTS + folder ini** = seluruh instalasi. Tidak ada
-`npm install` (kecuali modul NeoSoft opsional di bawah).
+`npm install` (kecuali modul NeoSoft opsional di bawah). Jalan di **Windows atau Linux**:
+padanan Linux dari tiap skrip `.bat`/`.ps1` ada sebagai `start.sh`, `backup.sh`,
+`update-forms.sh`, `tools/buat-sertifikat.sh` (openssl) dan layanan systemd di `linux/`
+(`sudo sh linux/pasang-service.sh`). Rincian: UJI_COBA_KLINIK.md §1b.
 
 ---
 

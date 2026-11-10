@@ -69,6 +69,30 @@ otomatis, **jangan pernah** port-forward 3777 ke internet.
 
 ---
 
+### 1b. Bila PC hub memakai Linux (Ubuntu/Debian/Fedora)
+
+Server-nya sama persis; hanya pembungkusnya yang berbeda. Padanan tiap langkah §1:
+
+| Windows | Linux |
+|---|---|
+| Pasang Node.js LTS dari nodejs.org | `sudo apt install nodejs` (Ubuntu 24.04+/Debian 12+ sudah ≥18) atau paket NodeSource; cek `node -v` |
+| Salin ke `C:\adc-hub` | Salin ke `/opt/adc-hub` (tanpa `data/`, `config.json`, `users.json`); `chmod +x *.sh tools/*.sh linux/*.sh` |
+| `start.bat` | `./start.sh` untuk mencoba — URL, Kunci dan PIN admin pertama tampil di terminal |
+| Firewall → Private ✓ | `sudo ufw allow 3777/tcp` (Fedora: `firewall-cmd --add-port=3777/tcp --permanent && firewall-cmd --reload`) |
+| `backup_dir` di `config.json` | sama, dengan jalur Linux, mis. `"backup_dir": "/mnt/backup/adc"` |
+| `node tools\pengguna.js …` | `node tools/pengguna.js …` (identik) |
+| `tools\buat-sertifikat.ps1` | `sh tools/buat-sertifikat.sh hub-adc <IP-PC-hub>` → `hub.pfx` + `hub.cer` (butuh openssl) |
+| Shortcut di folder Startup | `sudo sh linux/pasang-service.sh` → layanan systemd `adc-hub`: hidup saat boot, restart sendiri bila jatuh |
+| Jendela hitam hub | `sudo journalctl -u adc-hub -f` (log berjalan) · `sudo systemctl status adc-hub` |
+| `backup.bat` / `update-forms.bat` | `./backup.sh` / `./update-forms.sh /media/usb/adc-forms` (folder berisi 5 HTML baru) |
+| BitLocker | LUKS (dipilih saat instalasi OS) |
+
+Urutan yang disarankan: salin folder → `./start.sh` sekali untuk melihat Kunci & PIN admin → Ctrl+C →
+isi `backup_dir` → ganti PIN admin → (opsional) sertifikat → `sudo sh linux/pasang-service.sh`.
+Setelah menjadi layanan, perubahan `server.js` butuh `sudo systemctl restart adc-hub`;
+perubahan form di `www/` tidak. Printer dari PC Linux memakai CUPS (Settings → Printers) —
+untuk PC dokter berbasis Windows tidak ada bedanya karena hub tidak mencetak (§8).
+
 ## 2. Buat akun staf (PC hub, Command Prompt di `C:\adc-hub`)
 
 ```
@@ -192,6 +216,8 @@ Sesi staf tidak hilang.
 | Peringatan sertifikat di tablet (HTTPS) | Normal untuk sertifikat buatan sendiri; terima sekali, atau pasang `hub.cer` sebagai tepercaya. |
 | Halaman lama setelah form diperbarui | Tutup tab & buka lagi dari layar utama; pastikan `www\` di PC hub sudah ditimpa. |
 | Lupa PIN admin | `node tools\pengguna.js pin admin <baru>` di PC hub (butuh akses PC hub). |
+| Linux: `./start.sh` → "bad interpreter" / layanan gagal start | Skrip tersalin dengan akhir baris CRLF → `sed -i 's/\r$//' *.sh tools/*.sh linux/*.sh`; atau Node tidak di PATH layanan → `which node`, pasang paket distro. |
+| Linux: layanan jalan tapi tidak bisa menulis data | Folder bukan milik pengguna layanan → `sudo chown -R <user> /opt/adc-hub`; `backup_dir` di luar jalur yang diizinkan unit → jalankan ulang `pasang-service.sh` setelah mengisi `backup_dir`. |
 | Printer tidak muncul di PC dokter | Printer jaringan: cek IP printer & tambahkan manual by IP (§8A). Printer bagi-pakai: PC perawat mati / profil jaringan *Public* / sharing belum aktif (§8B). |
 | "Pop-up masih diblokir browser" saat cetak consent / program | Izinkan pop-up untuk alamat hub di Chrome/Edge (§8), lalu klik lagi. |
 | Cetakan terpotong / tanpa warna pita | Kertas bukan A4, atau *Background graphics* tidak dicentang di dialog cetak. |

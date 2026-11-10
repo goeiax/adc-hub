@@ -1,0 +1,26 @@
+# Unit systemd ADC Hub — templat; linux/pasang-service.sh mengganti __DIR__ dan __USER__
+# lalu memasangnya ke /etc/systemd/system/adc-hub.service.
+[Unit]
+Description=ADC Hub — Skin Quality Program (server form klinik, port 3777)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=__USER__
+WorkingDirectory=__DIR__
+ExecStart=/usr/bin/env node server.js
+Restart=always
+RestartSec=3
+# Jendela hitam di Windows diganti jurnal: sudo journalctl -u adc-hub -f
+StandardOutput=journal
+StandardError=journal
+# Pengerasan ringan: hub hanya butuh menulis ke folder sendiri (data/, config.json, users.json) + backup_dir
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=read-only
+ReadWritePaths=__DIR__ __BACKUP__
+
+[Install]
+WantedBy=multi-user.target
