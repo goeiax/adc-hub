@@ -320,12 +320,36 @@ const handler = (req, res) => {
   /* pengguna (admin) */
   if (parts[1] === 'users') {
     if (!boleh('users')) return tolak('users');
-    if (req.method === 'GET') return kirim(res, 200, { users: (bacaUsers().users || []).map(x => ({ id: x.id, nama: x.nama, peran: x.peran, aktif: x.aktif })) });
+    if (req.method === 'GET') return kirim(res, 200, { saya: sesi.id, users: (bacaUsers().users || []).map(x => ({ id: x.id, nama: x.nama, peran: x.peran, aktif: x.aktif !== false, dibuat: x.dibuat || null, diubah: x.diubah || null })) });
+    /* POST: pengguna baru = {id,nama,peran,pin}; pengguna lama = {id} + kolom yang diubah (nama | peran | aktif | pin).
+       Dipakai dashboard www/admin.html dan tools/pengguna.js setara. */
     return bodyJSON(req, o => {
-      if (!o || !o.id || !o.nama || !PERAN.includes(o.peran) || !/^\d{4,8}$/.test(String(o.pin || ''))) return kirim(res, 400, { error: 'butuh id, nama, peran (' + PERAN.join('/') + '), pin 4–8 digit' });
-      const users = bacaUsers(); buatUser(users, o.id, o.nama, o.peran, o.pin); tulisUsers(users);
-      audit({ aksi: 'user_simpan', ip, user: sesi.id, detail: o.id + ' ' + o.peran });
-      return kirim(res, 200, { ok: true });
+      const id = String((o && o.id) || '').trim().toLowerCase();
+      if (!/^[a-z0-9][a-z0-9._-]{1,23}$/.test(id)) return kirim(res, 400, { error: 'id: huruf kecil, angka, titik; 2–24 karakter' });
+      if (o.pin !== undefined && !/^\d{4,8}$/.test(String(o.pin))) return kirim(res, 400, { error: 'PIN 4–8 digit' });
+      if (o.peran !== undefined && !PERAN.includes(o.peran)) return kirim(res, 400, { error: 'peran: ' + PERAN.join('/') });
+      const users = bacaUsers(); users.users = users.users || [];
+      const ada = users.users.find(x => x.id === id);
+      if (!ada) {
+        if (!o.nama || !String(o.nama).trim() || !o.peran || o.pin === undefined) return kirim(res, 400, { error: 'pengguna baru butuh id, nama, peran (' + PERAN.join('/') + '), pin 4–8 digit' });
+        buatUser(users, id, String(o.nama).trim(), o.peran, o.pin); tulisUsers(users);
+        audit({ aksi: 'user_simpan', ip, user: sesi.id, detail: id + ' ' + o.peran });
+        return kirim(res, 200, { ok: true, aksi: 'baru' });
+      }
+      const turun = (o.peran !== undefined && o.peran !== 'admin') || o.aktif === false;
+      if (id === sesi.id && turun) return kirim(res, 400, { error: 'akun sendiri tidak bisa dinonaktifkan atau diturunkan perannya' });
+      if (ada.peran === 'admin' && turun && !users.users.some(x => x.id !== id && x.peran === 'admin' && x.aktif !== false)) return kirim(res, 400, { error: 'tidak bisa: ini satu-satunya admin aktif' });
+      const ubah = [];
+      if (o.nama !== undefined && String(o.nama).trim()) { ada.nama = String(o.nama).trim(); ubah.push('nama'); }
+      if (o.peran !== undefined && o.peran !== ada.peran) { ada.peran = o.peran; ubah.push('peran=' + o.peran); }
+      if (o.aktif !== undefined && !!o.aktif !== (ada.aktif !== false)) { ada.aktif = !!o.aktif; ubah.push(ada.aktif ? 'aktif' : 'nonaktif'); }
+      if (o.pin !== undefined) { ada.salt = crypto.randomBytes(8).toString('hex'); ada.hash = hashPin(o.pin, ada.salt); ubah.push('pin'); }
+      if (!ubah.length) return kirim(res, 400, { error: 'tidak ada yang diubah' });
+      ada.diubah = new Date().toISOString(); tulisUsers(users);
+      /* peran / PIN / nonaktif berubah -> sesi lama pengguna itu ditutup (kecuali sesi yang sedang dipakai admin ini) */
+      if (ubah.some(u => u !== 'nama')) { const tokIni = req.headers['x-adc-token']; for (const t of Object.keys(SESI)) if (SESI[t] && SESI[t].id === id && t !== tokIni) delete SESI[t]; simpanSesi(); }
+      audit({ aksi: 'user_ubah', ip, user: sesi.id, detail: id + ' ' + ubah.join(',') });
+      return kirim(res, 200, { ok: true, aksi: 'ubah', ubah });
     });
   }
 

@@ -93,7 +93,17 @@ Setelah menjadi layanan, perubahan `server.js` butuh `sudo systemctl restart adc
 perubahan form di `www/` tidak. Printer dari PC Linux memakai CUPS (Settings → Printers) —
 untuk PC dokter berbasis Windows tidak ada bedanya karena hub tidak mencetak (§8).
 
-## 2. Buat akun staf (PC hub, Command Prompt di `C:\adc-hub`)
+## 2. Buat akun staf
+
+**Cara mudah — dashboard Pengguna** (dari PC mana pun di jaringan klinik):
+buka `http://<IP-PC-hub>:3777/admin.html` (atau dari halaman "Pilih form" → kartu
+*Pengguna & peran*) → masuk sebagai **admin** (PIN dari jendela hub saat pertama jalan) →
+isi nama, ID, peran, PIN → *Simpan pengguna*. Di daftar: ketuk peran untuk menggantinya,
+*Atur ulang PIN* untuk staf yang lupa, *Nonaktifkan* untuk staf yang keluar. Setiap
+perubahan masuk log audit atas nama admin yang masuk. Akun sendiri dan admin aktif
+terakhir tidak bisa diturunkan atau dinonaktifkan.
+
+**Cara baris perintah** (PC hub, Command Prompt di `C:\adc-hub`) — hasilnya sama:
 
 ```
 node tools\pengguna.js tambah dr.sari  "dr. Sari Dewi, Sp.DVE"  dokter  482913

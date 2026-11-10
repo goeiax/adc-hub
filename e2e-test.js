@@ -55,6 +55,7 @@ async function open(file, { key = KEY, user = (/Form2/.test(file) ? 'dokter' : '
       try { w.localStorage.setItem('adc_hub_key', key); if (user && TOK[user]) { w.localStorage.setItem('adc_hub_tok', TOK[user]); w.localStorage.setItem('adc_hub_user', JSON.stringify(USER[user])); } } catch (e) {}
     } });
   const w = dom.window;
+  if (/admin\.html$/.test(file)) { await until(() => w._adminSiap === true, 4000).catch(() => {}); return { w, d: w.document, dialogs, dom }; }
   await until(() => typeof w.hubPing === 'function' && w._hubOn === true && (!user || key !== KEY || w._hubUser), 4000).catch(() => {});
   return { w, d: w.document, dialogs, dom };
 }
@@ -114,7 +115,37 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
     { const r = await fetch(BASE + '/api/users', { method: 'POST', headers: Hd('admin', true), body: JSON.stringify({ id: 'dr.baru', nama: 'dr. Baru', peran: 'dokter', pin: '555555' }) });
       const l = await (await fetch(BASE + '/api/login', { method: 'POST', headers: Hd(null, true), body: JSON.stringify({ id: 'dr.baru', pin: '555555' }) })).json();
       const c = await fetch(BASE + '/api/users', { method: 'POST', headers: Hd('cs', true), body: JSON.stringify({ id: 'x', nama: 'x', peran: 'cs', pin: '1234' }) });
-      check('hub: admin menambah pengguna lewat API & pengguna baru bisa masuk; cs ditolak', r.status === 200 && l.ok === true && l.user.peran === 'dokter' && c.status === 403, { r: r.status, l, c: c.status }); }
+      check('hub: admin menambah pengguna lewat API & pengguna baru bisa masuk; cs ditolak', r.status === 200 && l.ok === true && l.user.peran === 'dokter' && c.status === 403, { r: r.status, l, c: c.status });
+      /* dashboard pengguna: ubah peran / PIN / aktif lewat POST yang sama; pagar akun sendiri & admin terakhir */
+      const pu = (b, u = 'admin') => fetch(BASE + '/api/users', { method: 'POST', headers: Hd(u, true), body: JSON.stringify(b) }).then(async x => Object.assign(await x.json().catch(() => ({})), { _s: x.status }));
+      const lg = (id, pin) => fetch(BASE + '/api/login', { method: 'POST', headers: Hd(null, true), body: JSON.stringify({ id, pin }) }).then(x => x.status);
+      const g0 = await (await fetch(BASE + '/api/users', { headers: Hd('admin') })).json();
+      check('users GET: daftar memuat aktif/dibuat + "saya" = admin yang masuk', g0.saya === 'admin' && g0.users.some(x => x.id === 'dr.baru' && x.aktif === true && x.dibuat), g0);
+      const p1 = await pu({ id: 'dr.baru', peran: 'perawat' });
+      const sesiLama = await fetch(BASE + '/api/saya', { headers: Object.assign(Hd(), { 'X-ADC-Token': l.token }) });
+      check('users: ganti peran dr.baru -> perawat; sesi lamanya ditutup (401)', p1.ok === true && p1.ubah.includes('peran=perawat') && sesiLama.status === 401 && (await (await fetch(BASE + '/api/users', { headers: Hd('admin') })).json()).users.find(x => x.id === 'dr.baru').peran === 'perawat', { p1, s: sesiLama.status });
+      const p2 = await pu({ id: 'dr.baru', pin: '666666' });
+      check('users: atur ulang PIN -> PIN lama 401, PIN baru 200', p2.ok === true && (await lg('dr.baru', '555555')) === 401 && (await lg('dr.baru', '666666')) === 200, p2);
+      const p3 = await pu({ id: 'dr.baru', aktif: false });
+      const p4 = await pu({ id: 'dr.baru', aktif: true });
+      check('users: nonaktif -> login 401; aktif lagi -> 200', p3.ok === true && p3.ubah.includes('nonaktif') && (await lg('dr.baru', '666666')) === 200 && p4.ok === true, { p3, p4 });
+      const sendiri = await pu({ id: 'admin', aktif: false }), turun = await pu({ id: 'admin', peran: 'cs' }), idJelek = await pu({ id: 'Dr Baru!', nama: 'x', peran: 'cs', pin: '1234' }), kosong = await pu({ id: 'dr.baru' });
+      check('users: pagar — akun sendiri tidak bisa dinonaktifkan/diturunkan (400), id tidak valid 400, tanpa perubahan 400', sendiri._s === 400 && turun._s === 400 && idJelek._s === 400 && kosong._s === 400, { sendiri, turun, idJelek, kosong });
+      check('users: nonaktif dr.baru berhasil dipulihkan (login 200 setelah p4)', (await lg('dr.baru', '666666')) === 200);
+      /* halaman admin.html: tersaji, gerbang peran, render daftar */
+      check('admin.html tersaji oleh hub + kartu di index', (await fetch(BASE + '/admin.html')).status === 200 && /href="admin.html"/.test(fs.readFileSync(path.join('www', 'index.html'), 'utf8')));
+      { const ad = await open('admin.html', { user: 'admin' });
+        const rows = [...ad.d.querySelectorAll('#rows .u')].map(x => x.dataset.id);
+        const segPer = ad.d.querySelector('.u[data-id="dr.baru"] .seg button[data-peran="perawat"]');
+        check('admin.html (admin): aplikasi tampil, baris pengguna dirender, akun sendiri ditandai "Anda", peran dr.baru = perawat (aria-pressed)', !ad.d.getElementById('app').hidden && rows.includes('dr.baru') && !!ad.d.querySelector('.u[data-id="admin"] .me') && !!segPer && segPer.getAttribute('aria-pressed') === 'true', { rows, app: ad.d.getElementById('app').hidden, gates: ['gate_key', 'gate_login', 'gate_role'].filter(g => !ad.d.getElementById(g).hidden), toast: ad.d.getElementById('toast').textContent, dialogs: ad.dialogs.slice(0, 3) });
+        check('admin.html: tombol & target >= 44 px (CSS) dan kolom PIN/ID memakai label', /\.btn\{[^}]*min-height:44px/.test(fs.readFileSync(path.join('www', 'admin.html'), 'utf8')) && /\.seg button\{[^}]*min-height:44px/.test(fs.readFileSync(path.join('www', 'admin.html'), 'utf8')) && !!ad.d.querySelector('label[for="f_pin"]') && !!ad.d.querySelector('label[for="l_id"]'));
+        const segDok = () => { const b = ad.d.querySelector('.u[data-id="dr.baru"] .seg button[data-peran="dokter"]'); return b ? b.getAttribute('aria-pressed') : null; };
+        if (typeof ad.w.ubahPeran === 'function') ad.w.ubahPeran('dr.baru', 'dokter'); await until(() => segDok() === 'true', 3000).catch(() => {});
+        check('admin.html: ketuk peran -> POST /api/users -> daftar dimuat ulang (dr.baru kembali dokter)', segDok() === 'true' && (await (await fetch(BASE + '/api/users', { headers: Hd('admin') })).json()).users.find(x => x.id === 'dr.baru').peran === 'dokter', { seg: segDok() }); }
+      { const cs = await open('admin.html', { user: 'cs' });
+        check('admin.html (cs): gerbang "Hanya untuk admin", aplikasi tersembunyi', !cs.d.getElementById('gate_role').hidden && cs.d.getElementById('app').hidden && /bukan|hanya/i.test(cs.d.getElementById('role_msg').textContent)); }
+      { const no = await open('admin.html', { user: null });
+        check('admin.html (tanpa sesi): gerbang masuk tampil', !no.d.getElementById('gate_login').hidden && no.d.getElementById('app').hidden); } }
 
     /* ===== 1. FORM 1: isi + simpan intake ===== */
     const f1 = await open('ADC_Form1_Registrasi_Anamnesis_Pasien.html');
@@ -599,7 +630,7 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
       const tr = await open('ADC_SkinQualityProgram_Journey_Outcome_Tracker.html');
       muatRM(tr, 'muatHandoffHub', RM); await until(() => tr.w._ho);
       check('Tracker: Muat handoff terakhir lewat hub (RM) -> kunjungan ke-3', tr.w._ho && tr.w._ho.pasien.rm === RM && tr.w._ho.kunjungan_ke === 3, tr.w._ho && tr.w._ho.kunjungan_ke);
-      check('Hub: halaman depan menautkan 5 halaman (F1, F2, Slimming, Tracker, Panduan)', (fs.readFileSync(path.join('www', 'index.html'), 'utf8').match(/class="card"/g) || []).length === 5); }
+      check('Hub: halaman depan menautkan 6 halaman (F1, F2, Slimming, Tracker, Panduan, Pengguna)', (fs.readFileSync(path.join('www', 'index.html'), 'utf8').match(/class="card"/g) || []).length === 6); }
 
     { const ra = await open('ADC_Form2_Asesmen_Umum_Dokter.html');
       set(ra.d, 'd2_dx', 'Acne'); ra.w.pickStage('acne', 2);

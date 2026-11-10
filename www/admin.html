@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ADC Hub — Pengguna</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&display=swap" rel="stylesheet">
+<style>
+:root{--canvas:#FBF8F3;--surface:#FFFFFF;--surface-quiet:#F5EFE6;--ink:#1B1A18;--ink-2:#3A3833;--ink-muted:#6B675E;--ink-faint:#6F685B;
+  --ink-on-dark:rgba(245,239,230,.74);--line:#E6DECF;--line-strong:#D9CCB7;--accent:#C97A5E;--accent-deep:#8E4A33;--accent-act:#B0603F;
+  --blush:#FCF4F0;--green-text:#5F6C50;--green-bg:#EEF1E8;--ink-fill:#1F4E9C;--r-card:14px;--r-box:8px;--r-pill:999px;}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--canvas);color:var(--ink);font-family:'Archivo',system-ui,sans-serif;font-size:15px;line-height:1.5;font-weight:400}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent-deep);outline-offset:2px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+/* kepala — pita tinta seperti toolbar form */
+.top{background:var(--ink);color:#fff;padding:0 24px;min-height:60px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.top .t{font-size:14px;font-weight:600;letter-spacing:.04em}
+.top .t small{display:block;font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-on-dark);margin-bottom:1px}
+.top .sp{flex:1}
+.top a{color:var(--ink-on-dark);font-size:13px;text-decoration:underline;text-underline-offset:3px;min-height:44px;display:inline-flex;align-items:center;padding:0 6px}
+.top a:hover{color:#fff}
+.chip{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 14px;border:1px solid rgba(255,255,255,.28);border-radius:var(--r-pill);font-size:13px;color:#fff;background:transparent}
+.chip b{font-weight:600}
+.chip .dot{width:8px;height:8px;border-radius:50%;background:#9DB38A}
+.top button.lnk{background:none;border:none;color:var(--ink-on-dark);text-decoration:underline;text-underline-offset:3px;font-size:13px;min-height:44px;padding:0 8px}
+.top button.lnk:hover{color:#fff}
+
+.wrap{max-width:1080px;margin:0 auto;padding:28px 24px 60px}
+h1{font-size:34px;line-height:1.08;font-variation-settings:'wght' 320,'wdth' 80;font-weight:320;margin:0 0 6px}
+.lead{color:var(--ink-muted);font-size:14.5px;max-width:62ch;margin-bottom:26px}
+
+/* gerbang: kunci / masuk / bukan admin */
+.gate{max-width:440px;margin:40px auto;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);padding:28px 28px 24px}
+.gate h2{font-size:20px;font-weight:620;margin-bottom:6px}
+.gate p{font-size:13.5px;color:var(--ink-muted);margin-bottom:18px}
+.gate .err{color:var(--accent-deep);font-size:13.5px;font-weight:600;margin:-8px 0 12px;min-height:1em}
+
+.lab{display:block;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-muted);margin-bottom:6px}
+.in{width:100%;min-height:48px;padding:10px 13px;border:1px solid var(--line-strong);border-radius:var(--r-box);background:#fff;color:var(--ink-fill);font-size:16px}
+.in::placeholder{color:var(--ink-muted)}
+.in:focus{outline:none;border-color:var(--accent-deep);box-shadow:0 0 0 3px rgba(142,74,51,.14)}
+.f{margin-bottom:16px}
+.hint{font-size:12.5px;color:var(--ink-faint);margin-top:5px}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 20px;border-radius:var(--r-pill);border:1px solid var(--ink);background:transparent;color:var(--ink);font-size:14px;font-weight:600;letter-spacing:.01em;transition:background .16s,color .16s,border-color .16s}
+.btn:hover{background:var(--surface-quiet)}
+.btn.act{background:var(--accent-act);border-color:var(--accent-act);color:#fff}
+.btn.act:hover{background:var(--accent-deep);border-color:var(--accent-deep)}
+.btn.sm{min-height:44px;padding:0 14px;font-size:13px}
+.btn.quiet{border-color:var(--line-strong);color:var(--ink-2)}
+.btn.quiet:hover{border-color:var(--ink)}
+.btn[disabled]{opacity:.5;cursor:default}
+.row-btn{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;margin-top:6px}
+
+/* dua kolom: tambah (kiri, sempit) · daftar (kanan) */
+.grid{display:grid;grid-template-columns:minmax(300px,360px) 1fr;gap:22px;align-items:start}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);padding:22px 24px}
+.card h2{font-size:17px;font-weight:620;margin-bottom:14px;display:flex;align-items:baseline;gap:10px}
+.card h2 .n{font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--accent-deep)}
+
+/* pilihan peran: 4 kartu radio bertumpuk */
+.peran{display:grid;gap:8px}
+.peran label{display:grid;grid-template-columns:22px 1fr;gap:10px;align-items:start;padding:11px 12px;border:1px solid var(--line-strong);border-radius:var(--r-box);cursor:pointer;min-height:44px;transition:border-color .16s,background .16s}
+.peran label:hover{border-color:var(--accent)}
+.peran input{width:18px;height:18px;margin-top:2px;accent-color:var(--accent-deep)}
+.peran b{display:block;font-size:14px;font-weight:620}
+.peran span{display:block;font-size:12.5px;color:var(--ink-muted);line-height:1.4}
+.peran label:has(input:checked){border-color:var(--accent-deep);background:var(--blush)}
+
+.pinrow{display:flex;gap:8px;align-items:stretch}
+.pinrow .in{flex:1;letter-spacing:.18em;font-variant-numeric:tabular-nums}
+.pinrow .btn{white-space:nowrap}
+
+/* daftar pengguna */
+.list{display:flex;flex-direction:column}
+.u{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;padding:14px 0;border-bottom:1px solid var(--line)}
+.who{flex:1 1 200px;min-width:0}
+.seg{flex:0 0 auto}
+.acts{flex:0 0 auto;margin-left:auto}
+.u:last-child{border-bottom:none}
+.u.off .who b,.u.off .who span{color:var(--ink-muted)}
+.u.off .who b{text-decoration:line-through;text-decoration-thickness:1px}
+.who b{display:block;font-size:15.5px;font-weight:620;line-height:1.3}
+.who > span{display:block;font-size:12.5px;color:var(--ink-muted);font-variant-numeric:tabular-nums}
+.who .me{display:inline-block;margin-left:6px;font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--accent-deep);border:1px solid var(--accent);border-radius:var(--r-pill);padding:1px 7px;vertical-align:middle}
+.seg{display:inline-flex;border:1px solid var(--line-strong);border-radius:var(--r-pill);overflow:hidden;background:#fff}
+.seg button{min-height:44px;min-width:44px;padding:0 13px;border:none;background:transparent;font-size:13px;font-weight:600;color:var(--ink-2);border-right:1px solid var(--line)}
+.seg button:last-child{border-right:none}
+.seg button:hover{background:var(--surface-quiet)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:#fff}
+.seg button:focus-visible{outline-offset:-3px}
+.acts{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.st{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:var(--r-pill);display:inline-block}
+.st.on{color:var(--green-text);background:var(--green-bg)}
+.st.off{color:var(--ink-muted);background:var(--surface-quiet)}
+.pinbox{flex-basis:100%;display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:var(--surface-quiet);border-radius:var(--r-box);padding:10px 12px}
+.pinbox .in{max-width:200px;min-height:44px;letter-spacing:.18em}
+.pinbox .lab{margin:0 6px 0 0}
+.empty{padding:28px 0;color:var(--ink-muted);font-size:14px;text-align:center}
+
+/* legenda hak */
+.legend{margin-top:22px;font-size:13px;color:var(--ink-2);display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px 18px}
+.legend b{display:block;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-muted);margin-bottom:2px}
+
+/* toast */
+.toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,16px);background:var(--ink);color:#fff;padding:12px 18px;border-radius:var(--r-pill);font-size:14px;opacity:0;pointer-events:none;transition:opacity .18s,transform .18s;max-width:calc(100vw - 32px)}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+.toast.err{background:var(--accent-deep)}
+
+@media (max-width:860px){ .grid{grid-template-columns:1fr} }
+@media (max-width:560px){ .acts{margin-left:0;justify-content:flex-start} .seg button{padding:0 10px;font-size:12.5px} }
+@media (max-width:480px){ .top{padding:0 16px} .wrap{padding:20px 16px 48px} h1{font-size:28px} .gate{padding:22px 18px;margin:20px auto} }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="t"><small>ADC Hub · admin</small>Pengguna hub</div>
+  <div class="sp"></div>
+  <span class="chip" id="chip" hidden><span class="dot"></span><span id="chip_t"></span></span>
+  <button type="button" class="lnk" id="b_keluar" hidden onclick="keluar()">Keluar</button>
+  <a href="index.html">← Pilih form</a>
+</header>
+
+<main class="wrap">
+  <!-- gerbang 1: kunci perangkat -->
+  <section class="gate" id="gate_key" hidden>
+    <h2>Daftarkan perangkat ini</h2>
+    <p>Masukkan <b>Kunci</b> yang tampil di jendela hub (juga tersimpan di <code>config.json</code>). Sekali per perangkat; kunci yang sama dipakai oleh semua form di browser ini.</p>
+    <div class="err" id="key_err"></div>
+    <div class="f"><label class="lab" for="k_key">Kunci hub</label><input class="in" id="k_key" autocomplete="off" spellcheck="false" placeholder="adc-…"></div>
+    <div class="row-btn"><button type="button" class="btn act" onclick="simpanKunci()">Simpan kunci</button></div>
+  </section>
+
+  <!-- gerbang 2: masuk -->
+  <section class="gate" id="gate_login" hidden>
+    <h2>Masuk sebagai admin</h2>
+    <p>Setiap perubahan pengguna dicatat di log audit atas nama admin yang masuk.</p>
+    <div class="err" id="login_err"></div>
+    <form onsubmit="masuk(event)">
+      <div class="f"><label class="lab" for="l_id">ID pengguna</label><input class="in" id="l_id" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="mis. admin"></div>
+      <div class="f"><label class="lab" for="l_pin">PIN</label><input class="in" id="l_pin" type="password" inputmode="numeric" autocomplete="current-password" placeholder="4–8 digit" maxlength="8"></div>
+      <div class="row-btn"><button type="submit" class="btn act" id="l_btn">Masuk</button></div>
+    </form>
+    <p class="hint" style="margin-top:14px">Belum ada akun admin? Lihat jendela hub saat pertama dijalankan — PIN admin pertama dicetak di sana. <button type="button" class="btn sm quiet" style="margin-left:6px" onclick="gantiKunci()">Ubah kunci…</button></p>
+  </section>
+
+  <!-- gerbang 3: bukan admin -->
+  <section class="gate" id="gate_role" hidden>
+    <h2>Hanya untuk admin</h2>
+    <p id="role_msg">Akun yang masuk bukan admin. Pengelolaan pengguna hanya bisa dilakukan oleh peran <b>admin</b>.</p>
+    <div class="row-btn"><button type="button" class="btn" onclick="keluar()">Masuk dengan akun lain</button></div>
+  </section>
+
+  <!-- aplikasi -->
+  <section id="app" hidden>
+    <h1>Siapa boleh apa di hub</h1>
+    <p class="lead">Akun ini dipakai staf untuk masuk di tablet dan PC. PIN dokter adalah tanda tangan elektroniknya — biarkan dokter mengetik PIN-nya sendiri saat akun dibuat.</p>
+
+    <div class="grid">
+      <form class="card" id="f_tambah" onsubmit="tambah(event)" autocomplete="off">
+        <h2><span class="n">Tambah</span> Pengguna baru</h2>
+        <div class="f"><label class="lab" for="f_nama">Nama lengkap &amp; gelar</label><input class="in" id="f_nama" placeholder="mis. dr. Ani Lestari, Sp.DVE" oninput="saranId()"><div class="hint">Tampil sebagai Dokter pemeriksa dan pada stempel tanda tangan.</div></div>
+        <div class="f"><label class="lab" for="f_id">ID untuk masuk</label><input class="in" id="f_id" autocapitalize="none" spellcheck="false" placeholder="mis. dr.ani" oninput="this.dataset.manual=1"><div class="hint">Huruf kecil, angka, titik. Diisi otomatis dari nama; boleh diubah.</div></div>
+        <div class="f">
+          <span class="lab" id="lab_peran">Peran</span>
+          <div class="peran" role="radiogroup" aria-labelledby="lab_peran">
+            <label><input type="radio" name="f_peran" value="dokter" checked><span><b>Dokter</b><span>Form 2 &amp; Slimming, tanda tangan PIN, simpan handoff.</span></span></label>
+            <label><input type="radio" name="f_peran" value="perawat"><span><b>Perawat</b><span>Form 1, jadwal kontrol, terbitkan handoff.</span></span></label>
+            <label><input type="radio" name="f_peran" value="cs"><span><b>CS</b><span>Lihat &amp; cetak saja — tidak bisa menyimpan.</span></span></label>
+            <label><input type="radio" name="f_peran" value="admin"><span><b>Admin</b><span>Semua hak + kelola pengguna, log audit, koreksi &gt; 2×24 jam.</span></span></label>
+          </div>
+        </div>
+        <div class="f"><label class="lab" for="f_pin">PIN (4–8 digit)</label>
+          <div class="pinrow"><input class="in" id="f_pin" inputmode="numeric" maxlength="8" placeholder="••••••" autocomplete="new-password"><button type="button" class="btn sm quiet" onclick="pinAcak()">Buat acak</button></div>
+          <div class="hint">PIN tidak disimpan apa adanya — hanya hash-nya. Catat sekarang bila dibuat acak.</div></div>
+        <div class="err" id="f_err" style="color:var(--accent-deep);font-size:13.5px;font-weight:600;min-height:1em;margin-bottom:8px"></div>
+        <div class="row-btn"><button type="submit" class="btn act" id="f_simpan">Simpan pengguna</button></div>
+      </form>
+
+      <div class="card">
+        <h2><span class="n">Daftar</span> <span id="jml"></span></h2>
+        <div class="list" id="rows"></div>
+        <div class="legend">
+          <div><b>Ganti peran</b>Ketuk peran baru di baris pengguna — berlaku saat ia masuk lagi (sesi lamanya ditutup).</div>
+          <div><b>Atur ulang PIN</b>Untuk staf yang lupa PIN. Sesi lamanya ditutup; ia masuk dengan PIN baru.</div>
+          <div><b>Nonaktifkan</b>Staf yang keluar: tidak bisa masuk lagi, riwayat tanda tangannya tetap tersimpan.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+'use strict';
+/* Memakai kunci & sesi yang sama dengan form (localStorage adc_hub_key / adc_hub_tok), jadi admin yang
+   masuk di sini juga sudah masuk di Form 1/2 pada browser yang sama. */
+var PERAN = ['dokter','perawat','cs','admin'], PERAN_NAMA = {dokter:'Dokter',perawat:'Perawat',cs:'CS',admin:'Admin'};
+var _saya = null, _users = [];
+function ls(k,v){ try{ if(v===undefined) return localStorage.getItem(k); if(v===null) localStorage.removeItem(k); else localStorage.setItem(k,v); }catch(e){ return null; } }
+function hdr(json){ var h={'X-ADC-Key':ls('adc_hub_key')||''}; var t=ls('adc_hub_tok'); if(t) h['X-ADC-Token']=t; if(json) h['Content-Type']='application/json'; return h; }
+/* alamat hub = origin halaman ini (hub menyajikan halaman ini sendiri) */
+function api(path,body){
+  return fetch(location.origin+path,{method:body?'POST':'GET',headers:hdr(!!body),body:body?JSON.stringify(body):undefined,cache:'no-store'})
+    .then(function(r){ return r.json().catch(function(){return {};}).then(function(j){ j._status=r.status; return j; }); });
+}
+function tampil(id){ ['gate_key','gate_login','gate_role','app'].forEach(function(x){ document.getElementById(x).hidden=(x!==id); }); }
+function toast(msg,err){ var t=document.getElementById('toast'); t.textContent=msg; t.className='toast on'+(err?' err':''); clearTimeout(toast._t); toast._t=setTimeout(function(){ t.className='toast'; },err?4200:2600); }
+function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+
+/* ---- gerbang ---- */
+function mulai(){
+  if(!ls('adc_hub_key')){ tampil('gate_key'); setTimeout(function(){document.getElementById('k_key').focus();},0); window._adminSiap=true; return; }
+  api('/api/saya').then(function(j){
+    if(j._status===401 && /kunci/i.test(j.error||'')){ document.getElementById('key_err').textContent='Kunci tidak cocok dengan config.json hub.'; tampil('gate_key'); window._adminSiap=true; return; }
+    if(j._status===401){ tampil('gate_login'); var id=ls('adc_hub_id'); if(id){ document.getElementById('l_id').value=id; document.getElementById('l_pin').focus(); } else document.getElementById('l_id').focus(); window._adminSiap=true; return; }
+    if(!j.ok){ toast('Hub tidak merespons ('+j._status+')',true); tampil('gate_login'); window._adminSiap=true; return; }
+    _saya=j.user; masukOK();
+  }).catch(function(){ toast('Hub tidak terjangkau — periksa alamat & jaringan',true); tampil('gate_login'); window._adminSiap=true; });
+}
+function simpanKunci(){ var k=document.getElementById('k_key').value.trim(); if(!k){ document.getElementById('key_err').textContent='Kunci kosong.'; return; } ls('adc_hub_key',k); document.getElementById('key_err').textContent=''; mulai(); }
+function gantiKunci(){ document.getElementById('k_key').value=ls('adc_hub_key')||''; tampil('gate_key'); document.getElementById('k_key').focus(); }
+function masuk(ev){
+  ev.preventDefault();
+  var id=document.getElementById('l_id').value.trim().toLowerCase(), pin=document.getElementById('l_pin').value.trim(), er=document.getElementById('login_err');
+  if(!id||!/^\d{4,8}$/.test(pin)){ er.textContent='Isi ID dan PIN 4–8 digit.'; return; }
+  document.getElementById('l_btn').disabled=true;
+  api('/api/login',{id:id,pin:pin}).then(function(j){
+    document.getElementById('l_btn').disabled=false;
+    if(!j.ok){ er.textContent=j._status===401&&/kunci/i.test(j.error||'')?'Kunci perangkat salah — ubah kunci di bawah.':(j.error||'Gagal masuk'); document.getElementById('l_pin').value=''; document.getElementById('l_pin').focus(); return; }
+    ls('adc_hub_tok',j.token); ls('adc_hub_user',JSON.stringify(j.user)); ls('adc_hub_id',j.user.id);
+    er.textContent=''; document.getElementById('l_pin').value=''; _saya=j.user; masukOK();
+  }).catch(function(){ document.getElementById('l_btn').disabled=false; er.textContent='Hub tidak terjangkau.'; });
+}
+function masukOK(){
+  var chip=document.getElementById('chip'); chip.hidden=false; document.getElementById('chip_t').innerHTML='<b>'+esc(_saya.nama)+'</b> · '+esc(PERAN_NAMA[_saya.peran]||_saya.peran);
+  document.getElementById('b_keluar').hidden=false;
+  if(_saya.peran!=='admin'){ document.getElementById('role_msg').innerHTML='Masuk sebagai <b>'+esc(_saya.nama)+'</b> (peran '+esc(_saya.peran)+'). Pengelolaan pengguna hanya bisa dilakukan oleh peran <b>admin</b>.'; tampil('gate_role'); window._adminSiap=true; return; }
+  tampil('app'); muat();
+}
+function keluar(){
+  api('/api/logout',{}).catch(function(){}).then(function(){ ls('adc_hub_tok',null); ls('adc_hub_user',null); _saya=null; document.getElementById('chip').hidden=true; document.getElementById('b_keluar').hidden=true; mulai(); });
+}
+
+/* ---- daftar ---- */
+function muat(){
+  return api('/api/users').then(function(j){
+    if(j._status===401){ ls('adc_hub_tok',null); mulai(); return; }
+    if(j._status===403){ tampil('gate_role'); window._adminSiap=true; return; }
+    _users=(j.users||[]).slice().sort(function(a,b){ return (a.aktif===b.aktif?0:(a.aktif?-1:1)) || PERAN.indexOf(a.peran)-PERAN.indexOf(b.peran) || a.nama.localeCompare(b.nama,'id'); });
+    render(); window._adminSiap=true;
+  });
+}
+function render(){
+  var box=document.getElementById('rows'), aktif=_users.filter(function(u){return u.aktif;}).length;
+  document.getElementById('jml').textContent=_users.length?(aktif+' aktif'+(_users.length-aktif?(' · '+(_users.length-aktif)+' nonaktif'):'')):'';
+  if(!_users.length){ box.innerHTML='<div class="empty">Belum ada pengguna.</div>'; return; }
+  box.innerHTML=_users.map(function(u){
+    var me=_saya&&u.id===_saya.id;
+    return '<div class="u'+(u.aktif?'':' off')+'" data-id="'+esc(u.id)+'">'+
+      '<div class="who"><b>'+esc(u.nama)+(me?'<span class="me">Anda</span>':'')+'</b><span>'+esc(u.id)+' · <span class="st '+(u.aktif?'on':'off')+'">'+(u.aktif?'aktif':'nonaktif')+'</span></span></div>'+
+      '<div class="seg" role="group" aria-label="Peran '+esc(u.nama)+'">'+PERAN.map(function(p){ return '<button type="button" data-peran="'+p+'" aria-pressed="'+(u.peran===p)+'" onclick="ubahPeran(\''+esc(u.id)+'\',\''+p+'\')"'+((me&&p!=='admin')?' disabled title="Peran akun sendiri tidak bisa diturunkan"':'')+'>'+PERAN_NAMA[p]+'</button>'; }).join('')+'</div>'+
+      '<div class="acts"><button type="button" class="btn sm quiet b-pin" onclick="bukaPin(\''+esc(u.id)+'\')">Atur ulang PIN</button>'+
+      (me?'':'<button type="button" class="btn sm '+(u.aktif?'quiet':'')+' b-aktif" onclick="ubahAktif(\''+esc(u.id)+'\','+(!u.aktif)+')">'+(u.aktif?'Nonaktifkan':'Aktifkan')+'</button>')+'</div>'+
+      '</div>';
+  }).join('');
+}
+function kirim(body,okMsg){
+  return api('/api/users',body).then(function(j){
+    if(!j.ok){ toast(j.error||('Gagal ('+j._status+')'),true); return false; }
+    toast(okMsg); return muat().then(function(){ return true; });
+  }).catch(function(){ toast('Hub tidak terjangkau.',true); return false; });
+}
+function ubahPeran(id,p){ var u=_users.find(function(x){return x.id===id;}); if(!u||u.peran===p) return; kirim({id:id,peran:p},u.nama+' → '+PERAN_NAMA[p]); }
+function ubahAktif(id,on){ var u=_users.find(function(x){return x.id===id;}); if(!u) return; if(!on&&!confirm('Nonaktifkan '+u.nama+'?\n\nIa tidak bisa masuk lagi; riwayat & tanda tangannya tetap tersimpan. Bisa diaktifkan kembali kapan saja.')) return; kirim({id:id,aktif:on},u.nama+(on?' diaktifkan':' dinonaktifkan')); }
+function bukaPin(id){
+  var row=document.querySelector('.u[data-id="'+id+'"]'); if(!row) return;
+  var lama=document.querySelector('.pinbox'); if(lama) lama.remove();
+  var b=document.createElement('div'); b.className='pinbox';
+  b.innerHTML='<label class="lab" for="np_'+esc(id)+'">PIN baru</label><input class="in" id="np_'+esc(id)+'" inputmode="numeric" maxlength="8" placeholder="4–8 digit" autocomplete="new-password">'+
+    '<button type="button" class="btn sm quiet" onclick="document.getElementById(\'np_'+esc(id)+'\').value=acak6()">Buat acak</button>'+
+    '<button type="button" class="btn sm act" onclick="simpanPin(\''+esc(id)+'\')">Simpan PIN</button>'+
+    '<button type="button" class="btn sm quiet" onclick="this.parentNode.remove()">Batal</button>';
+  row.appendChild(b); document.getElementById('np_'+id).focus();
+}
+function simpanPin(id){ var v=(document.getElementById('np_'+id)||{}).value||''; if(!/^\d{4,8}$/.test(v)){ toast('PIN harus 4–8 digit angka',true); return; } var u=_users.find(function(x){return x.id===id;}); kirim({id:id,pin:v},'PIN '+(u?u.nama:id)+' diatur ulang'); }
+
+/* ---- tambah ---- */
+function saranId(){
+  var f=document.getElementById('f_id'); if(f.dataset.manual) return;
+  var n=document.getElementById('f_nama').value.toLowerCase().replace(/,.*$/,'').replace(/\b(sp|spdve|spgk|m|mkes|skp|ns|amd|s)\.?\s*\w*\.?$/g,'').trim();
+  var kata=n.split(/\s+/).filter(Boolean); var gelar=/^(dr|drg|ns|dr\.)$/.test(kata[0]||'')?kata.shift().replace('.',''):'';
+  var id=(gelar?gelar+'.':'')+(kata[0]||'').replace(/[^a-z0-9]/g,''); f.value=id.slice(0,24);
+}
+function acak6(){ var a=new Uint32Array(1); (window.crypto||{}).getRandomValues?crypto.getRandomValues(a):(a[0]=Math.floor(Math.random()*1e9)); return String(100000+(a[0]%900000)); }
+function pinAcak(){ var p=document.getElementById('f_pin'); p.value=acak6(); p.type='text'; p.focus(); }
+function tambah(ev){
+  ev.preventDefault();
+  var nama=document.getElementById('f_nama').value.trim(), id=document.getElementById('f_id').value.trim().toLowerCase(), pin=document.getElementById('f_pin').value.trim(),
+      peran=(document.querySelector('input[name=f_peran]:checked')||{}).value, er=document.getElementById('f_err');
+  if(!nama){ er.textContent='Nama wajib diisi.'; document.getElementById('f_nama').focus(); return; }
+  if(!/^[a-z0-9][a-z0-9._-]{1,23}$/.test(id)){ er.textContent='ID: huruf kecil, angka, titik; 2–24 karakter.'; document.getElementById('f_id').focus(); return; }
+  if(!/^\d{4,8}$/.test(pin)){ er.textContent='PIN harus 4–8 digit angka.'; document.getElementById('f_pin').focus(); return; }
+  if(_users.some(function(u){return u.id===id;})&&!confirm('ID '+id+' sudah ada. Timpa nama, peran dan PIN-nya?')) return;
+  er.textContent=''; document.getElementById('f_simpan').disabled=true;
+  kirim({id:id,nama:nama,peran:peran,pin:pin},nama+' ditambahkan sebagai '+PERAN_NAMA[peran]).then(function(ok){
+    document.getElementById('f_simpan').disabled=false;
+    if(ok){ document.getElementById('f_tambah').reset(); delete document.getElementById('f_id').dataset.manual; document.getElementById('f_pin').type='password'; document.getElementById('f_nama').focus(); }
+  });
+}
+document.addEventListener('DOMContentLoaded', mulai);
+</script>
+</body>
+</html>

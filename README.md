@@ -90,6 +90,7 @@ Minta NeoSoft membatasi user DB ke **SELECT saja** dan ke IP klinik.
 ## E. API (untuk programer)
 - `GET  /api/ping` — tanpa kunci (deteksi).
 - Header wajib rute lain: `X-ADC-Key: <kunci>`.
+- `GET  /api/users` — daftar pengguna (admin). `POST /api/users` — pengguna baru `{id,nama,peran,pin}`; pengguna lama `{id}` + kolom yang diubah (`nama` | `peran` | `aktif` | `pin`). Pagar: akun sendiri & admin aktif terakhir tidak bisa diturunkan/dinonaktifkan; sesi pengguna yang diubah ditutup. Dashboard: `www/admin.html`.
 - `GET  /api/pasien` — daftar ringkas.
 - `GET  /api/pasien/:rm` — `{intake, handoff_terakhir, jumlah_handoff}`.
 - `POST /api/intake` — body JSON `ADC-INTAKE` (keluaran Form 1).
