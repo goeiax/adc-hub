@@ -11,6 +11,8 @@ Tanpa dependensi: **Node.js LTS + folder ini** = seluruh instalasi. Tidak ada
 
 ---
 
+> **Uji coba di klinik:** ikuti **[UJI_COBA_KLINIK.md](UJI_COBA_KLINIK.md)** — versi terbaru dari langkah di bawah, sudah termasuk akun staf (ID + PIN), cadangan otomatis, HTTPS dan uji serah-terima.
+
 ## A. Instalasi (checklist untuk IT) — ±20 menit
 
 1. **Pilih PC hub**: PC yang menyala selama jam klinik, di LAN yang sama dengan
