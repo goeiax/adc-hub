@@ -3607,7 +3607,8 @@ function renderIntake(){
   var pg=(o.pengukuran||{});
   var bt=[pg.bb&&(pg.bb+' kg'),pg.tb&&(pg.tb+' cm'),pg.imt&&('IMT '+pg.imt)].filter(Boolean).join(' · ');
   var gh=[_kv('Berat · tinggi · IMT',bt),_kv('Tidur',g.tidur),_kv('Stres',g.stres),_kv('Matahari',g.matahari),_kv('Merokok',g.merokok),
-          _kv('Pola makan',g.pola_makan),_kv('Aktivitas',g.aktivitas)].filter(Boolean).join('');
+          _kv('Pola makan',g.pola_makan),_kv('Aktivitas',g.aktivitas),_kv('Air putih',g.air),_kv('Minuman manis',g.minuman_manis),_kv('Susu',g.susu),
+          _kv('Suplemen',g.suplemen),_kv('Alkohol',g.alkohol),_kv('Kebiasaan pada wajah',g.kebiasaan_wajah)].filter(Boolean).join('');
   var hor=(k.hormonal||[]).join(', ');
   var t3=(gh||hor||k.obat_kini)?('<div class="tier"><span class="tg">Latar</span><div class="tc">'+
     '<div class="kvgrid">'+_kv('Hormonal',hor)+_kv('Obat/produk dipakai',k.obat_kini)+_kv('Haid',k.haid)+gh+'</div>'+'</div></div>'):'';
