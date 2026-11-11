@@ -1,0 +1,10 @@
+#!/bin/sh
+# Hook git lokal ADC Hub: tolak push langsung ke main. Alur: kerja di dev -> pull request dev -> main di GitHub.
+# Pasang: copy tools\pre-push .git\hooks\pre-push   (Linux/macOS: cp tools/pre-push .git/hooks/ && chmod +x .git/hooks/pre-push)
+while read local_ref local_sha remote_ref remote_sha; do
+  if [ "$remote_ref" = "refs/heads/main" ]; then
+    echo "DITOLAK: push langsung ke main. Push ke dev lalu buka pull request dev -> main (gh pr create --base main --head dev)." >&2
+    exit 1
+  fi
+done
+exit 0

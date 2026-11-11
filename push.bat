@@ -12,7 +12,14 @@ echo === Status ===
 git add -A
 git status --short
 git diff --cached --quiet && echo Tidak ada perubahan baru untuk di-commit. || git commit -m "Update %date% %time:~0,5%"
-echo === Push ke GitHub ===
-git push -u origin main
+echo === Push ke GitHub (cabang aktif; main hanya lewat pull request) ===
+for /f "delims=" %%b in ('git rev-parse --abbrev-ref HEAD') do set CABANG=%%b
+if "%CABANG%"=="main" (
+  echo DITOLAK: Anda di cabang main. Pindah ke dev: git checkout dev
+  pause
+  exit /b 1
+)
+git push -u origin %CABANG%
+echo Buka pull request dev ^> main: https://github.com/goeiax/adc-hub/compare/main...%CABANG%
 echo.
 pause
