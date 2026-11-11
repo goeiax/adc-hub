@@ -1,4 +1,4 @@
-# Uji coba ADC Hub di klinik — panduan pemasangan
+## Uji coba ADC Hub di klinik — panduan pemasangan
 
 Panduan ini untuk IT klinik dan penanggung jawab uji coba. Tujuannya: hub berjalan di
 satu PC klinik, tablet perawat dan dokter tersambung lewat Wi-Fi klinik, setiap staf
