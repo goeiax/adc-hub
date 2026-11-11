@@ -4219,6 +4219,16 @@ function bukaRingkasanHandoff(){
   if(!w){ alert('Pop-up masih diblokir browser. Izinkan pop-up untuk situs ini, lalu klik lagi.'); return; }
   w.document.open(); w.document.write(handoffDocHTML(h)); w.document.close();
 }
+/* Unduhan otomatis saat Terbitkan: handoff lengkap + potret form (h._form) */
+function _unduhAsesmen(h){
+  try{
+    var d=new Date(), p2=function(n){ return (n<10?'0':'')+n; };
+    var nama='Asesmen_'+String((h.pasien&&h.pasien.rm)||'pasien').replace(/[^\w-]+/g,'_')+'_'+d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate())+'_'+p2(d.getHours())+p2(d.getMinutes())+'.json';
+    var b=new Blob([JSON.stringify(h)],{type:'application/json'}), u=URL.createObjectURL(b), a=document.createElement('a');
+    a.href=u; a.download=nama; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function(){ try{ URL.revokeObjectURL(u); }catch(e){} },2000);
+    return nama;
+  }catch(e){ console.warn('unduh berkas asesmen gagal',e); return ''; }
+}
 function unduhHandoffJSON(){
   var h=window._handoff; if(!h){ alert('Belum ada handoff yang diterbitkan.'); return; }
   try{
@@ -4239,6 +4249,7 @@ function _issueLanjut(h,a){
   set('h_avoid', a.hindari||a.remarks);
   renderPrev(h,true);
   window._handoff=h;
+  var berkas=_unduhAsesmen(h);   /* berkas untuk membuka kembali Form 2 — dibuat pada setiap Terbitkan */
   var ds=document.getElementById('d8_status');
   var stamp='Diterbitkan '+new Date().toLocaleString('id-ID')+(_hv('d8_by')?(' oleh '+_hv('d8_by')):'')+
             (_ck('d8_signoff')?' · sign-off dokter ADA':' · TANPA sign-off dokter');
@@ -4250,7 +4261,7 @@ function _issueLanjut(h,a){
   if(dc){ dc.hidden=false;
     var dl=document.getElementById('terbit_done_l'); if(dl) dl.textContent=((h.pasien&&h.pasien.nama)?(h.pasien.nama+' · '):'')+'RM '+((h.pasien&&h.pasien.rm)||'—')+' · '+new Date().toLocaleString('id-ID')+
       (h.penerbitan.ttd?(' · ditandatangani '+h.penerbitan.ttd.nama):(_ck('d8_signoff')?(window._ttdTakBisa?' · sign-off tanpa PIN (tablet belum terdaftar / hub tak terjangkau)':' · sign-off tanpa verifikasi PIN'):' · tanpa sign-off dokter'));
-    var dn=document.getElementById('terbit_done_note'); if(dn) dn.textContent='';
+    var dn=document.getElementById('terbit_done_note'); if(dn) dn.textContent=berkas?('Berkas '+berkas+' diunduh — simpan; dipakai untuk membuka kembali asesmen ini (Lainnya ▸ Buka asesmen tersimpan ▸ Pilih berkas).'):'';
     _doneHub(!_hubOn?'HUB MATI — unduh JSON dan lampirkan ke rekam medis.':(tanpaHub?('✗ Tidak dikirim ke hub ('+ketTanpa+') — unduh JSON, atau perbaiki lalu Terbitkan lagi.'):'Mengirim ke hub…'),(!_hubOn||tanpaHub)?'warn':'');
     try{ dc.scrollIntoView({behavior:'smooth',block:'center'}); }catch(e){} }
   /* Hasil hub HARUS terlihat: sebelumnya status selalu "Diterbitkan" walau hub menolak (kunci
@@ -4261,7 +4272,7 @@ function _issueLanjut(h,a){
     /* kegagalan hub ditulis ke kartu selesai (#terbit_done_hub) — tidak ada alert() di momen terbit */
   });
   var w=window.open('','_blank','width=900,height=940,scrollbars=yes,resizable=yes');
-  if(!w){ var dn2=document.getElementById('terbit_done_note'); if(dn2) dn2.textContent='Pop-up diblokir browser — pakai tombol "Buka ringkasan handoff" (izinkan pop-up untuk situs ini).'; return; }
+  if(!w){ var dn2=document.getElementById('terbit_done_note'); if(dn2) dn2.textContent=(dn2.textContent?(dn2.textContent+' '):'')+'Pop-up diblokir browser — pakai tombol "Buka ringkasan handoff" (izinkan pop-up untuk situs ini).'; return; }
   w.document.open(); w.document.write(handoffDocHTML(h)); w.document.close();
 }
 function applyHandoff(h){

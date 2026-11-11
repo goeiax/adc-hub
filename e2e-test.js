@@ -393,6 +393,7 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
     const ttdDlg = await terbit(a);
     check('F2: Terbitkan TIDAK meminta PIN lagi (sudah ditandatangani saat sign-off) & tidak ada dialog peringatan', ttdDlg === false && !a.dialogs.some(x => x.type === 'confirm') && a.w.__tdlgJudul === 'Terbitkan handoff?', a.dialogs.filter(x => x.type === 'confirm'));
     check('F2: popup ringkasan handoff dibuat', a.w.__popup && /Ringkasan Handoff/.test(a.w.__popup.document.html));
+    check('F2 Terbitkan: berkas Asesmen_<RM>_<tgl>_<jam>.json otomatis diunduh & disebut di kartu selesai', a.dialogs.some(x => x.type === 'download' && /^Asesmen_RM-TEST-001_\d{4}-\d{2}-\d{2}_\d{4}\.json$/.test(x.msg)) && /Asesmen_RM-TEST-001_.*diunduh/.test($(a.d, 'terbit_done_note').textContent), a.dialogs.filter(x => x.type === 'download').map(x => x.msg));
     /* buka kembali asesmen yang baru terbit: potret form ikut di handoff hub, lalu dipulihkan di form kosong */
     { await until(() => disk('handoff_terakhir.json')); const hT = disk('handoff_terakhir.json');
       check('F2 buka-ulang: handoff di hub membawa potret form (_form.isi, mode, stage, intake tanpa _form bersarang)', hT && hT._form && Array.isArray(hT._form.isi) && hT._form.isi.length > 200 && hT._form.mode === 'awal' && !(hT._form.prev && hT._form.prev._form), hT && hT._form && { n: hT._form.isi.length, mode: hT._form.mode });
