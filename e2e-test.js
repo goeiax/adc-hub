@@ -172,6 +172,10 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
       check('F1: pertanyaan ganda dihapus (BB/TB di Slimming, Masih menyusui, Haid tidak teratur) & label onset rambut unik',
         !labs.includes('Berat badan sekarang') && !labs.includes('Tinggi badan') && !labs.includes('Masih menyusui?') &&
         !/Haid tidak teratur/.test(f1.d.getElementById('d-slimming').textContent) && labs.filter(l => l === 'Sejak kapan?').length === 1 && labs.includes('Rontok sejak kapan?'), labs.filter(l => /Sejak|Berat|menyusui/i.test(l))); }
+    { const pilih = (lab, teks) => { const fx = [...f1.d.querySelectorAll('.page .f')].find(x => ((x.querySelector('.lab') || {}).textContent || '').trim().startsWith(lab)); const l = fx && [...fx.querySelectorAll('label.opt')].find(l => l.textContent.trim() === teks); if (l) l.querySelector('input').checked = true; return !!l; };
+      const p5 = [...f1.d.querySelectorAll('.step[data-step="3"] .f')];
+      const okPilih = pilih('Tidur', '7–8 jam') && pilih('Susu', 'Tiap hari') && pilih('Pola makan', 'Sering gorengan') && pilih('Pola makan', 'Makan malam larut') && pilih('Suplemen rutin', 'Whey / protein'); const gh = f1.w.buildIntake().gaya_hidup;
+      check('F1 P5: 12 pertanyaan gaya hidup, semuanya pilihan (chip centang); pilihan terbaca buildIntake', p5.length === 12 && p5.every(x => x.querySelectorAll('label.opt input[type=checkbox]').length >= 3) && okPilih && gh.tidur === '7–8 jam' && gh.susu === 'Tiap hari' && gh.pola_makan === 'Sering gorengan · Makan malam larut' && gh.suplemen === 'Whey / protein', { n: p5.length, gh }); }
     f1.w.simpanIntake();
     const c1 = lastDlg(f1, 'confirm');
     check('F1: dialog "belum lengkap" hanya soal tanda tangan (canvas tak ada di jsdom)', !c1 || /tanda tangan/i.test(c1.msg) && (c1.msg.match(/·/g) || []).length === 1, c1 && c1.msg);
@@ -243,6 +247,7 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
     await until(() => a.w._intake);
     check('F2: intake termuat dari hub', a.w._intake && a.w._intake.pasien.rm === RM, a.dialogs.slice(-2));
     check('F2: identitas terisi otomatis (termasuk NIK)', $(a.d, 'p_nama').value === 'Pasien Uji Coba' && $(a.d, 'rm').value === RM && $(a.d, 'p_wa').value === '081234567890' && $(a.d, 'p_nik').value === '3273012345678901', $(a.d, 'p_nik').value);
+    check('F2 Latar: jawaban gaya hidup baru (Susu, Suplemen) tampil di Ringkasan', /Susu/.test($(a.d, 'intake_body').textContent) && /Whey/.test($(a.d, 'intake_body').textContent) && /7–8 jam/.test($(a.d, 'intake_body').textContent));
     check('F2: ringkasan mencatat izin lisan foto', /izin lisan/.test($(a.d, 'intake_body').textContent));
     check('F2: webhook Make.com terisi otomatis dari hub (config.json)', $(a.d, 'cfg_webhook').value === 'https://hook.test/adc', $(a.d, 'cfg_webhook').value);
     { const wh = $(a.d, 'cfg_webhook'); wh.value = 'https://hook.test/baru'; wh.dispatchEvent(new a.w.Event('change', { bubbles: true }));
@@ -301,7 +306,10 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
       chk(a.d, 'alergi_none'); check('F2: centang Nihil di kotak itu memenuhi WAJIB alergi', a.w.reqStatus().find(x => x.label === 'Alergi dikonfirmasi').ok);
       check('F2: _programDerajat tidak menggandakan "Melasma" untuk program Hiperpigmentasi/Melasma', a.w._programDerajat({ program: 'Hiperpigmentasi/Melasma', derajat: 'Melasma IGA 3 · Sedang (Moderate)' }) === 'Hiperpigmentasi/Melasma — IGA 3 · Sedang (Moderate)' && a.w._programDerajat({ program: 'Acne', derajat: 'Acne IGA 3 · Sedang' }) === 'Acne IGA 3 · Sedang', a.w._programDerajat({ program: 'Hiperpigmentasi/Melasma', derajat: 'Melasma IGA 3 · Sedang (Moderate)' })); }
     { const ik4 = JSON.parse(JSON.stringify(a.w._intake)); ik4.kritis.alergi = 'Penisilin'; ik4.kritis.alergi_nihil = false; a.w.applyIntake(ik4); }
+    check('F2 modal: radio terpilih seragam dengan chip centang (latar krem + garis terakota, bukan blok hitam)', fs.readFileSync(path.join('www', 'ADC_Form2_Asesmen_Umum_Dokter.html'), 'utf8').includes('.ovl .rbopt.on{background:var(--surface-quiet,#F5EFE6);border-color:var(--accent,#C97A5E);'));
     check('F2: ringkasan intake tampil', $(a.d, 'intake_box').style.display !== 'none');
+    { const lb = a.d.querySelector('label[for="d2_dx_catatan"]'); set(a.d, 'd2_dx_catatan', 'DD: rosasea; pantau respons 4 minggu');
+      check('F2: kolom "Catatan dokter" di bawah Diagnosis (berlabel, setelah chip ICD) -> asesmen.diagnosis_catatan', !!lb && /Catatan dokter/.test(lb.textContent) && !!($(a.d, 'd2_icd_chips').compareDocumentPosition($(a.d, 'd2_dx_catatan')) & 4) && a.w.buildHandoff().asesmen.diagnosis_catatan === 'DD: rosasea; pantau respons 4 minggu'); }
     { const f2n = await open('ADC_Form2_Asesmen_Umum_Dokter.html'); await until(() => f2n.w._neoOn === true, 3000).catch(() => {});
       set(f2n.d, 'rm', 'RM-NEO-01'); $(f2n.d, 'rm').dispatchEvent(new f2n.w.Event('change', { bubbles: true }));
       await until(() => $(f2n.d, 'p_nama').value === 'Pasien NeoSoft', 4000).catch(() => {});

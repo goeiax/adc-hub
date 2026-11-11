@@ -727,7 +727,11 @@ input[type=checkbox],input[type=radio]{accent-color:var(--accent);width:17px;hei
 .callout,.note,.intro,.kunj-strip,.imp-box,.warn-box,.pmctx,.lockmsg,.stamp{border-radius:var(--r-box);}
 .btn,.req,.badge,.tg,.hb-badge,.hb-act,.hb-ovr,.cnt,.tagpill{border-radius:var(--r-pill);}
 .ovl .pmodal *{border-radius:revert;}
-.ovl .rbopt::before{border-radius:50% !important;}   /* radio = lingkaran, checkbox = kotak: jenis pilihan terbaca dari glyph-nya */
+.ovl .rbopt::before{border-radius:50% !important;}
+/* pilihan terpilih SERAGAM dengan chip centang (2026-11-11): latar krem + garis terakota + teks tinta; radio = titik terakota, bukan blok hitam */
+.ovl .rbopt.on{background:var(--surface-quiet,#F5EFE6);border-color:var(--accent,#C97A5E);color:var(--ink,#1B1A18);font-weight:560;}
+.ovl .rbopt.on::before{border-color:var(--accent-deep,#8E4A33);background:var(--accent-deep,#8E4A33);box-shadow:inset 0 0 0 2px #fff;}
+.ovl .rbopt:hover{border-color:var(--accent,#C97A5E);}   /* radio = lingkaran, checkbox = kotak: jenis pilihan terbaca dari glyph-nya */
 
 /* --- Input berkotak (bukan garis bawah) --- */
 .in,.mini,.cell,.ln,.fin,.tx-extra,
@@ -1187,6 +1191,8 @@ body.showall .step{display:block;}
 .icdbtn{font:inherit;font-size:12.5px;font-weight:600;padding:0 14px;min-height:44px;border-radius:var(--r-box,8px);border:1px solid var(--accent-deep,#8E4A33);background:var(--accent-deep,#8E4A33);color:#fff;cursor:pointer;white-space:nowrap;}
 .icdbtn:hover{background:var(--accent-act,#B0603F);border-color:var(--accent-act,#B0603F);}
 .icdchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:5px;min-height:0;}
+.dxcat-l{display:block;margin-top:12px;margin-bottom:5px;}
+textarea.in#d2_dx_catatan{min-height:64px;}
 .icdchips span{display:inline-flex;align-items:center;font-size:12.5px;padding:0 0 0 12px;min-height:44px;border-radius:999px;border:1px solid var(--line-strong,#D9CCB7);background:var(--surface-quiet,#F7F3EC);color:var(--ink-fill,#1F4E9C);}
 .icdchips span b{margin-right:5px;}
 .icdchips span .x{font:inherit;font-size:17px;font-weight:700;min-width:44px;min-height:44px;margin-left:2px;padding:0;border:none;background:none;color:var(--accent-deep,#8E4A33);cursor:pointer;border-radius:0 999px 999px 0;}
@@ -1690,7 +1696,9 @@ body.mode-kontrol #rb2 .rl::after{content:' — dilewati';font-size:12px;font-we
   <div class="row">
     <div class="f w3 s6"><span class="lab">Diagnosis<span class="req">wajib</span> <span class="opt">+ kode ICD-10</span></span>
       <div class="icdwrap"><input class="in" id="d2_dx" placeholder="mis. Acne vulgaris + PIH; Melasma sentrofasial; AGA; Obesitas grade I"><button type="button" class="icdbtn" onclick="openICD()" title="Pilih kode ICD-10 (wajib di RME)">ICD-10 ▾</button></div>
-      <div class="icdchips" id="d2_icd_chips"></div><input type="hidden" id="d2_icd"></div>
+      <div class="icdchips" id="d2_icd_chips"></div><input type="hidden" id="d2_icd">
+      <label class="lab dxcat-l" for="d2_dx_catatan">Catatan dokter <span class="opt">untuk diagnosis ini</span></label>
+      <textarea class="in ta" id="d2_dx_catatan" rows="2" placeholder="mis. diagnosis banding, dasar pertimbangan, hal yang perlu dipantau"></textarea></div>
     <div class="f s6 derajat"><span class="lab">Derajat <span class="opt">skala IGA · nilai kondisi hari ini</span></span>
   <input type="hidden" id="d2_derajat">
   <div class="mcard" id="igacard_umum">
@@ -3110,7 +3118,7 @@ function buildHandoff(){
     })(),
     asesmen:{
       tanggal:_hv('tgl'), dokter:_dokterKini(), program:_hProg(),
-      diagnosis:_hv('d2_dx'), icd:_icdData(), derajat:_hv('d2_derajat'), hasil:_hv('d2_hasil'),
+      diagnosis:_hv('d2_dx'), diagnosis_catatan:_hv('d2_dx_catatan'), icd:_icdData(), derajat:_hv('d2_derajat'), hasil:_hv('d2_hasil'),
       /* Pemeriksaan D1 & konteks D2 — sebelumnya diisi dokter tapi TIDAK pernah terekam. */
       pemeriksaan:{ umum:_hv('d1_umum'), tipe_kulit:_hv('d1_tipekulit'),
         fitzpatrick:(function(){var r=document.querySelector('input[name="d1_fitz"]:checked');return r?r.value:'';})(),
@@ -3201,6 +3209,7 @@ function handoffText(h){
   L.push('Asesmen: '+(a.tanggal||'—')+'  ·  Dokter: '+(a.dokter||'—')+(h.kunjungan_ke?('  ·  Kunjungan ke-'+h.kunjungan_ke):''));
   if(a.program) L.push('Program: '+a.program);
   L.push('Diagnosis: '+(a.diagnosis||'—'));
+  if(a.diagnosis_catatan) L.push('Catatan dokter (diagnosis): '+a.diagnosis_catatan);
   if(a.derajat) L.push('Derajat (IGA): '+a.derajat);
   if(a.hasil) L.push('Catatan klinis: '+a.hasil);
   L.push('Alergi/kontraindikasi: '+(a.alergi||(a.alergi_nihil?'Nihil (dikonfirmasi)':'BELUM DIKONFIRMASI')));
@@ -3263,7 +3272,7 @@ function handoffDocHTML(h){
   '<div class="flag"><b>Alergi / kontraindikasi</b>'+_hesc(alergi)+'</div>'+
   ((h.penerbitan&&!h.penerbitan.signoff_dokter)?'<div class="flag"><b>Perhatian</b>Diterbitkan tanpa sign-off dokter — konfirmasi ke dokter pemeriksa sebelum dijadikan acuan.</div>':'')+
   '<h2>Asesmen umum</h2><table>'+
-  r('Program',a.program)+r('Diagnosis',a.diagnosis)+r('ICD-10',_icdTeks(a.icd))+r('Derajat (IGA)',a.derajat)+r('Catatan klinis',a.hasil)+
+  r('Program',a.program)+r('Diagnosis',a.diagnosis)+r('Catatan dokter (diagnosis)',a.diagnosis_catatan)+r('ICD-10',_icdTeks(a.icd))+r('Derajat (IGA)',a.derajat)+r('Catatan klinis',a.hasil)+
   (a.pemeriksaan?(r('Keadaan umum',a.pemeriksaan.umum)+r('Tipe kulit',a.pemeriksaan.tipe_kulit)+
     r('Fitzpatrick',a.pemeriksaan.fitzpatrick)+
     ((a.pemeriksaan.bb||a.pemeriksaan.tb)?r('BB / TB / IMT',[a.pemeriksaan.bb&&(a.pemeriksaan.bb+' kg'),a.pemeriksaan.tb&&(a.pemeriksaan.tb+' cm'),a.pemeriksaan.imt].filter(Boolean).join(' / ')):'')):'')+
@@ -3607,7 +3616,8 @@ function renderIntake(){
   var pg=(o.pengukuran||{});
   var bt=[pg.bb&&(pg.bb+' kg'),pg.tb&&(pg.tb+' cm'),pg.imt&&('IMT '+pg.imt)].filter(Boolean).join(' · ');
   var gh=[_kv('Berat · tinggi · IMT',bt),_kv('Tidur',g.tidur),_kv('Stres',g.stres),_kv('Matahari',g.matahari),_kv('Merokok',g.merokok),
-          _kv('Pola makan',g.pola_makan),_kv('Aktivitas',g.aktivitas)].filter(Boolean).join('');
+          _kv('Pola makan',g.pola_makan),_kv('Aktivitas',g.aktivitas),_kv('Air putih',g.air),_kv('Minuman manis',g.minuman_manis),_kv('Susu',g.susu),
+          _kv('Suplemen',g.suplemen),_kv('Alkohol',g.alkohol),_kv('Kebiasaan pada wajah',g.kebiasaan_wajah)].filter(Boolean).join('');
   var hor=(k.hormonal||[]).join(', ');
   var t3=(gh||hor||k.obat_kini)?('<div class="tier"><span class="tg">Latar</span><div class="tc">'+
     '<div class="kvgrid">'+_kv('Hormonal',hor)+_kv('Obat/produk dipakai',k.obat_kini)+_kv('Haid',k.haid)+gh+'</div>'+'</div></div>'):'';
@@ -3648,7 +3658,7 @@ function renderPrev(h,baru){
   if(!box||!body) return;
   var a=h.asesmen||{};
   var rows=[['Kunjungan ke-',h.kunjungan_ke],['Tanggal asesmen',a.tanggal],['Dokter yang meng-asses',a.dokter],['Program',a.program],
-    ['Diagnosis',a.diagnosis],['Derajat (IGA)',a.derajat],['Catatan klinis',a.hasil],
+    ['Diagnosis',a.diagnosis],['Catatan dokter (diagnosis)',a.diagnosis_catatan],['Derajat (IGA)',a.derajat],['Catatan klinis',a.hasil],
     ['Alergi / kontraindikasi', a.alergi || (a.alergi_nihil?'Nihil (dikonfirmasi)':'')],
     ['Resep saat itu',(a.resep||[]).map(function(r){return [r.obat,r.jadwal,r.cara,r.durasi].filter(Boolean).join(' · ');}).join('  |  ')],
     ['Rencana & timeline',a.rencana],['Instruksi kontrol',a.instruksi_kontrol],
