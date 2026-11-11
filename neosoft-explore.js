@@ -47,7 +47,7 @@ function skor(nama, petunjuk) {
 (async () => {
   const conn = await mysql.createConnection({
     host: cfg.host, port: cfg.port || 3306, user: cfg.user, password: cfg.password,
-    database: cfg.database || undefined, connectTimeout: 10000
+    database: cfg.database || undefined, connectTimeout: 40000
   });
   console.log('=== NEOSOFT EXPLORER (baca-saja) ===');
   console.log('Terhubung ke', cfg.host + ':' + (cfg.port || 3306), 'sebagai', cfg.user);
@@ -91,6 +91,7 @@ function skor(nama, petunjuk) {
       const tandai = skor(c.c, PETUNJUK_KOLOM) ? '  <== relevan' : '';
       console.log(`   ${c.c}  (${c.d}${c.k ? ', ' + c.k : ''})${tandai}`);
     });
+    if (process.argv.includes('--skema-saja')) continue;   /* hanya struktur: tidak membaca baris pasien sama sekali */
     try {
       const [rows] = await conn.query('SELECT * FROM ??.?? LIMIT 1', [r.s, r.t]);
       if (rows.length) {

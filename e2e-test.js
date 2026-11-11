@@ -17,6 +17,8 @@ const { JSDOM, VirtualConsole } = require(path.join(JS_DIR, 'node_modules', 'jsd
 fs.copyFileSync(path.join(SRC, 'server.js'), path.join(WORK, 'server.js'));
 fs.cpSync(path.join(SRC, 'www'), path.join(WORK, 'www'), { recursive: true });
 fs.writeFileSync(path.join(WORK, 'config.json'), JSON.stringify({ port: 3791, key: 'adc-test', webhook: 'https://hook.test/adc', backup_dir: path.join(WORK, 'backup'), backup_jam: 1 }));
+/* NeoSoft tiruan (mock) — hub menjawab identitas by RM tanpa database */
+fs.writeFileSync(path.join(WORK, 'neosoft.json'), JSON.stringify({ mock: { 'RM-NEO-01': { nama: 'Pasien NeoSoft', nik: '3273019900000001', tgl_lahir: '1990-05-17', kelamin: 'P', wa: '081277770001', kota: 'Bandung' } } }));
 /* pengguna uji (users.json dibaca server saat start; PIN di-hash scrypt seperti tools/pengguna.js) */
 const crypto = require('crypto');
 const PIN = { admin: '111111', dokter: '222222', perawat: '333333', cs: '444444' };
@@ -37,7 +39,7 @@ function check(name, ok, detail) { results.push({ name, ok: !!ok, detail }); con
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 async function until(fn, ms = 4000) { const t = Date.now(); while (Date.now() - t < ms) { if (fn()) return true; await sleep(50); } return false; }
 
-async function open(file, { key = KEY, user = (/Form2/.test(file) ? 'dokter' : 'perawat'), log } = {}) {
+async function open(file, { key = KEY, user = (/Form2/.test(file) ? 'dokter' : 'perawat'), log, ls } = {}) {
   const dialogs = [];
   const vc = new VirtualConsole();
   vc.on('jsdomError', e => dialogs.push({ type: 'jsdomError', msg: String(e.message).slice(0, 200) }));
@@ -52,7 +54,7 @@ async function open(file, { key = KEY, user = (/Form2/.test(file) ? 'dokter' : '
       w.scrollTo = () => {}; w.Element.prototype.scrollIntoView = () => {};
       w.__popup = null;
       w.open = () => { const d = { html: '', open() {}, write(h) { d.html += h; }, close() {} }; w.__popup = { document: d }; return w.__popup; };
-      try { w.localStorage.setItem('adc_hub_key', key); if (user && TOK[user]) { w.localStorage.setItem('adc_hub_tok', TOK[user]); w.localStorage.setItem('adc_hub_user', JSON.stringify(USER[user])); } } catch (e) {}
+      try { w.localStorage.setItem('adc_hub_key', key); if (user && TOK[user]) { w.localStorage.setItem('adc_hub_tok', TOK[user]); w.localStorage.setItem('adc_hub_user', JSON.stringify(USER[user])); } if (ls) Object.keys(ls).forEach(k => w.localStorage.setItem(k, ls[k])); } catch (e) {}
     } });
   const w = dom.window;
   if (/admin\.html$/.test(file)) { await until(() => w._adminSiap === true, 4000).catch(() => {}); return { w, d: w.document, dialogs, dom }; }
@@ -110,6 +112,12 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
     check('hub: RM tak dikenal -> 404', (await fetch(BASE + '/api/pasien/NOPE', { headers: Hd('perawat') })).status === 404);
     check('hub: CS boleh lihat daftar, TIDAK boleh simpan intake (403)', (await fetch(BASE + '/api/pasien', { headers: Hd('cs') })).status === 200 &&
       (await fetch(BASE + '/api/intake', { method: 'POST', headers: Hd('cs', true), body: JSON.stringify({ doc: 'ADC-INTAKE', pasien: { rm: 'RM-CS' } }) })).status === 403);
+    /* NeoSoft (mock): ping mengumumkan, endpoint by RM, 404 untuk RM asing, butuh sesi */
+    check('NeoSoft: /api/ping mengumumkan neosoft:true (mock terpasang)', ping.neosoft === true, ping);
+    { const r = await fetch(BASE + '/api/neosoft/RM-NEO-01', { headers: Hd('perawat') }); const j = await r.json();
+      const r404 = await fetch(BASE + '/api/neosoft/RM-ASING', { headers: Hd('cs') });
+      const r401 = await fetch(BASE + '/api/neosoft/RM-NEO-01', { headers: Hd() });
+      check('NeoSoft: GET /api/neosoft/:rm -> identitas ternormalisasi (kelamin P -> Perempuan); RM asing 404; tanpa sesi 401', r.status === 200 && j.ok && j.sumber === 'neosoft' && j.pasien.nama === 'Pasien NeoSoft' && j.pasien.kelamin === 'Perempuan' && j.pasien.rm === 'RM-NEO-01' && r404.status === 404 && r401.status === 401, { s: r.status, j, r404: r404.status, r401: r401.status }); }
     check('hub: audit hanya admin (cs 403, admin 200)', (await fetch(BASE + '/api/audit', { headers: Hd('cs') })).status === 403 && (await fetch(BASE + '/api/audit', { headers: Hd('admin') })).status === 200);
     check('hub: cadangan ke backup_dir saat mulai (folder bertanggal + BACA-SAYA)', fs.existsSync(path.join(WORK, 'backup', 'BACA-SAYA.txt')) && fs.readdirSync(path.join(WORK, 'backup')).some(f => /^adc-data-\d{4}-/.test(f)), fs.existsSync(path.join(WORK, 'backup')) ? fs.readdirSync(path.join(WORK, 'backup')) : null);
     { const r = await fetch(BASE + '/api/users', { method: 'POST', headers: Hd('admin', true), body: JSON.stringify({ id: 'dr.baru', nama: 'dr. Baru', peran: 'dokter', pin: '555555' }) });
@@ -171,13 +179,52 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
     await until(() => f1.dialogs.some(x => x.type === 'alert' && /tersimpan di hub/.test(x.msg)));
     check('F1: pesan Simpan menyebut hub ✓ + RM (bukan pesan generik)', f1.dialogs.some(x => x.type === 'alert' && /✓.*tersimpan di hub klinik \(RM RM-TEST-001\)/.test(x.msg)), f1.dialogs.filter(x => x.type === 'alert').map(x => x.msg.slice(0, 80)));
     check('F1: tombol Simpan juga ada di akhir langkah 5', !!f1.d.querySelector('.donehint button[onclick="simpanIntake()"]'));
+    /* ===== 1a. FORM 1: identitas dari NeoSoft saat RM diisi ===== */
+    { const fn = await open('ADC_Form1_Registrasi_Anamnesis_Pasien.html');
+      await until(() => fn.w._neoOn === true, 3000).catch(() => {});
+      set(fn.d, 'p_wa', '0800-sudah-diketik');
+      set(fn.d, 'rm', 'RM-NEO-01'); $(fn.d, 'rm').dispatchEvent(new fn.w.Event('change', { bubbles: true }));
+      await until(() => $(fn.d, 'p_nama').value === 'Pasien NeoSoft', 4000).catch(() => {});
+      const lab = (pref) => { let v = ''; fn.d.querySelectorAll('.page .f').forEach(f => { const k = (f.querySelector('.lab') || {}).textContent || ''; if (!v && k.trim().toLowerCase().startsWith(pref)) v = fn.w._fval(f); }); return v; };
+      check('F1 NeoSoft: RM diisi -> nama, NIK, tanggal lahir, jenis kelamin, kota terisi dari NeoSoft; WA yang sudah diketik tidak ditimpa; catatan "identitas dari NeoSoft"', $(fn.d, 'p_nama').value === 'Pasien NeoSoft' && $(fn.d, 'p_nik').value === '3273019900000001' && $(fn.d, 'p_wa').value === '0800-sudah-diketik' && lab('tanggal lahir') === '17/05/1990' && lab('jenis kelamin') === 'Perempuan' && lab('kota') === 'Bandung' && /identitas dari NeoSoft/.test($(fn.d, 'rm_neo').textContent), { nama: $(fn.d, 'p_nama').value, tl: lab('tanggal lahir'), jk: lab('jenis kelamin'), kota: lab('kota'), note: $(fn.d, 'rm_neo').textContent });
+      set(fn.d, 'rm', 'RM-ASING-9'); $(fn.d, 'rm').dispatchEvent(new fn.w.Event('change', { bubbles: true }));
+      await until(() => /tidak ada di NeoSoft/.test($(fn.d, 'rm_neo').textContent), 3000).catch(() => {});
+      check('F1 NeoSoft: RM asing -> catatan "tidak ada di NeoSoft", isian tidak berubah', /tidak ada di NeoSoft/.test($(fn.d, 'rm_neo').textContent) && $(fn.d, 'p_nama').value === 'Pasien NeoSoft', $(fn.d, 'rm_neo').textContent); }
+    /* ===== 1b. FORM 1: panggil kembali (Muat Form 1 by RM) + draf lokal ===== */
+    { await until(() => disk('intake.json')); const ikF1 = disk('intake.json'); const f1b = await open('ADC_Form1_Registrasi_Anamnesis_Pasien.html');
+      check('F1 muat: tombol "Muat Form 1" di toolbar & draf belum ditawarkan (localStorage kosong)', !!$(f1b.d, 'tb_muat') && $(f1b.d, 'draftbar').hidden);
+      f1b.w.muatF1(); await sleep(50);
+      check('F1 muat: dialog RM/berkas terbuka (ids mdlg_rm/mdlg_file/mdlg_ok)', $(f1b.d, 'mdlg').classList.contains('on') && !!$(f1b.d, 'mdlg_file') && !!$(f1b.d, 'mdlg_ok'));
+      set(f1b.d, 'mdlg_rm', RM); $(f1b.d, 'mdlg_ok').click();
+      await until(() => f1b.w._f1Dimuat, 4000).catch(() => {});
+      const b2 = f1b.w.buildIntake();
+      check('F1 muat: identitas, panel staf & alergi terisi kembali dari hub; dialog tertutup', !!f1b.w._f1Dimuat && $(f1b.d, 'p_nama').value === 'Pasien Uji Coba' && $(f1b.d, 'rm').value === RM && $(f1b.d, 'p_nik').value === '3273012345678901' && $(f1b.d, 'p_dokter').value === 'dr. Uji, Sp.DVE' && $(f1b.d, 'p_bb').value === '58' && $(f1b.d, 'alergi').value === 'Penisilin' && $(f1b.d, 'p_foto_ok').checked && $(f1b.d, 'p_foto_izin').checked && !$(f1b.d, 'mdlg').classList.contains('on'), { nama: $(f1b.d, 'p_nama').value, dlg: $(f1b.d, 'mdlg_msg').textContent, dialogs: f1b.dialogs.slice(-2) });
+      check('F1 muat: program Acne kembali terpilih (kartu + blok detail), lokasi "Pipi" tercentang, 7 persetujuan tercentang', f1b.d.querySelector('.prog[data-p=acne]').classList.contains('on') && f1b.d.getElementById('d-acne').classList.contains('on') && [...f1b.d.querySelectorAll('#d-acne label.opt')].some(l => l.textContent.trim() === 'Pipi' && l.querySelector('input').checked) && f1b.d.querySelectorAll('label.ack input:checked').length === 7, { hilang: f1b.w._f1Hilang });
+      check('F1 muat: buildIntake() setelah dimuat = intake yang tersimpan (pasien, kritis, program, seksi P4)', JSON.stringify(b2.pasien) === JSON.stringify(ikF1.pasien) && b2.kritis.alergi === ikF1.kritis.alergi && JSON.stringify(b2.kritis.program) === JSON.stringify(ikF1.kritis.program) && JSON.stringify(b2.seksi) === JSON.stringify(ikF1.seksi) && b2.persetujuan.disetujui === ikF1.persetujuan.disetujui, { b2: { p: b2.pasien, s: b2.seksi }, ikF1: { p: ikF1.pasien, s: ikF1.seksi } });
+      { const ttd = JSON.parse(JSON.stringify(ikF1)); ttd.persetujuan.tanda_tangan.pasien = { nama: 'Pasien Uji Coba', tanggal: '2026-11-11', gambar: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==' };
+        f1b.w.applyIntakeF1(ttd); const b3 = f1b.w.buildIntake();
+        check('F1 muat: gambar tanda tangan dari intake dipertahankan (padData mengembalikannya) & nama penandatangan terisi', b3.persetujuan.tanda_tangan.pasien.gambar === ttd.persetujuan.tanda_tangan.pasien.gambar && $(f1b.d, 'ttd_pasien_nama').value === 'Pasien Uji Coba' && f1b.d.getElementById('ttd_pasien').parentNode.classList.contains('inked'), b3.persetujuan.tanda_tangan.pasien.gambar.slice(0, 30)); }
+      check('F1 muat: berkas bukan ADC-INTAKE ditolak', f1b.w.applyIntakeF1({ doc: 'ADC-HANDOFF' }) === false && f1b.dialogs.some(x => x.type === 'alert' && /bukan keluaran Form 1/.test(x.msg)));
+      /* draf lokal: perubahan -> localStorage; buka lagi -> bilah Lanjutkan */
+      set(f1b.d, 'p_nama', 'Draf Uji'); await until(() => { try { return /Draf Uji/.test(f1b.w.localStorage.getItem('adc_f1_draft') || ''); } catch (e) { return false; } }, 3000).catch(() => {});
+      const draf = f1b.w.localStorage.getItem('adc_f1_draft');
+      check('F1 draf: perubahan tersimpan otomatis ke localStorage (adc_f1_draft)', !!draf && /Draf Uji/.test(draf));
+      { const f1c = await open('ADC_Form1_Registrasi_Anamnesis_Pasien.html', { ls: { adc_f1_draft: draf } });
+        check('F1 draf: saat dibuka lagi, bilah "Isian terakhir" tampil dengan nama & RM', !$(f1c.d, 'draftbar').hidden && /Draf Uji/.test($(f1c.d, 'draft_teks').textContent) && new RegExp(RM).test($(f1c.d, 'draft_teks').textContent), $(f1c.d, 'draft_teks').textContent);
+        $(f1c.d, 'draft_lanjut').click(); await sleep(50);
+        check('F1 draf: Lanjutkan mengisi ulang form & menutup bilah', $(f1c.d, 'p_nama').value === 'Draf Uji' && $(f1c.d, 'rm').value === RM && $(f1c.d, 'draftbar').hidden);
+        f1c.w.confirm = () => true; f1c.w.resetForm();
+        check('F1 draf: Reset menghapus draf', !f1c.w.localStorage.getItem('adc_f1_draft') && $(f1c.d, 'p_nama').value === ''); }
+      { const f1d = await open('ADC_Form1_Registrasi_Anamnesis_Pasien.html', { ls: { adc_f1_draft: draf } });
+        $(f1d.d, 'draft_buang').click();
+        check('F1 draf: Buang menghapus draf tanpa mengisi form', !f1d.w.localStorage.getItem('adc_f1_draft') && $(f1d.d, 'draftbar').hidden && $(f1d.d, 'p_nama').value === ''); } }
     await until(() => disk('intake.json'));
-    const ik = disk('intake.json');
-    check('hub: intake.json tersimpan per RM', ik && ik.doc === 'ADC-INTAKE' && ik.pasien.rm === RM);
-    check('hub: field intake benar (nama, alergi, dokter, BB/TB)', ik && ik.pasien.nama === 'Pasien Uji Coba' && ik.kritis.alergi === 'Penisilin' && ik.penugasan.dokter === 'dr. Uji, Sp.DVE' && ik.pengukuran.bb === '58', ik && { p: ik.pasien, k: ik.kritis.alergi, pg: ik.pengukuran });
-    check('F1: IMT terhitung', ik && ik.pengukuran.imt, ik && ik.pengukuran);
-    check('F1: NIK & persetujuan (umum, data pribadi, hak-kewajiban) masuk ke intake', ik && ik.pasien.nik === '3273012345678901' && ik.persetujuan.total === 7 && ik.persetujuan.umum === true && ik.persetujuan.data_pribadi === true && ik.persetujuan.hak_kewajiban === true && ik.persetujuan.butir.length === 7, ik && ik.persetujuan);
-    check('hub: stempel server _audit (siapa/kapan) di intake = perawat', ik && ik._audit && ik._audit.oleh === 'perawat' && ik._audit.peran === 'perawat' && /^\d{4}-/.test(ik._audit.waktu), ik && ik._audit);
+    const ikF1 = disk('intake.json');
+    check('hub: intake.json tersimpan per RM', ikF1 && ikF1.doc === 'ADC-INTAKE' && ikF1.pasien.rm === RM);
+    check('hub: field intake benar (nama, alergi, dokter, BB/TB)', ikF1 && ikF1.pasien.nama === 'Pasien Uji Coba' && ikF1.kritis.alergi === 'Penisilin' && ikF1.penugasan.dokter === 'dr. Uji, Sp.DVE' && ikF1.pengukuran.bb === '58', ikF1 && { p: ikF1.pasien, k: ikF1.kritis.alergi, pg: ikF1.pengukuran });
+    check('F1: IMT terhitung', ikF1 && ikF1.pengukuran.imt, ikF1 && ikF1.pengukuran);
+    check('F1: NIK & persetujuan (umum, data pribadi, hak-kewajiban) masuk ke intake', ikF1 && ikF1.pasien.nik === '3273012345678901' && ikF1.persetujuan.total === 7 && ikF1.persetujuan.umum === true && ikF1.persetujuan.data_pribadi === true && ikF1.persetujuan.hak_kewajiban === true && ikF1.persetujuan.butir.length === 7, ikF1 && ikF1.persetujuan);
+    check('hub: stempel server _audit (siapa/kapan) di intake = perawat', ikF1 && ikF1._audit && ikF1._audit.oleh === 'perawat' && ikF1._audit.peran === 'perawat' && /^\d{4}-/.test(ikF1._audit.waktu), ikF1 && ikF1._audit);
     { const raw = fs.readFileSync(path.join('data', RM, 'intake.json'), 'utf8');
       check('hub: berkas di disk TERENKRIPSI (amplop aes-256-gcm, nama pasien tidak terbaca)', /"enc":"aes-256-gcm"/.test(raw) && !/Pasien Uji Coba/.test(raw)); }
 
@@ -248,8 +295,17 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
     check('F2: muat ulang Form 1 yang dikoreksi menimpa alergi lama', $(a.d, 'alergi_flag').value === 'Sulfa' && /Sulfa/.test($(a.d, 'intake_body').textContent), $(a.d, 'alergi_flag').value);
     { const ik3 = JSON.parse(JSON.stringify(a.w._intake)); ik3.kritis.alergi = ''; ik3.kritis.alergi_nihil = true; a.w.applyIntake(ik3); }
     check('F2: Form 1 "tidak ada alergi" -> nihil, ringkasan menyebut Nihil', $(a.d, 'alergi_flag').value === '' && $(a.d, 'alergi_none').checked && /Nihil/.test($(a.d, 'intake_body').textContent));
+    { const ik5 = JSON.parse(JSON.stringify(a.w._intake)); ik5.kritis.alergi = ''; ik5.kritis.alergi_nihil = false; a.w.applyIntake(ik5);
+      const rq = a.w.reqStatus().find(x => x.label === 'Alergi dikonfirmasi');
+      check('F2: Form 1 TANPA info alergi -> kotak alergi tetap tampil (dokter mencatat konfirmasi lisan), WAJIB mengarah ke kotak, ringkasan menyebut kotak', $(a.d, 'alergi_box').style.display !== 'none' && rq && !rq.ok && rq.go === 'alergi_box' && /catat di kotak/.test($(a.d, 'intake_body').textContent), { box: $(a.d, 'alergi_box').style.display, rq });
+      chk(a.d, 'alergi_none'); check('F2: centang Nihil di kotak itu memenuhi WAJIB alergi', a.w.reqStatus().find(x => x.label === 'Alergi dikonfirmasi').ok);
+      check('F2: _programDerajat tidak menggandakan "Melasma" untuk program Hiperpigmentasi/Melasma', a.w._programDerajat({ program: 'Hiperpigmentasi/Melasma', derajat: 'Melasma IGA 3 · Sedang (Moderate)' }) === 'Hiperpigmentasi/Melasma — IGA 3 · Sedang (Moderate)' && a.w._programDerajat({ program: 'Acne', derajat: 'Acne IGA 3 · Sedang' }) === 'Acne IGA 3 · Sedang', a.w._programDerajat({ program: 'Hiperpigmentasi/Melasma', derajat: 'Melasma IGA 3 · Sedang (Moderate)' })); }
     { const ik4 = JSON.parse(JSON.stringify(a.w._intake)); ik4.kritis.alergi = 'Penisilin'; ik4.kritis.alergi_nihil = false; a.w.applyIntake(ik4); }
     check('F2: ringkasan intake tampil', $(a.d, 'intake_box').style.display !== 'none');
+    { const f2n = await open('ADC_Form2_Asesmen_Umum_Dokter.html'); await until(() => f2n.w._neoOn === true, 3000).catch(() => {});
+      set(f2n.d, 'rm', 'RM-NEO-01'); $(f2n.d, 'rm').dispatchEvent(new f2n.w.Event('change', { bubbles: true }));
+      await until(() => $(f2n.d, 'p_nama').value === 'Pasien NeoSoft', 4000).catch(() => {});
+      check('F2 NeoSoft: pasien kontrol tanpa Form 1 di hub -> RM diisi -> nama/NIK/WA dari NeoSoft + catatan', $(f2n.d, 'p_nama').value === 'Pasien NeoSoft' && $(f2n.d, 'p_nik').value === '3273019900000001' && $(f2n.d, 'p_wa').value === '081277770001' && /identitas dari NeoSoft/.test($(f2n.d, 'rm_neo').textContent), { nama: $(f2n.d, 'p_nama').value, note: $(f2n.d, 'rm_neo').textContent }); }
     { const asli = JSON.parse(JSON.stringify(a.w._intake)); const lain = JSON.parse(JSON.stringify(asli)); lain.pasien = { nama: 'Orang Lain', rm: 'RM-LAIN', nik: '1111222233334444', wa: '0800' };
       a.w.confirm = m => { a.dialogs.push({ type: 'confirm', msg: String(m) }); return false; }; a.dialogs.length = 0; a.w.applyIntake(lain);
       const tolak = /DATA PASIEN BERBEDA/.test((a.dialogs.find(x => x.type === 'confirm') || {}).msg || '') && $(a.d, 'p_nama').value === 'Pasien Uji Coba' && $(a.d, 'rm').value === RM && a.w._intake.pasien.rm === RM;

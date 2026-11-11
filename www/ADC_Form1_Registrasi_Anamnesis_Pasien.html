@@ -539,6 +539,34 @@ button.hubchip{font-family:inherit;background:transparent;}
 .hubchip b{font-weight:700;letter-spacing:.16em;}
 .hubchip span{display:block;font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:none;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 @media print{.hubchip{display:none!important;}}
+
+/* ---- dialog Muat Form 1 (tata yang sama dengan Form 2) ---- */
+.mdlg-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2000;display:none;align-items:flex-start;justify-content:center;padding:6vh 16px 16px;overflow:auto;}
+.mdlg-bg.on{display:flex;}
+.mdlg{background:var(--surface);border-radius:var(--r-card,14px);width:100%;max-width:460px;padding:24px 24px 20px;box-shadow:0 18px 50px rgba(0,0,0,.25);}
+.mdlg-t{font-size:18px;font-weight:620;color:var(--ink);margin-bottom:16px;}
+.mdlg-l{display:block;font-size:11px;font-weight:620;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2);margin-bottom:6px;}
+.mdlg-l span{font-weight:400;letter-spacing:0;text-transform:none;color:var(--ink-muted);margin-left:6px;}
+.mdlg-in{width:100%;font:inherit;font-size:16px;color:var(--ink-fill);padding:11px 13px;border:1px solid var(--line-strong);border-radius:var(--r-box,8px);background:#fff;}
+.mdlg-in:focus{outline:none;border-color:var(--accent-act,#B0603F);}
+.mdlg-msg{min-height:20px;font-size:13px;color:var(--accent-deep);margin:8px 0 6px;}
+.mdlg-b{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.mdlg-sp{flex:1;}
+.mdlg-b button{font:inherit;font-size:14px;font-weight:600;min-height:44px;padding:0 18px;border-radius:999px;cursor:pointer;border:1px solid var(--line-strong);background:var(--surface);color:var(--ink);}
+.mdlg-b .mdlg-ok{background:var(--accent-act,#B0603F);border-color:var(--accent-act,#B0603F);color:#fff;}
+.mdlg-b .mdlg-file{border-color:var(--accent-act,#B0603F);color:var(--accent-deep);}
+.mdlg-msg .lnk{font:inherit;font-weight:600;color:var(--accent-deep);background:none;border:none;text-decoration:underline;text-underline-offset:2px;cursor:pointer;min-height:44px;padding:0 6px;}
+/* ---- bilah draf lokal ---- */
+.draftbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 14px;padding:10px 14px;background:var(--blush,#FCF4F0);border:1px solid var(--accent);border-radius:var(--r-box,8px);font-size:14px;color:var(--ink);}
+.draftbar[hidden]{display:none;}
+.draftbar .dt b{font-weight:620;}
+.draftbar .sp{flex:1;}
+.draftbar .dbtn{font:inherit;font-size:13.5px;font-weight:600;min-height:44px;padding:0 16px;border-radius:999px;border:1px solid var(--line-strong);background:#fff;color:var(--ink);cursor:pointer;}
+.draftbar .dbtn.act{background:var(--accent-act,#B0603F);border-color:var(--accent-act,#B0603F);color:#fff;}
+@media print{ .mdlg-bg,.draftbar{display:none !important;} }
+.neo-note{font-size:12px;line-height:1.3;margin-top:4px;min-height:0;opacity:.9;}
+.neo-note:empty{display:none;}
+@media print{ .neo-note{display:none !important;} }
 </style>
 </head>
 <body>
@@ -549,13 +577,19 @@ button.hubchip{font-family:inherit;background:transparent;}
     <div class="tb-hint">Diisi pasien · boleh dibantu perawat · sebelum masuk ruang konsultasi</div>
   </div>
   <div class="tb-actions">
-    <button type="button" class="hubchip off" id="hubchip" onclick="hubMenu()" title="Klik: masuk / ganti pengguna &amp; atur hub">HUB &middot; …</button><button class="btn" onclick="resetForm()">Reset</button>
+    <button type="button" class="hubchip off" id="hubchip" onclick="hubMenu()" title="Klik: masuk / ganti pengguna &amp; atur hub">HUB &middot; …</button><button class="btn" id="tb_muat" onclick="muatF1()">Muat Form 1</button><button class="btn" onclick="resetForm()">Reset</button>
     <button class="btn" onclick="cetakSemua()">Cetak / Simpan PDF</button>
     <button class="btn tan" onclick="simpanIntake()">Simpan Data Pasien</button>
   </div>
 </div>
 
 <div class="page">
+  <div class="draftbar" id="draftbar" hidden role="status">
+    <span class="dt" id="draft_teks"></span>
+    <span class="sp"></span>
+    <button type="button" class="dbtn" id="draft_buang" onclick="_draftBuang()">Buang</button>
+    <button type="button" class="dbtn act" id="draft_lanjut" onclick="_draftLanjut()">Lanjutkan</button>
+  </div>
 
   <header class="fhead">
     <div class="eyebrow">Skin Quality Program &middot; Form 1 dari 2</div>
@@ -569,7 +603,7 @@ button.hubchip{font-family:inherit;background:transparent;}
   <div class="staff doc-meta">
     <div class="staff-h"><span class="eg">Khusus staf</span><span class="ss">Diisi pendaftaran sebelum pasien mulai</span></div>
     <div class="staff-grid">
-      <div class="sf k3"><label class="slab" for="rm">No. RM</label><input class="sin" id="rm" placeholder="RM-______"></div>
+      <div class="sf k3"><label class="slab" for="rm">No. RM</label><input class="sin" id="rm" placeholder="RM-______"><div class="neo-note" id="rm_neo" role="status"></div></div>
       <div class="sf k3"><label class="slab" for="p_nik">NIK <span class="sreq">16 digit — identitas RME</span></label><input class="sin" id="p_nik" inputmode="numeric" maxlength="16" placeholder="16 digit KTP" oninput="cekNIK(this)"></div>
       <div class="sf k3"><label class="slab" for="tgl">Tanggal</label><input class="sin" type="date" id="tgl"></div>
       <div class="sf k3"><span class="slab">Status pasien</span>
@@ -926,10 +960,12 @@ function agReset(){document.querySelectorAll('textarea.ag').forEach(function(t){
 
 function resetForm(){ setTimeout(agReset,0);
   if(!confirm('Reset semua isian formulir?')) return;
-  document.querySelectorAll('input').forEach(function(i){ if(i.type==='checkbox'){i.checked=false;} else {i.value='';} });
+  /* termasuk textarea (nama, WA, jawaban pasien) & select — sebelumnya hanya <input> yang dikosongkan */
+  document.querySelectorAll('input,textarea,select').forEach(function(i){ if(i.type==='checkbox'||i.type==='radio'){i.checked=false;} else if(i.tagName==='SELECT'){i.selectedIndex=0;} else {i.value='';} });
   document.querySelectorAll('.prog').forEach(function(e){e.classList.remove('on');});
   document.querySelectorAll('.detail').forEach(function(e){e.classList.remove('on');});
   PADS.forEach(clearPad);
+  _draftHapus(); window._f1Dimuat=null;
 }
 window.addEventListener('load',function(){
   var d=new Date(); var t=document.getElementById('tgl'); if(t) t.value=d.toISOString().split('T')[0];
@@ -1195,7 +1231,7 @@ function hubChip(st,txt){ var c=document.getElementById('hubchip'); if(!c) retur
 function hubPing(){
   try{
     fetch(hubURL()+'/api/ping',{cache:'no-store'}).then(function(r){return r.json();})
-    .then(function(j){ _hubOn=!!(j&&j.ok); _hubCekSesi(j); })
+    .then(function(j){ _hubOn=!!(j&&j.ok); _hubCekSesi(j); window._neoOn=!!(j&&j.neosoft); })
     .catch(function(){ _hubOn=false; hubChip('off','mati'); });
   }catch(e){ _hubOn=false; }
 }
@@ -1277,6 +1313,7 @@ function simpanIntake(){
   a.href=u; a.download='Intake_'+nm+'_'+tg+'.json';
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(function(){URL.revokeObjectURL(u);},1500);
+  _draftHapus();   /* berkas sudah ada -> draf lokal tidak diperlukan lagi */
   /* Hasil hub HARUS terlihat perawat: sebelumnya pesan "tersimpan" muncul walau hub menolak
      (kunci belum diisi di tablet, jaringan) — dokter lalu tidak menemukan RM-nya. */
   if(!_hubOn){
@@ -1368,7 +1405,7 @@ function sizePad(cv){
      berukuran 0 menghasilkan goresan hilang, jadi tunda sampai terlihat. */
   if(!r.width||!r.height) return false;
   var dpr=window.devicePixelRatio||1;
-  var prev=cv.__inked?cv.toDataURL():null;
+  var prev=cv.__inked?cv.toDataURL():(cv.__loaded||null);   /* gambar tanda tangan yang dimuat ikut digambar saat kanvas punya ukuran */
   cv.width=Math.round(r.width*dpr); cv.height=Math.round(r.height*dpr);
   var c=cv.getContext('2d'); c.setTransform(1,0,0,1,0,0); c.scale(dpr,dpr);
   _ctx(cv);
@@ -1386,7 +1423,7 @@ function initPad(cv){
     if(!cv.width) if(!sizePad(cv)) return;
     drawing=true; cv.setPointerCapture&&cv.setPointerCapture(e.pointerId);
     var c=_ctx(cv), p=pos(e); c.beginPath(); c.moveTo(p.x,p.y);
-    cv.__inked=true; cv.parentNode.classList.add('inked'); e.preventDefault();
+    cv.__inked=true; cv.__loaded=null; cv.parentNode.classList.add('inked'); e.preventDefault();
   });
   cv.addEventListener('pointermove',function(e){
     if(!drawing) return; var c=cv.getContext('2d'), p=pos(e);
@@ -1398,14 +1435,186 @@ function initPad(cv){
 }
 function clearPad(id){
   var cv=document.getElementById(id); if(!cv) return;
-  var c=cv.getContext('2d'); c.setTransform(1,0,0,1,0,0);
+  var c=cv.getContext&&cv.getContext('2d');
+  if(!c){ cv.__inked=false; cv.__loaded=null; cv.parentNode.classList.remove('inked'); return; }   /* lingkungan tanpa kanvas 2D (uji jsdom) */
+  c.setTransform(1,0,0,1,0,0);
   c.clearRect(0,0,cv.width,cv.height);
   var dpr=window.devicePixelRatio||1; c.scale(dpr,dpr); _ctx(cv);
-  cv.__inked=false; cv.parentNode.classList.remove('inked');
+  cv.__inked=false; cv.__loaded=null; cv.parentNode.classList.remove('inked');
 }
-function padData(id){ var cv=document.getElementById(id);
-  return (cv&&cv.__inked)?cv.toDataURL('image/png'):''; }
+function padData(id){ var cv=document.getElementById(id); if(!cv) return '';
+  if(cv.__loaded&&!cv.__inked) return cv.__loaded;            /* dimuat dari intake, belum digores ulang */
+  return cv.__inked?cv.toDataURL('image/png'):''; }
+/* muat gambar tanda tangan (data URL) ke kanvas: tampil saat kanvas punya ukuran (sizePad), ikut tersimpan ulang */
+function _padLoad(id,dataURL){ var cv=document.getElementById(id); if(!cv) return;
+  clearPad(id); if(!dataURL||String(dataURL).indexOf('data:image/')!==0) return;
+  cv.__loaded=String(dataURL); cv.parentNode.classList.add('inked'); try{ sizePad(cv); }catch(e){} }
 window.addEventListener('resize',function(){ sizePads(); });
+
+/* ===== MUAT FORM 1 (panggil kembali) =====
+   Kebalikan buildIntake(): isian ditulis balik berdasarkan LABEL per seksi (P1..P6), bukan id —
+   sama seperti cara dibacanya. Untuk koreksi sebelum/sesudah dokter, atau melanjutkan di tablet lain. */
+function _ev(e,t){ try{ e.dispatchEvent(new Event(t,{bubbles:true})); }catch(x){} }
+function _setId(id,v){ var e=document.getElementById(id); if(!e) return; e.value=(v==null?'':String(v)); _ev(e,'input'); _ev(e,'change'); }
+function _chkId(id,on){ var e=document.getElementById(id); if(!e) return; e.checked=!!on; _ev(e,'change'); }
+/* kebalikan _fval: bagian yang sama dengan teks label checkbox -> dicentang; sisanya -> kontrol teks berurutan */
+function _fIsi(f,v){
+  var sisa=String(v||'').split(' · ').map(function(s){return s.trim();}).filter(Boolean);
+  var ctl=[].slice.call(f.querySelectorAll('input,select,textarea'));
+  ctl.forEach(function(e){ if(e.type!=='checkbox') return; var t=_t(e.closest('label')); var i=sisa.indexOf(t); e.checked=i>=0; if(i>=0) sisa.splice(i,1); _ev(e,'change'); });
+  var teks=ctl.filter(function(e){ return e.type!=='checkbox'&&e.type!=='radio'; });
+  teks.forEach(function(e,i){ var val=(i<teks.length-1)?(sisa.shift()||''):sisa.join(' · '); if(i===teks.length-1) sisa=[]; e.value=val; _ev(e,'input'); _ev(e,'change'); });
+}
+function _fPerSeksi(){ /* kode seksi -> daftar .f di dalamnya (termasuk blok detail, walau tertutup) */
+  var map={};
+  document.querySelectorAll('.page .sec').forEach(function(sec){
+    var kode=_t(sec.querySelector('.n')), arr=[], n=sec.nextElementSibling;
+    while(n && !(n.classList&&n.classList.contains('sec'))){
+      (n.classList&&n.classList.contains('f')?[n]:[]).concat(Array.prototype.slice.call(n.querySelectorAll('.f'))).forEach(function(f){ arr.push(f); });
+      n=n.nextElementSibling; }
+    map[kode]=arr; });
+  return map;
+}
+function applyIntakeF1(o){
+  if(!o||o.doc!=='ADC-INTAKE'){ alert('Berkas ini bukan keluaran Form 1 (ADC-INTAKE).'); return false; }
+  var p=o.pasien||{}, pn=o.penugasan||{}, pg=o.pengukuran||{}, k=o.kritis||{}, per=o.persetujuan||{};
+  /* identitas & panel staf */
+  _setId('p_nama',p.nama); _setId('rm',p.rm); _setId('p_nik',p.nik); var nk=document.getElementById('p_nik'); if(nk&&typeof cekNIK==='function') cekNIK(nk);
+  _setId('p_wa',p.wa); if(p.tanggal) _setId('tgl',p.tanggal);
+  _setId('p_dokter',pn.dokter); _chkId('p_foto_izin',pn.foto_izin); _chkId('p_foto_ok',pn.foto_baseline); _setId('p_foto_area',pn.foto_area);
+  _setId('p_bb',pg.bb); _setId('p_tb',pg.tb); if(typeof hitungIMT1==='function') hitungIMT1();
+  var status=String(p.status||'').split('/').map(function(s){return s.trim();}).filter(Boolean);
+  document.querySelectorAll('#p_status label').forEach(function(l){ var c=l.querySelector('input[type=checkbox]'); if(c){ c.checked=status.indexOf(_t(l))>=0; _ev(c,'change'); } });
+  /* alergi */
+  _setId('alergi',k.alergi); var an=document.querySelector('.flag label.none input[type=checkbox]'); if(an){ an.checked=!!k.alergi_nihil&&!(k.alergi||'').trim(); _ev(an,'change'); }
+  /* program -> kartu + blok detail */
+  var progs=(k.program||[]).map(function(s){return String(s).toLowerCase();});
+  document.querySelectorAll('.prog[data-p]').forEach(function(e){ var c=e.querySelector('input'), nm=_t(e.querySelector('.pname')).toLowerCase(); if(!c) return; c.checked=progs.indexOf(nm)>=0; _ev(c,'change'); if(typeof tog==='function') tog(e.getAttribute('data-p')); });
+  /* seluruh isian per seksi (label -> nilai) */
+  var map=_fPerSeksi(), dipakai=[], hilang=[];
+  (o.seksi||[]).forEach(function(s){
+    var kandidat=(map[s.kode]||[]);
+    (s.isian||[]).forEach(function(it){
+      var f=kandidat.filter(function(x){ return dipakai.indexOf(x)<0; }).find(function(x){ return _t(x.querySelector('.lab')).toLowerCase()===String(it.k||'').toLowerCase(); });
+      if(!f){ /* label berubah antar versi form: cari di seluruh halaman */
+        f=[].slice.call(document.querySelectorAll('.page .f')).filter(function(x){ return dipakai.indexOf(x)<0; }).find(function(x){ return _t(x.querySelector('.lab')).toLowerCase()===String(it.k||'').toLowerCase(); }); }
+      if(f){ dipakai.push(f); _fIsi(f,it.v); } else hilang.push(it.k);
+    });
+  });
+  /* "belum yakin" program */
+  document.querySelectorAll('label.opt').forEach(function(l){ if(/belum yakin/i.test(_t(l))){ var c=l.querySelector('input'); if(c){ c.checked=!!k.belum_yakin; _ev(c,'change'); } } });
+  /* persetujuan 7 butir: cocokkan teks butir */
+  var butir=per.butir||[];
+  document.querySelectorAll('label.ack').forEach(function(l){ var c=l.querySelector('input'); if(!c) return; var t=_t(l).slice(0,100); var b=butir.find(function(x){ return (x.teks||'')===t || (x.k&&x.k===l.getAttribute('data-k')); }); c.checked=!!(b&&b.setuju); _ev(c,'change'); });
+  /* tanda tangan: nama + gambar */
+  var tt=per.tanda_tangan||{}, tp=tt.pasien||{}, tw=tt.wali||{}, tr=tt.perawat||{};
+  _setId('ttd_pasien_nama',tp.nama); _setId('ttd_pasien_tgl',tp.tanggal); _setId('ttd_wali_nama',tw.nama); _setId('ttd_wali_hub',tw.hubungan); _setId('ttd_perawat_nama',tr.nama);
+  _padLoad('ttd_pasien',tp.gambar); _padLoad('ttd_wali',tw.gambar); _padLoad('ttd_perawat',tr.gambar);
+  if(typeof agReset==='function') setTimeout(function(){ document.querySelectorAll('textarea.ag').forEach(function(t){ t.style.height='auto'; t.style.height=t.scrollHeight+'px'; }); },0);
+  window._f1Dimuat=o; window._f1Hilang=hilang;
+  if(typeof goStep==='function') goStep(0);
+  return true;
+}
+var _f1Seq=0;
+function _f1Dialog(){
+  var bg=document.getElementById('mdlg');
+  if(!bg){
+    bg=document.createElement('div'); bg.id='mdlg'; bg.className='mdlg-bg';
+    bg.innerHTML='<div class="mdlg" role="dialog" aria-modal="true" aria-labelledby="mdlg_t">'+
+      '<div class="mdlg-t" id="mdlg_t">Muat Form 1 yang sudah tersimpan</div>'+
+      '<label class="mdlg-l" for="mdlg_rm">No. RM pasien <span>dari hub klinik</span></label>'+
+      '<input class="mdlg-in" id="mdlg_rm" autocomplete="off" placeholder="ketik No. RM">'+
+      '<div class="mdlg-msg" id="mdlg_msg"></div>'+
+      '<div class="mdlg-b">'+
+        '<button type="button" class="mdlg-file" id="mdlg_file">Pilih berkas…</button>'+
+        '<span class="mdlg-sp"></span>'+
+        '<button type="button" class="mdlg-x" id="mdlg_x">Batal</button>'+
+        '<button type="button" class="mdlg-ok" id="mdlg_ok">Muat</button>'+
+      '</div></div>'+
+      '<input type="file" id="_intakefile_f1" accept=".json,application/json" style="display:none">';
+    document.body.appendChild(bg);
+  }
+  return bg;
+}
+function muatF1(){
+  var bg=_f1Dialog(), inp=document.getElementById('mdlg_rm'), msg=document.getElementById('mdlg_msg'), btnOk=document.getElementById('mdlg_ok'), file=document.getElementById('_intakefile_f1');
+  var tok=++_f1Seq;
+  var tutup=function(){ _f1Seq++; dlgTutup(bg); btnOk.disabled=false; };
+  var selesaiMuat=function(o){ if(applyIntakeF1(o)){ tutup(); var nm=(o.pasien||{}).nama||''; alert('Form 1 dimuat'+(nm?(' — '+nm):'')+'.\n\nPeriksa isian, lalu klik Simpan Data Pasien lagi bila ada yang diubah.'); } };
+  var ok=function(){
+    if(btnOk.disabled) return;
+    var rm=(inp.value||'').trim(); if(!rm){ msg.textContent='Ketik No. RM, atau klik "Pilih berkas…".'; inp.focus(); return; }
+    if(!_hubOn){ msg.textContent='Hub tidak tersambung — pakai "Pilih berkas…" (berkas Intake_… hasil unduhan).'; return; }
+    msg.textContent='Memuat…'; btnOk.disabled=true;
+    hubGetPasien(rm,function(j,err){
+      if(tok!==_f1Seq) return; btnOk.disabled=false;
+      if(j&&j.intake){ selesaiMuat(j.intake); return; }
+      var kls=_hubKelas(err);
+      if(kls==='kunci'){ msg.innerHTML='Tablet ini belum terdaftar di hub — RM ini belum dicari. <button type="button" class="lnk" id="mdlg_kunci">Atur alamat / kunci hub…</button>'; var bk=document.getElementById('mdlg_kunci'); if(bk) bk.onclick=function(){ hubSetup(); if(tok===_f1Seq) ok(); }; return; }
+      if(kls==='login'){ msg.innerHTML='Belum masuk ke hub — RM ini belum dicari. <button type="button" class="lnk" id="mdlg_login">Masuk…</button>'; var bl=document.getElementById('mdlg_login'); if(bl) bl.onclick=function(){ hubLogin(function(okk){ if(okk&&tok===_f1Seq) ok(); }); }; return; }
+      if(kls==='jaringan'){ msg.textContent=_hubPesan(err); return; }
+      msg.textContent=(j&&j._status===404)||/tidak ada|404|not found/i.test(String(err||''))?('RM '+rm+' tidak ada di hub. Periksa penulisan, atau pakai "Pilih berkas…".'):('Gagal memuat: '+_hubPesan(err));
+    });
+  };
+  btnOk.onclick=ok; document.getElementById('mdlg_x').onclick=tutup;
+  inp.onkeydown=function(e){ if(e.key==='Enter'){ e.preventDefault(); ok(); } };
+  document.getElementById('mdlg_file').onclick=function(){ file.value=''; file.click(); };
+  file.onchange=function(){ var f=file.files&&file.files[0]; if(!f) return; var r=new FileReader(); r.onload=function(){ try{ selesaiMuat(JSON.parse(r.result)); }catch(e){ msg.textContent='Berkas tidak terbaca sebagai JSON Form 1.'; } }; r.readAsText(f); };
+  inp.value=(document.getElementById('rm')||{}).value||''; msg.textContent='';
+  dlgBuka(bg,tutup); setTimeout(function(){ inp.focus(); inp.select(); },0);
+}
+
+/* ===== DRAF LOKAL OTOMATIS =====
+   Setiap perubahan -> localStorage perangkat ini (bukan hub). Saat form dibuka lagi, bilah "Lanjutkan isian terakhir".
+   Dihapus setelah Simpan Data Pasien (berkas/hub sudah ada) atau Reset. Data pasien: hanya di tablet itu, maks 7 hari. */
+var _draftT=null, _draftKey='adc_f1_draft';
+function _draftSimpan(){ clearTimeout(_draftT); _draftT=setTimeout(function(){ try{
+  var d=buildIntake(); if(!((d.pasien||{}).nama||(d.pasien||{}).rm||(d.kritis||{}).keluhan)) return;
+  localStorage.setItem(_draftKey,JSON.stringify({t:Date.now(),d:d})); }catch(e){} },800); }
+function _draftHapus(){ clearTimeout(_draftT); try{ localStorage.removeItem(_draftKey); }catch(e){} var b=document.getElementById('draftbar'); if(b) b.hidden=true; }
+function _draftBaca(){ try{ var j=JSON.parse(localStorage.getItem(_draftKey)||'null'); if(!j||!j.d||!j.t) return null; if(Date.now()-j.t>7*24*3600*1000){ localStorage.removeItem(_draftKey); return null; } return j; }catch(e){ return null; } }
+function _draftTawarkan(){
+  var j=_draftBaca(), b=document.getElementById('draftbar'); if(!j||!b) return;
+  var p=j.d.pasien||{}, kapan=''; try{ kapan=new Date(j.t).toLocaleString('id-ID',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}); }catch(e){}
+  document.getElementById('draft_teks').innerHTML='Isian terakhir di perangkat ini belum disimpan: <b>'+_escF1(p.nama||'(tanpa nama)')+'</b>'+(p.rm?(' · RM '+_escF1(p.rm)):'')+(kapan?(' · '+kapan):'')+'.';
+  b.hidden=false;
+}
+function _escF1(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+function _draftLanjut(){ var j=_draftBaca(); var b=document.getElementById('draftbar'); if(b) b.hidden=true; if(j) applyIntakeF1(j.d); }
+function _draftBuang(){ _draftHapus(); }
+document.addEventListener('input',_draftSimpan); document.addEventListener('change',_draftSimpan);
+
+/* ===== NEOSOFT: identitas by No. RM (baca-saja lewat hub) =====
+   Saat No. RM diisi & hub punya akses NeoSoft: nama, NIK, WA, tanggal lahir, jenis kelamin, kota terisi
+   bila kolomnya masih kosong (yang sudah diketik tidak ditimpa). Tanpa NeoSoft: tidak terjadi apa-apa. */
+function neoAmbil(rm,cb){
+  try{ fetch(hubURL()+'/api/neosoft/'+encodeURIComponent(rm),{headers:hubHdr(),cache:'no-store'})
+    .then(function(r){ return r.json().then(function(j){ j=j||{}; j._status=r.status; return j; }); })
+    .then(function(j){ cb(j&&j.ok?j.pasien:null, j&&j.error, j._status); }).catch(function(e){ cb(null,String(e),0); }); }
+  catch(e){ cb(null,String(e),0); }
+}
+function _isiKosong(id,v){ var e=document.getElementById(id); if(!e||!v) return false; if((e.value||'').trim()) return false; e.value=v; _ev(e,'input'); _ev(e,'change'); return true; }
+function _fLabelKosong(prefix,v){ if(!v) return false; var f=null; document.querySelectorAll('.page .f').forEach(function(x){ if(f) return; var k=_t(x.querySelector('.lab')); if(k&&k.toLowerCase().indexOf(prefix.toLowerCase())===0) f=x; }); if(!f||_fval(f)) return false; _fIsi(f,v); return true; }
+var _neoRmTerakhir='';
+function rmNeoSoft(){
+  var el=document.getElementById('rm'), note=document.getElementById('rm_neo'); if(!el) return;
+  var rm=(el.value||'').trim(); if(note) note.textContent='';
+  if(!rm||!window._neoOn||!_hubOn||rm===_neoRmTerakhir) return; _neoRmTerakhir=rm;
+  if(note) note.textContent='mencari identitas di NeoSoft…';
+  neoAmbil(rm,function(p,err,st){
+    if((document.getElementById('rm').value||'').trim()!==rm) return;   /* RM sudah berubah lagi */
+    if(!p){ if(note) note.textContent=(st===404)?'RM tidak ada di NeoSoft — isi identitas manual.':(st===401?'':'NeoSoft tidak terjangkau — isi manual.'); return; }
+    var n=0; if(_isiKosong('p_nama',p.nama)) n++; if(_isiKosong('p_nik',p.nik)) n++; if(_isiKosong('p_wa',p.wa)) n++;
+    var nk=document.getElementById('p_nik'); if(nk&&typeof cekNIK==='function') cekNIK(nk);
+    var tl=p.tgl_lahir; if(tl&&/^\d{4}-\d{2}-\d{2}/.test(tl)){ var d=tl.slice(0,10).split('-'); tl=d[2]+'/'+d[1]+'/'+d[0]; }
+    if(_fLabelKosong('Tanggal lahir',tl)) n++; if(_fLabelKosong('Jenis kelamin',p.kelamin)) n++; if(_fLabelKosong('Kota domisili',p.kota||p.alamat)) n++;
+    if(note) note.textContent=n?('identitas dari NeoSoft ✓ ('+n+' kolom terisi; yang sudah diketik tidak diubah)'):'RM dikenal NeoSoft — kolom identitas sudah terisi, tidak diubah.';
+    window._neoTerakhir=p;
+  });
+}
+(function(){ var el=document.getElementById('rm'); if(!el) return; el.addEventListener('change',rmNeoSoft); el.addEventListener('blur',rmNeoSoft); })();
+document.addEventListener('pointerup',function(e){ if(e.target&&e.target.classList&&e.target.classList.contains('sigpad')) _draftSimpan(); });
+window.addEventListener('load',_draftTawarkan);
 </script>
 </body>
 </html>

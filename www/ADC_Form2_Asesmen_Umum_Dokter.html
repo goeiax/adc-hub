@@ -1332,6 +1332,9 @@ body.showall .step{display:block;}
 .intake .tier{gap:8px 20px;padding:15px 0 !important;}
 .intake .tc .none{font-size:14px;}
 .intake .tc .none.sub{display:block;margin-top:3px;}
+.neo-note{font-size:12px;line-height:1.3;color:var(--ink-muted);margin-top:4px;}
+.neo-note:empty{display:none;}
+@media print{ .neo-note{display:none !important;} }
 .intake .warnrow{font-size:14px;margin-top:12px;}
 @media (max-width:720px){ .intake .kvgrid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px 18px;} }
 @media print{ .intake .kv .k{font-size:11px;} .intake .kv .v,.intake .tc{font-size:13.5px;} }
@@ -1623,7 +1626,7 @@ body.mode-kontrol #rb2 .rl::after{content:' — dilewati';font-size:12px;font-we
        Id tetap sama -> applyIntake / applyHandoff / buildHandoff / hub tidak berubah. -->
   <div class="row idrow">
     <div class="f s3"><label class="lab" for="p_nama">Nama pasien</label><input class="in" id="p_nama" placeholder="Nama pasien"></div>
-    <div class="f s2"><label class="lab" for="rm">No. RM</label><input class="in" id="rm" placeholder="RM-______"></div>
+    <div class="f s2"><label class="lab" for="rm">No. RM</label><input class="in" id="rm" placeholder="RM-______"><div class="neo-note" id="rm_neo" role="status"></div></div>
     <div class="f s3"><label class="lab" for="p_nik">NIK <span class="opt">16 digit</span></label><input class="in" id="p_nik" inputmode="numeric" maxlength="16" placeholder="dari Form 1 / KTP"></div>
     <div class="f s2"><label class="lab" for="p_wa">WhatsApp</label><input class="in" id="p_wa" placeholder="08xx xxxx xxxx"></div>
     <div class="f s2"><label class="lab" for="tgl">Tanggal</label><input class="in" type="date" id="tgl"></div>
@@ -2654,8 +2657,35 @@ function _isiDokterDariHub(){
   var u=window._hubUser; if(!u||u.peran!=='dokter') return; var nm=u.nama||u.id;
   ['d1_dokter','d8_dokter'].forEach(function(id){ var e=document.getElementById(id); if(e&&!e.value.trim()) e.value=nm; });
 }
+/* ===== NEOSOFT: identitas by No. RM (baca-saja lewat hub) — untuk pasien kontrol yang belum punya Form 1/handoff di hub.
+   Hanya mengisi kolom yang kosong; Form 1 / handoff yang dimuat tetap menang. */
+function neoAmbil(rm,cb){
+  try{ fetch(hubURL()+'/api/neosoft/'+encodeURIComponent(rm),{headers:hubHdr(),cache:'no-store'})
+    .then(function(r){ return r.json().then(function(j){ j=j||{}; j._status=r.status; return j; }); })
+    .then(function(j){ cb(j&&j.ok?j.pasien:null, j&&j.error, j._status); }).catch(function(e){ cb(null,String(e),0); }); }
+  catch(e){ cb(null,String(e),0); }
+}
+var _neoRmTerakhir='';
+function rmNeoSoft(){
+  var el=document.getElementById('rm'), note=document.getElementById('rm_neo'); if(!el) return;
+  var rm=(el.value||'').trim(); if(note) note.textContent='';
+  if(!rm||!window._neoOn||!_hubOn||rm===_neoRmTerakhir) return; _neoRmTerakhir=rm;
+  if(window._intake&&((window._intake.pasien||{}).rm||'')===rm) return;   /* identitas sudah dari Form 1 */
+  if(note) note.textContent='mencari identitas di NeoSoft…';
+  neoAmbil(rm,function(p,err,st){
+    if((document.getElementById('rm').value||'').trim()!==rm) return;
+    if(!p){ if(note) note.textContent=(st===404)?'RM tidak ada di NeoSoft.':(st===401?'':'NeoSoft tidak terjangkau.'); return; }
+    var n=0; ['p_nama','p_nik','p_wa'].forEach(function(id){ var e=document.getElementById(id), v=p[{p_nama:'nama',p_nik:'nik',p_wa:'wa'}[id]]; if(e&&v&&!(e.value||'').trim()){ e.value=v; n++; try{ e.dispatchEvent(new Event('input',{bubbles:true})); }catch(x){} } });
+    if(note) note.textContent=n?('identitas dari NeoSoft ✓ ('+n+' kolom terisi)'):'RM dikenal NeoSoft — identitas sudah terisi, tidak diubah.';
+    window._neoTerakhir=p; if(typeof updateReq==='function') updateReq();
+  });
+}
+(function(){ var el=document.getElementById('rm'); if(!el) return; el.addEventListener('change',rmNeoSoft); el.addEventListener('blur',rmNeoSoft); })();
 /* "Acne — Acne IGA 3 · Sedang" -> derajat sudah memuat nama program; jangan digandakan */
-function _programDerajat(a){ var p=(a&&a.program)||'', d=(a&&a.derajat)||''; if(p&&d&&d.toLowerCase().indexOf(p.toLowerCase())===0) return d; return [p,d].filter(Boolean).join(' — '); }
+function _programDerajat(a){ var p=(a&&a.program)||'', d=(a&&a.derajat)||''; if(p&&d&&d.toLowerCase().indexOf(p.toLowerCase())===0) return d;
+  /* "Hiperpigmentasi/Melasma" + "Melasma IGA 3 · …" -> buang kata program di awal derajat bila sudah ada di nama program */
+  if(p&&d){ var kata=d.split(/\s+/)[0]; if(kata&&kata.length>3&&p.toLowerCase().split(/[\/\s]+/).indexOf(kata.toLowerCase())>=0) d=d.slice(kata.length).trim(); }
+  return [p,d].filter(Boolean).join(' — '); }
 function _dokterKini(){
   return (_mode==='kontrol')
     ? (_v('k1_dokter')||_v('d1_dokter'))
@@ -3413,7 +3443,7 @@ function hubChip(st,txt){ var c=document.getElementById('hubchip'); if(!c) retur
 function hubPing(){
   try{
     fetch(hubURL()+'/api/ping',{cache:'no-store'}).then(function(r){return r.json();})
-    .then(function(j){ _hubOn=!!(j&&j.ok); _hubCekSesi(j);
+    .then(function(j){ _hubOn=!!(j&&j.ok); _hubCekSesi(j); window._neoOn=!!(j&&j.neosoft);
       /* URL webhook Make.com dibagikan hub (config.json) -> tidak perlu ditempel per pasien */
       if(j&&j.webhook){ var wh=document.getElementById('cfg_webhook'); if(wh&&wh.value.trim()!==j.webhook){ wh.value=j.webhook; try{ localStorage.setItem('adc_webhook',j.webhook); }catch(e){} } } })
     .catch(function(){ _hubOn=false; hubChip('off','mati'); });
@@ -3547,7 +3577,7 @@ function renderIntake(){
   /* Tingkat 1 — keselamatan */
   var alg = k.alergi ? '<b>'+_esc(k.alergi)+'</b>'
           : (k.alergi_nihil ? '<span class="none">Nihil — dikonfirmasi pasien</span>'
-                            : '<b>BELUM DIISI PASIEN — konfirmasi lisan sebelum meresepkan</b>');
+                            : '<b>BELUM DIISI PASIEN — konfirmasi lisan sebelum meresepkan</b> <span class="none">dan catat di kotak Alergi / kontraindikasi di bawah ringkasan ini</span>');
   var flags=(k.flags||[]).map(function(f){return '<span class="fl">'+_esc(f)+'</span>';}).join('');
   var t1='<div class="tier crit"><span class="tg">Alergi</span><div class="tc">'+alg+
          (flags?('<div style="margin-top:4px">'+flags+'</div>'):'')+'</div></div>';
@@ -3675,7 +3705,7 @@ function metricStatus(){
 }
 /* Daftar isian yang benar-benar menentukan mutu — inilah yang tampil di bar atas. */
 function reqStatus(){
-  var out=[{label:'Alergi dikonfirmasi', ok:!!(_v('alergi_flag')||_ck('alergi_none')), go:(window._intake?'intake_box':'alergi_box')}];
+  var out=[{label:'Alergi dikonfirmasi', ok:!!(_v('alergi_flag')||_ck('alergi_none')), go:((window._intake&&_intakeAdaAlergi())?'intake_box':'alergi_box')}];
   if(_mode==='kontrol'){
     /* Di kontrol, diagnosis & program sudah ditetapkan di kunjungan awal.
        Yang menentukan mutu justru: hasil hari ini, remarks berikutnya, ritme, sign-off. */
@@ -3759,9 +3789,12 @@ function syncTipeKulit(){
 /* Alergi tampil baca-saja: sumbernya Form 1 (pasien baru) atau handoff (kontrol). */
 /* Pasien baru (Form 1 dimuat): alergi tampil di Ringkasan Anamnesis, kotak isian disembunyikan
    — koreksi lewat Form 1. Tanpa Form 1 (kontrol, berkas hilang): kotak tampil & bisa diisi. */
+/* Form 1 memuat alergi ATAU "nihil" -> kotak disembunyikan (sumber = Form 1). Form 1 tanpa keduanya -> kotak TAMPIL:
+   dokter mengonfirmasi lisan dan mencatat di sini; tanpa ini butir WAJIB "Alergi dikonfirmasi" tak pernah terpenuhi. */
+function _intakeAdaAlergi(){ var k=(window._intake&&window._intake.kritis)||{}; return !!((k.alergi||'').trim()||k.alergi_nihil); }
 function renderAlergi(){
   var box=document.getElementById('alergi_box'); if(!box) return;
-  box.style.display = window._intake ? 'none' : '';
+  box.style.display = (window._intake && _intakeAdaAlergi()) ? 'none' : '';
   var f=document.getElementById('alergi_flag'), n=document.getElementById('alergi_none');
   if(f&&n&&f.value.trim()&&n.checked) n.checked=false;   /* isi alergi & "nihil" tak boleh bersamaan */
 }

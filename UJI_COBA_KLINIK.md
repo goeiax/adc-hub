@@ -61,7 +61,14 @@ lembar cetak dan handoff dari hub dilampirkan ke sana seperti biasa.
    Ulangi bila IP hub berubah. Tanpa HTTPS hub tetap jalan di `http://` dalam LAN.
 7. Jalankan `start.bat` lagi. Di PC hub buka `http://localhost:3777/` (atau https) →
    halaman "Pilih form", baris bawah **"Hub: tersambung ✓"**.
-8. **Auto-start**: `Win+R` → `shell:startup` → taruh shortcut `start.bat` di situ.
+8. **(Opsional) NeoSoft — identitas pasien dari No. RM.** Bila IT/vendor NeoSoft memberi akun database
+   **SELECT saja** (dibatasi ke IP PC hub): `npm install mysql2` di `C:\adc-hub`, salin
+   `neosoft.json.example` → `neosoft.json`, isi host/user/password/database, jalankan
+   `node neosoft-explore.js > neosoft-skema.txt` untuk melihat tabel pasien, tulis satu SELECT di
+   `identitas.sql`, restart hub. Form 1 dan Form 2 lalu mengisi nama/NIK/WA (Form 1 juga tanggal lahir,
+   jenis kelamin, kota) begitu No. RM diketik. Hub **tidak pernah menulis** ke NeoSoft. Tanpa langkah ini
+   semuanya tetap jalan; identitas diketik perawat.
+9. **Auto-start**: `Win+R` → `shell:startup` → taruh shortcut `start.bat` di situ.
    Hub hidup tiap PC dinyalakan. Biarkan jendelanya terbuka (boleh di-minimize).
 
 Keamanan dasar PC hub: BitLocker aktif, akun Windows berkata sandi, layar terkunci
@@ -181,7 +188,7 @@ kirim beserta baris yang muncul di jendela hub saat itu.
 
 | Siapa | Kapan | Yang dilakukan |
 |---|---|---|
-| Perawat | Pasien **baru** datang | Form 1 di tablet registrasi → Simpan Data Pasien. Pasien kontrol **tidak** lewat Form 1. |
+| Perawat | Pasien **baru** datang | Form 1 di tablet registrasi → Simpan Data Pasien. Pasien kontrol **tidak** lewat Form 1. Koreksi / lanjut di tablet lain: **Muat Form 1** → ketik RM → ubah → Simpan lagi. Isian yang belum disimpan tersimpan sebagai draf di tablet itu (bilah *Lanjutkan* saat dibuka lagi). |
 | Dokter | Konsultasi | Form 2 → Muat Form 1 (baru) / Muat Handoff (kontrol) dengan No. RM → asesmen → form program → sign-off PIN → cetak lembar pasien + consent. |
 | Perawat | Setelah dokter | Langkah 6 Form 2: jadwal → simpan → reminder → **Terbitkan Handoff**. Berkas unduhan yang dibuat form adalah cadangan; lampirkan ke NeoSoft bersama cetakan. |
 | CS / admin | Kapan saja | Index hub → cari RM → cetak ulang; admin membaca audit dan mengoreksi >2×24 jam. |

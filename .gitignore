@@ -27,3 +27,6 @@ backup/
 
 # pengecualian: config detektor desain impeccable (bukan config.json hub) boleh ikut repo
 !.impeccable/config.json
+
+# catatan akun uji lokal (PIN) — jangan pernah ikut repo
+AKUN-UJI-LOKAL.txt

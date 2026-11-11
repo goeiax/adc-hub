@@ -77,13 +77,16 @@ by RM (perawat tidak mengetik ulang). **Baca-saja — tidak pernah menulis.**
 
 Di PC hub (koneksi DB hanya jalan dari jaringan yang diizinkan NeoSoft):
 1. `npm install mysql2` di folder ini (satu-satunya dependensi, opsional).
-2. Salin `neosoft.json.example` → **`neosoft.json`**, isi `password`.
+2. Salin `neosoft.json.example` → **`neosoft.json`**, isi host/user/password/database.
    **Jangan** commit / sinkron / kirim `neosoft.json` — itu kredensial DB.
 3. `node neosoft-explore.js > neosoft-skema.txt` — memetakan tabel & kolom
-   pasien (baca-saja). Kirim isi `neosoft-skema.txt` untuk memetakan query.
-   Boleh sensor nilai contoh (nama/nomor pasien); yang dibutuhkan struktur.
-4. Setelah query dipetakan, endpoint `GET /api/neosoft/:rm` aktif dan form
-   pre-isi identitas by RM.
+   pasien (baca-saja). Dari situ tulis **satu SELECT** di `identitas.sql` (lihat contoh
+   di `neosoft.json.example`): alias kolom ke `rm, nama, nik, tgl_lahir, kelamin, wa, alamat, kota`,
+   satu tanda `?` untuk No. RM. Boleh kirim `neosoft-skema.txt` (nilai contoh disensor) untuk dibantu.
+4. Restart hub → jendela hub menampilkan baris `NeoSoft: baca identitas by RM dari <host>`.
+   Sejak itu **`GET /api/neosoft/:rm`** aktif (butuh sesi hub) dan **Form 1 & Form 2 mengisi identitas
+   otomatis** saat No. RM diketik (hanya kolom yang masih kosong; catatan kecil "identitas dari NeoSoft").
+   Uji tanpa database: isi `"mock"` di `neosoft.json` (contoh di berkas example).
 
 Minta NeoSoft membatasi user DB ke **SELECT saja** dan ke IP klinik.
 
