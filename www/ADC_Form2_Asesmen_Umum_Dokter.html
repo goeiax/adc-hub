@@ -2655,7 +2655,10 @@ function _isiDokterDariHub(){
   ['d1_dokter','d8_dokter'].forEach(function(id){ var e=document.getElementById(id); if(e&&!e.value.trim()) e.value=nm; });
 }
 /* "Acne — Acne IGA 3 · Sedang" -> derajat sudah memuat nama program; jangan digandakan */
-function _programDerajat(a){ var p=(a&&a.program)||'', d=(a&&a.derajat)||''; if(p&&d&&d.toLowerCase().indexOf(p.toLowerCase())===0) return d; return [p,d].filter(Boolean).join(' — '); }
+function _programDerajat(a){ var p=(a&&a.program)||'', d=(a&&a.derajat)||''; if(p&&d&&d.toLowerCase().indexOf(p.toLowerCase())===0) return d;
+  /* "Hiperpigmentasi/Melasma" + "Melasma IGA 3 · …" -> buang kata program di awal derajat bila sudah ada di nama program */
+  if(p&&d){ var kata=d.split(/\s+/)[0]; if(kata&&kata.length>3&&p.toLowerCase().split(/[\/\s]+/).indexOf(kata.toLowerCase())>=0) d=d.slice(kata.length).trim(); }
+  return [p,d].filter(Boolean).join(' — '); }
 function _dokterKini(){
   return (_mode==='kontrol')
     ? (_v('k1_dokter')||_v('d1_dokter'))
@@ -3547,7 +3550,7 @@ function renderIntake(){
   /* Tingkat 1 — keselamatan */
   var alg = k.alergi ? '<b>'+_esc(k.alergi)+'</b>'
           : (k.alergi_nihil ? '<span class="none">Nihil — dikonfirmasi pasien</span>'
-                            : '<b>BELUM DIISI PASIEN — konfirmasi lisan sebelum meresepkan</b>');
+                            : '<b>BELUM DIISI PASIEN — konfirmasi lisan sebelum meresepkan</b> <span class="none">dan catat di kotak Alergi / kontraindikasi di bawah ringkasan ini</span>');
   var flags=(k.flags||[]).map(function(f){return '<span class="fl">'+_esc(f)+'</span>';}).join('');
   var t1='<div class="tier crit"><span class="tg">Alergi</span><div class="tc">'+alg+
          (flags?('<div style="margin-top:4px">'+flags+'</div>'):'')+'</div></div>';
@@ -3675,7 +3678,7 @@ function metricStatus(){
 }
 /* Daftar isian yang benar-benar menentukan mutu — inilah yang tampil di bar atas. */
 function reqStatus(){
-  var out=[{label:'Alergi dikonfirmasi', ok:!!(_v('alergi_flag')||_ck('alergi_none')), go:(window._intake?'intake_box':'alergi_box')}];
+  var out=[{label:'Alergi dikonfirmasi', ok:!!(_v('alergi_flag')||_ck('alergi_none')), go:((window._intake&&_intakeAdaAlergi())?'intake_box':'alergi_box')}];
   if(_mode==='kontrol'){
     /* Di kontrol, diagnosis & program sudah ditetapkan di kunjungan awal.
        Yang menentukan mutu justru: hasil hari ini, remarks berikutnya, ritme, sign-off. */
@@ -3759,9 +3762,12 @@ function syncTipeKulit(){
 /* Alergi tampil baca-saja: sumbernya Form 1 (pasien baru) atau handoff (kontrol). */
 /* Pasien baru (Form 1 dimuat): alergi tampil di Ringkasan Anamnesis, kotak isian disembunyikan
    — koreksi lewat Form 1. Tanpa Form 1 (kontrol, berkas hilang): kotak tampil & bisa diisi. */
+/* Form 1 memuat alergi ATAU "nihil" -> kotak disembunyikan (sumber = Form 1). Form 1 tanpa keduanya -> kotak TAMPIL:
+   dokter mengonfirmasi lisan dan mencatat di sini; tanpa ini butir WAJIB "Alergi dikonfirmasi" tak pernah terpenuhi. */
+function _intakeAdaAlergi(){ var k=(window._intake&&window._intake.kritis)||{}; return !!((k.alergi||'').trim()||k.alergi_nihil); }
 function renderAlergi(){
   var box=document.getElementById('alergi_box'); if(!box) return;
-  box.style.display = window._intake ? 'none' : '';
+  box.style.display = (window._intake && _intakeAdaAlergi()) ? 'none' : '';
   var f=document.getElementById('alergi_flag'), n=document.getElementById('alergi_none');
   if(f&&n&&f.value.trim()&&n.checked) n.checked=false;   /* isi alergi & "nihil" tak boleh bersamaan */
 }

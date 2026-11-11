@@ -248,6 +248,11 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
     check('F2: muat ulang Form 1 yang dikoreksi menimpa alergi lama', $(a.d, 'alergi_flag').value === 'Sulfa' && /Sulfa/.test($(a.d, 'intake_body').textContent), $(a.d, 'alergi_flag').value);
     { const ik3 = JSON.parse(JSON.stringify(a.w._intake)); ik3.kritis.alergi = ''; ik3.kritis.alergi_nihil = true; a.w.applyIntake(ik3); }
     check('F2: Form 1 "tidak ada alergi" -> nihil, ringkasan menyebut Nihil', $(a.d, 'alergi_flag').value === '' && $(a.d, 'alergi_none').checked && /Nihil/.test($(a.d, 'intake_body').textContent));
+    { const ik5 = JSON.parse(JSON.stringify(a.w._intake)); ik5.kritis.alergi = ''; ik5.kritis.alergi_nihil = false; a.w.applyIntake(ik5);
+      const rq = a.w.reqStatus().find(x => x.label === 'Alergi dikonfirmasi');
+      check('F2: Form 1 TANPA info alergi -> kotak alergi tetap tampil (dokter mencatat konfirmasi lisan), WAJIB mengarah ke kotak, ringkasan menyebut kotak', $(a.d, 'alergi_box').style.display !== 'none' && rq && !rq.ok && rq.go === 'alergi_box' && /catat di kotak/.test($(a.d, 'intake_body').textContent), { box: $(a.d, 'alergi_box').style.display, rq });
+      chk(a.d, 'alergi_none'); check('F2: centang Nihil di kotak itu memenuhi WAJIB alergi', a.w.reqStatus().find(x => x.label === 'Alergi dikonfirmasi').ok);
+      check('F2: _programDerajat tidak menggandakan "Melasma" untuk program Hiperpigmentasi/Melasma', a.w._programDerajat({ program: 'Hiperpigmentasi/Melasma', derajat: 'Melasma IGA 3 · Sedang (Moderate)' }) === 'Hiperpigmentasi/Melasma — IGA 3 · Sedang (Moderate)' && a.w._programDerajat({ program: 'Acne', derajat: 'Acne IGA 3 · Sedang' }) === 'Acne IGA 3 · Sedang', a.w._programDerajat({ program: 'Hiperpigmentasi/Melasma', derajat: 'Melasma IGA 3 · Sedang (Moderate)' })); }
     { const ik4 = JSON.parse(JSON.stringify(a.w._intake)); ik4.kritis.alergi = 'Penisilin'; ik4.kritis.alergi_nihil = false; a.w.applyIntake(ik4); }
     check('F2: ringkasan intake tampil', $(a.d, 'intake_box').style.display !== 'none');
     { const asli = JSON.parse(JSON.stringify(a.w._intake)); const lain = JSON.parse(JSON.stringify(asli)); lain.pasien = { nama: 'Orang Lain', rm: 'RM-LAIN', nik: '1111222233334444', wa: '0800' };
