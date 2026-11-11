@@ -1595,6 +1595,7 @@ body.mode-kontrol #rb2 .rl::after{content:' — dilewati';font-size:12px;font-we
 <body>
 
 <input type="file" id="_handofffile" accept=".json,application/json" style="display:none" onchange="loadHandoffFile(this)">
+<input type="file" id="_asesmenfile" accept=".json,application/json" style="display:none" onchange="_asesmenDariBerkas(this)">
 <input type="file" id="_intakefile" accept=".json,application/json" style="display:none" onchange="loadIntakeFile(this)">
 
 <div class="toolbar">
@@ -1612,6 +1613,7 @@ body.mode-kontrol #rb2 .rl::after{content:' — dilewati';font-size:12px;font-we
     <button class="btn" id="tb_muatho" onclick="muatHandoffHub()">Muat Handoff</button>
     <div class="tb-more"><button type="button" class="btn" id="tb_more" aria-haspopup="menu" aria-expanded="false" aria-controls="tbmenu" onclick="tbMenu()">Lainnya &#9662;</button>
       <div class="tbmenu" id="tbmenu" role="menu" aria-label="Aksi lain">
+        <button type="button" role="menuitem" id="tb_buka" onclick="tbMenu(false);bukaAsesmenHub()">Buka asesmen tersimpan&hellip; <small>yang sudah terbit — cetak ulang / koreksi</small></button>
         <button type="button" role="menuitem" onclick="tbMenu(false);cetakSemua()">Cetak / Simpan PDF <small>lembar asesmen dokter 1 halaman</small></button>
         <button type="button" role="menuitem" onclick="tbMenu(false);printAll()">Cetak semua form program</button>
         <a role="menuitem" href="ADC_Panduan_Pengisian_Form.html" target="_blank" rel="noopener" onclick="tbMenu(false)">Panduan pengisian <small>buka di tab baru</small></a>
@@ -4226,6 +4228,8 @@ function unduhHandoffJSON(){
   }catch(e){ alert('Gagal mengunduh JSON: '+e); }
 }
 function _issueLanjut(h,a){
+  try{ h._form=_formSnap(); }catch(e){ console.warn('potret form gagal',e); }   /* untuk "Buka asesmen tersimpan" */
+  window._dibukaUlang=null;
   function set(id,val){var e=document.getElementById(id); if(e&&val&&!e.value) e.value=val;}
   set('h_owner', a.dokter);
   set('h_fase', _programDerajat(a));
@@ -4380,6 +4384,72 @@ function muatIntakeHub(){
     hubGetPasien(rm,function(j,err){
       if(j&&j.intake){ if(selesai()) applyIntake(j.intake); }
       else selesai(err==='belum masuk sebagai pengguna hub'?'__login__':(_hubKelas(err)==='kunci'?'__kunci__':('Form 1 untuk RM '+rm+' tidak ada di hub'+(err?(' ('+err+')'):'')+'.')));
+    });
+  });
+}
+/* ===== BUKA ASESMEN TERSIMPAN (potret form di handoff) ===== */
+function _formKontrol(){ return [].filter.call(document.querySelectorAll('input,textarea,select'),function(e){
+  return e.type!=='file' && !e.closest('.mdlg-bg') && !e.closest('#ldlg') && !/^(cfg_|ldlg_|mdlg_)/.test(e.id||''); }); }
+function _rxTabel(){ return [].slice.call(document.querySelectorAll('table.rx-table, #hr_rxTable')); }
+function _formSnap(){
+  var polos=function(o){ if(!o) return null; var c=JSON.parse(JSON.stringify(o)); delete c._form; return c; };
+  return { v:1, waktu:new Date().toISOString(), mode:_mode, stage:JSON.parse(JSON.stringify(window._stage||{})),
+    rx:_rxTabel().map(function(t){ return t.querySelectorAll('tbody tr:not(.rx-saran)').length; }),
+    isi:_formKontrol().map(function(e){ return (e.type==='checkbox'||e.type==='radio')?(e.checked?1:0):e.value; }),
+    jadwal:!!(window._schedRows&&window._schedRows.length), jadwalSimpan:!!window._schedSaved,
+    intake:polos(window._intake), prev:polos(window._prevHandoff), ttd:window._ttd||null, ttdTakBisa:window._ttdTakBisa||null };
+}
+function bukaAsesmen(h){
+  if(!h||h.doc!=='ADC-HANDOFF'){ alert('Berkas ini bukan handoff Form 2 (ADC-HANDOFF).'); return false; }
+  if(/SLIMMING/.test(h.sumber||'')){ alert('Ini handoff Asesmen Slimming — buka dari form Slimming.'); return false; }
+  var s=h._form;
+  if(!s||!s.isi){ alert('Asesmen ini diterbitkan sebelum fitur "buka kembali" tersedia, jadi isian lengkapnya tidak tersimpan.\n\nUntuk melanjutkan pasien ini pakai mode Kontrol → Muat Handoff.'); return false; }
+  var nm=_hv('p_nama'), rmKini=_hv('rm'), ps=h.pasien||{};
+  if((nm||rmKini)&&!confirm('Form saat ini berisi '+(nm||'—')+' · RM '+(rmKini||'—')+'.\n\nGanti dengan asesmen tersimpan '+(ps.nama||'—')+' · RM '+(ps.rm||'—')+'? Isian di layar akan hilang.')) return false;
+  window._memulihkan=true;
+  try{
+    var c0=window.confirm; window.confirm=function(){ return true; }; try{ resetForm(); } finally { window.confirm=c0; }
+    /* baris resep tambahan dulu, supaya urutan kolom sama dengan saat dipotret */
+    _rxTabel().forEach(function(t,i){ var mau=(s.rx||[])[i]||0, jaga=0; while(t.querySelectorAll('tbody tr:not(.rx-saran)').length<mau && jaga++<40){ if(!tambahBarisRx(t)) break; } });
+    var k=_formKontrol(), cocok=(k.length===s.isi.length);
+    if(cocok) k.forEach(function(e,i){ var v=s.isi[i]; if(e.type==='checkbox'||e.type==='radio') e.checked=!!v; else e.value=(v==null?'':v); });
+    window._intake=s.intake||null; window._prevHandoff=s.prev||null;
+    Object.keys(s.stage||{}).forEach(function(p){ try{ pickStage(p,s.stage[p]); }catch(e){} });
+    setMode(s.mode==='kontrol'?'kontrol':'awal');
+    if(window._intake){ try{ renderIntake(); }catch(e){} }
+    if(window._prevHandoff){ try{ renderPrev(window._prevHandoff,false); }catch(e){} }
+    try{ renderAlergi(); }catch(e){}
+    document.querySelectorAll('.rbseg .rbopt').forEach(function(l){ var r=l.querySelector('input'); if(r) l.classList.toggle('on',!!r.checked); });
+    document.querySelectorAll('tr.rx-kosong, tr[data-saran-ok]').forEach(function(tr){ var i0=tr.querySelector('input'); if(i0&&(i0.value||'').trim()) tr.classList.remove('rx-kosong'); });
+    document.querySelectorAll('.ovl table tr').forEach(function(tr){ var i0=tr.querySelector('input'); if(i0&&(i0.value||'').trim()){ try{ i0.dispatchEvent(new Event('input',{bubbles:true})); }catch(e){} } });
+    document.querySelectorAll('textarea').forEach(function(t){ if(t.value){ try{ t.dispatchEvent(new Event('input',{bubbles:true})); }catch(e){} } });
+    PROGS.forEach(markProg);
+    try{ _icdChips(); }catch(e){} try{ syncRisikoBekas(); }catch(e){}
+    try{ updateIgaCards(); renderIGA(); }catch(e){} try{ renderRxMirror(); }catch(e){}
+    try{ gateSched(); if(s.jadwal){ generateSchedule(); window._schedSaved=!!s.jadwalSimpan; } }catch(e){}
+    window._ttd=s.ttd||null; window._ttdTakBisa=s.ttdTakBisa||false;
+    if(window._ttd) _ttdStatus('Ditandatangani · '+window._ttd.nama+' · '+_ttdJam(window._ttd.waktu)+' · PIN diverifikasi hub','ok');
+    window._dibukaUlang={terbit:h.diterbitkan, kunjungan:h.kunjungan_ke, lengkap:cocok};
+    try{ renderHoBar(); }catch(e){} try{ renderSerahRingkas(); }catch(e){} updateReq(); goStep(0);
+  } finally { window._memulihkan=false; }
+  var kapan=''; try{ kapan=new Date(h.diterbitkan).toLocaleString('id-ID',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}); }catch(e){}
+  alert('Asesmen tersimpan dibuka — '+(ps.nama||'')+' · RM '+(ps.rm||'')+' · kunjungan ke-'+(h.kunjungan_ke||'?')+(kapan?(' · terbit '+kapan):'')+'.\n\n'+
+    'Bisa langsung dicetak ulang. Bila ada isian yang diubah, sign-off dokter batal otomatis: tanda tangani & Terbitkan lagi (hub menyimpan versi baru, versi lama tetap diarsipkan).'+
+    (window._dibukaUlang.lengkap?'':'\n\nCatatan: susunan form sudah berubah sejak asesmen ini terbit — sebagian isian mungkin tidak terpulihkan; periksa sebelum mencetak.'));
+  return true;
+}
+/* isian diubah setelah dibuka ulang -> tanda tangan lama tidak berlaku lagi */
+(function(){ var batal=function(e){ if(window._memulihkan||!window._dibukaUlang||window._dibukaUlang.batal) return; var t=e.target; if(!t||!t.closest||t.closest('.mdlg-bg')||t.closest('#ldlg')||t.id==='d8_signoff') return;
+    window._dibukaUlang.batal=true; var cb=document.getElementById('d8_signoff');
+    if(window._ttd||(cb&&cb.checked)){ window._ttd=null; if(cb) cb.checked=false; _ttdStatus('Isian diubah setelah asesmen dibuka kembali — sign-off dokter perlu diulang.','warn'); if(typeof updateReq==='function') updateReq(); } };
+  document.addEventListener('input',batal,true); document.addEventListener('change',batal,true); })();
+function _asesmenDariBerkas(input){ var f=input.files&&input.files[0]; if(!f) return; var r=new FileReader(); r.onload=function(){ try{ bukaAsesmen(JSON.parse(r.result)); }catch(e){ alert('Berkas tidak terbaca sebagai JSON handoff.'); } input.value=''; }; r.readAsText(f); }
+function bukaAsesmenHub(){
+  if(!_hubOn){ document.getElementById('_asesmenfile').click(); return; }
+  _dlgMuat('Buka asesmen tersimpan (sudah terbit)','_asesmenfile',function(rm,selesai){
+    hubGetPasien(rm,function(j,err){
+      if(j&&j.handoff_terakhir){ if(selesai()) bukaAsesmen(j.handoff_terakhir); }
+      else selesai(err==='belum masuk sebagai pengguna hub'?'__login__':(_hubKelas(err)==='kunci'?'__kunci__':('Asesmen terbit untuk RM '+rm+' tidak ada di hub'+(err?(' ('+err+')'):'')+'.')));
     });
   });
 }
