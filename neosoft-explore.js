@@ -91,6 +91,7 @@ function skor(nama, petunjuk) {
       const tandai = skor(c.c, PETUNJUK_KOLOM) ? '  <== relevan' : '';
       console.log(`   ${c.c}  (${c.d}${c.k ? ', ' + c.k : ''})${tandai}`);
     });
+    if (process.argv.includes('--skema-saja')) continue;   /* hanya struktur: tidak membaca baris pasien sama sekali */
     try {
       const [rows] = await conn.query('SELECT * FROM ??.?? LIMIT 1', [r.s, r.t]);
       if (rows.length) {

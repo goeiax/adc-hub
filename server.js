@@ -54,6 +54,42 @@ if (!CFG.key) { CFG.key = 'adc-' + crypto.randomBytes(4).toString('hex'); cfgBar
 if (!CFG.data_key) { CFG.data_key = crypto.randomBytes(32).toString('hex'); cfgBaru = true; }
 if (cfgBaru) fs.writeFileSync(CFGP, JSON.stringify(CFG, null, 2));
 if (!fs.existsSync(DATA)) fs.mkdirSync(DATA, { recursive: true });
+
+/* ---- NeoSoft Cube — pembacaan identitas pasien by RM (BACA-SAJA, opsional) ----
+   neosoft.json (gitignored, hanya di PC klinik):
+     { host, port, user, password, database,
+       identitas: { sql: "SELECT no_rm AS rm, nama, nik, tgl_lahir, jk AS kelamin, hp AS wa, alamat, kota FROM pasien WHERE no_rm = ? LIMIT 1",
+                    kolom: { rm:"no_rm", nama:"nama_pasien" }   // opsional: peta bila alias di SQL tidak dipakai
+                  },
+       mock: { "RM-001": { nama:"…", nik:"…" } }               // opsional: uji tanpa database
+     }
+   Hanya SATU pernyataan SELECT yang dijalankan; sesi dipaksa READ ONLY; modul mysql2 dimuat saat dibutuhkan. */
+const NEOP = path.join(ROOT, 'neosoft.json');
+let NEO = null; try { NEO = JSON.parse(fs.readFileSync(NEOP, 'utf8')); } catch (e) { NEO = null; }
+const NEO_KOLOM = ['rm', 'nama', 'nik', 'tgl_lahir', 'kelamin', 'wa', 'alamat', 'kota', 'email'];
+const neoAktif = () => !!(NEO && (NEO.mock || (NEO.host && NEO.identitas && NEO.identitas.sql)));
+let _neoPool = null; const _neoCache = {};
+function neoNormal(row, peta) {
+  if (!row) return null; const out = {}; peta = peta || {};
+  const lc = {}; Object.keys(row).forEach(k => { lc[k.toLowerCase()] = row[k]; });
+  NEO_KOLOM.forEach(k => { const src = peta[k] ? String(peta[k]).toLowerCase() : k; let v = lc[src]; if (v === undefined || v === null) v = ''; if (v instanceof Date) v = v.toISOString().slice(0, 10); out[k] = String(v).trim(); });
+  if (/^(l|laki|laki-laki|male|m|pria)$/i.test(out.kelamin)) out.kelamin = 'Laki-laki'; else if (/^(p|perempuan|female|f|wanita)$/i.test(out.kelamin)) out.kelamin = 'Perempuan';
+  return out;
+}
+async function neoIdentitas(rm) {
+  if (!NEO) return null;
+  if (NEO.mock) { const m = NEO.mock[rm] || NEO.mock[String(rm).toUpperCase()]; return m ? neoNormal(Object.assign({ rm }, m)) : null; }
+  const sql = String((NEO.identitas || {}).sql || '').trim();
+  if (!/^select\s/i.test(sql) || /;\s*\S/.test(sql) || !sql.includes('?')) throw new Error('neosoft.json: identitas.sql harus satu pernyataan SELECT dengan satu tanda ?');
+  let mysql; try { mysql = require('mysql2/promise'); } catch (e) { throw new Error('modul mysql2 belum terpasang — jalankan: npm install mysql2 (di folder adc-hub)'); }
+  if (!_neoPool) _neoPool = mysql.createPool({ host: NEO.host, port: NEO.port || 3306, user: NEO.user, password: NEO.password, database: NEO.database || undefined, connectionLimit: 2, connectTimeout: 5000, waitForConnections: true });
+  const conn = await _neoPool.getConnection();
+  try {
+    try { await conn.query('SET SESSION TRANSACTION READ ONLY'); } catch (e) { /* versi lama tanpa dukungan: tetap SELECT saja */ }
+    const [rows] = await conn.query(sql, [rm]);
+    return rows && rows[0] ? neoNormal(rows[0], (NEO.identitas || {}).kolom) : null;
+  } finally { conn.release(); }
+}
 const DATA_KEY = Buffer.from(CFG.data_key, 'hex');
 const HMAC_KEY = crypto.createHash('sha256').update('ttd:' + CFG.data_key).digest();
 
@@ -233,7 +269,7 @@ const handler = (req, res) => {
   const ip = ipDari(req);
 
   /* ping tidak butuh kunci — dipakai form untuk deteksi hub */
-  if (parts[1] === 'ping') return kirim(res, 200, { ok: true, app: 'adc-hub', versi: 2, webhook: CFG.webhook || '', login: true });
+  if (parts[1] === 'ping') return kirim(res, 200, { ok: true, app: 'adc-hub', versi: 2, webhook: CFG.webhook || '', login: true, neosoft: neoAktif() });
 
   /* lapis 1: kunci perangkat */
   if ((req.headers['x-adc-key'] || '') !== CFG.key) return kirim(res, 401, { error: 'kunci salah. Lihat config.json di folder adc-hub.' });
@@ -256,6 +292,17 @@ const handler = (req, res) => {
 
   if (parts[1] === 'saya') return kirim(res, 200, { ok: true, user: { id: sesi.id, nama: sesi.nama, peran: sesi.peran } });
   if (req.method === 'POST' && parts[1] === 'logout') { delete SESI[req.headers['x-adc-token']]; simpanSesi(); audit({ aksi: 'logout', ip, user: sesi.id }); return kirim(res, 200, { ok: true }); }
+
+  /* identitas pasien dari NeoSoft by RM (baca-saja; semua peran yang boleh "lihat") */
+  if (req.method === 'GET' && parts[1] === 'neosoft' && parts[2]) {
+    if (!boleh('lihat')) return tolak('lihat');
+    if (!neoAktif()) return kirim(res, 404, { error: 'NeoSoft belum dikonfigurasi di hub (neosoft.json)' });
+    const rm = decodeURIComponent(parts[2]).trim(); if (!rm) return kirim(res, 400, { error: 'RM kosong' });
+    const jawab = (d) => kirim(res, d ? 200 : 404, d ? { ok: true, sumber: 'neosoft', pasien: d } : { error: 'RM ' + rm + ' tidak ada di NeoSoft' });
+    const c = _neoCache[rm]; if (c && Date.now() - c.t < 60000) return jawab(c.d);
+    return neoIdentitas(rm).then(d => { _neoCache[rm] = { t: Date.now(), d }; audit({ aksi: 'neosoft', ip, user: sesi.id, rm, detail: d ? 'ada' : 'tidak ada' }); return jawab(d); })
+      .catch(e => { console.error('NeoSoft:', e.message); audit({ aksi: 'neosoft', ip, user: sesi.id, rm, detail: 'gagal: ' + e.message.slice(0, 80) }); return kirim(res, 502, { error: 'NeoSoft tidak terjangkau: ' + e.message }); });
+  }
 
   /* tanda tangan dokter: konfirmasi PIN -> stempel */
   if (req.method === 'POST' && parts[1] === 'ttd') {
@@ -417,6 +464,7 @@ server.listen(CFG.port, () => {
   console.log('   Kunci : ' + CFG.key + '   (config.json)');
   console.log('   Data  : ' + DATA + '  (terenkripsi; jangan hilangkan config.json)');
   console.log('   Backup: ' + (CFG.backup_dir ? CFG.backup_dir + ' tiap ' + CFG.backup_jam + ' jam' : 'BELUM DIATUR — isi backup_dir di config.json'));
+  console.log('   NeoSoft: ' + (neoAktif() ? (NEO.mock ? 'MOCK (uji) — ' + Object.keys(NEO.mock).length + ' RM' : 'baca identitas by RM dari ' + NEO.host) : 'tidak dikonfigurasi (opsional; lihat neosoft.json.example)'));
   console.log('   Form  : ' + skema + '://localhost:' + CFG.port + '/   (dari tablet: ' + skema + '://IP-PC-ini:' + CFG.port + '/)');
   console.log(' Biarkan jendela ini terbuka selama klinik buka.');
   console.log('==============================================');

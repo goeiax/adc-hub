@@ -1,8 +1,23 @@
 {
-  "_catatan": "Salin berkas ini menjadi neosoft.json (tanpa .example) lalu isi nilainya dari NeoSoft. JANGAN commit/sinkron/kirim berkas neosoft.json — ini kredensial database live. Biarkan hanya di PC klinik.",
+  "_catatan": "Salin berkas ini menjadi neosoft.json (tanpa .example) lalu isi nilainya dari NeoSoft. JANGAN commit/sinkron/kirim berkas neosoft.json — ini kredensial database live. Biarkan hanya di PC klinik. Minta NeoSoft/IT membuat user database khusus dengan hak SELECT saja, dibatasi ke IP PC hub.",
   "host": "ALAMAT-DB-NEOSOFT",
   "port": 3306,
-  "user": "USER-DB",
+  "user": "USER-DB-SELECT-SAJA",
   "password": "PASSWORD-DB",
-  "database": ""
+  "database": "NAMA-DATABASE",
+  "_catatan_identitas": "Satu pernyataan SELECT dengan satu tanda ? untuk No. RM. Beri alias kolom ke nama berikut: rm, nama, nik, tgl_lahir, kelamin, wa, alamat, kota, email (yang tidak ada boleh dilewati). Nama tabel/kolom sebenarnya didapat dari: node neosoft-explore.js > neosoft-skema.txt",
+  "identitas": {
+    "sql": "SELECT no_rm AS rm, nama_pasien AS nama, nik, tgl_lahir, jenis_kelamin AS kelamin, no_hp AS wa, alamat, kota FROM pasien WHERE no_rm = ? LIMIT 1"
+  },
+  "_catatan_mock": "Untuk mencoba tanpa database: hapus host/identitas, isi mock. Hub lalu menjawab dari daftar ini.",
+  "_mock_contoh": {
+    "RM-000001": {
+      "nama": "Nama Contoh",
+      "nik": "3273000000000001",
+      "tgl_lahir": "1990-05-17",
+      "kelamin": "P",
+      "wa": "081200000000",
+      "kota": "Bandung"
+    }
+  }
 }

@@ -564,6 +564,9 @@ button.hubchip{font-family:inherit;background:transparent;}
 .draftbar .dbtn{font:inherit;font-size:13.5px;font-weight:600;min-height:44px;padding:0 16px;border-radius:999px;border:1px solid var(--line-strong);background:#fff;color:var(--ink);cursor:pointer;}
 .draftbar .dbtn.act{background:var(--accent-act,#B0603F);border-color:var(--accent-act,#B0603F);color:#fff;}
 @media print{ .mdlg-bg,.draftbar{display:none !important;} }
+.neo-note{font-size:12px;line-height:1.3;margin-top:4px;min-height:0;opacity:.9;}
+.neo-note:empty{display:none;}
+@media print{ .neo-note{display:none !important;} }
 </style>
 </head>
 <body>
@@ -600,7 +603,7 @@ button.hubchip{font-family:inherit;background:transparent;}
   <div class="staff doc-meta">
     <div class="staff-h"><span class="eg">Khusus staf</span><span class="ss">Diisi pendaftaran sebelum pasien mulai</span></div>
     <div class="staff-grid">
-      <div class="sf k3"><label class="slab" for="rm">No. RM</label><input class="sin" id="rm" placeholder="RM-______"></div>
+      <div class="sf k3"><label class="slab" for="rm">No. RM</label><input class="sin" id="rm" placeholder="RM-______"><div class="neo-note" id="rm_neo" role="status"></div></div>
       <div class="sf k3"><label class="slab" for="p_nik">NIK <span class="sreq">16 digit — identitas RME</span></label><input class="sin" id="p_nik" inputmode="numeric" maxlength="16" placeholder="16 digit KTP" oninput="cekNIK(this)"></div>
       <div class="sf k3"><label class="slab" for="tgl">Tanggal</label><input class="sin" type="date" id="tgl"></div>
       <div class="sf k3"><span class="slab">Status pasien</span>
@@ -1228,7 +1231,7 @@ function hubChip(st,txt){ var c=document.getElementById('hubchip'); if(!c) retur
 function hubPing(){
   try{
     fetch(hubURL()+'/api/ping',{cache:'no-store'}).then(function(r){return r.json();})
-    .then(function(j){ _hubOn=!!(j&&j.ok); _hubCekSesi(j); })
+    .then(function(j){ _hubOn=!!(j&&j.ok); _hubCekSesi(j); window._neoOn=!!(j&&j.neosoft); })
     .catch(function(){ _hubOn=false; hubChip('off','mati'); });
   }catch(e){ _hubOn=false; }
 }
@@ -1580,6 +1583,36 @@ function _escF1(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){re
 function _draftLanjut(){ var j=_draftBaca(); var b=document.getElementById('draftbar'); if(b) b.hidden=true; if(j) applyIntakeF1(j.d); }
 function _draftBuang(){ _draftHapus(); }
 document.addEventListener('input',_draftSimpan); document.addEventListener('change',_draftSimpan);
+
+/* ===== NEOSOFT: identitas by No. RM (baca-saja lewat hub) =====
+   Saat No. RM diisi & hub punya akses NeoSoft: nama, NIK, WA, tanggal lahir, jenis kelamin, kota terisi
+   bila kolomnya masih kosong (yang sudah diketik tidak ditimpa). Tanpa NeoSoft: tidak terjadi apa-apa. */
+function neoAmbil(rm,cb){
+  try{ fetch(hubURL()+'/api/neosoft/'+encodeURIComponent(rm),{headers:hubHdr(),cache:'no-store'})
+    .then(function(r){ return r.json().then(function(j){ j=j||{}; j._status=r.status; return j; }); })
+    .then(function(j){ cb(j&&j.ok?j.pasien:null, j&&j.error, j._status); }).catch(function(e){ cb(null,String(e),0); }); }
+  catch(e){ cb(null,String(e),0); }
+}
+function _isiKosong(id,v){ var e=document.getElementById(id); if(!e||!v) return false; if((e.value||'').trim()) return false; e.value=v; _ev(e,'input'); _ev(e,'change'); return true; }
+function _fLabelKosong(prefix,v){ if(!v) return false; var f=null; document.querySelectorAll('.page .f').forEach(function(x){ if(f) return; var k=_t(x.querySelector('.lab')); if(k&&k.toLowerCase().indexOf(prefix.toLowerCase())===0) f=x; }); if(!f||_fval(f)) return false; _fIsi(f,v); return true; }
+var _neoRmTerakhir='';
+function rmNeoSoft(){
+  var el=document.getElementById('rm'), note=document.getElementById('rm_neo'); if(!el) return;
+  var rm=(el.value||'').trim(); if(note) note.textContent='';
+  if(!rm||!window._neoOn||!_hubOn||rm===_neoRmTerakhir) return; _neoRmTerakhir=rm;
+  if(note) note.textContent='mencari identitas di NeoSoft…';
+  neoAmbil(rm,function(p,err,st){
+    if((document.getElementById('rm').value||'').trim()!==rm) return;   /* RM sudah berubah lagi */
+    if(!p){ if(note) note.textContent=(st===404)?'RM tidak ada di NeoSoft — isi identitas manual.':(st===401?'':'NeoSoft tidak terjangkau — isi manual.'); return; }
+    var n=0; if(_isiKosong('p_nama',p.nama)) n++; if(_isiKosong('p_nik',p.nik)) n++; if(_isiKosong('p_wa',p.wa)) n++;
+    var nk=document.getElementById('p_nik'); if(nk&&typeof cekNIK==='function') cekNIK(nk);
+    var tl=p.tgl_lahir; if(tl&&/^\d{4}-\d{2}-\d{2}/.test(tl)){ var d=tl.slice(0,10).split('-'); tl=d[2]+'/'+d[1]+'/'+d[0]; }
+    if(_fLabelKosong('Tanggal lahir',tl)) n++; if(_fLabelKosong('Jenis kelamin',p.kelamin)) n++; if(_fLabelKosong('Kota domisili',p.kota||p.alamat)) n++;
+    if(note) note.textContent=n?('identitas dari NeoSoft ✓ ('+n+' kolom terisi; yang sudah diketik tidak diubah)'):'RM dikenal NeoSoft — kolom identitas sudah terisi, tidak diubah.';
+    window._neoTerakhir=p;
+  });
+}
+(function(){ var el=document.getElementById('rm'); if(!el) return; el.addEventListener('change',rmNeoSoft); el.addEventListener('blur',rmNeoSoft); })();
 document.addEventListener('pointerup',function(e){ if(e.target&&e.target.classList&&e.target.classList.contains('sigpad')) _draftSimpan(); });
 window.addEventListener('load',_draftTawarkan);
 </script>

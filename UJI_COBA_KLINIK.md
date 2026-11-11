@@ -61,7 +61,14 @@ lembar cetak dan handoff dari hub dilampirkan ke sana seperti biasa.
    Ulangi bila IP hub berubah. Tanpa HTTPS hub tetap jalan di `http://` dalam LAN.
 7. Jalankan `start.bat` lagi. Di PC hub buka `http://localhost:3777/` (atau https) →
    halaman "Pilih form", baris bawah **"Hub: tersambung ✓"**.
-8. **Auto-start**: `Win+R` → `shell:startup` → taruh shortcut `start.bat` di situ.
+8. **(Opsional) NeoSoft — identitas pasien dari No. RM.** Bila IT/vendor NeoSoft memberi akun database
+   **SELECT saja** (dibatasi ke IP PC hub): `npm install mysql2` di `C:\adc-hub`, salin
+   `neosoft.json.example` → `neosoft.json`, isi host/user/password/database, jalankan
+   `node neosoft-explore.js > neosoft-skema.txt` untuk melihat tabel pasien, tulis satu SELECT di
+   `identitas.sql`, restart hub. Form 1 dan Form 2 lalu mengisi nama/NIK/WA (Form 1 juga tanggal lahir,
+   jenis kelamin, kota) begitu No. RM diketik. Hub **tidak pernah menulis** ke NeoSoft. Tanpa langkah ini
+   semuanya tetap jalan; identitas diketik perawat.
+9. **Auto-start**: `Win+R` → `shell:startup` → taruh shortcut `start.bat` di situ.
    Hub hidup tiap PC dinyalakan. Biarkan jendelanya terbuka (boleh di-minimize).
 
 Keamanan dasar PC hub: BitLocker aktif, akun Windows berkata sandi, layar terkunci
