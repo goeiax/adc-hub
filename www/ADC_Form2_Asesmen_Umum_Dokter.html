@@ -1388,6 +1388,18 @@ textarea.in#d2_dx_catatan{min-height:64px;}
 .mnote b{color:var(--ink-2);font-weight:620;}
 .mfoot{margin-top:2px;}
 .igamirror{font-weight:620;color:var(--ink-fill);}
+/* IGA dinilai di form program; kartu langkah 2 = cermin pada kunjungan awal */
+.ovl .igaseg-m{max-width:620px;margin:8px 0 12px;}
+.ovl .igaseg-m button{border-radius:var(--r-box,8px) !important;}
+#ovl_acne .igaseg-m button.on,#ovl_melasma .igaseg-m button.on,.ovl .igaseg-m button.on{background:#B0603F !important;background-color:#B0603F !important;border-color:var(--accent-act,#B0603F) !important;opacity:1 !important;}
+.ovl .igaseg-m button.on b,.ovl .igaseg-m button.on em{color:#fff !important;}
+.ovl .qline.igaq{border-bottom:none !important;padding-bottom:0 !important;}
+.ovl .qline.igaq .mstat{margin-left:12px;}
+.mcard.ro .igaseg button{pointer-events:none;cursor:default;}
+.mcard.ro .igaseg button:not(.on){opacity:.55;}
+.mcard .iga-buka{font:inherit;font-size:13px;font-weight:600;color:var(--accent-deep);background:none;border:none;text-decoration:underline;text-underline-offset:2px;cursor:pointer;min-height:44px;padding:0 4px;margin-top:4px;}
+.mcard.ro-umum .igaseg{display:none;}
+@media print{ .mcard .iga-buka{display:none !important;} .mcard.ro .igaseg button:not(.on){opacity:1;} }
 @media (max-width:620px){ .igaseg{grid-template-columns:repeat(3,1fr);} }
 @media print{
   .metrik{padding:10px 12px;margin:10px 0;}
@@ -2017,7 +2029,8 @@ body.mode-kontrol #rb2 .rl::after{content:' — dilewati';font-size:12px;font-we
 
   <!-- B. PENILAIAN KLINIS -->
   <div class="sec-label">B · Penilaian Klinis <span class="hint">dokter</span></div>
-  <div class="qline"><span class="q">IGA Acne:</span><span class="igamirror" id="igamir_acne">belum dinilai</span></div>
+  <div class="qline igaq"><span class="q">IGA Acne:</span><span class="igamirror" id="igamir_acne">belum dinilai</span><span class="mstat" id="igastatm_acne"></span></div>
+  <div class="igaseg igaseg-m" data-iga="ac_iga" role="group" aria-label="Skor IGA Acne"><button type="button" data-v="0" title="Clear" aria-pressed="false" onclick="setIGA('ac_iga','0')"><b>0</b><em>Bersih</em></button><button type="button" data-v="1" title="Almost clear" aria-pressed="false" onclick="setIGA('ac_iga','1')"><b>1</b><em>Hampir bersih</em></button><button type="button" data-v="2" title="Mild" aria-pressed="false" onclick="setIGA('ac_iga','2')"><b>2</b><em>Ringan</em></button><button type="button" data-v="3" title="Moderate" aria-pressed="false" onclick="setIGA('ac_iga','3')"><b>3</b><em>Sedang</em></button><button type="button" data-v="4" title="Severe" aria-pressed="false" onclick="setIGA('ac_iga','4')"><b>4</b><em>Berat</em></button></div>
   
   
   <div class="qline"><span class="q">Bekas:</span><label class="ck"><input type="checkbox"> PIE (merah)</label><label class="ck"><input type="checkbox"> PIH (gelap)</label>
@@ -2195,7 +2208,8 @@ body.mode-kontrol #rb2 .rl::after{content:' — dilewati';font-size:12px;font-we
   <div class="sec-label">B · Penilaian Klinis <span class="hint">dokter — nilai kesiapan kulit untuk laser</span></div>
   <div class="qline"><span class="q">Tipe melasma:</span><label class="ck"><input type="checkbox"> Epidermal</label><label class="ck"><input type="checkbox"> Dermal</label><label class="ck"><input type="checkbox"> Mixed</label><label class="ck"><input type="checkbox"> PIH pasca-acne</label><label class="ck"><input type="checkbox"> Lentigo/flek surya</label>
     <span class="sub">Fitzpatrick sudah dinilai di langkah 2</span></div>
-  <div class="qline"><span class="q">IGA Melasma:</span><span class="igamirror" id="igamir_melasma">belum dinilai</span></div>
+  <div class="qline igaq"><span class="q">IGA Melasma:</span><span class="igamirror" id="igamir_melasma">belum dinilai</span><span class="mstat" id="igastatm_melasma"></span></div>
+  <div class="igaseg igaseg-m" data-iga="me_iga" role="group" aria-label="Skor IGA Melasma"><button type="button" data-v="0" title="Clear" aria-pressed="false" onclick="setIGA('me_iga','0')"><b>0</b><em>Bersih</em></button><button type="button" data-v="1" title="Almost clear" aria-pressed="false" onclick="setIGA('me_iga','1')"><b>1</b><em>Hampir bersih</em></button><button type="button" data-v="2" title="Mild" aria-pressed="false" onclick="setIGA('me_iga','2')"><b>2</b><em>Ringan</em></button><button type="button" data-v="3" title="Moderate" aria-pressed="false" onclick="setIGA('me_iga','3')"><b>3</b><em>Sedang</em></button><button type="button" data-v="4" title="Severe" aria-pressed="false" onclick="setIGA('me_iga','4')"><b>4</b><em>Berat</em></button></div>
   
   
   <div class="qline"><span class="q">Foto klinis baseline diambil</span><span class="sub">(wajib — sumber kebenaran hasil)</span>
@@ -4112,7 +4126,7 @@ function issueHandoff(){
 function _terbitGo(t){
   if(/^Identitas pasien/.test(t)) return /No\. RM/.test(t)?'rm':'p_nama';
   if(/Asesmen selesai/.test(t)) return 'd8_signoff';
-  if(/IGA belum/.test(t)) return document.getElementById('d1_iga')?'d1_iga':null;
+  if(/IGA belum/.test(t)){ var pg=/^Melasma/.test(t)?'melasma':'acne'; if(!document.body.classList.contains('mode-kontrol')&&document.getElementById('pb_'+pg)) return 'pb_'+pg; return document.getElementById('igacard_'+pg)?'igacard_'+pg:'d1_iga'; }
   if(/Jadwal belum/.test(t)) return 'sb1';
   if(/^Diagnosis/.test(t)) return 'd2_dx';
   if(/^Alergi/.test(t)) return 'alergi_flag';
@@ -4939,6 +4953,14 @@ function syncIGAseg(){
     var seg=el.previousElementSibling;
     if(seg&&seg.classList&&seg.classList.contains('igaseg'))
       seg.querySelectorAll('button').forEach(function(b){ var on=b.getAttribute('data-v')===v; b.classList.toggle('on',on); b.setAttribute('aria-pressed',on?'true':'false'); });
+    document.querySelectorAll('.igaseg[data-iga="'+pair[0]+'"] button').forEach(function(b){ var on=b.getAttribute('data-v')===v; b.classList.toggle('on',on); b.setAttribute('aria-pressed',on?'true':'false'); });
+    /* kunjungan awal: kartu langkah 2 baca-saja (cermin) + tombol membuka form program; kontrol: bisa diketuk */
+    var kartu=document.getElementById('igacard_'+pair[1]), ro=!document.body.classList.contains('mode-kontrol');
+    if(kartu){ kartu.classList.toggle('ro',ro);
+      kartu.querySelectorAll('.igaseg button').forEach(function(b){ b.setAttribute('aria-disabled',ro?'true':'false'); b.tabIndex=ro?-1:0; });
+      var bk=kartu.querySelector('.iga-buka');
+      if(!bk){ bk=document.createElement('button'); bk.type='button'; bk.className='iga-buka'; bk.setAttribute('data-p',pair[1]); bk.onclick=function(){ if(typeof openProg==='function') openProg(this.getAttribute('data-p')); }; kartu.appendChild(bk); }
+      bk.textContent=(v===''?'Nilai':'Ubah')+' di form program ›'; bk.style.display=ro?'':'none'; }
     var mir=document.getElementById('igamir_'+pair[1]);
     if(mir) mir.textContent = v===''?'belum dinilai':(v+' · '+(IGA_LBL[v]||''));
     var st=document.getElementById('igastat_'+pair[1]);
@@ -4953,6 +4975,7 @@ function syncIGAseg(){
           (d.sukses?' · MEMENUHI kriteria berhasil':'');
         st.className='mstat '+(d.sukses?'win':'ok');
       }
+      var sm=document.getElementById('igastatm_'+pair[1]); if(sm){ sm.textContent=(d&&d.kini!=null)?st.textContent:''; sm.className=st.className; }
     }
   });
   /* kartu derajat umum (sebelum program dipilih) */
@@ -4961,7 +4984,8 @@ function syncIGAseg(){
     var sg=cu.querySelector('.igaseg');
     if(sg) sg.querySelectorAll('button').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-v')===u); });
     var su=document.getElementById('igastat_umum');
-    if(su){ su.textContent = u===''?'Pilih derajat hari ini':('IGA '+u+' · '+(IGA_LBL[u]||'')+' — dipakai program Acne/Melasma setelah dipilih');
+    var awal=!document.body.classList.contains('mode-kontrol'); cu.classList.toggle('ro-umum',awal&&u==='');
+    if(su){ su.textContent = u===''?(awal?'Derajat (IGA) dinilai di form program — langkah 3 · Program. Hasilnya tampil di sini.':'Pilih derajat hari ini'):('IGA '+u+' · '+(IGA_LBL[u]||'')+' — dipakai program Acne/Melasma setelah dipilih');
             su.className='mstat'+(u===''?'':' ok'); }
   }
   var dj=document.getElementById('d2_derajat'); if(dj) dj.value=_derajatTeks();
