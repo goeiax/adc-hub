@@ -307,6 +307,8 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
       check('F2: _programDerajat tidak menggandakan "Melasma" untuk program Hiperpigmentasi/Melasma', a.w._programDerajat({ program: 'Hiperpigmentasi/Melasma', derajat: 'Melasma IGA 3 · Sedang (Moderate)' }) === 'Hiperpigmentasi/Melasma — IGA 3 · Sedang (Moderate)' && a.w._programDerajat({ program: 'Acne', derajat: 'Acne IGA 3 · Sedang' }) === 'Acne IGA 3 · Sedang', a.w._programDerajat({ program: 'Hiperpigmentasi/Melasma', derajat: 'Melasma IGA 3 · Sedang (Moderate)' })); }
     { const ik4 = JSON.parse(JSON.stringify(a.w._intake)); ik4.kritis.alergi = 'Penisilin'; ik4.kritis.alergi_nihil = false; a.w.applyIntake(ik4); }
     check('F2: ringkasan intake tampil', $(a.d, 'intake_box').style.display !== 'none');
+    { const lb = a.d.querySelector('label[for="d2_dx_catatan"]'); set(a.d, 'd2_dx_catatan', 'DD: rosasea; pantau respons 4 minggu');
+      check('F2: kolom "Catatan dokter" di bawah Diagnosis (berlabel, setelah chip ICD) -> asesmen.diagnosis_catatan', !!lb && /Catatan dokter/.test(lb.textContent) && !!($(a.d, 'd2_icd_chips').compareDocumentPosition($(a.d, 'd2_dx_catatan')) & 4) && a.w.buildHandoff().asesmen.diagnosis_catatan === 'DD: rosasea; pantau respons 4 minggu'); }
     { const f2n = await open('ADC_Form2_Asesmen_Umum_Dokter.html'); await until(() => f2n.w._neoOn === true, 3000).catch(() => {});
       set(f2n.d, 'rm', 'RM-NEO-01'); $(f2n.d, 'rm').dispatchEvent(new f2n.w.Event('change', { bubbles: true }));
       await until(() => $(f2n.d, 'p_nama').value === 'Pasien NeoSoft', 4000).catch(() => {});
