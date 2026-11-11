@@ -1284,6 +1284,12 @@ textarea.in#d2_dx_catatan{min-height:64px;}
 #printsheet .ps-sig{text-align:center;font-size:7pt;color:#6B675E;}
 #printsheet .ps-sig img{display:block;height:26pt;max-width:46mm;object-fit:contain;margin:0 auto;border-bottom:.5pt solid #999;}
 #printsheet .ps-note{font-size:6.8pt;color:#6B675E;font-style:italic;margin-top:3pt;}
+#printsheet .ps-next{grid-column:1 / -1;border:1.2pt solid #8E4A33;border-radius:3pt;padding:4pt 7pt;margin:2pt 0;break-inside:avoid;display:grid;grid-template-columns:auto 1fr;gap:2pt 12pt;align-items:start;}
+#printsheet .ps-next .nl{font-size:6.8pt;letter-spacing:.12em;text-transform:uppercase;color:#8E4A33;font-weight:700;}
+#printsheet .ps-next .nd{font-size:12pt;font-weight:700;line-height:1.2;white-space:nowrap;}
+#printsheet .ps-next .ns{font-size:8pt;color:#3A3833;}
+#printsheet .ps-next .nw{font-size:8.2pt;line-height:1.35;color:#1B1A18;}
+#printsheet .ps-next .nw b{color:#8E4A33;}
 .metrik .mempty{font-size:13.5px;color:var(--ink-muted);line-height:1.5;}
 
 @media (max-width:860px){ .f.s1,.f.s2{grid-column:span 2;} }
@@ -4470,6 +4476,17 @@ document.addEventListener('input',function(e){ var t=e.target; if(t&&t.closest){
 /* ===== SERAH TERIMA DOKTER -> PERAWAT =====
    Perangkat berpindah tangan sekali; di titik itu dokter harus melihat apa yang belum lengkap selagi masih
    di ruangan, dan perawat harus melihat status dokter tanpa membuka langkah dokter. */
+/* Kotak "Kontrol berikutnya" di lembar cetak: kapan kembali + mengapa jadwal program penting.
+   Teks penjelasan = draf untuk ditinjau PJ klinik (tanpa janji hasil). */
+function _tglPanjang(s){ try{ if(!s) return ''; var d=new Date(s+'T00:00:00'); if(isNaN(d)) return s; return d.toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'}); }catch(e){ return s; } }
+function _psKontrolBerikut(a,ritme){
+  var tgl=(a&&a.kunjungan_berikutnya)||'', jam=(typeof _v==='function')?_v('d5_jam'):'';
+  var kapan=tgl?(_esc(_tglPanjang(tgl))+(jam?(' · pukul '+_esc(jam)):'')):'Tanggal akan diinformasikan perawat';
+  return '<div class="ps-next"><div><div class="nl">Kontrol berikutnya</div><div class="nd">'+kapan+'</div>'+
+    (ritme?('<div class="ns">'+_esc(ritme)+'</div>'):'')+'</div>'+
+    '<div class="nw"><b>Mengapa jadwal ini penting.</b> Program ini bekerja bertahap. Pada setiap kontrol, dokter menilai respons kulit Anda, menyesuaikan obat dan dosisnya, serta menangani efek samping sejak dini. Kontrol yang terlewat atau tertunda membuat perbaikan lebih lambat dan meningkatkan risiko kambuh. '+
+    'Mohon datang sesuai jadwal dan lanjutkan obat sampai kontrol berikutnya. Bila berhalangan, hubungi klinik <b>sebelum</b> tanggal tersebut untuk menjadwalkan ulang.</div></div>';
+}
 function _tglID(s){ try{ if(!s) return ''; var d=new Date(s+'T00:00:00'); if(isNaN(d)) return s; return d.toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'}); }catch(e){ return s; } }
 function _serahData(){
   var st=(typeof reqStatus==='function')?reqStatus():[], miss=st.filter(function(x){ return !x.ok; });
@@ -4869,8 +4886,9 @@ function _lembarCetak(){
       blok('Evaluasi kunjungan ini',evHtml,'ps-wide')+
       blok('Program & tindakan',prog,'ps-wide')+
       blok('Resep',rx,'ps-wide')+
-      blok('Rencana',kv('Ritme kontrol',ritme)+kv('Kunjungan berikutnya',a.kunjungan_berikutnya)+kv('Rencana & timeline',a.rencana)+
+      blok('Rencana',kv('Ritme kontrol',ritme)+kv('Rencana & timeline',a.rencana)+
         kv('Instruksi kontrol',a.instruksi_kontrol)+kv('Remarks',a.remarks)+kv('Yang harus dihindari',a.hindari),'ps-wide')+
+      _psKontrolBerikut(a,ritme)+
       blok('Riwayat (3 kunjungan terakhir)',riw,'ps-wide')+
     '</div>'+
     '<footer class="ps-f"><div>Sign-off dokter: <b>'+(pn.signoff_dokter?E(pn.dokter_signoff||a.dokter||'ada'):'BELUM')+'</b>'+
