@@ -6,7 +6,7 @@ Indonesia (all form/patient text). Code comments: Indonesian is fine.
 
 ## Layout & source of truth
 - **Form sources live one level up** in `../` (the Marketing folder):
-  `../ADC_Form1_Registrasi_Anamnesis_Pasien.html` (nurse+patient intake, new patients only),
+  `../ADC_Form1_Registrasi_Anamnesis_Pasien.html` (nurse+patient intake, new patients only; since 2026-11-11 it can **recall** a saved intake — toolbar `#tb_muat` → `muatF1()` dialog (`#mdlg`, ids `mdlg_rm/mdlg_file/mdlg_x/mdlg_ok`, file input `#_intakefile_f1`) → `applyIntakeF1(o)` = inverse of `buildIntake()`: ids for identity/staff, `.prog` cards by `.pname`, every `seksi[].isian` written back by label per section (`_fPerSeksi`, `_fIsi` = inverse of `_fval`: checkbox labels matched by text, remaining parts to text controls in order), `label.ack` by text/data-k, signatures via `_padLoad` (canvas keeps `__loaded` until re-inked; `padData` returns it). Sets `window._f1Dimuat`/`_f1Hilang`. Local **draft** autosave to `localStorage.adc_f1_draft` (debounced on input/change/sigpad pointerup, 7-day expiry) with the `#draftbar` offer at load (`_draftTawarkan/_draftLanjut/_draftBuang`); cleared by `simpanIntake` and `resetForm`),
   `../ADC_Form2_Asesmen_Umum_Dokter.html` (doctor assessment, contains program modals),
   `../ADC_Panduan_Pengisian_Form.html` (how-to guide — ALL instructional text lives here, not in forms).
 - Also served by the hub (same copy rule): `../ADC_Form_Asesmen_Slimming_SpGK.html` (Sp.GK Slimming; has Muat Form 1 + hub) and `../ADC_SkinQualityProgram_Journey_Outcome_Tracker.html` (loads handoff by RM). Their hub/dialog code is a verbatim copy of Form 2's (`hubDefault…hubGetPasien`, `_dlgMuat`); change Form 2 first, then re-copy.

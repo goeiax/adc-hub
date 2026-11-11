@@ -181,7 +181,7 @@ kirim beserta baris yang muncul di jendela hub saat itu.
 
 | Siapa | Kapan | Yang dilakukan |
 |---|---|---|
-| Perawat | Pasien **baru** datang | Form 1 di tablet registrasi → Simpan Data Pasien. Pasien kontrol **tidak** lewat Form 1. |
+| Perawat | Pasien **baru** datang | Form 1 di tablet registrasi → Simpan Data Pasien. Pasien kontrol **tidak** lewat Form 1. Koreksi / lanjut di tablet lain: **Muat Form 1** → ketik RM → ubah → Simpan lagi. Isian yang belum disimpan tersimpan sebagai draf di tablet itu (bilah *Lanjutkan* saat dibuka lagi). |
 | Dokter | Konsultasi | Form 2 → Muat Form 1 (baru) / Muat Handoff (kontrol) dengan No. RM → asesmen → form program → sign-off PIN → cetak lembar pasien + consent. |
 | Perawat | Setelah dokter | Langkah 6 Form 2: jadwal → simpan → reminder → **Terbitkan Handoff**. Berkas unduhan yang dibuat form adalah cadangan; lampirkan ke NeoSoft bersama cetakan. |
 | CS / admin | Kapan saja | Index hub → cari RM → cetak ulang; admin membaca audit dan mengoreksi >2×24 jam. |

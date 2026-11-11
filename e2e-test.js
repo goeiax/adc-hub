@@ -37,7 +37,7 @@ function check(name, ok, detail) { results.push({ name, ok: !!ok, detail }); con
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 async function until(fn, ms = 4000) { const t = Date.now(); while (Date.now() - t < ms) { if (fn()) return true; await sleep(50); } return false; }
 
-async function open(file, { key = KEY, user = (/Form2/.test(file) ? 'dokter' : 'perawat'), log } = {}) {
+async function open(file, { key = KEY, user = (/Form2/.test(file) ? 'dokter' : 'perawat'), log, ls } = {}) {
   const dialogs = [];
   const vc = new VirtualConsole();
   vc.on('jsdomError', e => dialogs.push({ type: 'jsdomError', msg: String(e.message).slice(0, 200) }));
@@ -52,7 +52,7 @@ async function open(file, { key = KEY, user = (/Form2/.test(file) ? 'dokter' : '
       w.scrollTo = () => {}; w.Element.prototype.scrollIntoView = () => {};
       w.__popup = null;
       w.open = () => { const d = { html: '', open() {}, write(h) { d.html += h; }, close() {} }; w.__popup = { document: d }; return w.__popup; };
-      try { w.localStorage.setItem('adc_hub_key', key); if (user && TOK[user]) { w.localStorage.setItem('adc_hub_tok', TOK[user]); w.localStorage.setItem('adc_hub_user', JSON.stringify(USER[user])); } } catch (e) {}
+      try { w.localStorage.setItem('adc_hub_key', key); if (user && TOK[user]) { w.localStorage.setItem('adc_hub_tok', TOK[user]); w.localStorage.setItem('adc_hub_user', JSON.stringify(USER[user])); } if (ls) Object.keys(ls).forEach(k => w.localStorage.setItem(k, ls[k])); } catch (e) {}
     } });
   const w = dom.window;
   if (/admin\.html$/.test(file)) { await until(() => w._adminSiap === true, 4000).catch(() => {}); return { w, d: w.document, dialogs, dom }; }
@@ -171,13 +171,41 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
     await until(() => f1.dialogs.some(x => x.type === 'alert' && /tersimpan di hub/.test(x.msg)));
     check('F1: pesan Simpan menyebut hub ✓ + RM (bukan pesan generik)', f1.dialogs.some(x => x.type === 'alert' && /✓.*tersimpan di hub klinik \(RM RM-TEST-001\)/.test(x.msg)), f1.dialogs.filter(x => x.type === 'alert').map(x => x.msg.slice(0, 80)));
     check('F1: tombol Simpan juga ada di akhir langkah 5', !!f1.d.querySelector('.donehint button[onclick="simpanIntake()"]'));
+    /* ===== 1b. FORM 1: panggil kembali (Muat Form 1 by RM) + draf lokal ===== */
+    { await until(() => disk('intake.json')); const ikF1 = disk('intake.json'); const f1b = await open('ADC_Form1_Registrasi_Anamnesis_Pasien.html');
+      check('F1 muat: tombol "Muat Form 1" di toolbar & draf belum ditawarkan (localStorage kosong)', !!$(f1b.d, 'tb_muat') && $(f1b.d, 'draftbar').hidden);
+      f1b.w.muatF1(); await sleep(50);
+      check('F1 muat: dialog RM/berkas terbuka (ids mdlg_rm/mdlg_file/mdlg_ok)', $(f1b.d, 'mdlg').classList.contains('on') && !!$(f1b.d, 'mdlg_file') && !!$(f1b.d, 'mdlg_ok'));
+      set(f1b.d, 'mdlg_rm', RM); $(f1b.d, 'mdlg_ok').click();
+      await until(() => f1b.w._f1Dimuat, 4000).catch(() => {});
+      const b2 = f1b.w.buildIntake();
+      check('F1 muat: identitas, panel staf & alergi terisi kembali dari hub; dialog tertutup', !!f1b.w._f1Dimuat && $(f1b.d, 'p_nama').value === 'Pasien Uji Coba' && $(f1b.d, 'rm').value === RM && $(f1b.d, 'p_nik').value === '3273012345678901' && $(f1b.d, 'p_dokter').value === 'dr. Uji, Sp.DVE' && $(f1b.d, 'p_bb').value === '58' && $(f1b.d, 'alergi').value === 'Penisilin' && $(f1b.d, 'p_foto_ok').checked && $(f1b.d, 'p_foto_izin').checked && !$(f1b.d, 'mdlg').classList.contains('on'), { nama: $(f1b.d, 'p_nama').value, dlg: $(f1b.d, 'mdlg_msg').textContent, dialogs: f1b.dialogs.slice(-2) });
+      check('F1 muat: program Acne kembali terpilih (kartu + blok detail), lokasi "Pipi" tercentang, 7 persetujuan tercentang', f1b.d.querySelector('.prog[data-p=acne]').classList.contains('on') && f1b.d.getElementById('d-acne').classList.contains('on') && [...f1b.d.querySelectorAll('#d-acne label.opt')].some(l => l.textContent.trim() === 'Pipi' && l.querySelector('input').checked) && f1b.d.querySelectorAll('label.ack input:checked').length === 7, { hilang: f1b.w._f1Hilang });
+      check('F1 muat: buildIntake() setelah dimuat = intake yang tersimpan (pasien, kritis, program, seksi P4)', JSON.stringify(b2.pasien) === JSON.stringify(ikF1.pasien) && b2.kritis.alergi === ikF1.kritis.alergi && JSON.stringify(b2.kritis.program) === JSON.stringify(ikF1.kritis.program) && JSON.stringify(b2.seksi) === JSON.stringify(ikF1.seksi) && b2.persetujuan.disetujui === ikF1.persetujuan.disetujui, { b2: { p: b2.pasien, s: b2.seksi }, ikF1: { p: ikF1.pasien, s: ikF1.seksi } });
+      { const ttd = JSON.parse(JSON.stringify(ikF1)); ttd.persetujuan.tanda_tangan.pasien = { nama: 'Pasien Uji Coba', tanggal: '2026-11-11', gambar: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==' };
+        f1b.w.applyIntakeF1(ttd); const b3 = f1b.w.buildIntake();
+        check('F1 muat: gambar tanda tangan dari intake dipertahankan (padData mengembalikannya) & nama penandatangan terisi', b3.persetujuan.tanda_tangan.pasien.gambar === ttd.persetujuan.tanda_tangan.pasien.gambar && $(f1b.d, 'ttd_pasien_nama').value === 'Pasien Uji Coba' && f1b.d.getElementById('ttd_pasien').parentNode.classList.contains('inked'), b3.persetujuan.tanda_tangan.pasien.gambar.slice(0, 30)); }
+      check('F1 muat: berkas bukan ADC-INTAKE ditolak', f1b.w.applyIntakeF1({ doc: 'ADC-HANDOFF' }) === false && f1b.dialogs.some(x => x.type === 'alert' && /bukan keluaran Form 1/.test(x.msg)));
+      /* draf lokal: perubahan -> localStorage; buka lagi -> bilah Lanjutkan */
+      set(f1b.d, 'p_nama', 'Draf Uji'); await until(() => { try { return /Draf Uji/.test(f1b.w.localStorage.getItem('adc_f1_draft') || ''); } catch (e) { return false; } }, 3000).catch(() => {});
+      const draf = f1b.w.localStorage.getItem('adc_f1_draft');
+      check('F1 draf: perubahan tersimpan otomatis ke localStorage (adc_f1_draft)', !!draf && /Draf Uji/.test(draf));
+      { const f1c = await open('ADC_Form1_Registrasi_Anamnesis_Pasien.html', { ls: { adc_f1_draft: draf } });
+        check('F1 draf: saat dibuka lagi, bilah "Isian terakhir" tampil dengan nama & RM', !$(f1c.d, 'draftbar').hidden && /Draf Uji/.test($(f1c.d, 'draft_teks').textContent) && new RegExp(RM).test($(f1c.d, 'draft_teks').textContent), $(f1c.d, 'draft_teks').textContent);
+        $(f1c.d, 'draft_lanjut').click(); await sleep(50);
+        check('F1 draf: Lanjutkan mengisi ulang form & menutup bilah', $(f1c.d, 'p_nama').value === 'Draf Uji' && $(f1c.d, 'rm').value === RM && $(f1c.d, 'draftbar').hidden);
+        f1c.w.confirm = () => true; f1c.w.resetForm();
+        check('F1 draf: Reset menghapus draf', !f1c.w.localStorage.getItem('adc_f1_draft') && $(f1c.d, 'p_nama').value === ''); }
+      { const f1d = await open('ADC_Form1_Registrasi_Anamnesis_Pasien.html', { ls: { adc_f1_draft: draf } });
+        $(f1d.d, 'draft_buang').click();
+        check('F1 draf: Buang menghapus draf tanpa mengisi form', !f1d.w.localStorage.getItem('adc_f1_draft') && $(f1d.d, 'draftbar').hidden && $(f1d.d, 'p_nama').value === ''); } }
     await until(() => disk('intake.json'));
-    const ik = disk('intake.json');
-    check('hub: intake.json tersimpan per RM', ik && ik.doc === 'ADC-INTAKE' && ik.pasien.rm === RM);
-    check('hub: field intake benar (nama, alergi, dokter, BB/TB)', ik && ik.pasien.nama === 'Pasien Uji Coba' && ik.kritis.alergi === 'Penisilin' && ik.penugasan.dokter === 'dr. Uji, Sp.DVE' && ik.pengukuran.bb === '58', ik && { p: ik.pasien, k: ik.kritis.alergi, pg: ik.pengukuran });
-    check('F1: IMT terhitung', ik && ik.pengukuran.imt, ik && ik.pengukuran);
-    check('F1: NIK & persetujuan (umum, data pribadi, hak-kewajiban) masuk ke intake', ik && ik.pasien.nik === '3273012345678901' && ik.persetujuan.total === 7 && ik.persetujuan.umum === true && ik.persetujuan.data_pribadi === true && ik.persetujuan.hak_kewajiban === true && ik.persetujuan.butir.length === 7, ik && ik.persetujuan);
-    check('hub: stempel server _audit (siapa/kapan) di intake = perawat', ik && ik._audit && ik._audit.oleh === 'perawat' && ik._audit.peran === 'perawat' && /^\d{4}-/.test(ik._audit.waktu), ik && ik._audit);
+    const ikF1 = disk('intake.json');
+    check('hub: intake.json tersimpan per RM', ikF1 && ikF1.doc === 'ADC-INTAKE' && ikF1.pasien.rm === RM);
+    check('hub: field intake benar (nama, alergi, dokter, BB/TB)', ikF1 && ikF1.pasien.nama === 'Pasien Uji Coba' && ikF1.kritis.alergi === 'Penisilin' && ikF1.penugasan.dokter === 'dr. Uji, Sp.DVE' && ikF1.pengukuran.bb === '58', ikF1 && { p: ikF1.pasien, k: ikF1.kritis.alergi, pg: ikF1.pengukuran });
+    check('F1: IMT terhitung', ikF1 && ikF1.pengukuran.imt, ikF1 && ikF1.pengukuran);
+    check('F1: NIK & persetujuan (umum, data pribadi, hak-kewajiban) masuk ke intake', ikF1 && ikF1.pasien.nik === '3273012345678901' && ikF1.persetujuan.total === 7 && ikF1.persetujuan.umum === true && ikF1.persetujuan.data_pribadi === true && ikF1.persetujuan.hak_kewajiban === true && ikF1.persetujuan.butir.length === 7, ikF1 && ikF1.persetujuan);
+    check('hub: stempel server _audit (siapa/kapan) di intake = perawat', ikF1 && ikF1._audit && ikF1._audit.oleh === 'perawat' && ikF1._audit.peran === 'perawat' && /^\d{4}-/.test(ikF1._audit.waktu), ikF1 && ikF1._audit);
     { const raw = fs.readFileSync(path.join('data', RM, 'intake.json'), 'utf8');
       check('hub: berkas di disk TERENKRIPSI (amplop aes-256-gcm, nama pasien tidak terbaca)', /"enc":"aes-256-gcm"/.test(raw) && !/Pasien Uji Coba/.test(raw)); }
 
