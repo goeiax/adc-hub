@@ -76,13 +76,21 @@ function neoNormal(row, peta) {
   if (/^(l|laki|laki-laki|male|m|pria)$/i.test(out.kelamin)) out.kelamin = 'Laki-laki'; else if (/^(p|perempuan|female|f|wanita)$/i.test(out.kelamin)) out.kelamin = 'Perempuan';
   return out;
 }
+/* Jabat tangan ke server NeoSoft lambat (±8–10 dtk), query-nya cepat (±25 ms): sambungan dibuka saat hub mulai
+   dan dijaga hidup (ping tiap 4 menit) supaya perawat tidak menunggu pada pencarian pertama. Gagal = diam, dicoba lagi. */
+function neoHangat() {
+  if (!NEO || NEO.mock || !NEO.host) return;
+  let mysql; try { mysql = require('mysql2/promise'); } catch (e) { console.error('   NeoSoft: modul mysql2 belum terpasang (npm install mysql2)'); return; }
+  const ping = () => neoIdentitas('__hangat__').then(() => { if (!neoHangat.ok) { neoHangat.ok = true; console.log('   NeoSoft: tersambung (baca-saja)'); } }).catch(e => { neoHangat.ok = false; console.error('   NeoSoft: belum tersambung — ' + e.message); });
+  ping(); setInterval(ping, 240000).unref();
+}
 async function neoIdentitas(rm) {
   if (!NEO) return null;
   if (NEO.mock) { const m = NEO.mock[rm] || NEO.mock[String(rm).toUpperCase()]; return m ? neoNormal(Object.assign({ rm }, m)) : null; }
   const sql = String((NEO.identitas || {}).sql || '').trim();
   if (!/^select\s/i.test(sql) || /;\s*\S/.test(sql) || !sql.includes('?')) throw new Error('neosoft.json: identitas.sql harus satu pernyataan SELECT dengan satu tanda ?');
   let mysql; try { mysql = require('mysql2/promise'); } catch (e) { throw new Error('modul mysql2 belum terpasang — jalankan: npm install mysql2 (di folder adc-hub)'); }
-  if (!_neoPool) _neoPool = mysql.createPool({ host: NEO.host, port: NEO.port || 3306, user: NEO.user, password: NEO.password, database: NEO.database || undefined, connectionLimit: 2, connectTimeout: 5000, waitForConnections: true });
+  if (!_neoPool) _neoPool = mysql.createPool({ host: NEO.host, port: NEO.port || 3306, user: NEO.user, password: NEO.password, database: NEO.database || undefined, connectionLimit: 2, connectTimeout: 30000, waitForConnections: true, enableKeepAlive: true, keepAliveInitialDelay: 30000, idleTimeout: 3600000, maxIdle: 2 });
   const conn = await _neoPool.getConnection();
   try {
     try { await conn.query('SET SESSION TRANSACTION READ ONLY'); } catch (e) { /* versi lama tanpa dukungan: tetap SELECT saja */ }
@@ -468,5 +476,6 @@ server.listen(CFG.port, () => {
   console.log('   Form  : ' + skema + '://localhost:' + CFG.port + '/   (dari tablet: ' + skema + '://IP-PC-ini:' + CFG.port + '/)');
   console.log(' Biarkan jendela ini terbuka selama klinik buka.');
   console.log('==============================================');
+  neoHangat();
   if (CFG.backup_dir) { backup('saat mulai'); setInterval(() => backup('berkala'), Math.max(1, +CFG.backup_jam || 6) * 3600 * 1000).unref(); }
 });

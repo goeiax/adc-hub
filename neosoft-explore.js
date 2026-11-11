@@ -47,7 +47,7 @@ function skor(nama, petunjuk) {
 (async () => {
   const conn = await mysql.createConnection({
     host: cfg.host, port: cfg.port || 3306, user: cfg.user, password: cfg.password,
-    database: cfg.database || undefined, connectTimeout: 10000
+    database: cfg.database || undefined, connectTimeout: 40000
   });
   console.log('=== NEOSOFT EXPLORER (baca-saja) ===');
   console.log('Terhubung ke', cfg.host + ':' + (cfg.port || 3306), 'sebagai', cfg.user);
