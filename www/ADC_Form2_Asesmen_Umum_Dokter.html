@@ -1984,7 +1984,7 @@ body.mode-kontrol #rb2 .rl::after{content:' — dilewati';font-size:12px;font-we
   <div class="serah-now" id="serah_now" aria-live="polite"></div>
   <div class="serah" id="serah_ringkas"></div>
   <div id="sched_lock" class="lockmsg">Terkunci — <b>ritme kontrol</b> dan <b>tanggal mulai</b> belum diisi dokter. <button type="button" class="lnk" onclick="goTo('d5_iv')">Isi di langkah 4 &rsaquo;</button></div>
-  <div class="zone nr lock" id="sched_zone">
+  <div class="zone nr lock" id="sched_zone" inert aria-disabled="true" aria-describedby="sched_lock">
     <div class="row">
       <div class="f s3"><label class="lab" for="d5_next">Kunjungan berikutnya</label><input class="in" type="date" id="d5_next"></div>
       <div class="f s3"><label class="lab" for="d5_jam">Jam / slot</label><input class="in" id="d5_jam" placeholder="mis. 14:00"></div>
@@ -2891,7 +2891,14 @@ function gateSched(){
   var iv=_v('d5_iv'), st=_v('d5_start');
   var ok=!!(iv&&st);
   var z=document.getElementById('sched_zone'), l=document.getElementById('sched_lock');
-  if(z) z.classList.toggle('lock',!ok);
+  if(z){ z.classList.toggle('lock',!ok);
+    /* terkunci untuk SEMUA cara masuk: inert (mouse, keyboard, pembaca layar) + cadangan tabindex untuk browser tanpa inert */
+    if(!ok){ z.setAttribute('inert',''); z.setAttribute('aria-disabled','true'); z.setAttribute('aria-describedby','sched_lock'); }
+    else { z.removeAttribute('inert'); z.removeAttribute('aria-disabled'); z.removeAttribute('aria-describedby'); }
+    z.querySelectorAll('button,input,select,textarea,a[href]').forEach(function(e){
+      if(!ok){ if(!e.hasAttribute('data-tab0')) e.setAttribute('data-tab0', e.getAttribute('tabindex')===null?'':e.getAttribute('tabindex')); e.setAttribute('tabindex','-1'); }
+      else if(e.hasAttribute('data-tab0')){ var t0=e.getAttribute('data-tab0'); if(t0==='') e.removeAttribute('tabindex'); else e.setAttribute('tabindex',t0); e.removeAttribute('data-tab0'); }
+    }); }
   if(l) l.style.display=ok?'none':'block';
   var c=document.getElementById('d5_ctrl');
   if(c&&iv&&!c.value) c.value='kontrol tiap '+IVTEXT[iv];
