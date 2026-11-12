@@ -410,6 +410,17 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
     const ttdDlg = await terbit(a);
     check('F2: Terbitkan TIDAK meminta PIN lagi (sudah ditandatangani saat sign-off) & tidak ada dialog peringatan', ttdDlg === false && !a.dialogs.some(x => x.type === 'confirm') && a.w.__tdlgJudul === 'Terbitkan handoff?', a.dialogs.filter(x => x.type === 'confirm'));
     check('F2: popup ringkasan handoff dibuat', a.w.__popup && /Ringkasan Handoff/.test(a.w.__popup.document.html));
+    /* Reset: dialog dulu, tidak ada yang dihapus sebelum dikonfirmasi */
+    { const ttd0 = a.w._ttd, nConfirm = a.dialogs.filter(x => x.type === 'confirm').length;
+      a.w.resetForm('berikut'); await sleep(20);
+      const rd = $(a.d, 'rdlg');
+      check('Reset (Pasien berikutnya): dialog bernama pasien, bukan confirm bawaan; judul & tombol "Pasien berikutnya"; belum ada yang terhapus', !!rd && rd.classList.contains('on') && /Mulai pasien berikutnya/.test($(a.d, 'rdlg_t').textContent) && new RegExp(RM).test($(a.d, 'rdlg_p').textContent) && $(a.d, 'rdlg_ok').textContent === 'Pasien berikutnya' && a.dialogs.filter(x => x.type === 'confirm').length === nConfirm && a.w._ttd === ttd0 && $(a.d, 'rm').value === RM, { t: rd && $(a.d, 'rdlg_t').textContent });
+      $(a.d, 'rdlg_x').click();
+      check('Reset dibatalkan: stempel TTD, centang sign-off dan isian tetap utuh', !rd.classList.contains('on') && a.w._ttd === ttd0 && !!a.w._ttd && $(a.d, 'd8_signoff').checked && $(a.d, 'rm').value === RM && !!a.w._handoff); }
+    { const rs = await open('ADC_Form2_Asesmen_Umum_Dokter.html'); set(rs.d, 'p_nama', 'Belum Terbit'); set(rs.d, 'rm', 'RM-X1'); rs.w.resetForm(); await sleep(20);
+      check('Reset form belum terbit: judul "Kosongkan form?", peringatan BELUM diterbitkan, fokus awal di Batal; OK mengosongkan', /Kosongkan form/.test($(rs.d, 'rdlg_t').textContent) && /BELUM diterbitkan/.test($(rs.d, 'rdlg_w').textContent) && /Belum Terbit/.test($(rs.d, 'rdlg_p').textContent));
+      $(rs.d, 'rdlg_ok').click(); check('Reset dikonfirmasi: form kosong', $(rs.d, 'p_nama').value === '' && $(rs.d, 'rm').value === '' && !$(rs.d, 'rdlg').classList.contains('on'));
+      rs.w.resetForm(); check('Reset pada form kosong: langsung, tanpa dialog', !$(rs.d, 'rdlg').classList.contains('on')); }
     await until(() => a.dialogs.some(x => x.type === 'download' && /^Asesmen_/.test(x.msg)), 3000).catch(() => {});
     check('F2 Terbitkan: berkas Asesmen_<RM>_<tgl>_<jam>.json otomatis diunduh & disebut di kartu selesai', a.dialogs.some(x => x.type === 'download' && /^Asesmen_RM-TEST-001_\d{4}-\d{2}-\d{2}_\d{4}\.json$/.test(x.msg)) && /Asesmen_RM-TEST-001_.*diunduh/.test($(a.d, 'terbit_done_note').textContent), a.dialogs.filter(x => x.type === 'download').map(x => x.msg));
     /* buka kembali asesmen yang baru terbit: potret form ikut di handoff hub, lalu dipulihkan di form kosong */

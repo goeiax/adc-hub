@@ -1237,6 +1237,9 @@ textarea.in#d2_dx_catatan{min-height:64px;}
 .mdlg-in{width:100%;font:inherit;font-size:16px;color:var(--ink-fill);padding:11px 13px;border:1px solid var(--line-strong);border-radius:var(--r-box);background:#fff;}
 .mdlg-in:focus{outline:none;border-color:var(--accent-act);}
 .mdlg-msg{min-height:20px;font-size:13px;color:var(--accent-deep);margin:8px 0 6px;}
+.mdlg-p{font-size:14.5px;line-height:1.5;color:var(--ink-2);margin:0 0 12px;}
+.mdlg-p.warn{color:var(--accent-deep);font-weight:600;}
+.mdlg-p:empty{display:none;}
 .mdlg-b{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
 .mdlg-sp{flex:1;}
 .mdlg-b button{font:inherit;font-size:14px;font-weight:600;min-height:44px;padding:0 18px;border-radius:var(--r-pill);cursor:pointer;border:1px solid var(--line-strong);background:var(--surface);color:var(--ink);}
@@ -2007,7 +2010,7 @@ body.mode-kontrol #rb2 .rl::after{content:' — dilewati';font-size:12px;font-we
     <div class="dc-l" id="terbit_done_l"></div>
     <div class="dc-hub" id="terbit_done_hub" aria-live="polite"></div>
     <div class="dc-note" id="terbit_done_note"></div>
-    <div class="dc-b"><button type="button" onclick="bukaRingkasanHandoff()">Buka ringkasan handoff</button><button type="button" onclick="unduhHandoffJSON()">Unduh JSON</button><button type="button" onclick="cetakSemua()">Cetak / Simpan PDF</button><button type="button" class="pri" onclick="resetForm()">Pasien berikutnya</button></div>
+    <div class="dc-b"><button type="button" onclick="bukaRingkasanHandoff()">Buka ringkasan handoff</button><button type="button" onclick="unduhHandoffJSON()">Unduh JSON</button><button type="button" onclick="cetakSemua()">Cetak / Simpan PDF</button><button type="button" class="pri" onclick="resetForm('berikut')">Pasien berikutnya</button></div>
   </div>
   <div class="stepnav no-print"><button type="button" class="nb" onclick="goStep(4)">&lsaquo; Kembali</button><button type="button" class="nb nb-p nb-terbit" onclick="issueHandoff()">Terbitkan Handoff</button></div></section>
   <div class="foot">
@@ -2986,9 +2989,31 @@ function saveSchedToRecord(){
   window._schedSaved=true;
   if(st){ st.textContent='Catatan jadwal tersimpan — berkas diunduh & disalin ke clipboard. Lampirkan ke rekam medis NeoSoft pasien.'; st.style.color='#3D7A5F'; }
 }
-function resetForm(){
-  try{ window._rbOverride=false; setTimeout(syncRisikoBekas,0); window._ttd=null; window._ttdTakBisa=false; _ttdStatus(''); window._isian={}; var cl=document.getElementById('d8_consent_lbl'); if(cl) cl.textContent=''; setTimeout(_icdChips,0); }catch(e){}
-  if(!confirm('Reset semua isian formulir?')) return;
+/* Reset = dua langkah: resetForm(mode) bertanya lewat dialog bernama pasien; _resetJalan() mengosongkan.
+   TIDAK ADA yang dihapus sebelum dikonfirmasi (dulu stempel TTD hilang walau Batal ditekan). */
+function resetForm(mode){
+  var nama=_hv('p_nama'), rm=_hv('rm'), siapa=[nama, rm?('RM '+rm):''].filter(Boolean).join(' · ');
+  var terisi=!!(nama||rm||_hv('d2_dx')||_hv('d2_hasil'));
+  if(!terisi){ _resetJalan(); return; }
+  var terbit=!!(window._handoff&&window._handoff.pasien&&(window._handoff.pasien.rm||'')===rm&&!(window._dibukaUlang&&window._dibukaUlang.batal));
+  var berikut=(mode==='berikut'&&terbit);
+  var bg=document.getElementById('rdlg');
+  if(!bg){ bg=document.createElement('div'); bg.id='rdlg'; bg.className='mdlg-bg';
+    bg.innerHTML='<div class="mdlg" role="dialog" aria-modal="true" aria-labelledby="rdlg_t"><div class="mdlg-t" id="rdlg_t"></div><p class="mdlg-p" id="rdlg_p"></p><p class="mdlg-p warn" id="rdlg_w"></p>'+
+      '<div class="mdlg-b"><span class="mdlg-sp"></span><button type="button" class="mdlg-x" id="rdlg_x">Batal</button><button type="button" class="mdlg-ok" id="rdlg_ok"></button></div></div>';
+    document.body.appendChild(bg); }
+  document.getElementById('rdlg_t').textContent=berikut?'Mulai pasien berikutnya?':'Kosongkan form?';
+  document.getElementById('rdlg_p').textContent=berikut?('Asesmen '+(siapa||'pasien ini')+' sudah diterbitkan. Form dikosongkan untuk pasien berikutnya.')
+    :('Semua isian '+(siapa?('untuk '+siapa+' '):'')+'di layar akan dihapus, termasuk form program, resep dan tanda tangan dokter.');
+  document.getElementById('rdlg_w').textContent=(berikut||terbit)?'':'Asesmen ini BELUM diterbitkan — isiannya tidak tersimpan di hub.';
+  document.getElementById('rdlg_ok').textContent=berikut?'Pasien berikutnya':'Kosongkan form';
+  var tutup=function(){ dlgTutup(bg); };
+  document.getElementById('rdlg_x').onclick=tutup;
+  document.getElementById('rdlg_ok').onclick=function(){ tutup(); _resetJalan(); try{ goStep(0); }catch(e){} };
+  dlgBuka(bg,tutup); setTimeout(function(){ try{ document.getElementById(berikut?'rdlg_ok':'rdlg_x').focus(); }catch(e){} },0);
+}
+function _resetJalan(){
+  try{ window._rbOverride=false; setTimeout(syncRisikoBekas,0); window._ttd=null; window._ttdTakBisa=false; _ttdStatus(''); window._isian={}; window._handoff=null; window._dibukaUlang=null; var cl=document.getElementById('d8_consent_lbl'); if(cl) cl.textContent=''; setTimeout(_icdChips,0); }catch(e){}
   var _dc=document.getElementById('terbit_done'); if(_dc) _dc.hidden=true;
   /* radio juga hanya dilepas centangnya — mengosongkan value-nya membuat Fitzpatrick
      terekam kosong setelah Reset. */
@@ -4424,7 +4449,7 @@ function bukaAsesmen(h){
   if((nm||rmKini)&&!confirm('Form saat ini berisi '+(nm||'—')+' · RM '+(rmKini||'—')+'.\n\nGanti dengan asesmen tersimpan '+(ps.nama||'—')+' · RM '+(ps.rm||'—')+'? Isian di layar akan hilang.')) return false;
   window._memulihkan=true;
   try{
-    var c0=window.confirm; window.confirm=function(){ return true; }; try{ resetForm(); } finally { window.confirm=c0; }
+    _resetJalan();
     /* baris resep tambahan dulu, supaya urutan kolom sama dengan saat dipotret */
     _rxTabel().forEach(function(t,i){ var mau=(s.rx||[])[i]||0, jaga=0; while(t.querySelectorAll('tbody tr:not(.rx-saran)').length<mau && jaga++<40){ if(!tambahBarisRx(t)) break; } });
     var k=_formKontrol(), cocok=(k.length===s.isi.length);
