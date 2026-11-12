@@ -1415,10 +1415,12 @@ textarea.in#d2_dx_catatan{min-height:64px;}
 .ovl .qline.igaq{border-bottom:none !important;padding-bottom:0 !important;}
 .ovl .qline.igaq .mstat{margin-left:12px;}
 .mcard.ro .igaseg button{pointer-events:none;cursor:default;}
-.mcard.ro .igaseg button:not(.on){opacity:.55;}
+.mcard.ro .igaseg button:not(.on){background:transparent;box-shadow:none;}   /* kontras penuh; hanya lebih ringan dari nilai terpilih */
+.mcard.ro .igaseg button:not(.on) b{font-weight:500;color:var(--ink-muted);}
+.mcard.ro-umum .iga-buka{margin-top:6px;}
 .mcard .iga-buka{font:inherit;font-size:13px;font-weight:600;color:var(--accent-deep);background:none;border:none;text-decoration:underline;text-underline-offset:2px;cursor:pointer;min-height:44px;padding:0 4px;margin-top:4px;}
 .mcard.ro-umum .igaseg{display:none;}
-@media print{ .mcard .iga-buka{display:none !important;} .mcard.ro .igaseg button:not(.on){opacity:1;} }
+@media print{ .mcard .iga-buka{display:none !important;} }
 @media (max-width:620px){ .igaseg{grid-template-columns:repeat(3,1fr);} }
 @media print{
   .metrik{padding:10px 12px;margin:10px 0;}
@@ -2228,10 +2230,10 @@ body.mode-kontrol #rb2 .rl::after{content:' — dilewati';font-size:12px;font-we
 
   <!-- B. PENILAIAN KLINIS -->
   <div class="sec-label">B · Penilaian Klinis <span class="hint">dokter — nilai kesiapan kulit untuk laser</span></div>
-  <div class="qline"><span class="q">Tipe melasma:</span><label class="ck"><input type="checkbox"> Epidermal</label><label class="ck"><input type="checkbox"> Dermal</label><label class="ck"><input type="checkbox"> Mixed</label><label class="ck"><input type="checkbox"> PIH pasca-acne</label><label class="ck"><input type="checkbox"> Lentigo/flek surya</label>
-    <span class="sub">Fitzpatrick sudah dinilai di langkah 2</span></div>
   <div class="qline igaq"><span class="q">IGA Melasma:</span><span class="igamirror" id="igamir_melasma">belum dinilai</span><span class="mstat" id="igastatm_melasma"></span></div>
   <div class="igaseg igaseg-m" data-iga="me_iga" role="group" aria-label="Skor IGA Melasma"><button type="button" data-v="0" title="Clear" aria-pressed="false" onclick="setIGA('me_iga','0')"><b>0</b><em>Bersih</em></button><button type="button" data-v="1" title="Almost clear" aria-pressed="false" onclick="setIGA('me_iga','1')"><b>1</b><em>Hampir bersih</em></button><button type="button" data-v="2" title="Mild" aria-pressed="false" onclick="setIGA('me_iga','2')"><b>2</b><em>Ringan</em></button><button type="button" data-v="3" title="Moderate" aria-pressed="false" onclick="setIGA('me_iga','3')"><b>3</b><em>Sedang</em></button><button type="button" data-v="4" title="Severe" aria-pressed="false" onclick="setIGA('me_iga','4')"><b>4</b><em>Berat</em></button></div>
+  <div class="qline"><span class="q">Tipe melasma:</span><label class="ck"><input type="checkbox"> Epidermal</label><label class="ck"><input type="checkbox"> Dermal</label><label class="ck"><input type="checkbox"> Mixed</label><label class="ck"><input type="checkbox"> PIH pasca-acne</label><label class="ck"><input type="checkbox"> Lentigo/flek surya</label>
+    <span class="sub">Fitzpatrick sudah dinilai di langkah 2</span></div>
   
   
   <div class="qline"><span class="q">Foto klinis baseline diambil</span><span class="sub">(wajib — sumber kebenaran hasil)</span>
@@ -5171,8 +5173,12 @@ function syncIGAseg(){
     if(sg) sg.querySelectorAll('button').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-v')===u); });
     var su=document.getElementById('igastat_umum');
     var awal=!document.body.classList.contains('mode-kontrol'); cu.classList.toggle('ro-umum',awal&&u==='');
-    if(su){ su.textContent = u===''?(awal?'Derajat (IGA) dinilai di form program — langkah 3 · Program. Hasilnya tampil di sini.':'Pilih derajat hari ini'):('IGA '+u+' · '+(IGA_LBL[u]||'')+' — dipakai program Acne/Melasma setelah dipilih');
+    if(su){ su.textContent = u===''?(awal?'IGA dinilai di dalam form program Acne / Melasma, lalu tampil di sini. Diagnosis tanpa program itu tidak memakai IGA.':'Pilih derajat hari ini'):('IGA '+u+' · '+(IGA_LBL[u]||'')+' — dipakai program Acne/Melasma setelah dipilih');
             su.className='mstat'+(u===''?'':' ok'); }
+    /* petunjuk = tombol: langsung ke langkah Program (dulu teks mati di tempat dokter biasa mengetuk) */
+    var bu=cu.querySelector('.iga-buka');
+    if(!bu){ bu=document.createElement('button'); bu.type='button'; bu.className='iga-buka'; bu.textContent='Ke langkah Program ›'; bu.onclick=function(){ if(typeof goStep==='function') goStep(2); }; cu.appendChild(bu); }
+    bu.style.display=(awal&&u==='')?'':'none';
   }
   var dj=document.getElementById('d2_derajat'); if(dj) dj.value=_derajatTeks();
 }
