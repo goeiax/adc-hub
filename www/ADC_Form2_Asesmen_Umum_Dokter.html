@@ -1259,45 +1259,48 @@ textarea.in#d2_dx_catatan{min-height:64px;}
   body.ps-on #printsheet{display:block !important;}
   @page{size:A4;}
 }
-#printsheet{font-family:var(--ff-body);color:#1B1A18;font-size:8.6pt;line-height:1.32;}
+#printsheet{font-family:var(--ff-body);color:#000;font-size:8.6pt;line-height:1.32;}
 #printsheet *{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
-#printsheet .ps-h{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:1.5pt solid #1B1A18;padding-bottom:3pt;margin-bottom:4pt;}
-#printsheet .ps-eb{font-size:6.8pt;letter-spacing:.14em;text-transform:uppercase;color:#6B675E;}
+#printsheet .ps-h{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:1.5pt solid #000;padding-bottom:3pt;margin-bottom:4pt;}
+#printsheet .ps-eb{font-size:6.8pt;letter-spacing:.14em;text-transform:uppercase;color:#6B6F6C;}
 #printsheet h1{font-size:13pt;margin:1pt 0 0;font-weight:700;}
 #printsheet .ps-meta{text-align:right;font-size:8pt;}
 #printsheet .ps-pt{font-size:9.2pt;margin:0 0 3pt;}
-#printsheet .ps-alg{border:1.2pt solid #1B1A18;background:#FCF4F0;padding:3pt 6pt;margin-bottom:5pt;font-size:9pt;}
-#printsheet .ps-fl{margin-left:8pt;font-size:8pt;color:#8E4A33;}
+#printsheet .ps-alg{border:1.2pt solid #000;background:#EDE6E7;padding:3pt 6pt;margin-bottom:5pt;font-size:9pt;}
+#printsheet .ps-fl{margin-left:8pt;font-size:8pt;color:#6E5A47;}
 #printsheet .ps-g{display:grid;grid-template-columns:1fr 1fr;gap:4pt 10pt;}
 #printsheet .ps-b{break-inside:avoid;}
 #printsheet .ps-b.ps-wide{grid-column:1 / -1;}
-#printsheet h3{font-size:7pt;letter-spacing:.14em;text-transform:uppercase;color:#8E4A33;margin:0 0 1.5pt;padding-bottom:1pt;border-bottom:.6pt solid #D9CCB7;}
+#printsheet h3{font-size:7pt;letter-spacing:.14em;text-transform:uppercase;color:#000;margin:0 0 1.5pt;padding-bottom:1pt;border-bottom:.8pt solid #CDAF97;}
 #printsheet .ps-kv{display:grid;grid-template-columns:30mm 1fr;gap:0 5pt;padding:.6pt 0;white-space:pre-wrap;}
-#printsheet .ps-kv span{color:#6B675E;font-size:7.6pt;}
-#printsheet .ps-prog{border:.6pt solid #D9CCB7;border-radius:3pt;padding:3pt 5pt 2pt;margin:0 0 3pt;break-inside:avoid;}
+#printsheet .ps-kv span{color:#6B6F6C;font-size:7.6pt;}
+#printsheet .ps-prog{border:.6pt solid #C8CBC8;border-radius:0;padding:3pt 5pt 2pt;margin:0 0 3pt;break-inside:avoid;}
 #printsheet .ps-ph{display:flex;align-items:baseline;gap:6pt;flex-wrap:wrap;margin-bottom:2pt;font-size:9.4pt;}
-#printsheet .ps-tag{font-size:7.4pt;border:.6pt solid #8E4A33;color:#8E4A33;border-radius:8pt;padding:0 5pt;}
+#printsheet .ps-tag{font-size:7.4pt;border:.6pt solid #B38F7E;color:#000;border-radius:8pt;padding:0 5pt;}
 #printsheet .ps-ig{margin-left:auto;font-size:8.2pt;}
-#printsheet .ps-dl{color:#6B675E;}
+#printsheet .ps-dl{color:#6B6F6C;}
 #printsheet .ps-pc{display:grid;gap:0 8pt;}
 #printsheet .ps-pc.c1{grid-template-columns:1fr;} #printsheet .ps-pc.c2{grid-template-columns:1fr 1fr;} #printsheet .ps-pc.c3{grid-template-columns:1fr 1.15fr 1.25fr;}
-#printsheet h4{font-size:6.8pt;letter-spacing:.1em;text-transform:uppercase;color:#6B675E;margin:0 0 1pt;font-weight:600;}
+#printsheet h4{font-size:6.8pt;letter-spacing:.1em;text-transform:uppercase;color:#6B6F6C;margin:0 0 1pt;font-weight:600;}
 #printsheet .ps-pc ul{margin:0;padding-left:9pt;}
 #printsheet .ps-pc li{margin:0 0 .6pt;font-size:7.9pt;}
-#printsheet .ps-tx{font-size:8pt;color:#3A3833;}
+#printsheet .ps-tx{font-size:8pt;color:#3A3F3C;}
 #printsheet .ps-t{width:100%;border-collapse:collapse;font-size:8pt;}
-#printsheet .ps-t th,#printsheet .ps-t td{border:.5pt solid #D9CCB7;padding:1.5pt 4pt;text-align:left;vertical-align:top;}
-#printsheet .ps-t th{background:#F5EFE6;font-size:6.8pt;letter-spacing:.08em;text-transform:uppercase;}
-#printsheet .ps-f{display:flex;justify-content:space-between;align-items:flex-end;gap:10pt;border-top:1pt solid #1B1A18;margin-top:6pt;padding-top:3pt;font-size:8pt;}
-#printsheet .ps-sig{text-align:center;font-size:7pt;color:#6B675E;}
+#printsheet .ps-t th,#printsheet .ps-t td{border:.5pt solid #C8CBC8;padding:1.5pt 4pt;text-align:left;vertical-align:top;}
+#printsheet .ps-t th{background:#E8EBE9;font-size:6.8pt;letter-spacing:.08em;text-transform:uppercase;}
+#printsheet .ps-f{display:flex;justify-content:space-between;align-items:flex-end;gap:10pt;border-top:1pt solid #000;margin-top:6pt;padding-top:3pt;font-size:8pt;}
+#printsheet .ps-sig{text-align:center;font-size:7pt;color:#6B6F6C;}
 #printsheet .ps-sig img{display:block;height:26pt;max-width:46mm;object-fit:contain;margin:0 auto;border-bottom:.5pt solid #999;}
-#printsheet .ps-note{font-size:6.8pt;color:#6B675E;font-style:italic;margin-top:3pt;}
-#printsheet .ps-next{grid-column:1 / -1;border:1.2pt solid #8E4A33;border-radius:3pt;padding:4pt 7pt;margin:2pt 0;break-inside:avoid;display:grid;grid-template-columns:auto 1fr;gap:2pt 12pt;align-items:start;}
-#printsheet .ps-next .nl{font-size:6.8pt;letter-spacing:.12em;text-transform:uppercase;color:#8E4A33;font-weight:700;}
+#printsheet .ps-note{font-size:6.8pt;color:#6B6F6C;font-style:italic;margin-top:3pt;}
+#printsheet .ps-next{grid-column:1 / -1;border:1.2pt solid #B38F7E;background:#E8EBE9;border-radius:0;padding:4pt 7pt;margin:2pt 0;break-inside:avoid;display:grid;grid-template-columns:auto 1fr;gap:2pt 12pt;align-items:start;}
+#printsheet .ps-next .nl{font-size:6.8pt;letter-spacing:.12em;text-transform:uppercase;color:#6E5A47;font-weight:700;}
 #printsheet .ps-next .nd{font-size:12pt;font-weight:700;line-height:1.2;white-space:nowrap;}
-#printsheet .ps-next .ns{font-size:8pt;color:#3A3833;}
-#printsheet .ps-next .nw{font-size:8.2pt;line-height:1.35;color:#1B1A18;}
-#printsheet .ps-next .nw b{color:#8E4A33;}
+#printsheet .ps-next .ns{font-size:8pt;color:#3A3F3C;}
+#printsheet .ps-next .nw{font-size:8.2pt;line-height:1.35;color:#000;}
+#printsheet .ps-next .nw b{color:#000;}
+#printsheet .ps-lg{margin:0 0 3pt;}
+#printsheet .ps-lg .adclogo{width:66mm;}
+#printsheet h1 .ps-eb{margin-left:6pt;font-weight:400;vertical-align:middle;}
 .metrik .mempty{font-size:13.5px;color:var(--ink-muted);line-height:1.5;}
 
 @media (max-width:860px){ .f.s1,.f.s2{grid-column:span 2;} }
@@ -1625,9 +1628,27 @@ body.mode-kontrol #rb2 .rl::after{content:' — dilewati';font-size:12px;font-we
   th, .ovl th, .ovl .subhead, span.rn, span.req, span.pn, .toolbar span.lb, .serah span.k, #serah_ringkas span.k, span.sk, .mdlg-l{font-size:12px !important;}
   .ovl input.ln, .ovl input.tx-extra, .ovl input.td-input, .ovl input.td-in{min-height:44px;}
 }
+
+/* ===== CETAK = ADC BRAND GUIDELINES =====
+   Layar memakai sistem krem/terakota; begitu dicetak, token dipetakan ke palet merek
+   (hitam, Cool Grey 2 U, 656 U, 2050 U, aksen 4043 U / 7613 U) dan logo resmi tampil di kepala lembar. */
+.pr-brand{display:none;}
+.adclogo{display:block;width:66mm;max-width:100%;height:auto;color:#000;}
+@media print{
+  :root{--canvas:#fff;--surface-quiet:#E8EBE9;--ink:#000;--ink-2:#3A3F3C;--ink-muted:#6B6F6C;--ink-faint:#6B6F6C;
+    --line:#DADCD9;--line-strong:#C8CBC8;--accent:#CDAF97;--accent-deep:#6E5A47;--accent-act:#B38F7E;--accent-quiet:#C8CBC8;
+    --blush:#EDE6E7;--gold:#CDAF97;
+    --ff-head:'Acumin Pro','Archivo',Arial,sans-serif;--ff-body:'Acumin Pro SemiCondensed','Acumin Pro','Archivo',Arial,sans-serif;}
+  .pr-brand{display:block !important;margin:0 0 5mm;}
+}
 </style>
+<script>/* Logo resmi ADC (Branding/Logo/SVG/Logo_ADC.svg) — dipakai semua cetakan; jangan digambar ulang / diubah proporsinya */
+var ADC_LOGO='<svg class="adclogo" xmlns="http://www.w3.org/2000/svg" viewBox="116 269 610 57" role="img" aria-label="Aesthetic Derma Centre" fill="currentColor"><g> <path d="M229.27,311.35c-2.36,5.16-7.59,8.92-13.75,8.92c-5.12,0-9.73-2.92-12.58-6.79c-0.65,1.7-1.47,3.33-2.46,4.82 c3.07,4.28,9.16,6.98,14.98,6.95c8.45-0.04,15.66-5.26,18.59-12.68L229.27,311.35z"/> <path d="M215.46,285.21c-9.46,0-15.37,6.11-17.57,10.44c-1.3,2.55-1.89,5.14-2.52,9.57c-0.31,2.13-1.8,15.05-15.08,15.05 c-9.6,0-15.26-8.07-15-15.37c0.4-11.24,10.65-14.82,14.84-14.7c5.86,0.16,9.21,2.64,11.2,4.79h2.77v-25.12h-4.96v17.42 c-11.37-6.07-28.58,1.32-28.76,17.99c-0.13,12.53,10,19.97,20.09,19.97c6.56,0,11.23-2.43,14.35-5.89 c4.31-4.76,5.25-10.72,5.61-14.19c1.28-12.31,10.4-14.97,15.07-14.97c6.6,0,11.29,3.69,13.76,8.93l4.79-1.23 C231.18,290.25,223.53,285.21,215.46,285.21"/> <path d="M136.66,290.19c7.17,0,13.43,5.1,14.85,12.13c0.04,0.18,0.08,0.72,0.08,0.72h5.09c0,0-0.13-0.79-0.17-1.05 c-1.63-9.73-9.99-16.79-19.84-16.79c-11.08,0-20.1,9.02-20.1,20.1c0,11.08,9.02,20.1,20.1,20.1c5.67,0,12.28-2.64,14.97-7.26v5.68 h4.85v-16.25l-4.85,0l-0.15,0.72c-1.42,7.03-7.65,12.13-14.82,12.13c-8.34,0-15.12-6.78-15.12-15.12 C121.54,296.98,128.32,290.19,136.66,290.19"/> <path d="M317.93,310.29c0.59,2.59,2.38,3.95,5.49,3.95c3.31,0,4.64-1.52,4.64-3.54c0-2.16-1.09-3.33-5.45-4.37 c-5.42-1.31-7.18-3.19-7.18-6.3c0-3.43,2.53-6.12,7.57-6.12c5.43,0,7.66,3.09,7.96,6.09h-3.36c-0.37-1.87-1.52-3.48-4.71-3.48 c-2.57,0-4.04,1.15-4.04,3.17c0,1.99,1.2,2.78,5.06,3.71c6.39,1.55,7.57,4.01,7.57,6.93c0,3.69-2.75,6.51-8.29,6.51 c-5.63,0-8.15-3.02-8.63-6.56H317.93z"/> <rect x="423.98" y="294.24" width="3.31" height="22.33"/> <path d="M452.61,310.13c-0.97,3.86-3.86,6.72-9.03,6.72c-6.75,0-10.12-5.06-10.12-11.37c0-6.07,3.39-11.56,10.25-11.56 c5.4,0,8.26,3.09,8.89,6.83h-3.32c-0.73-2.29-2.27-4.11-5.7-4.11c-4.75,0-6.67,4.31-6.67,8.74c0,4.27,1.8,8.76,6.8,8.76 c3.39,0,4.8-2,5.56-4H452.61z"/> <path d="M471.51,313.79h4.48c5.07,0,7.45-3.65,7.45-8.57c0-4.26-2.18-8.2-7.44-8.2h-4.5V313.79z M468.19,294.24h8.14 c6.32,0,10.57,4.28,10.57,10.93c0,6.59-4.13,11.4-10.69,11.4h-8.02V294.24z"/> <path d="M555.53,307.26c0-4.08,0.05-8.31,0.14-10.69h-0.12c-0.97,3.8-4.33,12.97-6.81,19.99h-2.93c-1.88-5.79-5.35-16.1-6.35-20.04 h-0.11c0.17,2.59,0.25,7.48,0.25,11.31v8.73h-3.09v-22.33h4.94c2.38,6.72,5.27,15.36,6.01,18.29h0.05 c0.53-2.3,3.96-11.74,6.44-18.29h4.8v22.33h-3.23V307.26z"/> <path d="M616.72,310.13c-0.97,3.86-3.86,6.72-9.03,6.72c-6.75,0-10.12-5.06-10.12-11.37c0-6.07,3.39-11.56,10.25-11.56 c5.4,0,8.26,3.09,8.89,6.83h-3.32c-0.73-2.29-2.27-4.11-5.7-4.11c-4.75,0-6.67,4.31-6.67,8.74c0,4.27,1.8,8.76,6.8,8.76 c3.39,0,4.8-2,5.56-4H616.72z"/> <path d="M643.49,316.56v-22.33h4.31c3.13,5.18,9.75,15.9,10.96,18.32h0.05c-0.22-2.76-0.21-6.35-0.21-10v-8.32h3.1v22.33h-4.06 c-2.85-4.76-9.82-16.41-11.16-18.93h-0.05c0.16,2.43,0.17,6.37,0.17,10.39v8.53H643.49z"/> <path d="M281.82,294.24h-4.1l-7.88,22.33h3.29c0,0,6-17.77,6.54-19.72h0.03c0.49,1.76,1.63,4.86,3.66,10.51h-4.96l-0.87,2.81h6.64 l2.36,6.41h3.52L281.82,294.24z"/> <path d="M575.81,294.24h-4.1l-7.88,22.33h3.29c0,0,5.99-17.77,6.54-19.72h0.03c0.49,1.76,1.63,4.86,3.66,10.51h-4.96l-0.87,2.81 h6.64l2.36,6.41h3.52L575.81,294.24z"/> <polygon points="298.27,313.76 298.27,307.88 298.27,306.28 298.27,303.47 298.27,302.33 298.27,297.04 309.81,297.04 309.81,294.24 295.02,294.24 295.02,316.56 309.96,316.56 310.38,313.76 "/> <rect x="300.5" y="303.47" width="8.79" height="2.8"/> <polygon points="385.65,313.76 385.65,307.88 385.65,306.28 385.65,303.47 385.65,302.33 385.65,297.04 397.2,297.04 397.2,294.24 382.41,294.24 382.41,316.56 397.35,316.56 397.77,313.76 "/> <rect x="387.89" y="303.47" width="8.79" height="2.8"/> <polygon points="496.32,313.76 496.32,307.88 496.32,306.28 496.32,303.47 496.32,302.33 496.32,297.04 507.86,297.04 507.86,294.24 493.08,294.24 493.08,316.56 508.02,316.56 508.44,313.76 "/> <rect x="498.55" y="303.47" width="8.79" height="2.8"/> <polygon points="625.83,313.76 625.83,307.88 625.83,306.28 625.83,303.47 625.83,302.33 625.83,297.04 637.37,297.04 637.37,294.24 622.59,294.24 622.59,316.56 637.53,316.56 637.94,313.76 "/> <rect x="628.06" y="303.47" width="8.79" height="2.8"/> <polygon points="709.97,294.24 709.97,316.56 724.91,316.56 725.33,313.76 713.21,313.76 713.21,307.88 713.21,306.28 713.21,303.47 713.21,302.33 713.21,297.04 724.76,297.04 724.76,294.24 "/> <rect x="715.45" y="303.47" width="8.79" height="2.8"/> <path d="M529.62,312.17v-0.99c0-3.9-1.6-5.22-3.29-5.69c2.04-0.6,3.7-2.34,3.7-5.26c0-3.48-2.48-6-7.12-6h-8.93v22.33h3.27v-8.22 v-1.45v-2.75v-2.64v-4.53h5c2.91,0,4.38,1.28,4.38,3.55c0,2.39-1.41,3.62-4.68,3.62h-2.47v2.75h2.07c3.93,0,4.77,1.34,4.77,4.38 v0.45c0,2.15-0.01,3.87,0.39,4.84h3.2C529.56,315.61,529.62,313.7,529.62,312.17"/> <path d="M704.89,312.17v-0.99c0-3.9-1.6-5.22-3.29-5.69c2.04-0.6,3.7-2.34,3.7-5.26c0-3.48-2.48-6-7.12-6h-8.93v22.33h3.27v-8.22 v-1.45v-2.75v-2.64v-4.53h5c2.9,0,4.38,1.28,4.38,3.55c0,2.39-1.41,3.62-4.68,3.62h-2.47v2.75h2.07c3.93,0,4.77,1.34,4.77,4.38 v0.45c0,2.15-0.01,3.87,0.39,4.84h3.2C704.83,315.61,704.89,313.7,704.89,312.17"/> <rect x="357.11" y="294.24" width="3.31" height="22.33"/> <polygon points="371.56,294.24 371.56,303.44 362.68,303.44 362.68,306.25 371.56,306.25 371.56,316.56 374.87,316.56 374.87,294.24 "/> <polygon points="345.21,294.24 334.75,294.24 334.75,297.04 341.88,297.04 341.88,316.56 345.21,316.56 345.21,304.04 345.21,297.04 "/> <rect x="347.47" y="294.24" width="4.87" height="2.8"/> <polygon points="412.08,294.24 401.62,294.24 401.62,297.04 408.75,297.04 408.75,316.56 412.08,316.56 412.08,304.04 412.08,297.04 "/> <rect x="414.35" y="294.24" width="4.87" height="2.8"/> <polygon points="677.18,294.24 666.71,294.24 666.71,297.04 673.84,297.04 673.84,316.56 677.18,316.56 677.18,304.04 677.18,297.04 "/> <rect x="679.44" y="294.24" width="4.87" height="2.8"/> </g></svg>';
+document.addEventListener('DOMContentLoaded',function(){ var n=document.querySelectorAll('[data-adclogo]'); for(var i=0;i<n.length;i++) n[i].innerHTML=ADC_LOGO; });
+</script>
 </head>
 <body>
+<div class="pr-brand"><span data-adclogo></span></div>
 
 <input type="file" id="_handofffile" accept=".json,application/json" style="display:none" onchange="loadHandoffFile(this)">
 <input type="file" id="_asesmenfile" accept=".json,application/json" style="display:none" onchange="_asesmenDariBerkas(this)">
@@ -2698,10 +2719,18 @@ function progFilled(p){
   });
   return any;
 }
+/* label tahap untuk manusia: tag kartu ("Tahap 2", "Tahap B") + nama bila ada ("Aktif (Bln 1–6)") — bukan kunci internal _stage */
+function _tahapLabel(p,k){
+  if(!k) return '';
+  var root=document.getElementById('ovl_'+p), kartu=root&&root.querySelector('.sev-card[id$="sev-'+k+'"]');
+  if(!kartu) return (typeof _psNamaTahap==='function')?_psNamaTahap(p,k):('Tahap '+k);
+  var b=function(s){ var e=kartu.querySelector(s); return e?e.textContent.replace(/\s+/g,' ').trim():''; };
+  return [b('.sev-tag'),b('.sev-name')].filter(Boolean).join(' · ')||('Tahap '+k);
+}
 function markProg(p){
   if(typeof updateReq==='function') setTimeout(updateReq,0);
   var on=progFilled(p);
-  var stg=(window._stage&&window._stage[p])?(' · tahap '+window._stage[p]):'';
+  var stg=(window._stage&&window._stage[p])?(' · '+_tahapLabel(p,window._stage[p])):'';
   var teks = on?('Terisi'+stg):'Belum diisi';
   ['pb_','pb2_'].forEach(function(pre){
     var b=document.getElementById(pre+p); if(b) b.classList.toggle('on',on);
@@ -3040,7 +3069,7 @@ function resetForm(mode){
   var nama=_hv('p_nama'), rm=_hv('rm'), siapa=[nama, rm?('RM '+rm):''].filter(Boolean).join(' · ');
   /* "kosong" = benar-benar tidak ada isian: semua kolom (kecuali tanggal bawaan), tahap program, IGA, tanda tangan */
   var terisi=!!(window._ttd||window._intake||window._prevHandoff||Object.keys(window._stage||{}).length)||
-    _formKontrol().some(function(e){ if(e.id==='tgl'||e.id==='d8_tgl') return false; return (e.type==='checkbox'||e.type==='radio')?e.checked:!!String(e.value||'').trim(); });
+    _formKontrol().some(function(e){ if(e.id==='tgl'||e.id==='d8_tgl'||e.id==='d1_dokter'||e.id==='d8_dokter') return false;   /* tanggal if(e.id==='tgl'||e.id==='d8_tgl') return false; return (e.type==='checkbox'||e.type==='radio')?(e.checked!==e.defaultChecked) nama dokter diisi otomatis (hub) — bukan data pasien */ return (e.type==='checkbox'||e.type==='radio')?(e.checked!==e.defaultChecked):(String(e.value||'').trim()!==_nilaiAwal(e)); });
   if(!terisi){ _resetJalan(); return; }
   if(!siapa) siapa='pasien tanpa nama';
   var terbit=!!(window._handoff&&window._handoff.pasien&&(window._handoff.pasien.rm||'')===rm&&!(window._dibukaUlang&&window._dibukaUlang.batal));
@@ -3060,12 +3089,18 @@ function resetForm(mode){
   document.getElementById('rdlg_ok').onclick=function(){ tutup(); _resetJalan(); try{ goStep(0); }catch(e){} };
   dlgBuka(bg,tutup); setTimeout(function(){ try{ document.getElementById(berikut?'rdlg_ok':'rdlg_x').focus(); }catch(e){} },0);
 }
+/* nilai bawaan sebuah kolom (atribut value / isi textarea / opsi terpilih bawaan) */
+function _nilaiAwal(e){
+  if(e.tagName==='SELECT'){ var o=[].filter.call(e.options,function(x){ return x.defaultSelected; })[0]||e.options[0]; return o?String(o.value||'').trim():''; }
+  return String(e.defaultValue||'').trim();
+}
 function _resetJalan(){
   try{ window._rbOverride=false; setTimeout(syncRisikoBekas,0); window._ttd=null; window._ttdTakBisa=false; _ttdStatus(''); window._isian={}; window._handoff=null; window._dibukaUlang=null; var cl=document.getElementById('d8_consent_lbl'); if(cl) cl.textContent=''; setTimeout(_icdChips,0); }catch(e){}
   var _dc=document.getElementById('terbit_done'); if(_dc) _dc.hidden=true;
   /* radio juga hanya dilepas centangnya — mengosongkan value-nya membuat Fitzpatrick
      terekam kosong setelah Reset. */
-  document.querySelectorAll('input,textarea').forEach(function(i){ if(i.type==='checkbox'||i.type==='radio'){i.checked=false;} else {i.value='';} });
+  /* kolom teks kembali ke nilai bawaannya (Durasi 3 bln, label baris rencana) — bukan dikosongkan */
+  document.querySelectorAll('input,textarea').forEach(function(i){ if(i.type==='checkbox'||i.type==='radio'){i.checked=false;} else if(i.type!=='file'){i.value=i.defaultValue||'';} });
   document.querySelectorAll('.rbseg.yn .rbopt.on').forEach(function(l){ l.classList.remove('on'); });
   document.querySelectorAll('.progbtn').forEach(function(e){e.classList.remove('on');});
   document.querySelectorAll('.sev-card').forEach(function(e){e.classList.remove('active');});
@@ -3077,6 +3112,7 @@ function _resetJalan(){
   var d8=document.getElementById('d8_status'); if(d8) d8.value='';
   window._intake=null; var ib=document.getElementById('intake_box'); if(ib) ib.style.display='none';
   setMode('awal');   /* reset = kembali ke kunjungan awal; ikut menutup palang handoff */
+  try{ if(typeof _isiDokterDariHub==='function') _isiDokterDariHub(); }catch(e){}   /* dokter yang sedang masuk tetap terisi untuk pasien berikutnya */
   PROGS.forEach(markProg); gateSched();
   var sb=document.getElementById('schedBody'); if(sb) sb.innerHTML='<tr><td colspan="4" style="color:var(--ink-muted)">Belum ada jadwal.</td></tr>';
 }
@@ -3167,7 +3203,7 @@ function _ringkasProgram(pd){
   if(!pd) return '';
   return Object.keys(pd).map(function(k){
     var d=pd[k]||{};
-    return (d.program||k)+(d.tahap?(' [tahap '+d.tahap+']'):'')+': '+((d.isian||[]).slice(0,24).join(' · '));
+    return (d.program||k)+(d.tahap?(' ['+_tahapLabel(k,d.tahap)+']'):'')+': '+((d.isian||[]).slice(0,24).join(' · '));
   }).join('  ||  ');
 }
 /* Mode kontrol menyembunyikan D1/D2 dan tidak membuka tabel resep program, jadi
@@ -3332,27 +3368,28 @@ function handoffDocHTML(h){
   var JD=JSON.stringify(JSON.stringify(h,null,2)).replace(/</g,'\\u003c');
   var JN=JSON.stringify('Handoff_'+nm+'_'+ymd);
   return '<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><title>Ringkasan Handoff — '+_hesc(p.nama||'')+'</title>'+
-  '<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@300..700&display=swap" rel="stylesheet">'+
+  '<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700&family=Archivo+Narrow:wght@400;600&display=swap" rel="stylesheet">'+
   '<style>'+
-  'body{font-family:\'Source Sans 3\',system-ui,Arial,sans-serif;color:#1B1A18;background:#FBF8F3;margin:0;font-size:14.5px;line-height:1.55;}'+
-  '.bar{background:#1B1A18;color:#F5EFE6;padding:10px 20px;display:flex;gap:8px;align-items:center;justify-content:space-between;position:sticky;top:0;}'+
-  '.bar b{font-family:\'Source Sans 3\',system-ui,Arial,sans-serif;font-size:14.5px;letter-spacing:.04em;}'+
-  '.bar button{font-family:inherit;font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;padding:8px 14px;border:1px solid #B0603F;background:#B0603F;color:#fff;cursor:pointer;}'+
+  'body{font-family:\'Acumin Pro SemiCondensed\',\'Archivo Narrow\',Archivo,Arial,sans-serif;color:#000;background:#FAF8F5;margin:0;font-size:14.5px;line-height:1.55;}'+
+  '.bar{background:#000;color:#E8EBE9;padding:10px 20px;display:flex;gap:8px;align-items:center;justify-content:space-between;position:sticky;top:0;}'+
+  '.bar b{font-family:\'Acumin Pro\',Archivo,Arial,sans-serif;font-size:14.5px;letter-spacing:.04em;}'+
+  '.bar button{font-family:inherit;font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;padding:8px 14px;border:1px solid #CDAF97;background:#CDAF97;color:#1d130c;cursor:pointer;}'+
   '.bar button.ghost{background:transparent;color:#FAF8F5;border-color:rgba(255,255,255,.5);}'+
-  '.sheet{background:#fff;max-width:190mm;margin:18px auto;padding:16mm 16mm 14mm;border:1px solid #E6DECF;}'+
-  'h1{font-family:\'Source Sans 3\',system-ui,Arial,sans-serif;font-size:20px;font-weight:600;margin:0 0 2px;}'+
-  '.eyebrow{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6B675E;}'+
-  '.meta{font-size:12.5px;color:#3A3833;margin-top:4px;}'+
+  '.sheet{background:#fff;max-width:190mm;margin:18px auto;padding:16mm 16mm 14mm;border:1px solid #DADCD9;}'+
+  'h1{font-family:\'Acumin Pro\',Archivo,Arial,sans-serif;font-size:20px;font-weight:600;margin:0 0 2px;}'+
+  '.eyebrow{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6B6F6C;}'+
+  '.meta{font-size:12.5px;color:#3A3F3C;margin-top:4px;}'+
   'hr{border:none;border-top:1px solid #000;margin:10px 0 14px;}'+
-  'h2{font-family:\'Source Sans 3\',system-ui,Arial,sans-serif;font-size:12.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;margin:16px 0 6px;padding-bottom:3px;border-bottom:1px solid #D9CCB7;}'+
+  'h2{font-family:\'Acumin Pro\',Archivo,Arial,sans-serif;font-size:12.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;margin:16px 0 6px;padding-bottom:3px;border-bottom:1px solid #C8CBC8;}'+
   'table{width:100%;border-collapse:collapse;font-size:13.5px;}'+
-  'th,td{text-align:left;vertical-align:top;padding:5px 8px;border:1px solid #E6DECF;}'+
-  'th{background:#F5EFE6;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;width:170px;}'+
+  'th,td{text-align:left;vertical-align:top;padding:5px 8px;border:1px solid #DADCD9;}'+
+  'th{background:#E8EBE9;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;width:170px;}'+
   'table.rx th{width:auto;}'+
-  '.flag{border:2px solid #000;background:#FCF4F0;padding:9px 12px;margin:12px 0;font-size:14.5px;}'+
-  '.flag b{font-family:\'Source Sans 3\',system-ui,Arial,sans-serif;font-size:11px;letter-spacing:.14em;text-transform:uppercase;display:block;margin-bottom:3px;}'+
-  '.note{font-size:12.5px;color:#6B675E;font-style:italic;margin-top:12px;border-top:1px solid #DADCD9;padding-top:8px;}'+
+  '.flag{border:2px solid #000;background:#EDE6E7;padding:9px 12px;margin:12px 0;font-size:14.5px;}'+
+  '.flag b{font-family:\'Acumin Pro\',Archivo,Arial,sans-serif;font-size:11px;letter-spacing:.14em;text-transform:uppercase;display:block;margin-bottom:3px;}'+
+  '.note{font-size:12.5px;color:#6B6F6C;font-style:italic;margin-top:12px;border-top:1px solid #DADCD9;padding-top:8px;}'+
   '@media print{.bar{display:none}.sheet{border:none;margin:0;max-width:none;padding:0}body{background:#fff}@page{size:A4;margin:14mm}}'+
+  '.lg svg{display:block;width:66mm;height:auto;margin:0 0 12px;color:#000}.lgt{display:none}'+
   '</style></head><body>'+
   '<div class="bar"><b>Ringkasan Handoff — '+_hesc(p.nama||'Pasien')+'</b><span>'+
   '<button onclick="window.print()">Cetak / PDF</button> '+
@@ -3361,7 +3398,8 @@ function handoffDocHTML(h){
   '<button class="ghost" onclick="hJson()">Unduh JSON</button> '+
   '<button class="ghost" onclick="window.close()">Tutup</button></span></div>'+
   '<div class="sheet" id="sheet">'+
-  '<div class="eyebrow">Aesthetic Derma Centre · Skin Quality Program</div>'+
+  '<div class="lg">'+ADC_LOGO+'<span class="lgt">Aesthetic Derma Centre</span></div>'+
+  '<div class="eyebrow">Skin Quality Program</div>'+
   '<h1>Ringkasan Handoff</h1>'+
   '<div class="meta">Pasien: <b>'+_hesc(p.nama||'—')+'</b> · No. RM: '+_hesc(p.rm||'—')+'</div>'+
   '<div class="meta">Asesmen: '+_hesc(a.tanggal||'—')+' · Dokter: '+_hesc(a.dokter||'—')+(h.kunjungan_ke?(' · <b>Kunjungan ke-'+_hesc(h.kunjungan_ke)+'</b>'):'')+'</div>'+
@@ -4909,24 +4947,24 @@ function consentHTML(c){
   var dx=String(x.diagnosis||'').split(/\n+/).map(function(l){return l.trim();}).filter(Boolean);
   var rk=_icRisikoTabel(x.risiko);
   function sec(n,tanya,resmi,isi){ return '<section><h2><span class="no">'+n+'</span>'+E(tanya)+' <small>'+E(resmi)+'</small></h2>'+isi+'</section>'; }
-  return '<!doctype html><html lang="id"><head><meta charset="utf-8"><title>Informed Consent '+E(c.no)+'</title><style>'+
-    '@page{size:A4;margin:13mm 15mm}*{box-sizing:border-box}body{font:10.5pt/1.5 "Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;color:#111;margin:0;padding:18px;max-width:780px}'+
-    '.hd{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;border-bottom:2px solid #111;padding-bottom:6px;font-size:9pt}.hd b{font-size:12.5pt;display:block}.hd .r{text-align:right}'+
-    'h1{font-size:15pt;margin:12px 0 2px;letter-spacing:.01em}h1 small{display:block;font-size:10pt;font-weight:400;color:#444;margin-top:2px}'+
-    '.intro{font-size:10pt;color:#333;margin:4px 0 10px}'+
-    '.id{display:grid;grid-template-columns:1fr 1fr;gap:2px 18px;border:1px solid #999;border-radius:6px;padding:8px 12px;font-size:10pt}.id div span{display:inline-block;min-width:112px;color:#555;font-size:9pt}'+
-    'section{margin-top:13px;break-inside:avoid-page}h2{font-size:11.5pt;margin:0 0 4px;padding-bottom:3px;border-bottom:1px solid #bbb;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}'+
-    'h2 .no{flex:none;width:20px;height:20px;border-radius:50%;background:#111;color:#fff;font-size:9.5pt;display:inline-flex;align-items:center;justify-content:center;align-self:center}h2 small{font-size:8.5pt;font-weight:400;color:#666}'+
-    'p{margin:3px 0}.dx b{font-size:11.5pt}.cat{font-size:9.5pt;color:#333;margin-top:5px}'+
+  return '<!doctype html><html lang="id"><head><meta charset="utf-8"><title>Informed Consent '+E(c.no)+'</title><link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700&family=Archivo+Narrow:wght@400;600&display=swap" rel="stylesheet"><style>'+
+    '@page{size:A4;margin:13mm 15mm}*{box-sizing:border-box}body{font:10.5pt/1.5 "Acumin Pro SemiCondensed","Acumin Pro","Archivo Narrow",Archivo,"Segoe UI",Arial,sans-serif;color:#000;margin:0;padding:18px;max-width:780px}'+
+    '.hd{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;border-bottom:2px solid #000;padding-bottom:6px;font-size:9pt}.hd b{font-size:12.5pt;display:block}.hd .lg svg{display:block;width:66mm;height:auto;margin:0 0 5px}.hd .lgt{display:none}h1,h2{font-family:"Acumin Pro",Archivo,"Segoe UI",Arial,sans-serif}.hd .r{text-align:right}'+
+    'h1{font-size:15pt;margin:12px 0 2px;letter-spacing:.01em}h1 small{display:block;font-size:10pt;font-weight:400;color:#3A3F3C;margin-top:2px}'+
+    '.intro{font-size:10pt;color:#3A3F3C;margin:4px 0 10px}'+
+    '.id{display:grid;grid-template-columns:1fr 1fr;gap:2px 18px;border:1px solid #C8CBC8;padding:8px 12px;font-size:10pt}.id div span{display:inline-block;min-width:112px;color:#6B6F6C;font-size:9pt}'+
+    'section{margin-top:13px;break-inside:avoid-page}h2{font-size:11.5pt;margin:0 0 4px;padding-bottom:3px;border-bottom:1px solid #CDAF97;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}'+
+    'h2 .no{flex:none;width:20px;height:20px;border-radius:50%;background:#000;color:#fff;font-size:9.5pt;display:inline-flex;align-items:center;justify-content:center;align-self:center}h2 small{font-size:8.5pt;font-weight:400;color:#6B6F6C}'+
+    'p{margin:3px 0}.dx b{font-size:11.5pt}.cat{font-size:9.5pt;color:#3A3F3C;margin-top:5px}'+
     'ul.tl{columns:2;column-gap:26px;margin:4px 0 6px;padding-left:18px}ul.tl li{break-inside:avoid;margin:0 0 1px}'+
-    'table.rk{border-collapse:collapse;width:100%;font-size:9.5pt;margin-top:4px}table.rk th{background:#f0f0f0;text-align:left;font-size:9pt;padding:4px 7px;border:1px solid #999}table.rk th small{display:block;font-weight:400;color:#555}'+
-    'table.rk td{padding:4px 7px;border:1px solid #999;vertical-align:top}table.rk td.tn{width:27%;font-weight:600}table.rk tr{break-inside:avoid}'+
-    '.st{border:2px solid #111;border-radius:6px;padding:10px 13px;margin-top:16px;break-inside:avoid}.st p{margin:0 0 8px}.pil{display:flex;gap:28px;margin:6px 0 8px;font-size:12pt;font-weight:700}.pil span{display:inline-flex;align-items:center;gap:8px}.pil i{width:18px;height:18px;border:2px solid #111;display:inline-block}'+
-    '.sg{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-top:10px;font-size:9.5pt;text-align:center;break-inside:avoid}.sg div{border-top:1px solid #111;padding-top:4px;margin-top:62px}.sg small{color:#555}'+
-    '.ft{margin-top:14px;font-size:8pt;color:#555;border-top:1px solid #bbb;padding-top:4px}.np{position:fixed;top:8px;right:8px;font:inherit;padding:8px 16px}@media print{.np{display:none}body{padding:0}}'+
+    'table.rk{border-collapse:collapse;width:100%;font-size:9.5pt;margin-top:4px}table.rk th{background:#E8EBE9;text-align:left;font-size:9pt;padding:4px 7px;border:1px solid #C8CBC8}table.rk th small{display:block;font-weight:400;color:#6B6F6C}'+
+    'table.rk td{padding:4px 7px;border:1px solid #C8CBC8;vertical-align:top}table.rk td.tn{width:27%;font-weight:600}table.rk tr{break-inside:avoid}'+
+    '.st{border:1.5px solid #000;background:#E8EBE9;padding:10px 13px;margin-top:16px;break-inside:avoid}.st p{margin:0 0 8px}.pil{display:flex;gap:28px;margin:6px 0 8px;font-size:12pt;font-weight:700}.pil span{display:inline-flex;align-items:center;gap:8px}.pil i{width:18px;height:18px;border:2px solid #000;background:#fff;display:inline-block}'+
+    '.sg{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-top:10px;font-size:9.5pt;text-align:center;break-inside:avoid}.sg div{border-top:1px solid #000;padding-top:4px;margin-top:62px}.sg small{color:#6B6F6C}'+
+    '.ft{margin-top:14px;font-size:8pt;color:#6B6F6C;border-top:1px solid #DADCD9;padding-top:4px}.np{position:fixed;top:8px;right:8px;font:inherit;padding:8px 16px}@media print{.np{display:none}body{padding:0}}'+
     '</style></head><body>'+
     '<button class="np" onclick="window.print()">Cetak</button>'+
-    '<div class="hd"><div><b>Aesthetic Derma Centre</b>Klinik Utama · Jl. Ir. H. Djuanda 88, Bandung</div><div class="r">No. lembar: <b style="font-size:10pt">'+E(c.no)+'</b>'+E(tgl)+'</div></div>'+
+    '<div class="hd"><div><div class="lg">'+ADC_LOGO+'<span class="lgt">Aesthetic Derma Centre</span></div>Klinik Utama · Jl. Ir. H. Djuanda 88, Bandung</div><div class="r">No. lembar: <b style="font-size:10pt">'+E(c.no)+'</b>'+E(tgl)+'</div></div>'+
     '<h1>PERSETUJUAN TINDAKAN KEDOKTERAN<small>Informed Consent — penjelasan dokter sebelum Anda memutuskan</small></h1>'+
     '<p class="intro">Lembar ini merangkum penjelasan dokter tentang kondisi Anda dan tindakan yang direncanakan. Silakan baca, tanyakan apa pun yang belum jelas, lalu putuskan di bagian akhir.</p>'+
     '<div class="id"><div><span>Nama</span><b>'+E(p.nama||'—')+'</b></div><div><span>No. RM</span>'+E(p.rm||'—')+'</div>'+
@@ -5074,8 +5112,8 @@ function _lembarCetak(){
              _v('d5_months')&&(_v('d5_months')+' bulan'),jd.length&&(jd.length+' reminder WA')].filter(Boolean).join(' · '):'';
   var pn=h.penerbitan||{}, per=ik.persetujuan||{}, tt=(per.tanda_tangan||{}).pasien||{};
   var html=
-    '<header class="ps-h"><div><div class="ps-eb">Aesthetic Derma Centre · Skin Quality Program</div>'+
-      '<h1>Lembar Asesmen Dokter</h1></div>'+
+    '<header class="ps-h"><div><div class="ps-lg">'+ADC_LOGO+'</div>'+
+      '<h1>Lembar Asesmen Dokter<span class="ps-eb">Skin Quality Program</span></h1></div>'+
       '<div class="ps-meta">'+E(a.tanggal||'')+' · '+(kontrol?'Kunjungan kontrol':'Kunjungan awal')+(h.kunjungan_ke?(' ke-'+E(h.kunjungan_ke)):'')+
       '<br>Dokter pemeriksa: <b>'+E(a.dokter||'—')+'</b></div></header>'+
     '<div class="ps-pt"><b>'+E(ps.nama||'—')+'</b> · RM '+E(ps.rm||'—')+(ps.wa?(' · WA '+E(ps.wa)):'')+
