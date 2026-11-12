@@ -996,6 +996,7 @@ function resetForm(){ setTimeout(agReset,0);
   document.querySelectorAll('.detail').forEach(function(e){e.classList.remove('on');});
   PADS.forEach(clearPad);
   _draftHapus(); window._f1Dimuat=null;
+  if(typeof _neoRmTerakhir!=='undefined') _neoRmTerakhir=''; var nn=document.getElementById('rm_neo'); if(nn) nn.textContent='';
 }
 window.addEventListener('load',function(){
   var d=new Date(); var t=document.getElementById('tgl'); if(t) t.value=d.toISOString().split('T')[0];
@@ -1510,6 +1511,8 @@ function _fPerSeksi(){ /* kode seksi -> daftar .f di dalamnya (termasuk blok det
 function applyIntakeF1(o){
   if(!o||o.doc!=='ADC-INTAKE'){ alert('Berkas ini bukan keluaran Form 1 (ADC-INTAKE).'); return false; }
   var p=o.pasien||{}, pn=o.penugasan||{}, pg=o.pengukuran||{}, k=o.kritis||{}, per=o.persetujuan||{};
+  /* memuat data yang SUDAH tersimpan bukan "isian belum disimpan": jangan tulis draf lokal dari sini */
+  window._draftJeda=true; clearTimeout(_draftT); setTimeout(function(){ window._draftJeda=false; },1200);
   /* identitas & panel staf */
   _setId('p_nama',p.nama); _setId('rm',p.rm); _setId('p_nik',p.nik); var nk=document.getElementById('p_nik'); if(nk&&typeof cekNIK==='function') cekNIK(nk);
   _setId('p_wa',p.wa); if(p.tanggal) _setId('tgl',p.tanggal);
@@ -1585,7 +1588,8 @@ function muatF1(){
       if(kls==='kunci'){ msg.innerHTML='Tablet ini belum terdaftar di hub — RM ini belum dicari. <button type="button" class="lnk" id="mdlg_kunci">Atur alamat / kunci hub…</button>'; var bk=document.getElementById('mdlg_kunci'); if(bk) bk.onclick=function(){ hubSetup(); if(tok===_f1Seq) ok(); }; return; }
       if(kls==='login'){ msg.innerHTML='Belum masuk ke hub — RM ini belum dicari. <button type="button" class="lnk" id="mdlg_login">Masuk…</button>'; var bl=document.getElementById('mdlg_login'); if(bl) bl.onclick=function(){ hubLogin(function(okk){ if(okk&&tok===_f1Seq) ok(); }); }; return; }
       if(kls==='jaringan'){ msg.textContent=_hubPesan(err); return; }
-      msg.textContent=(j&&j._status===404)||/tidak ada|404|not found/i.test(String(err||''))?('RM '+rm+' tidak ada di hub. Periksa penulisan, atau pakai "Pilih berkas…".'):('Gagal memuat: '+_hubPesan(err));
+      if(j&&!j.intake){ msg.textContent='RM '+rm+' ada di hub, tetapi tanpa Form 1 (pasien kontrol / Form 1 belum pernah disimpan).'; return; }
+      msg.textContent=/belum ada|tidak ada|404|not found/i.test(String(err||''))?('RM '+rm+' belum ada di hub. Periksa penulisan, atau pakai "Pilih berkas…".'):('Gagal memuat: '+(_hubPesan(err)||'hub tidak menjawab'));
     });
   };
   btnOk.onclick=ok; document.getElementById('mdlg_x').onclick=tutup;
@@ -1600,7 +1604,7 @@ function muatF1(){
    Setiap perubahan -> localStorage perangkat ini (bukan hub). Saat form dibuka lagi, bilah "Lanjutkan isian terakhir".
    Dihapus setelah Simpan Data Pasien (berkas/hub sudah ada) atau Reset. Data pasien: hanya di tablet itu, maks 7 hari. */
 var _draftT=null, _draftKey='adc_f1_draft';
-function _draftSimpan(){ clearTimeout(_draftT); _draftT=setTimeout(function(){ try{
+function _draftSimpan(){ if(window._draftJeda) return; clearTimeout(_draftT); _draftT=setTimeout(function(){ try{
   var d=buildIntake(); if(!((d.pasien||{}).nama||(d.pasien||{}).rm||(d.kritis||{}).keluhan)) return;
   localStorage.setItem(_draftKey,JSON.stringify({t:Date.now(),d:d})); }catch(e){} },800); }
 function _draftHapus(){ clearTimeout(_draftT); try{ localStorage.removeItem(_draftKey); }catch(e){} var b=document.getElementById('draftbar'); if(b) b.hidden=true; }
@@ -1635,7 +1639,8 @@ function rmNeoSoft(){
   if(note) note.textContent='mencari identitas di NeoSoft…';
   neoAmbil(rm,function(p,err,st){
     if((document.getElementById('rm').value||'').trim()!==rm) return;   /* RM sudah berubah lagi */
-    if(!p){ if(note) note.textContent=(st===404)?'RM tidak ada di NeoSoft — isi identitas manual.':(st===401?'':'NeoSoft tidak terjangkau — isi manual.'); return; }
+    if(!p){ if(st!==404) _neoRmTerakhir='';   /* gagal sementara (belum masuk / jaringan / pengaturan) -> boleh dicoba lagi untuk RM yang sama */
+      if(note) note.textContent=(st===404)?'RM tidak ada di NeoSoft — isi identitas manual.':(st===401?'':(st===500?'NeoSoft: pengaturan di hub perlu diperbaiki IT — isi manual dulu.':'NeoSoft tidak terjangkau — isi manual.')); return; }
     var n=0; if(_isiKosong('p_nama',p.nama)) n++; if(_isiKosong('p_nik',p.nik)) n++; if(_isiKosong('p_wa',p.wa)) n++;
     var nk=document.getElementById('p_nik'); if(nk&&typeof cekNIK==='function') cekNIK(nk);
     var tl=p.tgl_lahir; if(tl&&/^\d{4}-\d{2}-\d{2}/.test(tl)){ var d=tl.slice(0,10).split('-'); tl=d[2]+'/'+d[1]+'/'+d[0]; }
