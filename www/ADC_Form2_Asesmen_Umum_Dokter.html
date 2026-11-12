@@ -138,7 +138,9 @@ label.opt.lbl-hamil{border:1.5px solid var(--accent-deep,#8E4A33);background:#FB
 .zone{border-left:4px solid var(--line-strong);padding-left:12px;margin-bottom:6px;}
 .zone.dr{border-left-color:var(--ink);}
 .zone.nr{border-left-color:var(--accent);}
-.lock{opacity:.45;pointer-events:none;}
+/* terkunci: teks & label tetap terbaca penuh (perawat bisa melihat apa yang menunggu); hanya kontrolnya yang redup */
+.lock{pointer-events:none;}
+.lock input,.lock select,.lock textarea,.lock button,.lock table{opacity:.5;}
 .lockmsg{font-size:12.5px;color:var(--accent-deep);font-weight:600;padding:9px 12px;border:1px dashed var(--accent-deep);margin:6px 0;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
 .lockmsg .lnk{font:inherit;font-size:12.5px;font-weight:600;color:var(--accent-deep);background:none;border:none;text-decoration:underline;text-underline-offset:2px;cursor:pointer;padding:6px 4px;min-height:36px;}
 /* serah terima: ringkasan status dokter (langkah 6) + dialog tinjauan */
@@ -1995,7 +1997,7 @@ body.mode-kontrol #rb2 .rl::after{content:' — dilewati';font-size:12px;font-we
   <!-- Ringkasan serah terima: perawat melihat status dokter (tanda tangan, wajib, program, resep, ritme) tanpa membuka langkah dokter -->
   <div class="serah-now" id="serah_now" aria-live="polite"></div>
   <div class="serah" id="serah_ringkas"></div>
-  <div id="sched_lock" class="lockmsg">Terkunci — <b>ritme kontrol</b> dan <b>tanggal mulai</b> belum diisi dokter. <button type="button" class="lnk" onclick="goTo('d5_iv')">Isi di langkah 4 &rsaquo;</button></div>
+  <div id="sched_lock" class="lockmsg" role="status">Terkunci — <b>ritme kontrol</b> dan <b>tanggal mulai</b> belum diisi dokter. <button type="button" class="lnk" onclick="goTo('d5_iv')">Isi di langkah 4 &rsaquo;</button></div>
   <div class="zone nr lock" id="sched_zone" inert aria-disabled="true" aria-describedby="sched_lock">
     <div class="row">
       <div class="f s3"><label class="lab" for="d5_next">Kunjungan berikutnya</label><input class="in" type="date" id="d5_next"></div>
@@ -3837,6 +3839,10 @@ function setMode(m){
   if(ket) ket.textContent = (m==='kontrol')
     ? 'Langkah Pemeriksaan & diagnosis dipersingkat dan langkah Program dilewati — sudah ditetapkan di kunjungan awal. Ubah ke "Awal" bila perlu direvisi.'
     : 'Semua bagian tampil.';
+  /* rel: langkah Program dilewati di kunjungan kontrol -> tombolnya nonaktif sungguhan, dengan nama yang menyebutnya */
+  var rb2=document.getElementById('rb2');
+  if(rb2){ if(m==='kontrol'){ rb2.disabled=true; rb2.setAttribute('aria-disabled','true'); rb2.setAttribute('aria-label','Langkah 3 Program — dilewati pada kunjungan kontrol'); }
+           else { rb2.disabled=false; rb2.removeAttribute('aria-disabled'); rb2.removeAttribute('aria-label'); } }
   renderK1ctx();
   if(typeof updateGisDim==='function') updateGisDim();
   if(typeof updateIgaCards==='function') updateIgaCards();
