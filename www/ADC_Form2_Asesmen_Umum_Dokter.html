@@ -282,6 +282,8 @@ label.opt.lbl-hamil{border:1.5px solid var(--accent-deep,#8E4A33);background:#FB
 /* kartu tahap = tombol (keyboard & pembaca layar); tampilan kartu dipertahankan */
 .ovl button.sev-card{font:inherit;text-align:left;color:inherit;background:#fff;display:block;min-height:44px;}
 .ovl .sev-tag,.ovl .sev-name,.ovl .sev-desc{display:block;}
+/* Acne: tahap bernomor saja (tanpa kata mirip derajat IGA) — nomor jadi judul kartu */
+#ovl_acne .sev-card .sev-tag{font-size:15px !important;font-weight:700;letter-spacing:.02em;text-transform:none;color:var(--ink,#1B1A18) !important;margin-bottom:3px;}
 #ovl_acne .stage-block{border:1.5px solid var(--border);border-radius:6px;margin-bottom:9px;overflow:hidden;display:none;}
 #ovl_acne .stage-block.show{display:block;}
 #ovl_acne .stage-head{background:var(--blue);color:#fff;padding:5px 11px;font-size:12.5px;font-weight:700;}
@@ -2073,7 +2075,7 @@ body.mode-kontrol #rb2 .rl::after{content:' — dilewati';font-size:12px;font-we
     <div class="rbseg" id="rb_seg" role="radiogroup" aria-label="Kesimpulan risiko bekas">
       <label class="rbopt"><input type="radio" name="rb_level" value="Rendah" onchange="syncRisikoBekas(true)"> Rendah</label><label class="rbopt"><input type="radio" name="rb_level" value="Sedang" onchange="syncRisikoBekas(true)"> Sedang</label><label class="rbopt"><input type="radio" name="rb_level" value="Tinggi" onchange="syncRisikoBekas(true)"> Tinggi</label>
     </div><span class="sub" id="rb_saran"></span>
-    <div class="rb-conseq" id="rb_conseq" hidden>Risiko bekas <b id="rb_conseq_lv"></b>: kendalikan agresif &amp; dini — pertimbangkan jalur isotretinoin (Tahap 2 · Menengah–Berat).</div></div>
+    <div class="rb-conseq" id="rb_conseq" hidden>Risiko bekas <b id="rb_conseq_lv"></b>: kendalikan agresif &amp; dini — pertimbangkan jalur isotretinoin (Tahap 2).</div></div>
   <div class="qline"><span class="q">Distribusi:</span><label class="ck"><input type="checkbox"> Dahi</label><label class="ck"><input type="checkbox"> Pipi</label><label class="ck"><input type="checkbox"> Rahang/dagu</label><label class="ck"><input type="checkbox"> Dada</label><label class="ck"><input type="checkbox"> Punggung</label><label class="ck" style="margin-left:auto"><input type="checkbox"> Hormonal</label></div>
 
   <div class="qline"><span class="q">Baseline waktu pemulihan (rentang — dari pengalaman dokter):</span><span class="q">Mulai membaik:</span><input class="ln" placeholder="mis. 4–6 minggu" style="min-width:75px;"><span class="q">Hasil optimal:</span><input class="ln" placeholder="mis. 3–6 bulan" style="min-width:75px;"><span class="sub">rentang, bukan janji</span></div>
@@ -2118,15 +2120,15 @@ body.mode-kontrol #rb2 .rl::after{content:' — dilewati';font-size:12px;font-we
   <div class="sec-label gold">D · Tahap Perawatan &amp; Protokol <span class="hint">menentukan resep default + jadwal SleekFlow</span></div>
   
   <div class="sev-grid">
-    <button type="button" class="sev-card s1" id="ac_sev-1" onclick="pickStage('acne',1)" aria-pressed="false"><span class="sev-tag">Tahap 1</span><span class="sev-name">Ringan</span><span class="sev-desc">Bruntusan/komedo. Pembersihan + obat oles.</span></button>
-    <button type="button" class="sev-card s2" id="ac_sev-2" onclick="pickStage('acne',2)" aria-pressed="false"><span class="sev-tag">Tahap 2</span><span class="sev-name">Menengah–Berat</span><span class="sev-desc">+ Excel V, Plazion, obat minum.</span></button>
-    <button type="button" class="sev-card s3" id="ac_sev-3" onclick="pickStage('acne',3)" aria-pressed="false"><span class="sev-tag">Tahap 3</span><span class="sev-name">Bekas (pasca-jerawat)</span><span class="sev-desc">±3 bln. PicoSure / Excel V / Dermapen.</span></button>
-    <button type="button" class="sev-card s4" id="ac_sev-4" onclick="pickStage('acne',4)" aria-pressed="false"><span class="sev-tag">Tahap 4</span><span class="sev-name">Maintenance</span><span class="sev-desc">Kulit bersih (3–6 bln). Cegah build-up.</span></button>
+    <button type="button" class="sev-card s1" id="ac_sev-1" onclick="pickStage('acne',1)" aria-pressed="false"><span class="sev-tag">Tahap 1</span><span class="sev-desc">Bruntusan/komedo. Pembersihan + obat oles.</span></button>
+    <button type="button" class="sev-card s2" id="ac_sev-2" onclick="pickStage('acne',2)" aria-pressed="false"><span class="sev-tag">Tahap 2</span><span class="sev-desc">+ Excel V, Plazion, obat minum.</span></button>
+    <button type="button" class="sev-card s3" id="ac_sev-3" onclick="pickStage('acne',3)" aria-pressed="false"><span class="sev-tag">Tahap 3</span><span class="sev-desc">Bekas pasca-jerawat, ±3 bln. PicoSure / Excel V / Dermapen.</span></button>
+    <button type="button" class="sev-card s4" id="ac_sev-4" onclick="pickStage('acne',4)" aria-pressed="false"><span class="sev-tag">Tahap 4</span><span class="sev-desc">Maintenance: kulit bersih (3–6 bln). Cegah build-up.</span></button>
   </div>
 
   <div class="pm-kosong" role="note"><b>Belum ada tahap yang dipilih.</b> Resep dan prosedur mengikuti tahap program, jadi bagian ini terisi setelah tahap ditentukan. <button type="button" onclick="pmKeTahap('acne')">Pilih tahap &rsaquo;</button></div>
   <div class="stage-block" id="ac_block-1">
-    <div class="stage-head">TAHAP RINGAN · Prosedur + Obat Oles</div>
+    <div class="stage-head">TAHAP 1 · Prosedur + Obat Oles</div>
     <div class="stage-body">
       <div class="subhead">Prosedur</div>
       <div class="chk-grid"><label class="chk-item"><input type="checkbox"> Peeling</label><label class="chk-item"><input type="checkbox"> Ekstraksi komedo (forceps, tanpa jarum)</label><label class="chk-item"><input type="checkbox"> Glow Peel</label></div>
@@ -2141,7 +2143,7 @@ body.mode-kontrol #rb2 .rl::after{content:' — dilewati';font-size:12px;font-we
   </div>
 
   <div class="stage-block" id="ac_block-2">
-    <div class="stage-head s2">TAHAP MENENGAH–BERAT · Prosedur + Obat Oles + Obat Minum</div>
+    <div class="stage-head s2">TAHAP 2 · Prosedur + Obat Oles + Obat Minum</div>
     <div class="stage-body">
       <div class="subhead red">Prosedur</div>
       <div class="chk-grid"><label class="chk-item"><input type="checkbox"> Peeling</label><label class="chk-item"><input type="checkbox"> Ekstraksi</label><label class="chk-item"><input type="checkbox"> Excel V</label><label class="chk-item"><input type="checkbox"> Plazion (awal)</label><label class="chk-item"><input type="checkbox"> Deep Pore Combo (IPL)</label><label class="chk-item"><input type="checkbox"> Microneedling RF (nodul)</label></div>
@@ -2163,7 +2165,7 @@ body.mode-kontrol #rb2 .rl::after{content:' — dilewati';font-size:12px;font-we
   </div>
 
   <div class="stage-block" id="ac_block-3">
-    <div class="stage-head s3">TAHAP PASCA-JERAWAT (BEKAS) · Setelah ±3 Bulan</div>
+    <div class="stage-head s3">TAHAP 3 · Pasca-jerawat (bekas), setelah ±3 bulan</div>
     <div class="stage-body">
       <div class="subhead" style="color:var(--gold)">Modalitas per Jenis Bekas</div>
       <div class="chk-grid"><label class="chk-item"><input type="checkbox"> PicoSure — cokelat (PIH)</label><label class="chk-item"><input type="checkbox"> Excel V — merah (PIE)</label><label class="chk-item"><input type="checkbox"> Dermapen/MN-RF — tekstur</label></div>
@@ -2177,7 +2179,7 @@ body.mode-kontrol #rb2 .rl::after{content:' — dilewati';font-size:12px;font-we
   </div>
 
   <div class="stage-block" id="ac_block-4">
-    <div class="stage-head s4">TAHAP MAINTENANCE · Kulit Bersih (3–6 Bln), Cegah Build-up</div>
+    <div class="stage-head s4">TAHAP 4 · Maintenance, kulit bersih (3–6 bln), cegah build-up</div>
     <div class="stage-body">
       <div class="subhead" style="color:var(--green-text)">Prosedur</div>
       <div class="chk-grid"><label class="chk-item"><input type="checkbox"> Peeling — sebulan sekali</label><label class="chk-item"><input type="checkbox"> Pencerah: krim</label><label class="chk-item"><input type="checkbox"> Pencerah: PicoSure</label></div>
@@ -4976,6 +4978,8 @@ function _psNamaTahap(p,k){
   var root=document.getElementById('ovl_'+p); if(!root) return String(k);
   var kartu=root.querySelector('.sev-card[id$="sev-'+k+'"] .sev-name');
   if(kartu) return kartu.textContent.replace(/\s+/g,' ').trim();
+  var tag=root.querySelector('.sev-card[id$="sev-'+k+'"] .sev-tag');     /* Acne: tahap bernomor ("Tahap 2") */
+  if(tag) return tag.textContent.replace(/\s+/g,' ').trim();
   var fase=root.querySelector('.s[data-s="'+k+'"] .n');
   if(fase) return fase.textContent.replace(/\s+/g,' ').trim();
   return String(k);
@@ -5032,7 +5036,7 @@ function _lembarCetak(){
     }
     var kol=[[ 'Penyebab yang ditemukan', g.penyebab ],[ 'Rencana perawatan di klinik', g.klinik ],[ 'Sudah dijelaskan ke pasien', g.edukasi ]]
       .filter(function(x){ return x[1].length; });
-    return '<div class="ps-prog"><div class="ps-ph"><b>'+E(d.program||p)+'</b>'+(g.tahap?('<span class="ps-tag">'+(/^Fase/.test(g.tahap)?'':'Tahap ')+E(g.tahap)+'</span>'):'')+
+    return '<div class="ps-prog"><div class="ps-ph"><b>'+E(d.program||p)+'</b>'+(g.tahap?('<span class="ps-tag">'+(/^(Fase|Tahap)/.test(g.tahap)?'':'Tahap ')+E(g.tahap)+'</span>'):'')+
       (ig?('<span class="ps-ig">'+ig+'</span>'):'')+'</div>'+
       (kol.length?('<div class="ps-pc c'+kol.length+'">'+kol.map(function(x){ return '<div><h4>'+E(x[0])+'</h4>'+ul(x[1])+'</div>'; }).join('')+'</div>')
                  :('<div class="ps-tx">'+(dibawa?'Melanjutkan rencana perawatan dari kunjungan sebelumnya — tindakan hari ini tercatat di Evaluasi kunjungan ini.':'Belum ada tindakan yang dicentang di form program.')+'</div>'))+'</div>';

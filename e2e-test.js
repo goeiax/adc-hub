@@ -325,6 +325,8 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
     { const ik4 = JSON.parse(JSON.stringify(a.w._intake)); ik4.kritis.alergi = 'Penisilin'; ik4.kritis.alergi_nihil = false; a.w.applyIntake(ik4); }
     check('F2 modal: radio terpilih seragam dengan chip centang (latar krem + garis terakota, bukan blok hitam)', fs.readFileSync(path.join('www', 'ADC_Form2_Asesmen_Umum_Dokter.html'), 'utf8').includes('.ovl .rbopt.on{background:var(--surface-quiet,#F5EFE6);border-color:var(--accent,#C97A5E);'));
     check('F2: ringkasan intake tampil', $(a.d, 'intake_box').style.display !== 'none');
+    { const tn = await open('ADC_Form2_Asesmen_Umum_Dokter.html'); const kartu = [...tn.d.querySelectorAll('#ovl_acne .sev-card')]; tn.w.pickStage('acne', 2);
+      check('Tahap Acne bernomor saja: kartu tanpa nama mirip derajat (tak ada .sev-name, tak ada "Ringan"/"Menengah–Berat"), judul blok "TAHAP 1..4", ringkasan perawat "Acne · Tahap 2"', kartu.length === 4 && kartu.every(k => !k.querySelector('.sev-name') && !/Ringan|Menengah|Berat/.test(k.textContent)) && [...tn.d.querySelectorAll('#ovl_acne .stage-head')].every((h, i) => h.textContent.startsWith('TAHAP ' + (i + 1) + ' ·')) && tn.w._psNamaTahap('acne', 2) === 'Tahap 2' && /Acne · Tahap 2/.test(tn.w._serahData().prog || ''), { prog: tn.w._serahData().prog }); }
     { const cssL = fs.readFileSync(path.join('www', 'ADC_Form2_Asesmen_Umum_Dokter.html'), 'utf8'); const blk = (cssL.match(/LANTAI KETERBACAAN LAYAR[\s\S]*?\n\}\n/) || [''])[0];
       check('Lantai layar: th, .subhead, span.rn/.req/.pn, .lb, .k, .sk, .mdlg-l = 12 px; isian form program (ln, tx-extra, td-input, td-in) min-height 44 px; hanya @media screen', /@media screen\{/.test(blk) && /font-size:12px !important/.test(blk) && ['th', 'span.rn', 'span.req', 'span.pn', 'span.sk', '.mdlg-l', '.ovl .subhead'].every(s => blk.includes(s)) && /\.ovl input\.ln, \.ovl input\.tx-extra, \.ovl input\.td-input, \.ovl input\.td-in\{min-height:44px;\}/.test(blk), blk.slice(0, 120)); }
     { const kz = await open('ADC_Form2_Asesmen_Umum_Dokter.html'); await sleep(50); const z = $(kz.d, 'sched_zone'), ctl = [...z.querySelectorAll('button,input,select,textarea')];
@@ -633,7 +635,7 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
       pr.w.applyIntake({ doc: 'ADC-INTAKE', pasien: { nama: 'Uji <b>X</b>', rm: 'RM-9' }, kritis: { alergi: 'Sulfa', keluhan: 'Jerawat' }, penugasan: { foto_baseline: true }, pengukuran: {}, persetujuan: { total: 2, disetujui: 2, tanda_tangan: { pasien: { nama: 'A', tanggal: '2026-10-10', gambar: 'data:image/png;base64,iVBORw0KGgo=' } } }, seksi: [{ kode: 'P4', isian: [{ k: 'Lokasi utama', v: 'Pipi' }] }] });
       set(pr.d, 'd2_dx', 'Acne vulgaris'); pr.w.pickStage('acne', 1);
       const el = pr.w._lembarCetak(), tx = el.textContent;
-      check('Cetak: lembar 1 halaman memuat identitas, alergi, P4, diagnosis, program; nama di-escape', /Lembar Asesmen Dokter/.test(tx) && /Sulfa/.test(tx) && /Lokasi utama/.test(tx) && /Acne vulgaris/.test(tx) && /Tahap Ringan/.test(tx) && !el.querySelector('b b') && tx.includes('Uji <b>X</b>'), tx.slice(0, 200));
+      check('Cetak: lembar 1 halaman memuat identitas, alergi, P4, diagnosis, program; nama di-escape', /Lembar Asesmen Dokter/.test(tx) && /Sulfa/.test(tx) && /Lokasi utama/.test(tx) && /Acne vulgaris/.test(tx) && /Tahap 1/.test(tx) && !el.querySelector('b b') && tx.includes('Uji <b>X</b>'), tx.slice(0, 200));
       check('F2: tanda tangan menampilkan titik tengah, bukan kode &middot;', !/&middot;/.test($(pr.d, 'intake_body').textContent) && /A · 2026-10-10/.test($(pr.d, 'intake_body').textContent)); }
 
     { const pg = await open('ADC_Form2_Asesmen_Umum_Dokter.html');
@@ -646,7 +648,7 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
       check('F2: treatment tambahan di tabel 4 faktor tersimpan di handoff (dulu hilang)', pg.w.buildHandoff().program_detail.acne.isian.includes('Faktor "Sebum berlebih" — treatment tambahan: Diet rendah GI'), pg.w.buildHandoff().program_detail.acne.isian.slice(-2));
       const box = pg.w._lembarCetak().querySelector('.ps-prog'), t = box.textContent;
       check('Cetak: program dikelompokkan (tahap, derajat, penyebab, rencana klinik, edukasi) tanpa jawaban Ya/Tidak',
-        /Tahap Menengah–Berat/.test(t) && /Derajat hari ini: 2 · Ringan/.test(t) && /Penyebab yang ditemukan/.test(t) && /Sebum berlebih: kulit berminyak/.test(t) &&
+        /Tahap 2/.test(t) && !/Tahap Tahap|Menengah–Berat/.test(t) && /Derajat hari ini: 2 · Ringan/.test(t) && /Penyebab yang ditemukan/.test(t) && /Sebum berlebih: kulit berminyak/.test(t) &&
         /Rencana perawatan di klinik/.test(t) && /Metabolic Health/.test(t) && /Excel V/.test(t) && /Sebum berlebih: Diet rendah GI/.test(t) &&
         /Sudah dijelaskan ke pasien/.test(t) && ![...box.querySelectorAll('li')].some(li => /^(Ya|Tidak)$/.test(li.textContent.trim())), t.slice(0, 300)); }
 
@@ -659,7 +661,7 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
       v2.w.applyHandoff(ho); v2.w.setIGA('ac_iga', '1');
       const t2 = v2.w._lembarCetak().textContent;
       check('Cetak kontrol: tahap dari handoff tampil & rencana dinyatakan dilanjutkan (bukan "belum ada tindakan")',
-        /Tahap Menengah–Berat/.test(t2) && /Melanjutkan rencana perawatan/.test(t2) && !/Belum ada tindakan/.test(t2) && /awal 3 → membaik 2 tingkat/.test(t2), t2.slice(t2.indexOf('Program'), t2.indexOf('Program') + 260)); }
+        /Tahap 2/.test(t2) && !/Tahap Tahap|Menengah–Berat/.test(t2) && /Melanjutkan rencana perawatan/.test(t2) && !/Belum ada tindakan/.test(t2) && /awal 3 → membaik 2 tingkat/.test(t2), t2.slice(t2.indexOf('Program'), t2.indexOf('Program') + 260)); }
     { /* Hair: edukasi (tanpa .consent-item) & nama fase */
       const hh = await open('ADC_Form2_Asesmen_Umum_Dokter.html');
       hh.w.pickStage('hair', 1);
