@@ -2704,7 +2704,8 @@ function rmNeoSoft(){
   if(note) note.textContent='mencari identitas di NeoSoft…';
   neoAmbil(rm,function(p,err,st){
     if((document.getElementById('rm').value||'').trim()!==rm) return;
-    if(!p){ if(note) note.textContent=(st===404)?'RM tidak ada di NeoSoft.':(st===401?'':'NeoSoft tidak terjangkau.'); return; }
+    if(!p){ if(st!==404) _neoRmTerakhir='';
+      if(note) note.textContent=(st===404)?'RM tidak ada di NeoSoft.':(st===401?'':(st===500?'NeoSoft: pengaturan di hub perlu diperbaiki IT.':'NeoSoft tidak terjangkau.')); return; }
     var n=0; ['p_nama','p_nik','p_wa'].forEach(function(id){ var e=document.getElementById(id), v=p[{p_nama:'nama',p_nik:'nik',p_wa:'wa'}[id]]; if(e&&v&&!(e.value||'').trim()){ e.value=v; n++; try{ e.dispatchEvent(new Event('input',{bubbles:true})); }catch(x){} } });
     if(note) note.textContent=n?('identitas dari NeoSoft ✓ ('+n+' kolom terisi)'):'RM dikenal NeoSoft — identitas sudah terisi, tidak diubah.';
     window._neoTerakhir=p; if(typeof updateReq==='function') updateReq();
@@ -2999,6 +3000,7 @@ function resetForm(){
   document.querySelectorAll('.stage .s').forEach(function(e){e.classList.remove('on');});
   var pb=document.getElementById('prev_box'); if(pb) pb.style.display='none';
   window._prevHandoff=null; window._schedRows=null; window._stage={}; window._schedSaved=false;
+  if(typeof _neoRmTerakhir!=='undefined') _neoRmTerakhir=''; var _nn=document.getElementById('rm_neo'); if(_nn) _nn.textContent='';
   var d8=document.getElementById('d8_status'); if(d8) d8.value='';
   window._intake=null; var ib=document.getElementById('intake_box'); if(ib) ib.style.display='none';
   setMode('awal');   /* reset = kembali ke kunjungan awal; ikut menutup palang handoff */
@@ -4224,8 +4226,11 @@ function _unduhAsesmen(h){
   try{
     var d=new Date(), p2=function(n){ return (n<10?'0':'')+n; };
     var nama='Asesmen_'+String((h.pasien&&h.pasien.rm)||'pasien').replace(/[^\w-]+/g,'_')+'_'+d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate())+'_'+p2(d.getHours())+p2(d.getMinutes())+'.json';
-    var b=new Blob([JSON.stringify(h)],{type:'application/json'}), u=URL.createObjectURL(b), a=document.createElement('a');
-    a.href=u; a.download=nama; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function(){ try{ URL.revokeObjectURL(u); }catch(e){} },2000);
+    /* ditunda sesaat: pop-up ringkasan dibuka lebih dulu (sebagian browser tablet memblokir pop-up yang datang setelah unduhan) */
+    setTimeout(function(){ try{
+      var b=new Blob([JSON.stringify(h)],{type:'application/json'}), u=URL.createObjectURL(b), a=document.createElement('a');
+      a.href=u; a.download=nama; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function(){ try{ URL.revokeObjectURL(u); }catch(e){} },2000);
+    }catch(e){ console.warn('unduh berkas asesmen gagal',e); } },350);
     return nama;
   }catch(e){ console.warn('unduh berkas asesmen gagal',e); return ''; }
 }

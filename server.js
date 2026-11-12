@@ -81,8 +81,16 @@ function neoNormal(row, peta) {
 function neoHangat() {
   if (!NEO || NEO.mock || !NEO.host) return;
   let mysql; try { mysql = require('mysql2/promise'); } catch (e) { console.error('   NeoSoft: modul mysql2 belum terpasang (npm install mysql2)'); return; }
-  const ping = () => neoIdentitas('__hangat__').then(() => { if (!neoHangat.ok) { neoHangat.ok = true; console.log('   NeoSoft: tersambung (baca-saja)'); } }).catch(e => { neoHangat.ok = false; console.error('   NeoSoft: belum tersambung — ' + e.message); });
+  const ping = () => neoIdentitas('__hangat__').then(() => { if (!neoHangat.ok) { neoHangat.ok = true; console.log('   NeoSoft: tersambung (baca-saja)'); } }).catch(e => { neoHangat.ok = false; console.error('   ' + neoGalat(e)[1]); });
   ping(); setInterval(ping, 240000).unref();
+}
+/* Galat NeoSoft -> kode HTTP + pesan yang menyebut sebabnya (bukan selalu "tidak terjangkau") */
+function neoGalat(e) {
+  const m = String((e && e.message) || e), c = String((e && e.code) || '');
+  if (/mysql2/.test(m)) return [500, 'NeoSoft: ' + m];
+  if (/identitas\.sql/.test(m) || /^ER_(NO_SUCH_TABLE|BAD_FIELD_ERROR|PARSE_ERROR|BAD_DB_ERROR|TABLEACCESS_DENIED_ERROR|DBACCESS_DENIED_ERROR|WRONG_.*|NON_UNIQ_ERROR)/.test(c)) return [500, 'Query NeoSoft di neosoft.json salah (' + m + ') — periksa identitas.sql / database'];
+  if (c === 'ER_ACCESS_DENIED_ERROR' || /Access denied/i.test(m)) return [502, 'NeoSoft menolak login — periksa user/password di neosoft.json atau pembatasan IP'];
+  return [502, 'NeoSoft tidak terjangkau: ' + m];
 }
 async function neoIdentitas(rm) {
   if (!NEO) return null;
@@ -127,6 +135,7 @@ function pinTerkunci(ip, id) {
 }
 function pinGagal(ip, id) { const kini = Date.now(); _gKunci(ip, id).forEach(([k]) => { (_gagal[k] = _gagal[k] || []).push(kini); }); }
 function pinBerhasil(ip, id) { delete _gagal[_gKunci(ip, id)[0][0]]; }
+setInterval(() => { const batas = Date.now() - (+CFG.login_menit || 15) * 60000; Object.keys(_gagal).forEach(k => { _gagal[k] = _gagal[k].filter(t => t > batas); if (!_gagal[k].length) delete _gagal[k]; }); }, 600000).unref();
 const PESAN_KUNCI = () => 'Terlalu banyak percobaan PIN. Tunggu ' + (+CFG.login_menit || 15) + ' menit, atau minta admin mengatur ulang PIN.';
 
 /* ---- enkripsi di disk: amplop AES-256-GCM; berkas lama (plaintext) tetap terbaca ---- */
@@ -268,7 +277,11 @@ function sajikan(req, res, urlPath) {
 function corsAsal(req) {
   const o = req.headers.origin; if (!o) return '';
   if (o === 'null') return 'null';
-  try { const u = new URL(o); if (u.host === req.headers.host || /^(localhost|127\.0\.0\.1|\[::1\])$/.test(u.hostname)) return o; } catch (e) { return ''; }
+  /* jaringan privat klinik: hub yang sama sering dibuka lewat IP, adc-hub.lan/.local, atau nama Tailscale — itu asal yang sah */
+  try { const u = new URL(o), hn = u.hostname;
+    if (u.host === req.headers.host || /^(localhost|127\.0\.0\.1|\[::1\])$/.test(hn)) return o;
+    if ((/^\d{1,3}(\.\d{1,3}){3}$/.test(hn) && /^(10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.|100\.(6[4-9]|[7-9]\d|1[01]\d|12[0-7])\.)/.test(hn)) || /\.(lan|local|home|internal|ts\.net)$/i.test(hn) || !hn.includes('.')) return o;
+  } catch (e) { return ''; }
   return (CFG.cors_asal || []).includes(o) ? o : '';
 }
 function kirim(res, code, obj) {
@@ -340,7 +353,7 @@ const handler = (req, res) => {
     const jawab = (d) => kirim(res, d ? 200 : 404, d ? { ok: true, sumber: 'neosoft', pasien: d } : { error: 'RM ' + rm + ' tidak ada di NeoSoft' });
     const c = _neoCache[rm]; if (c && Date.now() - c.t < 60000) return jawab(c.d);
     return neoIdentitas(rm).then(d => { _neoCache[rm] = { t: Date.now(), d }; audit({ aksi: 'neosoft', ip, user: sesi.id, rm, detail: d ? 'ada' : 'tidak ada' }); return jawab(d); })
-      .catch(e => { console.error('NeoSoft:', e.message); audit({ aksi: 'neosoft', ip, user: sesi.id, rm, detail: 'gagal: ' + e.message.slice(0, 80) }); return kirim(res, 502, { error: 'NeoSoft tidak terjangkau: ' + e.message }); });
+      .catch(e => { const g = neoGalat(e); console.error(g[1]); audit({ aksi: 'neosoft', ip, user: sesi.id, rm, detail: 'gagal: ' + String(e.message).slice(0, 80) }); return kirim(res, g[0], { error: g[1] }); });
   }
 
   /* tanda tangan dokter: konfirmasi PIN -> stempel */
