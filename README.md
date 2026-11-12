@@ -65,6 +65,11 @@ di-restart; tablet cukup refresh.
 - **Muat Form 1 / Muat Handoff**: ketik No. RM. Tidak ketemu → form menawarkan
   pemilih berkas seperti biasa.
 
+## C2. Akses dari luar klinik (opsional)
+Tidak dengan port forwarding. Pakai Tailscale: rencana untuk IT di
+**[RENCANA-AKSES-LUAR-TAILSCALE.md](RENCANA-AKSES-LUAR-TAILSCALE.md)**, ringkasan pemakaian di
+**[AKSES-LUAR.md](AKSES-LUAR.md)**, skrip `akses-luar.sh` / `akses-luar.bat`.
+
 ## C. Keamanan
 - **LAN saja.** Jangan pernah port-forward 3777 ke internet.
 - Kunci di `config.json`; ganti bila bocor → restart → perbarui di tiap tablet.

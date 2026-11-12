@@ -109,7 +109,25 @@ function aman(rm) { // RM -> nama folder yang aman
 }
 function dirRM(rm) { return path.join(DATA, aman(rm)); }
 function stampe() { return new Date().toISOString().replace(/[:.]/g, '-'); }
-function ipDari(req) { return (req.socket && req.socket.remoteAddress) || ''; }
+/* Di belakang proxy LOKAL (tailscale serve, nginx di mesin yang sama) soket selalu 127.0.0.1; alamat perangkat
+   yang sebenarnya ada di X-Forwarded-For. Header itu HANYA dipercaya bila soketnya loopback — dari jaringan,
+   siapa pun bisa memalsukannya. */
+function ipDari(req) {
+  const soket = (req.socket && req.socket.remoteAddress) || '';
+  if (/^(::1|127\.|::ffff:127\.)/.test(soket)) { const xf = String(req.headers['x-forwarded-for'] || '').split(',')[0].trim(); if (xf) return xf; }
+  return soket;
+}
+/* (2) Pembatasan percobaan PIN: per perangkat+pengguna, per pengguna (lintas perangkat), dan per perangkat.
+   Di memori saja (hilang saat hub restart). Atur di config.json: login_maks (default 8), login_menit (15). */
+const _gagal = {};
+function _gKunci(ip, id) { const u = String(id || '').trim().toLowerCase(); return [['pi:' + ip + '|' + u, 1], ['u:' + u, 2.5], ['ip:' + ip, 4]]; }
+function pinTerkunci(ip, id) {
+  const maks = +CFG.login_maks || 8, jendela = (+CFG.login_menit || 15) * 60000, kini = Date.now();
+  return _gKunci(ip, id).some(([k, kali]) => { const a = (_gagal[k] || []).filter(t => kini - t < jendela); if (a.length) _gagal[k] = a; else delete _gagal[k]; return a.length >= Math.ceil(maks * kali); });
+}
+function pinGagal(ip, id) { const kini = Date.now(); _gKunci(ip, id).forEach(([k]) => { (_gagal[k] = _gagal[k] || []).push(kini); }); }
+function pinBerhasil(ip, id) { delete _gagal[_gKunci(ip, id)[0][0]]; }
+const PESAN_KUNCI = () => 'Terlalu banyak percobaan PIN. Tunggu ' + (+CFG.login_menit || 15) + ' menit, atau minta admin mengatur ulang PIN.';
 
 /* ---- enkripsi di disk: amplop AES-256-GCM; berkas lama (plaintext) tetap terbaca ---- */
 function enkrip(obj) {
@@ -244,14 +262,24 @@ function sajikan(req, res, urlPath) {
   res.writeHead(200, { 'Content-Type': MIME[ext], 'Cache-Control': 'no-cache' });
   fs.createReadStream(abs).pipe(res);
 }
+/* CORS: bukan lagi "*". Diizinkan: halaman yang disajikan hub ini sendiri (asal = Host), form yang dibuka sebagai
+   berkas lokal (Origin "null" — jalur offline), localhost, dan daftar cors_asal di config.json. Situs lain tidak
+   mendapat header sehingga browser menolak membaca jawabannya. */
+function corsAsal(req) {
+  const o = req.headers.origin; if (!o) return '';
+  if (o === 'null') return 'null';
+  try { const u = new URL(o); if (u.host === req.headers.host || /^(localhost|127\.0\.0\.1|\[::1\])$/.test(u.hostname)) return o; } catch (e) { return ''; }
+  return (CFG.cors_asal || []).includes(o) ? o : '';
+}
 function kirim(res, code, obj) {
-  res.writeHead(code, {
-    'Content-Type': 'application/json; charset=utf-8',
-    'Access-Control-Allow-Origin': '*',
+  const h = { 'Content-Type': 'application/json; charset=utf-8', 'Vary': 'Origin' };
+  if (res._asal) Object.assign(h, {
+    'Access-Control-Allow-Origin': res._asal,
     'Access-Control-Allow-Headers': 'Content-Type, X-ADC-Key, X-ADC-Token',
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
     'Access-Control-Allow-Private-Network': 'true'
   });
+  res.writeHead(code, h);
   res.end(JSON.stringify(obj));
 }
 function bodyJSON(req, cb) {
@@ -270,6 +298,7 @@ function daftarConsent(dir) {
 const handler = (req, res) => {
   const t0 = Date.now();
   res.on('finish', () => console.log(new Date().toISOString().slice(11, 19), req.method, req.url, res.statusCode, (Date.now() - t0) + 'ms'));
+  res._asal = corsAsal(req);
   if (req.method === 'OPTIONS') return kirim(res, 204, {});
   const u = new URL(req.url, 'http://x');
   const parts = u.pathname.split('/').filter(Boolean);
@@ -287,7 +316,9 @@ const handler = (req, res) => {
     return bodyJSON(req, o => {
       const users = bacaUsers().users || [];
       const user = o && users.find(x => x.id === String(o.id || '').trim().toLowerCase());
-      if (!cekPin(user, o && o.pin)) { audit({ aksi: 'login_gagal', ip, user: o && o.id }); return kirim(res, 401, { error: 'ID atau PIN salah' }); }
+      if (pinTerkunci(ip, o && o.id)) { audit({ aksi: 'login_terkunci', ip, user: o && o.id }); return kirim(res, 429, { error: PESAN_KUNCI() }); }
+      if (!cekPin(user, o && o.pin)) { pinGagal(ip, o && o.id); audit({ aksi: 'login_gagal', ip, user: o && o.id }); return kirim(res, 401, { error: 'ID atau PIN salah' }); }
+      pinBerhasil(ip, user.id);
       const tok = buatSesi(user, ip);
       audit({ aksi: 'login', ip, user: user.id, peran: user.peran });
       return kirim(res, 200, { ok: true, token: tok, user: { id: user.id, nama: user.nama, peran: user.peran } });
@@ -318,7 +349,9 @@ const handler = (req, res) => {
       const users = bacaUsers().users || [];
       const user = o && users.find(x => x.id === String(o.id || sesi.id).trim().toLowerCase());
       if (!user || user.peran !== 'dokter' && user.peran !== 'admin') return kirim(res, 403, { error: 'tanda tangan hanya untuk pengguna berperan dokter' });
-      if (!cekPin(user, o && o.pin)) { audit({ aksi: 'ttd_gagal', ip, user: user.id }); return kirim(res, 401, { error: 'PIN dokter salah' }); }
+      if (pinTerkunci(ip, user.id)) { audit({ aksi: 'ttd_terkunci', ip, user: user.id }); return kirim(res, 429, { error: PESAN_KUNCI() }); }
+      if (!cekPin(user, o && o.pin)) { pinGagal(ip, user.id); audit({ aksi: 'ttd_gagal', ip, user: user.id }); return kirim(res, 401, { error: 'PIN dokter salah' }); }
+      pinBerhasil(ip, user.id);
       const t = buatTTD(user);
       audit({ aksi: 'ttd', ip, user: user.id, rm: o && o.rm, detail: 'oleh sesi ' + sesi.id });
       return kirim(res, 200, { ok: true, ttd: t });
@@ -398,7 +431,8 @@ const handler = (req, res) => {
       if (o.nama !== undefined && String(o.nama).trim()) { ada.nama = String(o.nama).trim(); ubah.push('nama'); }
       if (o.peran !== undefined && o.peran !== ada.peran) { ada.peran = o.peran; ubah.push('peran=' + o.peran); }
       if (o.aktif !== undefined && !!o.aktif !== (ada.aktif !== false)) { ada.aktif = !!o.aktif; ubah.push(ada.aktif ? 'aktif' : 'nonaktif'); }
-      if (o.pin !== undefined) { ada.salt = crypto.randomBytes(8).toString('hex'); ada.hash = hashPin(o.pin, ada.salt); ubah.push('pin'); }
+      if (o.pin !== undefined) { ada.salt = crypto.randomBytes(8).toString('hex'); ada.hash = hashPin(o.pin, ada.salt); ubah.push('pin');
+        Object.keys(_gagal).forEach(k => { if (k === 'u:' + id || k.endsWith('|' + id)) delete _gagal[k]; }); }
       if (!ubah.length) return kirim(res, 400, { error: 'tidak ada yang diubah' });
       ada.diubah = new Date().toISOString(); tulisUsers(users);
       /* peran / PIN / nonaktif berubah -> sesi lama pengguna itu ditutup (kecuali sesi yang sedang dipakai admin ini) */

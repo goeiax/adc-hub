@@ -1,7 +1,7 @@
 # Rencana akses ADC Hub dari luar klinik dengan Tailscale — untuk IT
 
-**Status:** rencana, belum dijalankan. **Tahap 0 harus selesai dulu** (perubahan kode hub oleh
-pengembang) sebelum Tahap 2 diaktifkan.
+**Status:** Tahap 0 (kode hub) selesai 12 Nov 2026; Tahap 1–4 belum dijalankan. Server harus
+memakai versi hub terbaru sebelum Tahap 2.
 
 ## 1. Tujuan dan batasan
 
@@ -41,15 +41,19 @@ yang perlu dipasang di perangkat.
 
 ## 4. Tahapan
 
-### Tahap 0 — Persiapan hub (pengembang) — **belum selesai**
+### Tahap 0 — Persiapan hub (pengembang) — **selesai 12 Nov 2026**
 
-Jangan lanjut ke Tahap 2 sebelum versi hub yang memuat hal berikut terpasang di server:
+Sudah ada di kode hub. **Syarat sebelum Tahap 2:** server memakai versi hub terbaru
+(`git pull` cabang `main` setelah perubahan ini digabung, lalu `sudo systemctl restart adc-hub`).
 
-- [ ] Log audit mencatat alamat perangkat yang sebenarnya saat permintaan datang lewat
-      `tailscale serve` (sekarang semua akan tercatat sebagai `127.0.0.1`).
-- [ ] Pembatasan percobaan login (PIN 4–8 digit tidak boleh bisa ditebak berulang-ulang).
-- [ ] Pengaturan cross-origin diperketat.
-- [ ] Skrip `akses-luar.sh` (Linux) dan `akses-luar.bat` (Windows).
+- [x] Log audit mencatat alamat perangkat yang sebenarnya saat permintaan datang lewat
+      `tailscale serve` (`X-Forwarded-For` dipercaya hanya dari proxy di mesin yang sama).
+- [x] Pembatasan percobaan PIN: 8 kali salah dalam 15 menit → terkunci 15 menit
+      (login dan tanda tangan dokter); admin membuka kunci dengan mengatur ulang PIN.
+      Bisa diubah di `config.json`: `login_maks`, `login_menit`.
+- [x] Cross-origin diperketat: hanya halaman dari hub sendiri, form berkas lokal, dan
+      localhost. Asal tambahan: `"cors_asal": ["https://…"]` di `config.json`.
+- [x] Skrip `akses-luar.sh` (Linux) dan `akses-luar.bat` (Windows) — menjalankan langkah 2.5–2.6.
 
 ### Tahap 1 — Akun dan kebijakan (pemilik + IT, ±20 menit)
 
