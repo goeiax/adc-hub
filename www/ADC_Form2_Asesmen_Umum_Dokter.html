@@ -4948,21 +4948,21 @@ function consentHTML(c){
   var rk=_icRisikoTabel(x.risiko);
   function sec(n,tanya,resmi,isi){ return '<section><h2><span class="no">'+n+'</span>'+E(tanya)+' <small>'+E(resmi)+'</small></h2>'+isi+'</section>'; }
   return '<!doctype html><html lang="id"><head><meta charset="utf-8"><title>Informed Consent '+E(c.no)+'</title><link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700&family=Archivo+Narrow:wght@400;600&display=swap" rel="stylesheet"><style>'+
-    '@page{size:A4;margin:13mm 15mm}*{box-sizing:border-box}body{font:10.5pt/1.5 "Acumin Pro SemiCondensed","Acumin Pro","Archivo Narrow",Archivo,"Segoe UI",Arial,sans-serif;color:#000;margin:0;padding:18px;max-width:780px}'+
+    '@page{size:A4;margin:11mm 13mm}*{box-sizing:border-box}body{font:10pt/1.4 "Acumin Pro SemiCondensed","Acumin Pro","Archivo Narrow",Archivo,"Segoe UI",Arial,sans-serif;color:#000;margin:0;padding:18px;max-width:780px}'+
     '.hd{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;border-bottom:2px solid #000;padding-bottom:6px;font-size:9pt}.hd b{font-size:12.5pt;display:block}.hd .lg svg{display:block;width:66mm;height:auto;margin:0 0 5px}.hd .lgt{display:none}h1,h2{font-family:"Acumin Pro",Archivo,"Segoe UI",Arial,sans-serif}.hd .r{text-align:right}'+
-    'h1{font-size:15pt;margin:12px 0 2px;letter-spacing:.01em}h1 small{display:block;font-size:10pt;font-weight:400;color:#3A3F3C;margin-top:2px}'+
-    '.intro{font-size:10pt;color:#3A3F3C;margin:4px 0 10px}'+
-    '.id{display:grid;grid-template-columns:1fr 1fr;gap:2px 18px;border:1px solid #C8CBC8;padding:8px 12px;font-size:10pt}.id div span{display:inline-block;min-width:112px;color:#6B6F6C;font-size:9pt}'+
-    'section{margin-top:13px;break-inside:avoid-page}h2{font-size:11.5pt;margin:0 0 4px;padding-bottom:3px;border-bottom:1px solid #CDAF97;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}'+
+    'h1{font-size:14pt;margin:8px 0 1px;letter-spacing:.01em}h1 small{display:block;font-size:9.5pt;font-weight:400;color:#3A3F3C;margin-top:2px}'+
+    '.intro{font-size:9.5pt;color:#3A3F3C;margin:3px 0 7px}'+
+    '.id{display:grid;grid-template-columns:1.25fr 1fr 1fr;gap:1px 16px;border:1px solid #C8CBC8;padding:5px 10px;font-size:9.5pt}.id div span{display:inline-block;margin-right:7px;color:#6B6F6C;font-size:8.5pt}'+
+    'section{margin-top:9px}.g2{display:grid;grid-template-columns:1fr 1fr;gap:0 22px}.g2 section{break-inside:avoid}.akhir{break-inside:avoid}h2{break-after:avoid;font-size:11pt;margin:0 0 3px;padding-bottom:2px;border-bottom:1px solid #CDAF97;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}'+
     'h2 .no{flex:none;width:20px;height:20px;border-radius:50%;background:#000;color:#fff;font-size:9.5pt;display:inline-flex;align-items:center;justify-content:center;align-self:center}h2 small{font-size:8.5pt;font-weight:400;color:#6B6F6C}'+
-    'p{margin:3px 0}.dx b{font-size:11.5pt}.cat{font-size:9.5pt;color:#3A3F3C;margin-top:5px}'+
-    'ul.tl{columns:2;column-gap:26px;margin:4px 0 6px;padding-left:18px}ul.tl li{break-inside:avoid;margin:0 0 1px}'+
-    'table.rk{border-collapse:collapse;width:100%;font-size:9.5pt;margin-top:4px}table.rk th{background:#E8EBE9;text-align:left;font-size:9pt;padding:4px 7px;border:1px solid #C8CBC8}table.rk th small{display:block;font-weight:400;color:#6B6F6C}'+
-    'table.rk td{padding:4px 7px;border:1px solid #C8CBC8;vertical-align:top}table.rk td.tn{width:27%;font-weight:600}table.rk tr{break-inside:avoid}'+
-    '.st{border:1.5px solid #000;background:#E8EBE9;padding:10px 13px;margin-top:16px;break-inside:avoid}.st p{margin:0 0 8px}.pil{display:flex;gap:28px;margin:6px 0 8px;font-size:12pt;font-weight:700}.pil span{display:inline-flex;align-items:center;gap:8px}.pil i{width:18px;height:18px;border:2px solid #000;background:#fff;display:inline-block}'+
-    '.sg{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-top:10px;font-size:9.5pt;text-align:center;break-inside:avoid}.sg div{border-top:1px solid #000;padding-top:4px;margin-top:62px}.sg small{color:#6B6F6C}'+
-    '.ft{margin-top:14px;font-size:8pt;color:#6B6F6C;border-top:1px solid #DADCD9;padding-top:4px}.np{position:fixed;top:8px;right:8px;font:inherit;padding:8px 16px}@media print{.np{display:none}body{padding:0}}'+
-    '</style></head><body>'+
+    'p{margin:2px 0}.dx b{font-size:11pt}.cat{font-size:9.5pt;color:#3A3F3C;margin-top:5px}'+
+    'ul.tl{columns:3;column-gap:20px;margin:3px 0 4px;padding-left:16px}ul.tl li{break-inside:avoid;margin:0 0 1px}'+
+    'table.rk{border-collapse:collapse;width:100%;font-size:9pt;line-height:1.3;margin-top:3px}table.rk th{background:#E8EBE9;text-align:left;font-size:8.5pt;padding:2.5px 6px;border:1px solid #C8CBC8}table.rk th small{display:block;font-weight:400;color:#6B6F6C}'+
+    'table.rk td{padding:2.5px 6px;border:1px solid #C8CBC8;vertical-align:top}table.rk td.tn{width:24%;font-weight:600}table.rk tr{break-inside:avoid}'+
+    '.st{border:1.5px solid #000;background:#E8EBE9;padding:7px 12px;margin-top:11px;break-inside:avoid}.st p{margin:0 0 5px}.pil{display:flex;gap:28px;margin:4px 0 5px;font-size:11.5pt;font-weight:700}.pil span{display:inline-flex;align-items:center;gap:8px}.pil i{width:18px;height:18px;border:2px solid #000;background:#fff;display:inline-block}'+
+    '.sg{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-top:10px;font-size:9.5pt;text-align:center;break-inside:avoid}.sg div{border-top:1px solid #000;padding-top:3px;margin-top:50px}.sg small{color:#6B6F6C}'+
+    '.ft{margin-top:9px;font-size:7.5pt;color:#6B6F6C;border-top:1px solid #DADCD9;padding-top:4px}.np{position:fixed;top:8px;right:8px;font:inherit;padding:8px 16px}@media print{.np{display:none}body{padding:0;max-width:none}}'+
+    '</style><style id="zcss"></style></head><body>'+
     '<button class="np" onclick="window.print()">Cetak</button>'+
     '<div class="hd"><div><div class="lg">'+ADC_LOGO+'<span class="lgt">Aesthetic Derma Centre</span></div>Klinik Utama · Jl. Ir. H. Djuanda 88, Bandung</div><div class="r">No. lembar: <b style="font-size:10pt">'+E(c.no)+'</b>'+E(tgl)+'</div></div>'+
     '<h1>PERSETUJUAN TINDAKAN KEDOKTERAN<small>Informed Consent — penjelasan dokter sebelum Anda memutuskan</small></h1>'+
@@ -4973,15 +4973,21 @@ function consentHTML(c){
     sec(1,'Apa kondisi Anda?','Diagnosis & dasar diagnosis','<div class="dx">'+(dx.length?('<p><b>'+E(dx[0])+'</b></p>'+dx.slice(1).map(function(l){return '<p>'+E(l.charAt(0).toUpperCase()+l.slice(1))+'</p>';}).join('')):'<p>—</p>')+'</div>')+
     sec(2,'Apa yang akan dilakukan, dan untuk apa?','Tindakan & tujuannya',(tind.length?('<ul class="tl">'+tind.map(function(t){return '<li>'+E(t)+'</li>';}).join('')+'</ul>'):'')+'<p><b>Tujuannya:</b> '+br(tujuan)+'</p>')+
     sec(3,'Apa yang mungkin terjadi setelah tindakan?','Risiko & komplikasi',rk.html)+
-    sec(4,'Apakah ada pilihan lain?','Alternatif tindakan','<p>'+br(x.alternatif)+'</p>')+
+    '<div class="g2">'+sec(4,'Apakah ada pilihan lain?','Alternatif tindakan','<p>'+br(x.alternatif)+'</p>')+
     sec(5,'Bagaimana bila tindakan tidak dilakukan?','Risiko bila tidak dilakukan','<p>'+br(String(x.tanpa_tindakan||'').replace(/^./,function(ch){return ch.toUpperCase();}))+'</p>')+
     sec(6,'Hasil apa yang bisa diharapkan?','Prognosis','<p>'+br(x.prognosis)+'</p>')+
-    sec(7,'Berapa perkiraan biayanya?','Perkiraan biaya','<p>'+br(x.biaya)+'</p>')+
-    '<div class="st"><p><b>Pernyataan pasien.</b> Saya yang bertanda tangan di bawah ini, pasien / wali dari pasien tersebut di atas, menyatakan telah menerima penjelasan di atas secara lisan dan tertulis, memahaminya, berkesempatan bertanya, dan dengan ini:</p>'+
+    sec(7,'Berapa perkiraan biayanya?','Perkiraan biaya','<p>'+br(x.biaya)+'</p>')+'</div>'+
+    '<div class="akhir"><div class="st"><p><b>Pernyataan pasien.</b> Saya yang bertanda tangan di bawah ini, pasien / wali dari pasien tersebut di atas, menyatakan telah menerima penjelasan di atas secara lisan dan tertulis, memahaminya, berkesempatan bertanya, dan dengan ini:</p>'+
     '<div class="pil"><span><i></i> MENYETUJUI</span><span><i></i> MENOLAK</span></div>'+
     '<p style="margin:0">dilakukannya tindakan tersebut. Saya memahami bahwa persetujuan ini dapat saya cabut sebelum tindakan dimulai, dan bahwa kedokteran bukan ilmu pasti sehingga hasil tidak dapat dijamin.</p></div>'+
-    '<div class="sg"><div>Pasien / wali<br><small>nama jelas & tanda tangan</small></div><div>Saksi: '+E(c.saksi||'________________')+'<br><small>perawat / tenaga kesehatan</small></div><div>Dokter: '+E(c.dokter||'________________')+'<br><small>tanda tangan</small></div></div>'+
+    '<div class="sg"><div>Pasien / wali<br><small>nama jelas & tanda tangan</small></div><div>Saksi: '+E(c.saksi||'________________')+'<br><small>perawat / tenaga kesehatan</small></div><div>Dokter: '+E(c.dokter||'________________')+'<br><small>tanda tangan</small></div></div></div>'+
     '<div class="ft">Bandung, '+E(tgl)+' · Lembar ini bagian dari rekam medis (PMK 24/2022) dan disimpan sesuai masa retensi. Dasar: UU 17/2023 Ps. 293, PP 28/2024 Ps. 777–781, Permenkes 11/2025. Dicetak dari ADC Form 2 · '+E(c.no)+'</div>'+
+    /* pengaman 2 halaman: ukur tinggi pada lebar cetak A4; bila melebihi 2 halaman, perkecil skala cetak (paling kecil 70%) */
+    '<scr'+'ipt>(function(){function pas(){try{var b=document.body,MM=96/25.4,w=(210-26)*MM,maks=2*(297-22)*MM*0.94,np=document.querySelector(".np");'+
+    'var lw=b.style.width,lp=b.style.padding,lm=b.style.maxWidth;if(np)np.style.display="none";b.style.width=w+"px";b.style.maxWidth="none";b.style.padding="0";var h=b.scrollHeight;'+
+    'b.style.width=lw;b.style.padding=lp;b.style.maxWidth=lm;if(np)np.style.display="";var z=h>maks?Math.max(.7,maks/h):1;b.setAttribute("data-skala",z.toFixed(3));b.setAttribute("data-hal",(h/((297-22)*MM)).toFixed(2));'+
+    'document.getElementById("zcss").textContent=z<1?("@media print{body{zoom:"+z.toFixed(3)+"}}"):"";}catch(e){}}'+
+    'window.addEventListener("load",pas);window.addEventListener("beforeprint",pas);if(document.fonts&&document.fonts.ready)document.fonts.ready.then(pas);})();</scr'+'ipt>'+
     '</body></html>';
 }
 
