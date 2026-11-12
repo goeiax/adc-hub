@@ -2719,10 +2719,18 @@ function progFilled(p){
   });
   return any;
 }
+/* label tahap untuk manusia: tag kartu ("Tahap 2", "Tahap B") + nama bila ada ("Aktif (Bln 1–6)") — bukan kunci internal _stage */
+function _tahapLabel(p,k){
+  if(!k) return '';
+  var root=document.getElementById('ovl_'+p), kartu=root&&root.querySelector('.sev-card[id$="sev-'+k+'"]');
+  if(!kartu) return (typeof _psNamaTahap==='function')?_psNamaTahap(p,k):('Tahap '+k);
+  var b=function(s){ var e=kartu.querySelector(s); return e?e.textContent.replace(/\s+/g,' ').trim():''; };
+  return [b('.sev-tag'),b('.sev-name')].filter(Boolean).join(' · ')||('Tahap '+k);
+}
 function markProg(p){
   if(typeof updateReq==='function') setTimeout(updateReq,0);
   var on=progFilled(p);
-  var stg=(window._stage&&window._stage[p])?(' · tahap '+window._stage[p]):'';
+  var stg=(window._stage&&window._stage[p])?(' · '+_tahapLabel(p,window._stage[p])):'';
   var teks = on?('Terisi'+stg):'Belum diisi';
   ['pb_','pb2_'].forEach(function(pre){
     var b=document.getElementById(pre+p); if(b) b.classList.toggle('on',on);
@@ -3061,7 +3069,7 @@ function resetForm(mode){
   var nama=_hv('p_nama'), rm=_hv('rm'), siapa=[nama, rm?('RM '+rm):''].filter(Boolean).join(' · ');
   /* "kosong" = benar-benar tidak ada isian: semua kolom (kecuali tanggal bawaan), tahap program, IGA, tanda tangan */
   var terisi=!!(window._ttd||window._intake||window._prevHandoff||Object.keys(window._stage||{}).length)||
-    _formKontrol().some(function(e){ if(e.id==='tgl'||e.id==='d8_tgl') return false; return (e.type==='checkbox'||e.type==='radio')?e.checked:!!String(e.value||'').trim(); });
+    _formKontrol().some(function(e){ if(e.id==='tgl'||e.id==='d8_tgl'||e.id==='d1_dokter'||e.id==='d8_dokter') return false;   /* tanggal if(e.id==='tgl'||e.id==='d8_tgl') return false; return (e.type==='checkbox'||e.type==='radio')?(e.checked!==e.defaultChecked) nama dokter diisi otomatis (hub) — bukan data pasien */ return (e.type==='checkbox'||e.type==='radio')?(e.checked!==e.defaultChecked):(String(e.value||'').trim()!==_nilaiAwal(e)); });
   if(!terisi){ _resetJalan(); return; }
   if(!siapa) siapa='pasien tanpa nama';
   var terbit=!!(window._handoff&&window._handoff.pasien&&(window._handoff.pasien.rm||'')===rm&&!(window._dibukaUlang&&window._dibukaUlang.batal));
@@ -3081,12 +3089,18 @@ function resetForm(mode){
   document.getElementById('rdlg_ok').onclick=function(){ tutup(); _resetJalan(); try{ goStep(0); }catch(e){} };
   dlgBuka(bg,tutup); setTimeout(function(){ try{ document.getElementById(berikut?'rdlg_ok':'rdlg_x').focus(); }catch(e){} },0);
 }
+/* nilai bawaan sebuah kolom (atribut value / isi textarea / opsi terpilih bawaan) */
+function _nilaiAwal(e){
+  if(e.tagName==='SELECT'){ var o=[].filter.call(e.options,function(x){ return x.defaultSelected; })[0]||e.options[0]; return o?String(o.value||'').trim():''; }
+  return String(e.defaultValue||'').trim();
+}
 function _resetJalan(){
   try{ window._rbOverride=false; setTimeout(syncRisikoBekas,0); window._ttd=null; window._ttdTakBisa=false; _ttdStatus(''); window._isian={}; window._handoff=null; window._dibukaUlang=null; var cl=document.getElementById('d8_consent_lbl'); if(cl) cl.textContent=''; setTimeout(_icdChips,0); }catch(e){}
   var _dc=document.getElementById('terbit_done'); if(_dc) _dc.hidden=true;
   /* radio juga hanya dilepas centangnya — mengosongkan value-nya membuat Fitzpatrick
      terekam kosong setelah Reset. */
-  document.querySelectorAll('input,textarea').forEach(function(i){ if(i.type==='checkbox'||i.type==='radio'){i.checked=false;} else {i.value='';} });
+  /* kolom teks kembali ke nilai bawaannya (Durasi 3 bln, label baris rencana) — bukan dikosongkan */
+  document.querySelectorAll('input,textarea').forEach(function(i){ if(i.type==='checkbox'||i.type==='radio'){i.checked=false;} else if(i.type!=='file'){i.value=i.defaultValue||'';} });
   document.querySelectorAll('.rbseg.yn .rbopt.on').forEach(function(l){ l.classList.remove('on'); });
   document.querySelectorAll('.progbtn').forEach(function(e){e.classList.remove('on');});
   document.querySelectorAll('.sev-card').forEach(function(e){e.classList.remove('active');});
@@ -3098,6 +3112,7 @@ function _resetJalan(){
   var d8=document.getElementById('d8_status'); if(d8) d8.value='';
   window._intake=null; var ib=document.getElementById('intake_box'); if(ib) ib.style.display='none';
   setMode('awal');   /* reset = kembali ke kunjungan awal; ikut menutup palang handoff */
+  try{ if(typeof _isiDokterDariHub==='function') _isiDokterDariHub(); }catch(e){}   /* dokter yang sedang masuk tetap terisi untuk pasien berikutnya */
   PROGS.forEach(markProg); gateSched();
   var sb=document.getElementById('schedBody'); if(sb) sb.innerHTML='<tr><td colspan="4" style="color:var(--ink-muted)">Belum ada jadwal.</td></tr>';
 }
@@ -3188,7 +3203,7 @@ function _ringkasProgram(pd){
   if(!pd) return '';
   return Object.keys(pd).map(function(k){
     var d=pd[k]||{};
-    return (d.program||k)+(d.tahap?(' [tahap '+d.tahap+']'):'')+': '+((d.isian||[]).slice(0,24).join(' · '));
+    return (d.program||k)+(d.tahap?(' ['+_tahapLabel(k,d.tahap)+']'):'')+': '+((d.isian||[]).slice(0,24).join(' · '));
   }).join('  ||  ');
 }
 /* Mode kontrol menyembunyikan D1/D2 dan tidak membuka tabel resep program, jadi
