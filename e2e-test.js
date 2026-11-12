@@ -118,6 +118,21 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
       const r404 = await fetch(BASE + '/api/neosoft/RM-ASING', { headers: Hd('cs') });
       const r401 = await fetch(BASE + '/api/neosoft/RM-NEO-01', { headers: Hd() });
       check('NeoSoft: GET /api/neosoft/:rm -> identitas ternormalisasi (kelamin P -> Perempuan); RM asing 404; tanpa sesi 401', r.status === 200 && j.ok && j.sumber === 'neosoft' && j.pasien.nama === 'Pasien NeoSoft' && j.pasien.kelamin === 'Perempuan' && j.pasien.rm === 'RM-NEO-01' && r404.status === 404 && r401.status === 401, { s: r.status, j, r404: r404.status, r401: r401.status }); }
+    /* Tahap 0 akses luar: CORS, alamat perangkat di balik proxy lokal, pembatasan percobaan PIN */
+    { const ac = async (origin) => (await fetch(BASE + '/api/ping', { headers: origin ? { Origin: origin } : {} })).headers.get('access-control-allow-origin');
+      check('CORS: asal asing tidak diberi izin; asal = hub sendiri, berkas lokal ("null") dan localhost diizinkan; tanpa Origin tanpa header', (await ac('https://situs-lain.example')) === null && (await ac(BASE)) === BASE && (await ac('null')) === 'null' && (await ac('http://localhost:5500')) === 'http://localhost:5500' && (await ac('')) === null, [await ac('https://situs-lain.example'), await ac(BASE), await ac('null')]); }
+    { await fetch(BASE + '/api/pasien', { headers: Object.assign(Hd('perawat'), { 'X-Forwarded-For': '100.64.0.7, 10.0.0.1' }) });
+      await fetch(BASE + '/api/login', { method: 'POST', headers: Object.assign(Hd(null, true), { 'X-Forwarded-For': '100.64.0.9' }), body: JSON.stringify({ id: 'perawat', pin: '999999' }) });
+      const au = (await (await fetch(BASE + '/api/audit?n=50', { headers: Hd('admin') })).json()).audit;
+      check('Audit di balik proxy lokal: X-Forwarded-For dipakai sebagai alamat perangkat (soket loopback)', au.some(r => r.aksi === 'login_gagal' && r.ip === '100.64.0.9'), au.filter(r => r.aksi === 'login_gagal').map(r => r.ip)); }
+    { const xf = { 'X-Forwarded-For': '100.64.0.50' }, coba = (pin, id = 'cs') => fetch(BASE + '/api/login', { method: 'POST', headers: Object.assign(Hd(null, true), xf), body: JSON.stringify({ id, pin }) }).then(async r => ({ s: r.status, j: await r.json() }));
+      const st = []; for (let i = 0; i < 9; i++) st.push((await coba('000000')).s);
+      const benar = await coba(PIN.cs), lain = await coba(PIN.perawat, 'perawat');
+      const dariLain = await fetch(BASE + '/api/login', { method: 'POST', headers: Object.assign(Hd(null, true), { 'X-Forwarded-For': '100.64.0.51' }), body: JSON.stringify({ id: 'cs', pin: PIN.cs }) });
+      check('Batas percobaan PIN: 8 kali salah -> percobaan ke-9 ditolak 429, PIN benar pun ditolak selama terkunci; pengguna lain di perangkat itu & pengguna yang sama di perangkat lain tetap bisa masuk', st.slice(0, 8).every(s => s === 401) && st[8] === 429 && benar.s === 429 && /Terlalu banyak percobaan/.test(benar.j.error) && lain.s === 200 && dariLain.status === 200, { st, benar: benar.s, lain: lain.s, dariLain: dariLain.status });
+      const reset = await fetch(BASE + '/api/users', { method: 'POST', headers: Hd('admin', true), body: JSON.stringify({ id: 'cs', pin: PIN.cs }) });
+      check('Batas percobaan PIN: admin mengatur ulang PIN -> kunci terbuka', reset.status === 200 && (await coba(PIN.cs)).s === 200);
+      await login('cs'); }
     check('hub: audit hanya admin (cs 403, admin 200)', (await fetch(BASE + '/api/audit', { headers: Hd('cs') })).status === 403 && (await fetch(BASE + '/api/audit', { headers: Hd('admin') })).status === 200);
     check('hub: cadangan ke backup_dir saat mulai (folder bertanggal + BACA-SAYA)', fs.existsSync(path.join(WORK, 'backup', 'BACA-SAYA.txt')) && fs.readdirSync(path.join(WORK, 'backup')).some(f => /^adc-data-\d{4}-/.test(f)), fs.existsSync(path.join(WORK, 'backup')) ? fs.readdirSync(path.join(WORK, 'backup')) : null);
     { const r = await fetch(BASE + '/api/users', { method: 'POST', headers: Hd('admin', true), body: JSON.stringify({ id: 'dr.baru', nama: 'dr. Baru', peran: 'dokter', pin: '555555' }) });
