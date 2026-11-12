@@ -437,7 +437,11 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
     { const rs = await open('ADC_Form2_Asesmen_Umum_Dokter.html'); set(rs.d, 'p_nama', 'Belum Terbit'); set(rs.d, 'rm', 'RM-X1'); rs.w.resetForm(); await sleep(20);
       check('Reset form belum terbit: judul "Kosongkan form?", peringatan BELUM diterbitkan, fokus awal di Batal; OK mengosongkan', /Kosongkan form/.test($(rs.d, 'rdlg_t').textContent) && /BELUM diterbitkan/.test($(rs.d, 'rdlg_w').textContent) && /Belum Terbit/.test($(rs.d, 'rdlg_p').textContent));
       $(rs.d, 'rdlg_ok').click(); check('Reset dikonfirmasi: form kosong', $(rs.d, 'p_nama').value === '' && $(rs.d, 'rm').value === '' && !$(rs.d, 'rdlg').classList.contains('on'));
-      rs.w.resetForm(); check('Reset pada form kosong: langsung, tanpa dialog', !$(rs.d, 'rdlg').classList.contains('on')); }
+      rs.w.resetForm(); check('Reset pada form kosong: langsung, tanpa dialog', !$(rs.d, 'rdlg').classList.contains('on'));
+      rs.w.pickStage('acne', 2); rs.w.setIGA('ac_iga', '3'); rs.w.resetForm(); await sleep(20);
+      check('Reset tanpa nama tetapi form program terisi (tahap + IGA): dialog TETAP muncul, menyebut "pasien tanpa nama", belum ada yang terhapus', $(rs.d, 'rdlg').classList.contains('on') && /pasien tanpa nama/.test($(rs.d, 'rdlg_p').textContent) && $(rs.d, 'ac_iga').value === '3', $(rs.d, 'rdlg_p').textContent);
+      $(rs.d, 'rdlg_x').click();
+      rs.w.openProg('acne'); rs.w.pmGo('acne', '2'); check('pmGo menerima nomor bagian berupa string (tidak mengosongkan modal)', rs.d.querySelectorAll('#ovl_acne .pmpart.on').length === 1 && rs.d.querySelector('#ovl_acne .pmpart.on').getAttribute('data-part') === '2'); rs.w.closeProg('acne'); }
     await until(() => a.dialogs.some(x => x.type === 'download' && /^Asesmen_/.test(x.msg)), 3000).catch(() => {});
     check('F2 Terbitkan: berkas Asesmen_<RM>_<tgl>_<jam>.json otomatis diunduh & disebut di kartu selesai', a.dialogs.some(x => x.type === 'download' && /^Asesmen_RM-TEST-001_\d{4}-\d{2}-\d{2}_\d{4}\.json$/.test(x.msg)) && /Asesmen_RM-TEST-001_.*diunduh/.test($(a.d, 'terbit_done_note').textContent), a.dialogs.filter(x => x.type === 'download').map(x => x.msg));
     /* buka kembali asesmen yang baru terbit: potret form ikut di handoff hub, lalu dipulihkan di form kosong */

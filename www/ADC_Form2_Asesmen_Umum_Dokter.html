@@ -2634,6 +2634,7 @@ function initPmWizard(){
 function pmGo(p,n,diam){
   var ovl=document.getElementById('ovl_'+p); if(!ovl) return;
   window._pmPart[p]=n;
+  n=+n;   /* nomor bagian selalu angka — string dari atribut dulu menyembunyikan semua bagian */
   ovl.querySelectorAll('.pmpart').forEach(function(w){ w.classList.toggle('on', +w.getAttribute('data-part')===n); });
   ovl.querySelectorAll('.pmrail button').forEach(function(b){ var on=+b.getAttribute('data-part')===n; b.classList.toggle('on',on); b.setAttribute('aria-selected',on?'true':'false'); if(on) b.setAttribute('aria-current','step'); else b.removeAttribute('aria-current'); });
   pmTandaiTerisi(p);
@@ -3024,8 +3025,11 @@ function saveSchedToRecord(){
    TIDAK ADA yang dihapus sebelum dikonfirmasi (dulu stempel TTD hilang walau Batal ditekan). */
 function resetForm(mode){
   var nama=_hv('p_nama'), rm=_hv('rm'), siapa=[nama, rm?('RM '+rm):''].filter(Boolean).join(' · ');
-  var terisi=!!(nama||rm||_hv('d2_dx')||_hv('d2_hasil'));
+  /* "kosong" = benar-benar tidak ada isian: semua kolom (kecuali tanggal bawaan), tahap program, IGA, tanda tangan */
+  var terisi=!!(window._ttd||window._intake||window._prevHandoff||Object.keys(window._stage||{}).length)||
+    _formKontrol().some(function(e){ if(e.id==='tgl'||e.id==='d8_tgl') return false; return (e.type==='checkbox'||e.type==='radio')?e.checked:!!String(e.value||'').trim(); });
   if(!terisi){ _resetJalan(); return; }
+  if(!siapa) siapa='pasien tanpa nama';
   var terbit=!!(window._handoff&&window._handoff.pasien&&(window._handoff.pasien.rm||'')===rm&&!(window._dibukaUlang&&window._dibukaUlang.batal));
   var berikut=(mode==='berikut'&&terbit);
   var bg=document.getElementById('rdlg');
