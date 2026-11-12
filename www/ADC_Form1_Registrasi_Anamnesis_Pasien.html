@@ -1645,7 +1645,7 @@ function rmNeoSoft(){
     var nk=document.getElementById('p_nik'); if(nk&&typeof cekNIK==='function') cekNIK(nk);
     var tl=p.tgl_lahir; if(tl&&/^\d{4}-\d{2}-\d{2}/.test(tl)){ var d=tl.slice(0,10).split('-'); tl=d[2]+'/'+d[1]+'/'+d[0]; }
     if(_fLabelKosong('Tanggal lahir',tl)) n++; if(_fLabelKosong('Jenis kelamin',p.kelamin)) n++; if(_fLabelKosong('Kota domisili',p.kota||p.alamat)) n++;
-    if(note) note.textContent=n?('identitas dari NeoSoft ✓ ('+n+' kolom terisi; yang sudah diketik tidak diubah)'):'RM dikenal NeoSoft — kolom identitas sudah terisi, tidak diubah.';
+    if(note) note.textContent=n?('identitas dari NeoSoft ✓ ('+n+' isian terisi; yang sudah diketik tidak diubah)'):'RM dikenal NeoSoft — identitas sudah terisi, tidak diubah.';
     window._neoTerakhir=p;
   });
 }
