@@ -1242,6 +1242,7 @@ textarea.in#d2_dx_catatan{min-height:64px;}
 .mdlg-p{font-size:14.5px;line-height:1.5;color:var(--ink-2);margin:0 0 12px;}
 .mdlg-p.warn{color:var(--accent-deep);font-weight:600;}
 .mdlg-p:empty{display:none;}
+.step > .sec[tabindex="-1"]:focus{outline:none;}   /* judul langkah menerima fokus terprogram; cincin fokus tetap untuk kontrol sungguhan */
 .mdlg-b{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
 .mdlg-sp{flex:1;}
 .mdlg-b button{font:inherit;font-size:14px;font-weight:600;min-height:44px;padding:0 18px;border-radius:var(--r-pill);cursor:pointer;border:1px solid var(--line-strong);background:var(--surface);color:var(--ink);}
@@ -4962,7 +4963,10 @@ function goStep(i){
   if(_step===5&&typeof renderSerahRingkas==='function') renderSerahRingkas();
   if(_step>=4){ var dd=document.getElementById('d8_dokter'); if(dd&&!dd.value.trim()){ var nmD=_dokterKini()||((window._hubUser&&window._hubUser.peran==='dokter')?(window._hubUser.nama||window._hubUser.id):''); if(nmD) dd.value=nmD; } }
   window.scrollTo({top:0,behavior:'smooth'});
+  /* fokus ikut pindah ke judul langkah baru (tombol Lanjut yang tadi difokus sudah tersembunyi) */
+  if(window._stepSiap&&!window._memulihkan){ var jd=st[_step].querySelector('.sec'); if(jd){ jd.setAttribute('tabindex','-1'); try{ jd.focus({preventScroll:true}); }catch(e){ try{ jd.focus(); }catch(e2){} } } }
 }
+window.addEventListener('load',function(){ setTimeout(function(){ window._stepSiap=true; },0); });
 /* ===== LEMBAR CETAK 1 HALAMAN =====
    Cetak / Simpan PDF tidak lagi mencetak seluruh langkah form (berhalaman-halaman,
    banyak kolom kosong). Lembar ini disusun dari data yang SAMA dengan handoff
