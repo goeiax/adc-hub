@@ -1391,8 +1391,10 @@ textarea.in#d2_dx_catatan{min-height:64px;}
 .igaseg button em{font-size:12px;font-style:normal;letter-spacing:.02em;white-space:normal;line-height:1.15;color:var(--ink-muted);
   text-align:center;line-height:1.25;}
 .igaseg button:hover{border-color:var(--accent);}
-.igaseg button.on{background:var(--accent-act);border-color:var(--accent-act);}
-.igaseg button.on b,.igaseg button.on em{color:#fff;}
+/* terpilih = bahasa yang sama dengan chip centang: krem, garis terakota 2px (inset supaya ukuran tidak bergeser), angka tebal */
+.igaseg button.on{background:var(--surface-quiet,#F5EFE6);border-color:var(--accent-deep,#8E4A33);box-shadow:inset 0 0 0 1px var(--accent-deep,#8E4A33);}
+.igaseg button.on b{color:var(--accent-deep,#8E4A33);font-weight:720;}
+.igaseg button.on em{color:var(--ink,#1B1A18);font-weight:600;}
 .mnote{font-size:13px;line-height:1.55;color:var(--ink-muted);}
 .mnote b{color:var(--ink-2);font-weight:620;}
 .mfoot{margin-top:2px;}
@@ -1407,8 +1409,9 @@ textarea.in#d2_dx_catatan{min-height:64px;}
 /* IGA dinilai di form program; kartu langkah 2 = cermin pada kunjungan awal */
 .ovl .igaseg-m{max-width:620px;margin:8px 0 12px;}
 .ovl .igaseg-m button{border-radius:var(--r-box,8px) !important;}
-#ovl_acne .igaseg-m button.on,#ovl_melasma .igaseg-m button.on,.ovl .igaseg-m button.on{background:#B0603F !important;background-color:#B0603F !important;border-color:var(--accent-act,#B0603F) !important;opacity:1 !important;}
-.ovl .igaseg-m button.on b,.ovl .igaseg-m button.on em{color:#fff !important;}
+.ovl .igaseg-m button.on{background:var(--surface-quiet,#F5EFE6) !important;border-color:var(--accent-deep,#8E4A33) !important;box-shadow:inset 0 0 0 1px var(--accent-deep,#8E4A33) !important;opacity:1 !important;}
+.ovl .igaseg-m button.on b{color:var(--accent-deep,#8E4A33) !important;}
+.ovl .igaseg-m button.on em{color:var(--ink,#1B1A18) !important;}
 .ovl .qline.igaq{border-bottom:none !important;padding-bottom:0 !important;}
 .ovl .qline.igaq .mstat{margin-left:12px;}
 .mcard.ro .igaseg button{pointer-events:none;cursor:default;}

@@ -325,6 +325,8 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
     { const ik4 = JSON.parse(JSON.stringify(a.w._intake)); ik4.kritis.alergi = 'Penisilin'; ik4.kritis.alergi_nihil = false; a.w.applyIntake(ik4); }
     check('F2 modal: radio terpilih seragam dengan chip centang (latar krem + garis terakota, bukan blok hitam)', fs.readFileSync(path.join('www', 'ADC_Form2_Asesmen_Umum_Dokter.html'), 'utf8').includes('.ovl .rbopt.on{background:var(--surface-quiet,#F5EFE6);border-color:var(--accent,#C97A5E);'));
     check('F2: ringkasan intake tampil', $(a.d, 'intake_box').style.display !== 'none');
+    { const cssI = fs.readFileSync(path.join('www', 'ADC_Form2_Asesmen_Umum_Dokter.html'), 'utf8');
+      check('IGA terpilih seragam dengan chip (krem + garis terakota, tanpa blok terakota / teks putih)', cssI.includes('.igaseg button.on{background:var(--surface-quiet,#F5EFE6);border-color:var(--accent-deep,#8E4A33);') && !/\.igaseg button\.on b,\.igaseg button\.on em\{color:#fff;\}/.test(cssI) && !/igaseg-m button\.on\{background:#B0603F/.test(cssI)); }
     { const pk = await open('ADC_Form2_Asesmen_Umum_Dokter.html'); const ka = pk.d.querySelector('#ovl_acne .pm-kosong'), km = pk.d.querySelector('#ovl_melasma .pm-kosong');
       const bagianBlok = pk.d.querySelector('#ac_block-1').closest('.pmpart'), bagianKartu = pk.d.querySelector('#ovl_acne .sev-card').closest('.pmpart');
       pk.w.openProg('acne'); pk.w.pmKeTahap('acne'); await sleep(100);
