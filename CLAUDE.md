@@ -57,6 +57,7 @@ Kontrol mode = `body.mode-kontrol` (`.vis-awal` hidden, `.vis-kontrol` shown); i
 
 ## Known gotchas (each bit us before)
 - **Dual-role CSS classes** (incl. `.fin` = allergy-flag input, so never use it for a button — the modal finish button is `.pm-selesai`): `.sec`, `.row`, `.opt`, `.f`, `.ck` mean different things in main form vs. the Hair-Loss modal (`#ovl_hair`, imported markup). Any global style change must be checked for leakage into `#ovl_hair`.
+- Screen legibility floor block (2026-11-12) sits at the very end of the main `<style>`: `@media screen` forces 12 px on `th`, `.ovl .subhead`, `span.rn/.req/.pn/.k/.sk`, `.toolbar span.lb`, `.mdlg-l` and `min-height:44px` on modal text inputs (`.ln`, `.tx-extra`, `.td-input`, `.td-in`). New small labels should be written at ≥12 px rather than added to this list.
 - Phone (≤640 px) rules live in one `@media (max-width:640px)` block near `.tb-more`: toolbar and ctlbar wrap and go static, the acne 4-factor table stacks per row; plus small blocks next to their base rule: the D5 table sits in `.tblwrap` (scrolls sideways, min-width 600 on phones), the modal `.pmrail` is static on phones, and the login dialog's buttons stack at ≤480 (inside `_ldlgBuat`'s style string, all 4 forms). Shipping size is still the 1024 tablet; check both when touching chrome.
 - Grid span classes differ per file (`.k4` exists in Form 2, not Form 1). Check definitions in the target file.
 - Avoid `border` shorthand with `var()` where tests run in jsdom — use longhands.

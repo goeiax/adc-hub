@@ -1605,6 +1605,13 @@ body.mode-kontrol #rb2 .rl::after{content:' — dilewati';font-size:12px;font-we
 .ctlbar .reqbar .it.ok,.ctlbar .reqbar .it.lebih{display:none;}
 .ctlbar .reqbar.semua .it.ok,.ctlbar .reqbar.semua .it.lebih{display:inline-flex;}
 @media print{.ctlbar{display:none !important;}}
+
+/* ===== LANTAI KETERBACAAN LAYAR (kritik #10): teks fungsional >= 12 px, isian form program >= 44 px ===== */
+@media screen{
+  html body th, html body table.tbl th, html body .page table th, html body #ovl_acne th, html body #ovl_melasma th, html body #ovl_hair th,
+  th, .ovl th, .ovl .subhead, span.rn, span.req, span.pn, .toolbar span.lb, .serah span.k, #serah_ringkas span.k, span.sk, .mdlg-l{font-size:12px !important;}
+  .ovl input.ln, .ovl input.tx-extra, .ovl input.td-input, .ovl input.td-in{min-height:44px;}
+}
 </style>
 </head>
 <body>
@@ -2724,7 +2731,7 @@ function rmNeoSoft(){
     if(!p){ if(st!==404) _neoRmTerakhir='';
       if(note) note.textContent=(st===404)?'RM tidak ada di NeoSoft.':(st===401?'':(st===500?'NeoSoft: pengaturan di hub perlu diperbaiki IT.':'NeoSoft tidak terjangkau.')); return; }
     var n=0; ['p_nama','p_nik','p_wa'].forEach(function(id){ var e=document.getElementById(id), v=p[{p_nama:'nama',p_nik:'nik',p_wa:'wa'}[id]]; if(e&&v&&!(e.value||'').trim()){ e.value=v; n++; try{ e.dispatchEvent(new Event('input',{bubbles:true})); }catch(x){} } });
-    if(note) note.textContent=n?('identitas dari NeoSoft ✓ ('+n+' kolom terisi)'):'RM dikenal NeoSoft — identitas sudah terisi, tidak diubah.';
+    if(note) note.textContent=n?('identitas dari NeoSoft ✓ ('+n+' isian terisi)'):'RM dikenal NeoSoft — identitas sudah terisi, tidak diubah.';
     window._neoTerakhir=p; if(typeof updateReq==='function') updateReq();
   });
 }
