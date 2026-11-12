@@ -16,6 +16,8 @@ padanan Linux dari tiap skrip `.bat`/`.ps1` ada sebagai `start.sh`, `backup.sh`,
 
 > **Uji coba di klinik:** ikuti **[UJI_COBA_KLINIK.md](UJI_COBA_KLINIK.md)** — versi terbaru dari langkah di bawah, sudah termasuk akun staf (ID + PIN), cadangan otomatis, HTTPS dan uji serah-terima.
 
+> **Jaringan klinik (MikroTik + beberapa Wi-Fi):** checklist untuk teknisi di **[JARINGAN-KLINIK.md](JARINGAN-KLINIK.md)** — satu jaringan staf, alamat tetap `http://adc-hub.lan:3777/`.
+
 ## A. Instalasi (checklist untuk IT) — ±20 menit
 
 1. **Pilih PC hub**: PC yang menyala selama jam klinik, di LAN yang sama dengan
