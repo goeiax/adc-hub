@@ -30,6 +30,9 @@ html,body{background:var(--canvas); color:var(--ink); font-family:var(--ff-body)
 .doc-head{display:flex; justify-content:space-between; align-items:flex-end; border-bottom:1px solid var(--ink); padding-bottom:8px; margin-bottom:8px;}
 .brand .eyebrow{font-size:10px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-muted); margin-bottom:3px;}
 .brand .name{font-family:var(--ff-head); font-size:22px; font-weight:600; letter-spacing:.02em; line-height:1;}
+.adclogo{display:block;width:66mm;max-width:100%;height:auto;color:#000;}
+.brand .name{margin:5px 0 6px;}
+@media print{:root{--ff-head:'Acumin Pro','Archivo',Arial,sans-serif;--ff-body:'Acumin Pro SemiCondensed','Archivo Narrow','Archivo',Arial,sans-serif;}}
 .brand .addr{font-size:11px; color:var(--ink-muted); margin-top:4px;}
 .doc-meta{text-align:right; font-size:11px; color:var(--ink-2);}
 .doc-meta .title{font-family:var(--ff-head); font-size:17px; font-weight:600; color:var(--ink); margin-bottom:3px;}
@@ -148,6 +151,10 @@ button.hubchip{font-family:inherit;background:transparent;}
 .mdlg-b .mdlg-file{border-color:var(--accent-act, #B0603F);color:var(--accent-deep, #8E4A33);}
 @media print{ .hubchip,.mdlg-bg{display:none !important;} }
 </style>
+<script>/* Logo resmi ADC (Branding/Logo/SVG/Logo_ADC.svg) — dipakai semua cetakan; jangan digambar ulang / diubah proporsinya */
+var ADC_LOGO='<svg class="adclogo" xmlns="http://www.w3.org/2000/svg" viewBox="116 269 610 57" role="img" aria-label="Aesthetic Derma Centre" fill="currentColor"><g> <path d="M229.27,311.35c-2.36,5.16-7.59,8.92-13.75,8.92c-5.12,0-9.73-2.92-12.58-6.79c-0.65,1.7-1.47,3.33-2.46,4.82 c3.07,4.28,9.16,6.98,14.98,6.95c8.45-0.04,15.66-5.26,18.59-12.68L229.27,311.35z"/> <path d="M215.46,285.21c-9.46,0-15.37,6.11-17.57,10.44c-1.3,2.55-1.89,5.14-2.52,9.57c-0.31,2.13-1.8,15.05-15.08,15.05 c-9.6,0-15.26-8.07-15-15.37c0.4-11.24,10.65-14.82,14.84-14.7c5.86,0.16,9.21,2.64,11.2,4.79h2.77v-25.12h-4.96v17.42 c-11.37-6.07-28.58,1.32-28.76,17.99c-0.13,12.53,10,19.97,20.09,19.97c6.56,0,11.23-2.43,14.35-5.89 c4.31-4.76,5.25-10.72,5.61-14.19c1.28-12.31,10.4-14.97,15.07-14.97c6.6,0,11.29,3.69,13.76,8.93l4.79-1.23 C231.18,290.25,223.53,285.21,215.46,285.21"/> <path d="M136.66,290.19c7.17,0,13.43,5.1,14.85,12.13c0.04,0.18,0.08,0.72,0.08,0.72h5.09c0,0-0.13-0.79-0.17-1.05 c-1.63-9.73-9.99-16.79-19.84-16.79c-11.08,0-20.1,9.02-20.1,20.1c0,11.08,9.02,20.1,20.1,20.1c5.67,0,12.28-2.64,14.97-7.26v5.68 h4.85v-16.25l-4.85,0l-0.15,0.72c-1.42,7.03-7.65,12.13-14.82,12.13c-8.34,0-15.12-6.78-15.12-15.12 C121.54,296.98,128.32,290.19,136.66,290.19"/> <path d="M317.93,310.29c0.59,2.59,2.38,3.95,5.49,3.95c3.31,0,4.64-1.52,4.64-3.54c0-2.16-1.09-3.33-5.45-4.37 c-5.42-1.31-7.18-3.19-7.18-6.3c0-3.43,2.53-6.12,7.57-6.12c5.43,0,7.66,3.09,7.96,6.09h-3.36c-0.37-1.87-1.52-3.48-4.71-3.48 c-2.57,0-4.04,1.15-4.04,3.17c0,1.99,1.2,2.78,5.06,3.71c6.39,1.55,7.57,4.01,7.57,6.93c0,3.69-2.75,6.51-8.29,6.51 c-5.63,0-8.15-3.02-8.63-6.56H317.93z"/> <rect x="423.98" y="294.24" width="3.31" height="22.33"/> <path d="M452.61,310.13c-0.97,3.86-3.86,6.72-9.03,6.72c-6.75,0-10.12-5.06-10.12-11.37c0-6.07,3.39-11.56,10.25-11.56 c5.4,0,8.26,3.09,8.89,6.83h-3.32c-0.73-2.29-2.27-4.11-5.7-4.11c-4.75,0-6.67,4.31-6.67,8.74c0,4.27,1.8,8.76,6.8,8.76 c3.39,0,4.8-2,5.56-4H452.61z"/> <path d="M471.51,313.79h4.48c5.07,0,7.45-3.65,7.45-8.57c0-4.26-2.18-8.2-7.44-8.2h-4.5V313.79z M468.19,294.24h8.14 c6.32,0,10.57,4.28,10.57,10.93c0,6.59-4.13,11.4-10.69,11.4h-8.02V294.24z"/> <path d="M555.53,307.26c0-4.08,0.05-8.31,0.14-10.69h-0.12c-0.97,3.8-4.33,12.97-6.81,19.99h-2.93c-1.88-5.79-5.35-16.1-6.35-20.04 h-0.11c0.17,2.59,0.25,7.48,0.25,11.31v8.73h-3.09v-22.33h4.94c2.38,6.72,5.27,15.36,6.01,18.29h0.05 c0.53-2.3,3.96-11.74,6.44-18.29h4.8v22.33h-3.23V307.26z"/> <path d="M616.72,310.13c-0.97,3.86-3.86,6.72-9.03,6.72c-6.75,0-10.12-5.06-10.12-11.37c0-6.07,3.39-11.56,10.25-11.56 c5.4,0,8.26,3.09,8.89,6.83h-3.32c-0.73-2.29-2.27-4.11-5.7-4.11c-4.75,0-6.67,4.31-6.67,8.74c0,4.27,1.8,8.76,6.8,8.76 c3.39,0,4.8-2,5.56-4H616.72z"/> <path d="M643.49,316.56v-22.33h4.31c3.13,5.18,9.75,15.9,10.96,18.32h0.05c-0.22-2.76-0.21-6.35-0.21-10v-8.32h3.1v22.33h-4.06 c-2.85-4.76-9.82-16.41-11.16-18.93h-0.05c0.16,2.43,0.17,6.37,0.17,10.39v8.53H643.49z"/> <path d="M281.82,294.24h-4.1l-7.88,22.33h3.29c0,0,6-17.77,6.54-19.72h0.03c0.49,1.76,1.63,4.86,3.66,10.51h-4.96l-0.87,2.81h6.64 l2.36,6.41h3.52L281.82,294.24z"/> <path d="M575.81,294.24h-4.1l-7.88,22.33h3.29c0,0,5.99-17.77,6.54-19.72h0.03c0.49,1.76,1.63,4.86,3.66,10.51h-4.96l-0.87,2.81 h6.64l2.36,6.41h3.52L575.81,294.24z"/> <polygon points="298.27,313.76 298.27,307.88 298.27,306.28 298.27,303.47 298.27,302.33 298.27,297.04 309.81,297.04 309.81,294.24 295.02,294.24 295.02,316.56 309.96,316.56 310.38,313.76 "/> <rect x="300.5" y="303.47" width="8.79" height="2.8"/> <polygon points="385.65,313.76 385.65,307.88 385.65,306.28 385.65,303.47 385.65,302.33 385.65,297.04 397.2,297.04 397.2,294.24 382.41,294.24 382.41,316.56 397.35,316.56 397.77,313.76 "/> <rect x="387.89" y="303.47" width="8.79" height="2.8"/> <polygon points="496.32,313.76 496.32,307.88 496.32,306.28 496.32,303.47 496.32,302.33 496.32,297.04 507.86,297.04 507.86,294.24 493.08,294.24 493.08,316.56 508.02,316.56 508.44,313.76 "/> <rect x="498.55" y="303.47" width="8.79" height="2.8"/> <polygon points="625.83,313.76 625.83,307.88 625.83,306.28 625.83,303.47 625.83,302.33 625.83,297.04 637.37,297.04 637.37,294.24 622.59,294.24 622.59,316.56 637.53,316.56 637.94,313.76 "/> <rect x="628.06" y="303.47" width="8.79" height="2.8"/> <polygon points="709.97,294.24 709.97,316.56 724.91,316.56 725.33,313.76 713.21,313.76 713.21,307.88 713.21,306.28 713.21,303.47 713.21,302.33 713.21,297.04 724.76,297.04 724.76,294.24 "/> <rect x="715.45" y="303.47" width="8.79" height="2.8"/> <path d="M529.62,312.17v-0.99c0-3.9-1.6-5.22-3.29-5.69c2.04-0.6,3.7-2.34,3.7-5.26c0-3.48-2.48-6-7.12-6h-8.93v22.33h3.27v-8.22 v-1.45v-2.75v-2.64v-4.53h5c2.91,0,4.38,1.28,4.38,3.55c0,2.39-1.41,3.62-4.68,3.62h-2.47v2.75h2.07c3.93,0,4.77,1.34,4.77,4.38 v0.45c0,2.15-0.01,3.87,0.39,4.84h3.2C529.56,315.61,529.62,313.7,529.62,312.17"/> <path d="M704.89,312.17v-0.99c0-3.9-1.6-5.22-3.29-5.69c2.04-0.6,3.7-2.34,3.7-5.26c0-3.48-2.48-6-7.12-6h-8.93v22.33h3.27v-8.22 v-1.45v-2.75v-2.64v-4.53h5c2.9,0,4.38,1.28,4.38,3.55c0,2.39-1.41,3.62-4.68,3.62h-2.47v2.75h2.07c3.93,0,4.77,1.34,4.77,4.38 v0.45c0,2.15-0.01,3.87,0.39,4.84h3.2C704.83,315.61,704.89,313.7,704.89,312.17"/> <rect x="357.11" y="294.24" width="3.31" height="22.33"/> <polygon points="371.56,294.24 371.56,303.44 362.68,303.44 362.68,306.25 371.56,306.25 371.56,316.56 374.87,316.56 374.87,294.24 "/> <polygon points="345.21,294.24 334.75,294.24 334.75,297.04 341.88,297.04 341.88,316.56 345.21,316.56 345.21,304.04 345.21,297.04 "/> <rect x="347.47" y="294.24" width="4.87" height="2.8"/> <polygon points="412.08,294.24 401.62,294.24 401.62,297.04 408.75,297.04 408.75,316.56 412.08,316.56 412.08,304.04 412.08,297.04 "/> <rect x="414.35" y="294.24" width="4.87" height="2.8"/> <polygon points="677.18,294.24 666.71,294.24 666.71,297.04 673.84,297.04 673.84,316.56 677.18,316.56 677.18,304.04 677.18,297.04 "/> <rect x="679.44" y="294.24" width="4.87" height="2.8"/> </g></svg>';
+document.addEventListener('DOMContentLoaded',function(){ var n=document.querySelectorAll('[data-adclogo]'); for(var i=0;i<n.length;i++) n[i].innerHTML=ADC_LOGO; });
+</script>
 </head>
 <body>
 
@@ -175,7 +182,7 @@ button.hubchip{font-family:inherit;background:transparent;}
   <div class="doc-head">
     <div class="brand">
       <div class="eyebrow">Skin Quality Program · pemantauan journey &amp; hasil</div>
-      <div class="name">AESTHETIC DERMA CENTRE</div>
+      <div class="name"><span data-adclogo aria-label="Aesthetic Derma Centre"></span></div>
       <div class="addr">Jl. Ir. H. Djuanda 88, Bandung &nbsp;·&nbsp; WhatsApp +62 821 30144778 &nbsp;·&nbsp; aestheticdermacentre.com</div>
     </div>
     <div class="doc-meta">
@@ -684,24 +691,25 @@ function cetakJourney(){
   w.document.open();
   w.document.write('<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><title>Perjalanan Perawatan — '+_wesc(p.nama||'')+'</title>'+
   '<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700&family=Archivo+Narrow:wght@400;600&display=swap" rel="stylesheet">'+
-  '<style>body{font-family:\'Archivo Narrow\',Arial,sans-serif;color:#000;background:#FAF8F5;margin:0;font-size:15px;line-height:1.6}'+
+  '<style>body{font-family:\'Acumin Pro SemiCondensed\',\'Archivo Narrow\',Arial,sans-serif;color:#000;background:#FAF8F5;margin:0;font-size:15px;line-height:1.6}'+
   '.bar{background:#000;color:#FAF8F5;padding:11px 22px;display:flex;justify-content:space-between;align-items:center}'+
   '.bar button{font-family:inherit;font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;padding:8px 15px;border:1px solid #CDAF97;background:#CDAF97;color:#1d130c;cursor:pointer}'+
   '.sheet{background:#fff;max-width:190mm;margin:18px auto;padding:16mm;border:1px solid #DADCD9}'+
-  'h1{font-family:Archivo,Arial,sans-serif;font-size:23px;font-weight:600;margin:0 0 4px}'+
+  'h1{font-family:\'Acumin Pro\',Archivo,Arial,sans-serif;font-size:23px;font-weight:600;margin:0 0 4px}'+
   '.eyebrow{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6B6F6C}'+
   '.meta{font-size:13px;color:#3A3F3C;margin-top:6px}'+
   'hr{border:none;border-top:1px solid #000;margin:14px 0}'+
-  'h2{font-family:Archivo,Arial,sans-serif;font-size:13px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;margin:20px 0 8px;padding-bottom:4px;border-bottom:1px solid #C8CBC8}'+
+  'h2{font-family:\'Acumin Pro\',Archivo,Arial,sans-serif;font-size:13px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;margin:20px 0 8px;padding-bottom:4px;border-bottom:1px solid #C8CBC8}'+
   'table{width:100%;border-collapse:collapse;font-size:13.5px}th,td{text-align:left;vertical-align:top;padding:7px 9px;border:1px solid #DADCD9}'+
   'th{background:#E8EBE9;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase}'+
   '.d{font-size:12px;color:#6B6F6C}'+
   '.note{font-size:12.5px;color:#3A3F3C;background:#EDE6E7;border:1px solid #BAA3A3;padding:10px 13px;margin-top:16px}'+
   '@media print{.bar{display:none}.sheet{border:none;margin:0;max-width:none;padding:0}body{background:#fff}@page{size:A4;margin:15mm}}'+
+  '.lg svg{display:block;width:66mm;height:auto;margin:0 0 12px;color:#000}.lgt{display:none}'+
   '</style></head><body>'+
   '<div class="bar"><b>Perjalanan Perawatan — '+_wesc(p.nama||'Pasien')+'</b>'+
   '<button onclick="window.print()">Cetak / Simpan PDF</button></div>'+
-  '<div class="sheet"><div class="eyebrow">Aesthetic Derma Centre · Skin Quality Program</div>'+
+  '<div class="sheet"><div class="lg">'+ADC_LOGO+'<span class="lgt">Aesthetic Derma Centre</span></div><div class="eyebrow">Skin Quality Program</div>'+
   '<h1>Perjalanan perawatan Anda</h1>'+
   '<div class="meta">'+_wesc(p.nama||'—')+' · Program '+_wesc(a.program||'—')+' · '+rows.length+' kunjungan tercatat</div><hr>'+
   '<h2>Ringkasan tiap kunjungan</h2>'+
