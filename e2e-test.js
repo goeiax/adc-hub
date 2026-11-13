@@ -172,6 +172,8 @@ const lastDlg = (s, t) => s.dialogs.filter(x => !t || x.type === t).slice(-1)[0]
 
     /* ===== 1. FORM 1: isi + simpan intake ===== */
     const f1 = await open('ADC_Form1_Registrasi_Anamnesis_Pasien.html');
+    { const lf = await open('ADC_Form1_Registrasi_Anamnesis_Pasien.html'); const fh = lf.d.querySelector('.fhead'); const awal = !fh.classList.contains('lanjut'); lf.w.goStep(1); const dua = fh.classList.contains('lanjut'); lf.w.goStep(0);
+      check('F1: paragraf pengantar hanya di langkah pertama (kelas .lanjut di .fhead pada langkah 2+, lepas lagi di langkah 1; aturan hanya @media screen)', awal && dua && !fh.classList.contains('lanjut') && /@media screen\{ body:not\(\.showall\) \.fhead\.lanjut \.lede\{display:none;\}/.test(fs.readFileSync(path.join('www', 'ADC_Form1_Registrasi_Anamnesis_Pasien.html'), 'utf8'))); }
     check('F1: halaman termuat & hub tersambung', f1.w._hubOn === true, f1.dialogs.filter(x => x.type === 'jsdomError'));
     set(f1.d, 'p_nama', 'Pasien Uji Coba'); set(f1.d, 'rm', RM); set(f1.d, 'p_wa', '081234567890');
     check('F1: chip HUB menampilkan pengguna yang masuk', /Perawat Uji/.test($(f1.d, 'hubchip').textContent) && $(f1.d, 'hubchip').classList.contains('on'), $(f1.d, 'hubchip').textContent);
