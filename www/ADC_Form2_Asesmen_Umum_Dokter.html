@@ -1255,7 +1255,20 @@ textarea.in#d2_dx_catatan{min-height:64px;}
 #prev_body .pv-row:last-child{border-bottom:none;}
 #prev_body .pv-v{font-size:15px;line-height:1.5;color:var(--ink);white-space:pre-wrap;overflow-wrap:anywhere;}
 #prev_body .pv-dx{font-weight:600;font-size:16px;}
-#prev_body .pv-pg{display:block;white-space:normal;} #prev_body .pv-pg + .pv-pg{margin-top:6px;}
+#prev_body .pv-row:has(.pv-temuan){grid-template-columns:1fr;gap:8px;}   /* temuan program memakai lebar penuh */
+#prev_body .pv-temuan{display:grid;gap:12px;min-width:0;}
+#prev_body .pv-prog{border:1px solid var(--line-strong);border-radius:var(--r-box,8px);background:var(--surface);padding:12px 14px 13px;min-width:0;}
+#prev_body .pv-pt{font-size:15px;font-weight:700;color:var(--ink);padding-bottom:8px;margin-bottom:10px;border-bottom:1px solid var(--line);}
+#prev_body .pv-qa{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px 22px;}
+#prev_body .pv-qa > div{min-width:0;}
+#prev_body .pv-a{display:block;font-size:15px;font-weight:600;line-height:1.4;color:var(--ink);overflow-wrap:anywhere;}
+#prev_body .pv-sub{font-size:12.5px;font-weight:600;color:var(--ink-muted);margin:13px 0 6px;}
+#prev_body .pv-prog > .pv-sub:first-of-type:nth-child(2){margin-top:0;}
+#prev_body .pv-ck{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px;}
+#prev_body .pv-ck li{font-size:13.5px;line-height:1.3;color:var(--ink);background:var(--surface-quiet);border:1px solid var(--line);border-radius:4px;padding:4px 9px;overflow-wrap:anywhere;}
+#prev_body .pv-ln{list-style:none;margin:0;padding:0;display:grid;gap:6px;}
+#prev_body .pv-ln li{font-size:15px;line-height:1.4;}
+#prev_body .pv-ln b{display:block;font-weight:600;overflow-wrap:anywhere;} #prev_body .pv-ln span{display:block;font-size:13.5px;color:var(--ink-2);overflow-wrap:anywhere;}
 #prev_body .pv-rx{list-style:none;margin:0;padding:0;counter-reset:pvrx;}
 #prev_body .pv-rx li{position:relative;padding:0 0 7px 26px;font-size:15px;line-height:1.4;counter-increment:pvrx;}
 #prev_body .pv-rx li:last-child{padding-bottom:0;}
@@ -3808,6 +3821,31 @@ function renderIntake(){
   if(mf) mf.textContent = pn.foto_baseline ? ('— sudah diambil perawat di Form 1'+(pn.foto_area?(' ('+pn.foto_area+')'):'')+'; centang hanya bila difoto ulang') : '';
   box.style.display='';
 }
+/* satu program di "Temuan form program": judul, lalu tanya-jawab (grid), butir dicentang (keping), dan baris panjang (daftar) */
+function _pvProgHTML(judul,items){
+  var E=_hesc, qa=[], idx={}, cek=[], baris=[];
+  (items||[]).forEach(function(s){
+    s=String(s||'').replace(/\s+/g,' ').trim(); if(!s) return;
+    var m=s.match(/^(.{2,}?)(\?)?::?\s+(.+)$/);
+    if(m && m[1].indexOf(' · ')<0){ var q=m[1].replace(/[:?\s]+$/,'')+(m[2]?'?':''), k=q.toLowerCase();
+      if(idx[k]==null){ idx[k]=qa.length; qa.push([q,[m[3]]]); } else if(qa[idx[k]][1].indexOf(m[3])<0) qa[idx[k]][1].push(m[3]);
+      return; }
+    if(s.indexOf(' · ')>=0 || s.length>44) baris.push(s); else if(cek.indexOf(s)<0) cek.push(s);
+  });
+  return '<div class="pv-prog"><div class="pv-pt">'+E(judul)+'</div>'+
+    (qa.length?('<div class="pv-qa">'+qa.map(function(x){ return '<div><span class="pv-k">'+E(x[0])+'</span><span class="pv-a">'+E(x[1].join(' – '))+'</span></div>'; }).join('')+'</div>'):'')+
+    (cek.length?('<div class="pv-sub">Dicentang</div><ul class="pv-ck">'+cek.map(function(c){ return '<li>'+E(c)+'</li>'; }).join('')+'</ul>'):'')+
+    (baris.length?('<div class="pv-sub">Resep / catatan</div><ul class="pv-ln">'+baris.map(function(b){ var p=b.split(' · '); return '<li><b>'+E(p[0])+'</b>'+(p.length>1?('<span>'+E(p.slice(1).join(' · '))+'</span>'):'')+'</li>'; }).join('')+'</ul>'):'')+
+    (!qa.length&&!cek.length&&!baris.length?'<span class="pv-k">Tidak ada isian.</span>':'')+'</div>';
+}
+/* sumber: objek program_detail (utuh) atau teks ringkas lama "Program [Tahap]: a · b  ||  …" (riwayat) */
+function _pvTemuan(v){
+  if(v && typeof v==='object'){
+    return Object.keys(v).map(function(k){ var d=v[k]||{}; var th=d.tahap?(' · '+((typeof _tahapLabel==='function')?_tahapLabel(k,d.tahap):('Tahap '+d.tahap))):''; return _pvProgHTML((d.program||k)+th, d.isian||[]); }).join('');
+  }
+  return String(v||'').split(/\s*\|\|\s*/).filter(Boolean).map(function(s){ var m=s.match(/^(.*?)(?:\s*\[(.+?)\])?:\s+(.*)$/); var jd=m?(m[1]+(m[2]?(' · '+m[2]):'')):s, isi=m?m[3]:'';
+    return _pvProgHTML(jd, isi?isi.split(' · '):[]); }).join('');
+}
 function renderPrev(h,baru){
   var box=document.getElementById('prev_box'), body=document.getElementById('prev_body');
   if(!box||!body) return;
@@ -3823,14 +3861,14 @@ function renderPrev(h,baru){
         return '<li><b>'+E(r.obat||'—')+'</b>'+(d?('<span>'+E(d)+'</span>'):'')+'</li>'; }).join('')+'</ol>'):'','html'],
     ['Rencana & timeline',a.rencana],['Instruksi kontrol',a.instruksi_kontrol],
     ['Remarks',a.remarks],['Yang harus dihindari',a.hindari],['Kunjungan berikutnya',a.kunjungan_berikutnya?((typeof _tglID==='function'&&_tglID(a.kunjungan_berikutnya))||a.kunjungan_berikutnya):''],
-    ['Temuan form program',_ringkasProgram(h.program_detail),'prog']
+    ['Temuan form program',(h.program_detail&&Object.keys(h.program_detail).length)?h.program_detail:'','prog']
   ].filter(function(r){return r[1];});
   (h.riwayat||[]).slice().reverse().forEach(function(v){
     if(v.temuan_program) rows.push(['Temuan kunjungan ke-'+(v.kunjungan_ke||'?'), v.temuan_program,'prog']);
   });
   var isi=function(r){
     if(r[2]==='html') return r[1];
-    if(r[2]==='prog') return '<span class="pv-v">'+String(r[1]).split(/\s*\|\|\s*/).map(function(s){ var k=s.indexOf(': '); return '<span class="pv-pg">'+(k>0?('<b>'+E(s.slice(0,k))+'</b> '+E(s.slice(k+2))):E(s))+'</span>'; }).join('')+'</span>';
+    if(r[2]==='prog') return '<div class="pv-temuan">'+_pvTemuan(r[1])+'</div>';
     return '<span class="pv-v'+(r[2]==='dx'?' pv-dx':'')+'">'+E(r[1])+'</span>';
   };
   body.innerHTML =
