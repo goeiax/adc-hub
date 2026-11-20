@@ -1,0 +1,82 @@
+---
+description: ADC Hub HTML/CSS design system. Reuse the cream/terracotta screen tokens, existing form classes, and the separate print palette. Read DESIGN.md before changing UI.
+globs: www/*.html
+alwaysApply: false
+---
+
+# ADC Hub design system
+
+This is vanilla HTML and CSS. Forms are single files with a `<style>` block. There is no React, Flutter, shared `.css`, or component library. Read `DESIGN.md` at the repo root before adding or restyling UI. The token tables and file map live there.
+
+## Reuse what is already on the page
+
+Copy an existing class. Do not invent a one-off button, card, input, or chip, and do not hard-code a style that a custom property or an existing rule already expresses.
+
+- **Commit** (Lanjut, Serahkan, dialog OK, Selesai): `class="nb nb-p"` or `class="mdlg-ok"`. Fill is `var(--accent-act)`, label is white.
+- **Publish** (Terbitkan Handoff only): `class="nb nb-terbit"`. Fill is `var(--ink)`.
+- **Everything else**: outlined. `class="nb"`, `class="sbtn"`, or a plain `.mdlg-b button`.
+- **Field**: a `.f` inside `.row`, span `.s3`–`.s12` (the row is 12 columns). Label `<label class="lab" for="…">`, control `<input class="in">`.
+- **Choice**: `<label class="opt"><input type="checkbox"> …</label>`. Selected state is the cream chip (`--surface-quiet` fill, `--accent` / `--sel-line` edge), not a solid terracotta block.
+- **Dialog**: `.mdlg-bg` + `.mdlg[role="dialog"]`, opened with `dlgBuka` and closed with `dlgTutup`. Do not add a second modal system. Login stays `_ldlg`.
+
+```html
+<div class="row">
+  <div class="f s6">
+    <label class="lab" for="p_nama">Nama lengkap</label>
+    <input class="in" id="p_nama" autocomplete="name">
+  </div>
+</div>
+<div class="stepnav">
+  <button type="button" class="nb">Kembali</button>
+  <button type="button" class="nb nb-p">Lanjut</button>
+</div>
+```
+
+White text on terracotta uses `--accent-act` (`#B0603F`). Never put a white label on `--accent` (`#C97A5E`).
+
+`.fin` is the allergy input. The modal finish control is `.pm-selesai`. `.sec`, `.row`, `.opt`, `.f`, and `.ck` mean something else inside `#ovl_hair`; check that modal before changing those selectors globally.
+
+## Tokens
+
+Use the custom properties in that file’s `:root`. Form 2 is the master for the warm screen system; Form 1, the Panduan, `www/index.html`, and `www/admin.html` share it. Slimming and the Tracker have their own cool-grey `:root` — use those names when editing those files, and do not repaint them terracotta.
+
+Screen color: `--canvas`, `--surface`, `--surface-quiet`, `--ink`, `--ink-2`, `--ink-muted`, `--ink-faint`, `--ink-on-dark`, `--ink-fill`, `--line`, `--line-strong`, `--accent`, `--accent-deep`, `--accent-act`, `--blush`, `--gold`, `--green-text`.
+
+Type: `--ff-head` and `--ff-body` (Archivo). Sizes already in use: 52/46/40/34px display (34px at ≤640px), 17px lede, 16px body, 15px inputs, 13–14px buttons, 12px labels. 12px is the floor for functional text. Do not add a new size.
+
+Radius: `--r-card` (14px), `--r-box` (8px), `--r-pill` (999px).
+
+Spacing is not tokenized. There is no `--space-*` scale; do not create one. Match the rhythm in `DESIGN.md` (12-column row gap `22px 20px`, chip padding `11px 18px`, 44px targets). No raw hex, `rgb()`, or `hsl()`, and no new magic number, when a token or an existing rule already covers the job.
+
+Entered values stay `color: var(--ink-fill)`. Placeholders stay `--ink-muted` or `--ink-faint`.
+
+Write borders as longhands (`border-width`, `border-style`, `border-color`) when the value uses `var()`. The `border` shorthand with `var()` fails the jsdom CSS parse.
+
+## Where new UI goes
+
+Five clinical files are authored in the parent Marketing folder and copied into `www/` by `update-forms.sh` / `update-forms.bat`:
+
+- `ADC_Form1_Registrasi_Anamnesis_Pasien.html`
+- `ADC_Form2_Asesmen_Umum_Dokter.html`
+- `ADC_Panduan_Pengisian_Form.html`
+- `ADC_Form_Asesmen_Slimming_SpGK.html`
+- `ADC_SkinQualityProgram_Journey_Outcome_Tracker.html`
+
+Edit the parent source, then sync. Do not treat `www/` as the source for those five. `www/index.html` and `www/admin.html` live only in `www/`; edit them there.
+
+The hub chip, login, and Muat dialog are one shared script. Form 2 is the master; Slimming and the Tracker are copies. Change Form 2, then re-copy. Keep every `id` and function name — `buildIntake`, `applyIntake`, `buildHandoff`, `reqStatus`, and `igaData` read them. No instructional copy inside the forms; that belongs in the Panduan.
+
+## Accessibility
+
+- Keyboard focus is `:focus-visible` — 2px solid `var(--accent)`, offset 2px (admin uses `--accent-deep`). Do not remove it, and do not set `outline: none` on modal fields.
+- Contrast floor is 4.5:1, including placeholders. On the ink toolbar, use `--ink-on-dark`. Status green is `--green-text`.
+- Touch targets are at least 44px. New labels are at least 12px (do not extend the legibility override list at the end of Form 2’s `<style>`).
+- New controls get `<label class="lab" for>`. `.page` stays `role="main"`, `.sec` stays a heading, dialogs keep `aria-labelledby`, the rail keeps `aria-current="step"`.
+
+## Screen, print, and breakpoints
+
+Light mode only. Do not add a dark theme or `prefers-color-scheme`.
+
+The ship size is a 1024px tablet. Phone rules are `@media (max-width: 640px)`: toolbar and `.ctlbar` wrap and leave `position: sticky`, page padding becomes `0 20px 64px`, `.fhead .h1` becomes 34px. Also already in the CSS: 12-column rows collapse at 860px and 560px, the rail scrolls at 820px, login buttons stack at 480px. Follow those breakpoints; do not add a new one for a single control.
+
+Screen and print are different palettes. Screen stays cream and terracotta (or the cool-grey `:root` on Slimming and the Tracker). Print is the block marked `CETAK = ADC BRAND GUIDELINES` in Form 1 and Form 2: it reassigns `:root` to black, Cool Grey, and accent `#CDAF97` for rules only, with Acumin Pro then Archivo. The logo is `ADC_LOGO` into `[data-adclogo]`, 66mm wide. Do not put the screen terracotta or cream hexes into print CSS, and do not redraw the logo.
