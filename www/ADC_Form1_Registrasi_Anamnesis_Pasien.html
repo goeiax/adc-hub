@@ -272,6 +272,14 @@ body{background:var(--canvas);}
 @media (max-width:640px){ .fhead .h1{font-size:34px;} .fhead{padding:32px 0 24px;} }
 /* langkah 2 dst.: paragraf pengantar disembunyikan (sudah dibaca di langkah pertama); saat cetak tetap tampil */
 @media screen{ body:not(.showall) .fhead.lanjut .lede{display:none;} body:not(.showall) .fhead.lanjut{padding-bottom:22px;} }
+@media screen{
+  body:not(.showall) .fhead.lanjut .eyebrow,
+  body:not(.showall) .fhead.lanjut .h1{display:none;}
+  body:not(.showall) .fhead.lanjut .stepname{display:block;}
+  body:not(.showall) .fhead.lanjut{padding-top:28px;padding-bottom:10px;}
+}
+.fhead .stepname{display:none;margin:0;font-size:32px;line-height:1.15;font-weight:500;color:var(--ink);}
+@media (max-width:640px){ .fhead .stepname{font-size:26px;} }
 
 /* Panel staf (gelap) */
 .staff{background:#14130F;border-radius:14px;padding:24px 28px;margin-bottom:26px;
@@ -303,9 +311,11 @@ body{background:var(--canvas);}
 .rail button.on::before{content:'';position:absolute;top:-1px;left:0;right:8px;height:2px;background:var(--accent);}
 .rail button.on .rl{color:var(--ink);font-weight:600;}
 .rail button:hover .rl{color:var(--accent-deep);}
-@media (max-width:760px){ .rail{grid-auto-flow:row;grid-auto-columns:auto;}
-  .rail button{padding:11px 0;border-top:1px solid var(--line);}
-  .rail button.on::before{right:0;} }
+@media (max-width:760px){
+  .rail{display:flex;overflow-x:auto;grid-auto-flow:unset;-webkit-overflow-scrolling:touch;}
+  .rail button{flex:0 0 auto;min-width:9.5rem;min-height:44px;padding:10px 14px 12px 0;border-top:none;}
+  .rail button.on::before{right:8px;}
+}
 
 /* Kartu langkah */
 .step{background:var(--surface);border:1px solid var(--line);border-radius:14px;
@@ -614,6 +624,7 @@ document.addEventListener('DOMContentLoaded',function(){ var n=document.querySel
     <div class="pr-brand"><span data-adclogo></span></div>
     <div class="eyebrow">Skin Quality Program &middot; Form 1 dari 2</div>
     <h1 class="h1">Registrasi &amp; anamnesis pasien</h1>
+    <p class="stepname" id="f1_langkah"></p>
     <p class="lede"><b>Untuk pasien.</b> Mohon isi selengkap yang Anda tahu &mdash; boleh dibantu perawat kami. Informasi ini dipakai dokter untuk menyusun rencana perawatan yang tepat, dan <b>hanya ditanyakan sekali</b>; di form berikutnya dokter tidak akan menanyakan hal yang sama lagi.</p>
   </header>
 
@@ -1427,6 +1438,7 @@ function goStep(i){
   document.querySelectorAll('#rail button').forEach(function(b,k){ b.classList.toggle('on',k===_step); });
   toggleStaffPanel(_step);
   var fh=document.querySelector('.fhead'); if(fh) fh.classList.toggle('lanjut',_step>0);   /* pengantar hanya di langkah pertama */
+  var lj=document.getElementById('f1_langkah'); if(lj) lj.textContent=_step>0?(RAIL[_step]||''):'';
   /* kanvas baru punya ukuran setelah langkahnya tampil */
   if(typeof sizePads==='function') setTimeout(sizePads,0);
   var pg=document.querySelector('.page');
