@@ -431,8 +431,8 @@ body.showall .step{display:block;}
 /* ===== PANEL STAF: grid 12 kolom (disamakan dengan badan form) =====
    Sebelumnya auto-fit minmax(190px) menghasilkan 4 kolom, lalu blok foto
    (span 2) membungkus ke baris 2 dan menyisakan 2 kolom kosong — ruang mati
-   besar di kanan bawah. Kini baris 1 = empat field @3 kolom, baris 2 = blok
-   foto selebar penuh dengan chip & area difoto SEBARIS. */
+   besar di kanan bawah. Kini baris 1 = empat field @3 kolom, lalu dokter
+   (satu pilihan, chip selebar penuh), lalu foto dan pengukuran selebar penuh. */
 .staff .staff-grid{grid-template-columns:repeat(12,1fr) !important;gap:20px 20px !important;}
 .staff .sf.k3{grid-column:span 3;}
 .staff .sf.k12{grid-column:span 12;}
@@ -443,9 +443,11 @@ body.showall .step{display:block;}
 .staff .foto-row .spills{flex:0 0 auto;}
 .staff .foto-row .sin{flex:1 1 260px;min-width:0;}
 /* kotak centang di panel gelap: putih pekat terlalu mencolok, samakan ke aksen */
-.staff input[type=checkbox]{accent-color:var(--accent);}
+.staff input[type=checkbox],.staff input[type=radio]{accent-color:var(--accent);}
 .staff .opt.spill{min-height:46px !important;padding:11px 18px !important;}
 .staff .sin{min-height:46px;}
+.staff #p_dokter_ketik{margin-top:12px;}
+.staff #p_dokter_ketik[hidden]{display:none !important;}
 /* pemisah tipis antara baris identitas dan baris foto */
 .staff .sf.k12{border-top:1px solid rgba(245,239,230,.14);padding-top:18px;margin-top:2px;}
 @media (max-width:900px){
@@ -640,7 +642,30 @@ document.addEventListener('DOMContentLoaded',function(){ var n=document.querySel
       <div class="sf k3"><span class="slab">Status pasien</span>
         <div class="spills" id="p_status"><label class="opt spill"><input type="checkbox"> Baru</label><label class="opt spill"><input type="checkbox"> Lama</label></div>
       </div>
-      <div class="sf k3"><label class="slab" for="p_dokter">Dokter pemeriksa</label><input class="sin" id="p_dokter" placeholder="dr. …, Sp.DVE"></div>
+      <!-- Satu dokter per kunjungan. Nilai tetap di #p_dokter (penugasan.dokter).
+           Chip = judul yang tampil di aestheticdermacentre.com/pages/our-doctors.
+           "Nama lain" menjaga nama di luar daftar (berkas lama / dokter tamu). -->
+      <div class="sf k12">
+        <span class="slab" id="p_dokter_lab">Dokter pemeriksa</span>
+        <div class="spills" id="p_dokter_pilih" role="radiogroup" aria-labelledby="p_dokter_lab">
+          <label class="opt spill"><input type="radio" name="p_dokter_pilih" value="dr. Yogi Faldian, Sp.DVE"> dr. Yogi Faldian, Sp.DVE</label>
+          <label class="opt spill"><input type="radio" name="p_dokter_pilih" value="dr. Renata Yuliasari, Sp.DVE"> dr. Renata Yuliasari, Sp.DVE</label>
+          <label class="opt spill"><input type="radio" name="p_dokter_pilih" value="dr. Erda Avriyanti, PhD, Sp.DVE"> dr. Erda Avriyanti, PhD, Sp.DVE</label>
+          <label class="opt spill"><input type="radio" name="p_dokter_pilih" value="dr. Kamelia Utami S, Sp.DVE"> dr. Kamelia Utami S, Sp.DVE</label>
+          <label class="opt spill"><input type="radio" name="p_dokter_pilih" value="dr. Nadila Ayu Karisa, Sp.DVE"> dr. Nadila Ayu Karisa, Sp.DVE</label>
+          <label class="opt spill"><input type="radio" name="p_dokter_pilih" value="dr. Keshia Amalia Mivina Mudia, Sp.DVE"> dr. Keshia Amalia Mivina Mudia, Sp.DVE</label>
+          <label class="opt spill"><input type="radio" name="p_dokter_pilih" value="dr. Syafira Andiani, Sp.DVE"> dr. Syafira Andiani, Sp.DVE</label>
+          <label class="opt spill"><input type="radio" name="p_dokter_pilih" value="dr. Stephanie Widjaja, SpDVE"> dr. Stephanie Widjaja, SpDVE</label>
+          <label class="opt spill"><input type="radio" name="p_dokter_pilih" value="dr. Nita Nurul Rachman, SpGK, AIFO-K"> dr. Nita Nurul Rachman, SpGK, AIFO-K</label>
+          <label class="opt spill"><input type="radio" name="p_dokter_pilih" value="dr. Shiela Stefani, M.Gizi, SpGK, AIFO-K, FINEM"> dr. Shiela Stefani, M.Gizi, SpGK, AIFO-K, FINEM</label>
+          <label class="opt spill"><input type="radio" name="p_dokter_pilih" value="dr. Annisa Fauziah, Sp.GK, AIFO-K"> dr. Annisa Fauziah, Sp.GK, AIFO-K</label>
+          <label class="opt spill"><input type="radio" name="p_dokter_pilih" id="p_dokter_lain" value=""> Nama lain</label>
+        </div>
+        <div id="p_dokter_ketik" hidden>
+          <label class="slab" for="p_dokter">Nama lain</label>
+          <input class="sin" id="p_dokter" placeholder="dr. …, Sp.DVE">
+        </div>
+      </div>
       <div class="sf k12"><span class="slab">Foto klinis baseline <span class="sreq">wajib sebelum pasien masuk</span></span>
         <div class="foto-row">
           <div class="spills" id="p_foto">
@@ -1028,6 +1053,7 @@ function resetForm(){ setTimeout(agReset,0);
   PADS.forEach(clearPad);
   _draftHapus(); window._f1Dimuat=null;
   if(typeof _neoRmTerakhir!=='undefined') _neoRmTerakhir=''; var nn=document.getElementById('rm_neo'); if(nn) nn.textContent='';
+  var dk=document.getElementById('p_dokter_ketik'); if(dk) dk.hidden=true;   /* radio sudah lepas; kotak "Nama lain" ikut tertutup */
 }
 window.addEventListener('load',function(){
   var d=new Date(); var t=document.getElementById('tgl'); if(t) t.value=d.toISOString().split('T')[0];
@@ -1683,6 +1709,52 @@ function rmNeoSoft(){
   });
 }
 (function(){ var el=document.getElementById('rm'); if(!el) return; el.addEventListener('change',rmNeoSoft); el.addEventListener('blur',rmNeoSoft); })();
+
+/* Dokter pemeriksa: chip radio menulis nama ke #p_dokter, yang tetap dibaca
+   buildIntake() (_v) dan ditulis applyIntakeF1() (_setId) sebagai penugasan.dokter.
+   Nama di luar daftar (berkas lama) tetap di kotak "Nama lain". */
+var _dokterLewat=false;
+function _dokterCocok(v){
+  var hit=null;
+  document.querySelectorAll('#p_dokter_pilih input[type=radio]').forEach(function(r){
+    if(r.value && r.value===v) hit=r;
+  });
+  return hit;
+}
+function _dokterSamakan(dariKetik){
+  var inp=document.getElementById('p_dokter'); if(!inp) return;
+  var v=(inp.value||'').trim(), cocok=_dokterCocok(v);
+  var lain=document.getElementById('p_dokter_lain'), kotak=document.getElementById('p_dokter_ketik');
+  if(cocok){ cocok.checked=true; if(kotak) kotak.hidden=true; return; }
+  if(v||dariKetik){ if(lain) lain.checked=true; if(kotak) kotak.hidden=false; return; }
+  document.querySelectorAll('#p_dokter_pilih input[type=radio]').forEach(function(r){ r.checked=false; });
+  if(kotak) kotak.hidden=true;
+}
+function _dokterPilih(r){
+  var inp=document.getElementById('p_dokter'), kotak=document.getElementById('p_dokter_ketik');
+  if(!inp||!r) return;
+  _dokterLewat=true;
+  if(r.id==='p_dokter_lain'){
+    if(_dokterCocok((inp.value||'').trim())) inp.value='';
+    if(kotak) kotak.hidden=false;
+    try{ inp.focus(); }catch(e){}
+  } else {
+    inp.value=r.value;
+    if(kotak) kotak.hidden=true;
+  }
+  _ev(inp,'input');
+  _dokterLewat=false;
+}
+(function(){
+  var grp=document.getElementById('p_dokter_pilih'), inp=document.getElementById('p_dokter');
+  if(grp) grp.addEventListener('change',function(e){
+    var r=e.target; if(r&&r.name==='p_dokter_pilih') _dokterPilih(r);
+  });
+  if(inp) inp.addEventListener('input',function(e){
+    if(_dokterLewat) return;
+    _dokterSamakan(!!(e&&e.isTrusted));
+  });
+})();
 document.addEventListener('pointerup',function(e){ if(e.target&&e.target.classList&&e.target.classList.contains('sigpad')) _draftSimpan(); });
 window.addEventListener('load',_draftTawarkan);
 </script>
