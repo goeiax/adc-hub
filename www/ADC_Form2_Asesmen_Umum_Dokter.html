@@ -1244,6 +1244,46 @@ textarea.in#d2_dx_catatan{min-height:64px;}
 .mdlg-p{font-size:14.5px;line-height:1.5;color:var(--ink-2);margin:0 0 12px;}
 .mdlg-p.warn{color:var(--accent-deep);font-weight:600;}
 .mdlg-p:empty{display:none;}
+/* ===== Asesmen dokter sebelumnya (kontrol) — fakta ringkas di atas, lalu daftar label | isi dengan kolom label tetap ===== */
+#prev_body .pv-k{display:block;font-size:12.5px;font-weight:500;line-height:1.35;color:var(--ink-muted);}
+#prev_body .pv-meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px 22px;padding:2px 12px 12px;border-bottom:1px solid var(--line-strong);}
+#prev_body .pv-mv{display:block;font-size:16px;font-weight:600;line-height:1.3;color:var(--ink);margin-top:1px;overflow-wrap:anywhere;}
+#prev_body .pv-alg{display:grid;grid-template-columns:190px minmax(0,1fr);gap:4px 18px;align-items:baseline;margin:12px 0 2px;padding:9px 12px;background:var(--blush,#FCF4F0);border:1px solid var(--accent-deep,#8E4A33);border-radius:var(--r-box,8px);}
+#prev_body .pv-alg .pv-k{color:var(--accent-deep,#8E4A33);font-weight:600;}
+#prev_body .pv-alg .pv-v{font-weight:600;}
+#prev_body .pv-row{display:grid;grid-template-columns:190px minmax(0,1fr);gap:4px 18px;align-items:baseline;padding:9px 12px;border-bottom:1px solid var(--line);}
+#prev_body .pv-row:last-child{border-bottom:none;}
+#prev_body .pv-v{font-size:15px;line-height:1.5;color:var(--ink);white-space:pre-wrap;overflow-wrap:anywhere;}
+#prev_body .pv-dx{font-weight:600;font-size:16px;}
+#prev_body .pv-row:has(.pv-temuan){grid-template-columns:1fr;gap:8px;}   /* temuan program memakai lebar penuh */
+#prev_body .pv-temuan{display:grid;gap:12px;min-width:0;}
+#prev_body .pv-prog{border:1px solid var(--line-strong);border-radius:var(--r-box,8px);background:var(--surface);padding:12px 14px 13px;min-width:0;}
+#prev_body .pv-pt{font-size:15px;font-weight:700;color:var(--ink);padding-bottom:8px;margin-bottom:10px;border-bottom:1px solid var(--line);}
+#prev_body .pv-qa{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px 22px;}
+#prev_body .pv-qa > div{min-width:0;}
+#prev_body .pv-a{display:block;font-size:15px;font-weight:600;line-height:1.4;color:var(--ink);overflow-wrap:anywhere;}
+#prev_body .pv-sub{font-size:12.5px;font-weight:600;color:var(--ink-muted);margin:13px 0 6px;}
+/* tiap pertanyaan centang: pertanyaan di kiri, pilihan yang dicentang di kanan */
+#prev_body .pv-cg{margin-top:12px;border-top:1px solid var(--line);}
+#prev_body .pv-prog > .pv-pt + .pv-cg{margin-top:0;border-top:none;}
+#prev_body .pv-cr{display:grid;grid-template-columns:220px minmax(0,1fr);gap:4px 16px;align-items:start;padding:8px 0;border-bottom:1px solid var(--line);}
+#prev_body .pv-cr:last-child{border-bottom:none;padding-bottom:0;}
+#prev_body .pv-cr > .pv-k{padding-top:5px;color:var(--ink-2);font-weight:600;}
+@media (max-width:640px){ #prev_body .pv-cr{grid-template-columns:1fr;} #prev_body .pv-cr > .pv-k{padding-top:0;} }
+#prev_body .pv-prog > .pv-sub:first-of-type:nth-child(2){margin-top:0;}
+#prev_body .pv-ck{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px;}
+#prev_body .pv-ck li{font-size:13.5px;line-height:1.3;color:var(--ink);background:var(--surface-quiet);border:1px solid var(--line);border-radius:4px;padding:4px 9px;overflow-wrap:anywhere;}
+#prev_body .pv-ln{list-style:none;margin:0;padding:0;display:grid;gap:6px;}
+#prev_body .pv-ln li{font-size:15px;line-height:1.4;}
+#prev_body .pv-ln b{display:block;font-weight:600;overflow-wrap:anywhere;} #prev_body .pv-ln span{display:block;font-size:13.5px;color:var(--ink-2);overflow-wrap:anywhere;}
+#prev_body .pv-rx{list-style:none;margin:0;padding:0;counter-reset:pvrx;}
+#prev_body .pv-rx li{position:relative;padding:0 0 7px 26px;font-size:15px;line-height:1.4;counter-increment:pvrx;}
+#prev_body .pv-rx li:last-child{padding-bottom:0;}
+#prev_body .pv-rx li::before{content:counter(pvrx);position:absolute;left:0;top:1px;width:19px;font-size:12.5px;font-weight:600;color:var(--ink-muted);text-align:right;}
+#prev_body .pv-rx b{display:block;font-weight:600;color:var(--ink);overflow-wrap:anywhere;}
+#prev_body .pv-rx span{display:block;font-size:13.5px;color:var(--ink-2);overflow-wrap:anywhere;}
+#prev_body .pv-src{margin-top:8px;padding:0 12px;font-size:13px;color:var(--ink-muted);font-style:italic;}
+@media (max-width:640px){ #prev_body .pv-row,#prev_body .pv-alg{grid-template-columns:1fr;gap:2px;} }
 .step > .sec[tabindex="-1"]:focus{outline:none;}   /* judul langkah menerima fokus terprogram; cincin fokus tetap untuk kontrol sungguhan */
 .mdlg-b{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
 .mdlg-sp{flex:1;}
@@ -3296,11 +3336,40 @@ function _faktorExtra(root){
   });
   return out;
 }
+/* teks judul/pertanyaan yang rapi: tanpa kode huruf "A · ", tanpa keterangan dalam kurung, tanpa titik dua */
+function _judulRapi(el){
+  if(!el) return '';
+  var c=el.cloneNode(true); c.querySelectorAll('.n,.ff-badge,small,em,.hint,.req,.opt,input,select,textarea,button').forEach(function(x){ x.remove(); });
+  var t=''; for(var i=0;i<c.childNodes.length&&!t;i++){ var n=c.childNodes[i]; if(n.nodeType===3) t=n.textContent.replace(/\s+/g,' ').trim(); }
+  if(!t) t=c.textContent.replace(/\s+/g,' ').trim();
+  return t.replace(/^[A-Z]\d?\s*·\s*/,'').replace(/\s*\([^)]*\)\s*/g,' ').replace(/\s*→.*$/,'').replace(/[:?\s]+$/,'').replace(/\s+/g,' ').trim();
+}
+/* pertanyaan / judul yang menaungi sebuah kotak centang di form program */
+function _konteksCek(e,root){
+  var q=(typeof _qSebelum==='function')?_qSebelum(e):''; if(q&&q.trim()){ var qq=q.replace(/\s+/g,' ').replace(/\s*\([^)]*\)\s*/g,' ').replace(/[:?\s]+$/,'').trim(); if(qq) return qq; }
+  var tr=e.closest('tr'), fk=tr&&tr.querySelector('td.ff-fac, td.fk');
+  if(fk){ var td=e.closest('td'), tb=e.closest('table'), th=(td&&tb)?tb.querySelectorAll('thead th')[td.cellIndex]:null, kol=th?_judulRapi(th):'';
+    return 'Faktor '+_faktorNama(fk)+(kol?(' — '+kol):''); }
+  var kot=e.closest('.f,.field,.hcell'), lb=kot&&kot.querySelector('.lab,.field-label');
+  if(lb&&!lb.contains(e)){ var t1=_judulRapi(lb); if(t1) return t1; }
+  /* form Hair-Loss: kotak centang berada di div.ck, pertanyaannya <label> (tanpa input) tepat sebelum wadah itu */
+  var wk=e.closest('div.ck'), s=wk&&wk.previousElementSibling;
+  while(s){ if(s.tagName==='LABEL'&&!s.querySelector('input')){ var t0=_judulRapi(s); if(t0) return t0; } s=s.previousElementSibling; }
+  var n=e;
+  while(n&&n!==root){ var p=n.previousElementSibling;
+    /* .sec di form Hair-Loss adalah WADAH bagian (kelas berperan ganda) — hanya judul tanpa isian yang dihitung */
+    while(p){ if(p.matches&&p.matches('.q,.subhead,.sech,.sec,.sec-label,.stage-head,.lab,.field-label')&&!p.querySelector('input,select,textarea')){ var t2=_judulRapi(p); if(t2) return t2; } p=p.previousElementSibling; }
+    n=n.parentElement; }
+  return 'Lainnya';
+}
 function _progDetail(){
   var out={};
   activeProgs().forEach(function(p){
     var root=document.getElementById('ovl_'+p); if(!root) return;
     var isian=[];
+    /* rinci = isian yang sama, tetapi berkelompok per pertanyaan/judul: [{k:pertanyaan, t:'isi'|'cek'|'rx', v:[...]}] */
+    var rinci=[], _ri={}, _trRx=[];
+    var catat=function(t,k,v){ if(!v) return; k=k||'Lainnya'; var id=t+'|'+k.toLowerCase(); if(_ri[id]==null){ _ri[id]=rinci.length; rinci.push({k:k,t:t,v:[]}); } if(rinci[_ri[id]].v.indexOf(v)<0) rinci[_ri[id]].v.push(v); };
     root.querySelectorAll('input,select,textarea').forEach(function(e){
       /* Blok tahap yang TIDAK dipilih (tersembunyi) berisi baris contoh/default untuk
          tahap lain — jangan ikut terekam, kalau tidak obat yang tak diresepkan
@@ -3308,13 +3377,14 @@ function _progDetail(){
       if(e.closest && e.closest('.stage-block:not(.show), .blk:not(.show)')) return;
       if(e.type==='checkbox'){
         if(!e.checked) return;
-        var lab=e.closest('label'); if(lab) isian.push(lab.textContent.trim());
+        var lab=e.closest('label'); if(lab){ isian.push(lab.textContent.trim()); catat('cek',_konteksCek(e,root),lab.textContent.replace(/\s+/g,' ').trim()); }
         return;
       }
       if(e.type==='radio'){   /* satu pilihan: catat bersama pertanyaannya ("Kesimpulan risiko bekas: Tinggi") */
         if(!e.checked) return;
         var rl=e.closest('label'), rk=_qSebelum(e);
         isian.push((rk?rk.replace(/\s+/g,' ').replace(/\s*\(.*?\)\s*/,'').replace(/:\s*$/,'').trim()+': ':'')+(rl?rl.textContent.trim():e.value));
+        catat('isi',rk?rk.replace(/\s+/g,' ').replace(/\s*\(.*?\)\s*/,'').replace(/[:\s]+$/,'').trim():'Pilihan',rl?rl.textContent.replace(/\s+/g,' ').trim():e.value);
         return;
       }
       if(e.classList&&e.classList.contains('tx-extra')) return;  /* ditangani _faktorExtra dengan konteks faktor */
@@ -3322,9 +3392,15 @@ function _progDetail(){
       var lab=e.closest('.f')||e.closest('.field')||e.closest('.hcell')||e.closest('.qline');
       var key=lab?((lab.querySelector('label,.lab,.field-label,.q')||{}).textContent||''):'';
       isian.push((key?key.trim()+': ':'')+v);
+      /* baris tabel resep: satu obat = satu butir ("Tretinoin · Malam · Seluruh wajah · Lanjut") */
+      var trx=e.closest('table.rx-table tr, #hr_rxTable tr');
+      if(trx){ if(_trRx.indexOf(trx)<0){ _trRx.push(trx); var sel=[].map.call(trx.querySelectorAll('input,select,textarea'),function(x){ return (x.type==='checkbox'||x.type==='radio')?'':String(x.value||'').trim(); }).filter(Boolean);
+          var thd=trx.closest('table').querySelector('thead'); catat('rx',/Dosis/.test((thd||{}).textContent||'')?'Obat minum':'Obat oles / produk',sel.join(' · ')); }
+        return; }
+      catat('isi',key?key.replace(/\s+/g,' ').replace(/[:\s]+$/,'').trim():'Catatan',v);
     });
-    _faktorExtra(root).forEach(function(x){ isian.push(x); });
-    out[p]={program:PLABEL[p], tahap:(window._stage&&window._stage[p])||'', isian:isian};
+    _faktorExtra(root).forEach(function(x){ isian.push(x); catat('isi','Treatment tambahan',x.replace(/^Faktor\s+/,'').replace(' — treatment tambahan:',':')); });
+    out[p]={program:PLABEL[p], tahap:(window._stage&&window._stage[p])||'', isian:isian, rinci:rinci};
     /* IGA: nilai hari ini + baseline yang dibawa terus dari kunjungan pertama,
        supaya delta selalu dihitung terhadap titik awal, bukan kunjungan sebelumnya. */
     var ig=(typeof igaData==='function')?igaData(p):null;
@@ -3788,28 +3864,74 @@ function renderIntake(){
   if(mf) mf.textContent = pn.foto_baseline ? ('— sudah diambil perawat di Form 1'+(pn.foto_area?(' ('+pn.foto_area+')'):'')+'; centang hanya bila difoto ulang') : '';
   box.style.display='';
 }
+/* handoff lama (tanpa rinci): cari pertanyaan sebuah butir centang dari form program yang sekarang, lewat teks labelnya */
+function _pvKamus(p){
+  window._pvK=window._pvK||{}; if(window._pvK[p]) return window._pvK[p];
+  var m={}, root=document.getElementById('ovl_'+p);
+  if(root) root.querySelectorAll('input[type=checkbox]').forEach(function(e){ var l=e.closest('label'); if(!l) return; var t=l.textContent.replace(/\s+/g,' ').trim(); if(t&&m[t]==null) m[t]=_konteksCek(e,root); });
+  return (window._pvK[p]=m);
+}
+function _pvRinciLama(items,p){
+  var out=[], ix={}, kamus=p?_pvKamus(p):{};
+  var catat=function(t,k,v){ var id=t+'|'+k.toLowerCase(); if(ix[id]==null){ ix[id]=out.length; out.push({k:k,t:t,v:[]}); } if(out[ix[id]].v.indexOf(v)<0) out[ix[id]].v.push(v); };
+  (items||[]).forEach(function(s){
+    s=String(s||'').replace(/\s+/g,' ').trim(); if(!s) return;
+    if(kamus[s]){ catat('cek',kamus[s],s); return; }
+    var m=s.match(/^(.{2,}?)(\?)?::?\s+(.+)$/);
+    if(m && m[1].indexOf(' · ')<0){ catat('isi',m[1].replace(/[:?\s]+$/,'')+(m[2]?'?':''),m[3]); return; }
+    if(s.indexOf(' · ')>=0) catat('rx','Resep / catatan',s); else catat('cek','Isian lain (form versi lama — tanpa pertanyaan)',s);
+  });
+  return out;
+}
+/* satu program di "Temuan form program": tanya-jawab (grid), lalu tiap pertanyaan centang dengan pilihannya, lalu resep */
+function _pvProgHTML(judul,items,rinci,p){
+  var E=_hesc, r=(rinci&&rinci.length)?rinci:_pvRinciLama(items,p);
+  var isi=r.filter(function(x){return x.t==='isi';}), cek=r.filter(function(x){return x.t==='cek';}), rx=r.filter(function(x){return x.t==='rx';});
+  return '<div class="pv-prog"><div class="pv-pt">'+E(judul)+'</div>'+
+    (isi.length?('<div class="pv-qa">'+isi.map(function(x){ return '<div><span class="pv-k">'+E(x.k)+'</span><span class="pv-a">'+E(x.v.join(' – '))+'</span></div>'; }).join('')+'</div>'):'')+
+    (cek.length?('<div class="pv-cg">'+cek.map(function(x){ return '<div class="pv-cr"><span class="pv-k">'+E(x.k)+'</span><ul class="pv-ck">'+x.v.map(function(c){ return '<li>'+E(c)+'</li>'; }).join('')+'</ul></div>'; }).join('')+'</div>'):'')+
+    rx.map(function(x){ return '<div class="pv-sub">'+E(x.k)+'</div><ul class="pv-ln">'+x.v.map(function(b){ var q=b.split(' · '); return '<li><b>'+E(q[0])+'</b>'+(q.length>1?('<span>'+E(q.slice(1).join(' · '))+'</span>'):'')+'</li>'; }).join('')+'</ul>'; }).join('')+
+    (!r.length?'<span class="pv-k">Tidak ada isian.</span>':'')+'</div>';
+}
+/* sumber: objek program_detail (utuh) atau teks ringkas lama "Program [Tahap]: a · b  ||  …" (riwayat) */
+function _pvTemuan(v){
+  if(v && typeof v==='object'){
+    return Object.keys(v).map(function(k){ var d=v[k]||{}; var th=d.tahap?(' · '+((typeof _tahapLabel==='function')?_tahapLabel(k,d.tahap):('Tahap '+d.tahap))):''; return _pvProgHTML((d.program||k)+th, d.isian||[], d.rinci, k); }).join('');
+  }
+  return String(v||'').split(/\s*\|\|\s*/).filter(Boolean).map(function(s){ var m=s.match(/^(.*?)(?:\s*\[(.+?)\])?:\s+(.*)$/); var jd=m?(m[1]+(m[2]?(' · '+m[2]):'')):s, isi=m?m[3]:'';
+    var pk=''; if(m&&typeof PLABEL==='object') Object.keys(PLABEL).forEach(function(k){ if(PLABEL[k]===m[1]) pk=k; });
+    return _pvProgHTML(jd, isi?isi.split(' · '):[], null, pk); }).join('');
+}
 function renderPrev(h,baru){
   var box=document.getElementById('prev_box'), body=document.getElementById('prev_body');
   if(!box||!body) return;
-  var a=h.asesmen||{};
-  var rows=[['Kunjungan ke-',h.kunjungan_ke],['Tanggal asesmen',a.tanggal],['Dokter yang meng-asses',a.dokter],['Program',a.program],
-    ['Diagnosis',a.diagnosis],['Catatan dokter (diagnosis)',a.diagnosis_catatan],['Derajat (IGA)',a.derajat],['Catatan klinis',a.hasil],
-    ['Alergi / kontraindikasi', a.alergi || (a.alergi_nihil?'Nihil (dikonfirmasi)':'')],
-    ['Resep saat itu',(a.resep||[]).map(function(r){return [r.obat,r.jadwal,r.cara,r.durasi].filter(Boolean).join(' · ');}).join('  |  ')],
+  var a=h.asesmen||{}, E=_hesc;
+  var tgl=a.tanggal?((typeof _tglID==='function'&&_tglID(a.tanggal))||a.tanggal):'';
+  /* fakta singkat: sebaris di atas */
+  var meta=[['Kunjungan ke-',h.kunjungan_ke],['Tanggal asesmen',tgl],['Dokter yang meng-asses',a.dokter],['Program',a.program]].filter(function(r){return r[1];});
+  var alergi=a.alergi || (a.alergi_nihil?'Nihil (dikonfirmasi)':'');
+  var resep=(a.resep||[]).filter(function(r){ return r&&(r.obat||r.jadwal||r.cara||r.durasi); });
+  var teks=function(v){ return '<span class="pv-v">'+E(v)+'</span>'; };
+  var rows=[['Diagnosis',a.diagnosis,'dx'],['Catatan dokter (diagnosis)',a.diagnosis_catatan],['Derajat (IGA)',a.derajat],['Catatan klinis',a.hasil],
+    ['Resep saat itu',resep.length?('<ol class="pv-rx">'+resep.map(function(r){ var d=[r.jadwal,r.cara,r.durasi].filter(Boolean).join(' · ');
+        return '<li><b>'+E(r.obat||'—')+'</b>'+(d?('<span>'+E(d)+'</span>'):'')+'</li>'; }).join('')+'</ol>'):'','html'],
     ['Rencana & timeline',a.rencana],['Instruksi kontrol',a.instruksi_kontrol],
-    ['Remarks',a.remarks],['Yang harus dihindari',a.hindari],['Kunjungan berikutnya',a.kunjungan_berikutnya],
-    ['Temuan form program',_ringkasProgram(h.program_detail)]
+    ['Remarks',a.remarks],['Yang harus dihindari',a.hindari],['Kunjungan berikutnya',a.kunjungan_berikutnya?((typeof _tglID==='function'&&_tglID(a.kunjungan_berikutnya))||a.kunjungan_berikutnya):''],
+    ['Temuan form program',(h.program_detail&&Object.keys(h.program_detail).length)?h.program_detail:'','prog']
   ].filter(function(r){return r[1];});
   (h.riwayat||[]).slice().reverse().forEach(function(v){
-    if(v.temuan_program) rows.push(['Temuan kunjungan ke-'+(v.kunjungan_ke||'?'), v.temuan_program]);
+    if(v.temuan_program) rows.push(['Temuan kunjungan ke-'+(v.kunjungan_ke||'?'), v.temuan_program,'prog']);
   });
-  body.innerHTML = rows.map(function(r){
-    return '<div style="display:flex;gap:10px;padding:3px 0;border-bottom:1px solid var(--line)">'+
-      '<span style="min-width:150px;font-size:12.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-muted)">'+_hesc(r[0])+'</span>'+
-      '<span style="font-size:15px">'+_hesc(r[1])+'</span></div>';
-  }).join('') +
-  '<div style="margin-top:6px;font-size:13.5px;color:var(--ink-muted);font-style:italic">'+
-  (baru?'Baru diterbitkan dari asesmen di halaman ini.':'Dimuat dari berkas handoff kunjungan sebelumnya.')+'</div>';
+  var isi=function(r){
+    if(r[2]==='html') return r[1];
+    if(r[2]==='prog') return '<div class="pv-temuan">'+_pvTemuan(r[1])+'</div>';
+    return '<span class="pv-v'+(r[2]==='dx'?' pv-dx':'')+'">'+E(r[1])+'</span>';
+  };
+  body.innerHTML =
+    (meta.length?('<div class="pv-meta">'+meta.map(function(r){ return '<div><span class="pv-k">'+E(r[0])+'</span><span class="pv-mv">'+E(r[1])+'</span></div>'; }).join('')+'</div>'):'')+
+    (alergi?('<div class="pv-alg"><span class="pv-k">Alergi / kontraindikasi</span><span class="pv-v">'+E(alergi)+'</span></div>'):'')+
+    '<div class="pv-list">'+rows.map(function(r){ return '<div class="pv-row"><span class="pv-k">'+E(r[0])+'</span>'+isi(r)+'</div>'; }).join('')+'</div>'+
+    '<div class="pv-src">'+(baru?'Baru diterbitkan dari asesmen di halaman ini.':'Dimuat dari berkas handoff kunjungan sebelumnya.')+'</div>';
   box.style.display='block';
 }
 /* Metrik wajib per program — aturan yang sama dipakai di seluruh dokumen SOP.
@@ -4948,21 +5070,21 @@ function consentHTML(c){
   var rk=_icRisikoTabel(x.risiko);
   function sec(n,tanya,resmi,isi){ return '<section><h2><span class="no">'+n+'</span>'+E(tanya)+' <small>'+E(resmi)+'</small></h2>'+isi+'</section>'; }
   return '<!doctype html><html lang="id"><head><meta charset="utf-8"><title>Informed Consent '+E(c.no)+'</title><link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700&family=Archivo+Narrow:wght@400;600&display=swap" rel="stylesheet"><style>'+
-    '@page{size:A4;margin:13mm 15mm}*{box-sizing:border-box}body{font:10.5pt/1.5 "Acumin Pro SemiCondensed","Acumin Pro","Archivo Narrow",Archivo,"Segoe UI",Arial,sans-serif;color:#000;margin:0;padding:18px;max-width:780px}'+
+    '@page{size:A4;margin:11mm 13mm}*{box-sizing:border-box}body{font:10pt/1.4 "Acumin Pro SemiCondensed","Acumin Pro","Archivo Narrow",Archivo,"Segoe UI",Arial,sans-serif;color:#000;margin:0;padding:18px;max-width:780px}'+
     '.hd{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;border-bottom:2px solid #000;padding-bottom:6px;font-size:9pt}.hd b{font-size:12.5pt;display:block}.hd .lg svg{display:block;width:66mm;height:auto;margin:0 0 5px}.hd .lgt{display:none}h1,h2{font-family:"Acumin Pro",Archivo,"Segoe UI",Arial,sans-serif}.hd .r{text-align:right}'+
-    'h1{font-size:15pt;margin:12px 0 2px;letter-spacing:.01em}h1 small{display:block;font-size:10pt;font-weight:400;color:#3A3F3C;margin-top:2px}'+
-    '.intro{font-size:10pt;color:#3A3F3C;margin:4px 0 10px}'+
-    '.id{display:grid;grid-template-columns:1fr 1fr;gap:2px 18px;border:1px solid #C8CBC8;padding:8px 12px;font-size:10pt}.id div span{display:inline-block;min-width:112px;color:#6B6F6C;font-size:9pt}'+
-    'section{margin-top:13px;break-inside:avoid-page}h2{font-size:11.5pt;margin:0 0 4px;padding-bottom:3px;border-bottom:1px solid #CDAF97;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}'+
+    'h1{font-size:14pt;margin:8px 0 1px;letter-spacing:.01em}h1 small{display:block;font-size:9.5pt;font-weight:400;color:#3A3F3C;margin-top:2px}'+
+    '.intro{font-size:9.5pt;color:#3A3F3C;margin:3px 0 7px}'+
+    '.id{display:grid;grid-template-columns:1.25fr 1fr 1fr;gap:1px 16px;border:1px solid #C8CBC8;padding:5px 10px;font-size:9.5pt}.id div span{display:inline-block;margin-right:7px;color:#6B6F6C;font-size:8.5pt}'+
+    'section{margin-top:9px}.g2{display:grid;grid-template-columns:1fr 1fr;gap:0 22px}.g2 section{break-inside:avoid}.akhir{break-inside:avoid}h2{break-after:avoid;font-size:11pt;margin:0 0 3px;padding-bottom:2px;border-bottom:1px solid #CDAF97;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}'+
     'h2 .no{flex:none;width:20px;height:20px;border-radius:50%;background:#000;color:#fff;font-size:9.5pt;display:inline-flex;align-items:center;justify-content:center;align-self:center}h2 small{font-size:8.5pt;font-weight:400;color:#6B6F6C}'+
-    'p{margin:3px 0}.dx b{font-size:11.5pt}.cat{font-size:9.5pt;color:#3A3F3C;margin-top:5px}'+
-    'ul.tl{columns:2;column-gap:26px;margin:4px 0 6px;padding-left:18px}ul.tl li{break-inside:avoid;margin:0 0 1px}'+
-    'table.rk{border-collapse:collapse;width:100%;font-size:9.5pt;margin-top:4px}table.rk th{background:#E8EBE9;text-align:left;font-size:9pt;padding:4px 7px;border:1px solid #C8CBC8}table.rk th small{display:block;font-weight:400;color:#6B6F6C}'+
-    'table.rk td{padding:4px 7px;border:1px solid #C8CBC8;vertical-align:top}table.rk td.tn{width:27%;font-weight:600}table.rk tr{break-inside:avoid}'+
-    '.st{border:1.5px solid #000;background:#E8EBE9;padding:10px 13px;margin-top:16px;break-inside:avoid}.st p{margin:0 0 8px}.pil{display:flex;gap:28px;margin:6px 0 8px;font-size:12pt;font-weight:700}.pil span{display:inline-flex;align-items:center;gap:8px}.pil i{width:18px;height:18px;border:2px solid #000;background:#fff;display:inline-block}'+
-    '.sg{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-top:10px;font-size:9.5pt;text-align:center;break-inside:avoid}.sg div{border-top:1px solid #000;padding-top:4px;margin-top:62px}.sg small{color:#6B6F6C}'+
-    '.ft{margin-top:14px;font-size:8pt;color:#6B6F6C;border-top:1px solid #DADCD9;padding-top:4px}.np{position:fixed;top:8px;right:8px;font:inherit;padding:8px 16px}@media print{.np{display:none}body{padding:0}}'+
-    '</style></head><body>'+
+    'p{margin:2px 0}.dx b{font-size:11pt}.cat{font-size:9.5pt;color:#3A3F3C;margin-top:5px}'+
+    'ul.tl{columns:3;column-gap:20px;margin:3px 0 4px;padding-left:16px}ul.tl li{break-inside:avoid;margin:0 0 1px}'+
+    'table.rk{border-collapse:collapse;width:100%;font-size:9pt;line-height:1.3;margin-top:3px}table.rk th{background:#E8EBE9;text-align:left;font-size:8.5pt;padding:2.5px 6px;border:1px solid #C8CBC8}table.rk th small{display:block;font-weight:400;color:#6B6F6C}'+
+    'table.rk td{padding:2.5px 6px;border:1px solid #C8CBC8;vertical-align:top}table.rk td.tn{width:24%;font-weight:600}table.rk tr{break-inside:avoid}'+
+    '.st{border:1.5px solid #000;background:#E8EBE9;padding:7px 12px;margin-top:11px;break-inside:avoid}.st p{margin:0 0 5px}.pil{display:flex;gap:28px;margin:4px 0 5px;font-size:11.5pt;font-weight:700}.pil span{display:inline-flex;align-items:center;gap:8px}.pil i{width:18px;height:18px;border:2px solid #000;background:#fff;display:inline-block}'+
+    '.sg{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-top:10px;font-size:9.5pt;text-align:center;break-inside:avoid}.sg div{border-top:1px solid #000;padding-top:3px;margin-top:50px}.sg small{color:#6B6F6C}'+
+    '.ft{margin-top:9px;font-size:7.5pt;color:#6B6F6C;border-top:1px solid #DADCD9;padding-top:4px}.np{position:fixed;top:8px;right:8px;font:inherit;padding:8px 16px}@media print{.np{display:none}body{padding:0;max-width:none}}'+
+    '</style><style id="zcss"></style></head><body>'+
     '<button class="np" onclick="window.print()">Cetak</button>'+
     '<div class="hd"><div><div class="lg">'+ADC_LOGO+'<span class="lgt">Aesthetic Derma Centre</span></div>Klinik Utama · Jl. Ir. H. Djuanda 88, Bandung</div><div class="r">No. lembar: <b style="font-size:10pt">'+E(c.no)+'</b>'+E(tgl)+'</div></div>'+
     '<h1>PERSETUJUAN TINDAKAN KEDOKTERAN<small>Informed Consent — penjelasan dokter sebelum Anda memutuskan</small></h1>'+
@@ -4973,15 +5095,21 @@ function consentHTML(c){
     sec(1,'Apa kondisi Anda?','Diagnosis & dasar diagnosis','<div class="dx">'+(dx.length?('<p><b>'+E(dx[0])+'</b></p>'+dx.slice(1).map(function(l){return '<p>'+E(l.charAt(0).toUpperCase()+l.slice(1))+'</p>';}).join('')):'<p>—</p>')+'</div>')+
     sec(2,'Apa yang akan dilakukan, dan untuk apa?','Tindakan & tujuannya',(tind.length?('<ul class="tl">'+tind.map(function(t){return '<li>'+E(t)+'</li>';}).join('')+'</ul>'):'')+'<p><b>Tujuannya:</b> '+br(tujuan)+'</p>')+
     sec(3,'Apa yang mungkin terjadi setelah tindakan?','Risiko & komplikasi',rk.html)+
-    sec(4,'Apakah ada pilihan lain?','Alternatif tindakan','<p>'+br(x.alternatif)+'</p>')+
+    '<div class="g2">'+sec(4,'Apakah ada pilihan lain?','Alternatif tindakan','<p>'+br(x.alternatif)+'</p>')+
     sec(5,'Bagaimana bila tindakan tidak dilakukan?','Risiko bila tidak dilakukan','<p>'+br(String(x.tanpa_tindakan||'').replace(/^./,function(ch){return ch.toUpperCase();}))+'</p>')+
     sec(6,'Hasil apa yang bisa diharapkan?','Prognosis','<p>'+br(x.prognosis)+'</p>')+
-    sec(7,'Berapa perkiraan biayanya?','Perkiraan biaya','<p>'+br(x.biaya)+'</p>')+
-    '<div class="st"><p><b>Pernyataan pasien.</b> Saya yang bertanda tangan di bawah ini, pasien / wali dari pasien tersebut di atas, menyatakan telah menerima penjelasan di atas secara lisan dan tertulis, memahaminya, berkesempatan bertanya, dan dengan ini:</p>'+
+    sec(7,'Berapa perkiraan biayanya?','Perkiraan biaya','<p>'+br(x.biaya)+'</p>')+'</div>'+
+    '<div class="akhir"><div class="st"><p><b>Pernyataan pasien.</b> Saya yang bertanda tangan di bawah ini, pasien / wali dari pasien tersebut di atas, menyatakan telah menerima penjelasan di atas secara lisan dan tertulis, memahaminya, berkesempatan bertanya, dan dengan ini:</p>'+
     '<div class="pil"><span><i></i> MENYETUJUI</span><span><i></i> MENOLAK</span></div>'+
     '<p style="margin:0">dilakukannya tindakan tersebut. Saya memahami bahwa persetujuan ini dapat saya cabut sebelum tindakan dimulai, dan bahwa kedokteran bukan ilmu pasti sehingga hasil tidak dapat dijamin.</p></div>'+
-    '<div class="sg"><div>Pasien / wali<br><small>nama jelas & tanda tangan</small></div><div>Saksi: '+E(c.saksi||'________________')+'<br><small>perawat / tenaga kesehatan</small></div><div>Dokter: '+E(c.dokter||'________________')+'<br><small>tanda tangan</small></div></div>'+
+    '<div class="sg"><div>Pasien / wali<br><small>nama jelas & tanda tangan</small></div><div>Saksi: '+E(c.saksi||'________________')+'<br><small>perawat / tenaga kesehatan</small></div><div>Dokter: '+E(c.dokter||'________________')+'<br><small>tanda tangan</small></div></div></div>'+
     '<div class="ft">Bandung, '+E(tgl)+' · Lembar ini bagian dari rekam medis (PMK 24/2022) dan disimpan sesuai masa retensi. Dasar: UU 17/2023 Ps. 293, PP 28/2024 Ps. 777–781, Permenkes 11/2025. Dicetak dari ADC Form 2 · '+E(c.no)+'</div>'+
+    /* pengaman 2 halaman: ukur tinggi pada lebar cetak A4; bila melebihi 2 halaman, perkecil skala cetak (paling kecil 70%) */
+    '<scr'+'ipt>(function(){function pas(){try{var b=document.body,MM=96/25.4,w=(210-26)*MM,maks=2*(297-22)*MM*0.94,np=document.querySelector(".np");'+
+    'var lw=b.style.width,lp=b.style.padding,lm=b.style.maxWidth;if(np)np.style.display="none";b.style.width=w+"px";b.style.maxWidth="none";b.style.padding="0";var h=b.scrollHeight;'+
+    'b.style.width=lw;b.style.padding=lp;b.style.maxWidth=lm;if(np)np.style.display="";var z=h>maks?Math.max(.7,maks/h):1;b.setAttribute("data-skala",z.toFixed(3));b.setAttribute("data-hal",(h/((297-22)*MM)).toFixed(2));'+
+    'document.getElementById("zcss").textContent=z<1?("@media print{body{zoom:"+z.toFixed(3)+"}}"):"";}catch(e){}}'+
+    'window.addEventListener("load",pas);window.addEventListener("beforeprint",pas);if(document.fonts&&document.fonts.ready)document.fonts.ready.then(pas);})();</scr'+'ipt>'+
     '</body></html>';
 }
 

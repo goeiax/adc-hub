@@ -270,6 +270,8 @@ body{background:var(--canvas);}
 .fhead .lede{font-size:17px;line-height:1.6;color:var(--ink-2);max-width:68ch;text-wrap:pretty;}
 .fhead .lede b{font-weight:600;color:var(--ink);}
 @media (max-width:640px){ .fhead .h1{font-size:34px;} .fhead{padding:32px 0 24px;} }
+/* langkah 2 dst.: paragraf pengantar disembunyikan (sudah dibaca di langkah pertama); saat cetak tetap tampil */
+@media screen{ body:not(.showall) .fhead.lanjut .lede{display:none;} body:not(.showall) .fhead.lanjut{padding-bottom:22px;} }
 
 /* Panel staf (gelap) */
 .staff{background:#14130F;border-radius:14px;padding:24px 28px;margin-bottom:26px;
@@ -1424,6 +1426,7 @@ function goStep(i){
   st.forEach(function(e,k){ e.classList.toggle('on',k===_step); });
   document.querySelectorAll('#rail button').forEach(function(b,k){ b.classList.toggle('on',k===_step); });
   toggleStaffPanel(_step);
+  var fh=document.querySelector('.fhead'); if(fh) fh.classList.toggle('lanjut',_step>0);   /* pengantar hanya di langkah pertama */
   /* kanvas baru punya ukuran setelah langkahnya tampil */
   if(typeof sizePads==='function') setTimeout(sizePads,0);
   var pg=document.querySelector('.page');
